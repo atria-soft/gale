@@ -71,7 +71,7 @@ class AndroidContext : public gale::Context {
 			return true;
 		}
 	public:
-		AndroidContext(gale::context::Application* _application, JNIEnv* _env, jclass _classBase, jobject _objCallback, enum application _typeAPPL) :
+		AndroidContext(gale::Application* _application, JNIEnv* _env, jclass _classBase, jobject _objCallback, enum application _typeAPPL) :
 		  gale::Context(_application),
 		  m_javaApplicationType(_typeAPPL),
 		  m_JavaVirtualMachinePointer(nullptr),
@@ -468,7 +468,7 @@ class AndroidContext : public gale::Context {
 };
 
 static std::vector<AndroidContext*> s_listInstance;
-gale::context::Application* s_applicationInit = NULL;
+gale::Application* s_applicationInit = NULL;
 
 extern "C" {
 	/* Call to initialize the graphics state */
@@ -509,7 +509,7 @@ extern "C" {
 		GALE_DEBUG("*******************************************");
 		AndroidContext* tmpContext = nullptr;
 		s_applicationInit = NULL;
-		gale::context::Application* localApplication = NULL;
+		gale::Application* localApplication = NULL;
 		// call the basic init of all application (that call us ...)
 		main(0,NULL);
 		localApplication = s_applicationInit;
@@ -898,7 +898,7 @@ extern "C" {
 };
 
 
-int gale::run(gale::context::Application* _application, int _argc, const char *_argv[]) {
+int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 	s_applicationInit = _application;
 	return 0;
 }

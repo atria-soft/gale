@@ -103,7 +103,7 @@ namespace gale {
 			enum gale::context::clipBoard::clipboardListe clipboardID;
 			// InputId
 			enum gale::key::type inputType;
-			int32_t                 inputId;
+			int32_t inputId;
 			// generic dimentions
 			vec2 dimention;
 			// keyboard events :
@@ -116,20 +116,20 @@ namespace gale {
 			eSystemMessage() :
 				TypeMessage(msgNone),
 				clipboardID(gale::context::clipBoard::clipboardStd),
-				inputType(gale::key::typeUnknow),
+				inputType(gale::key::type_unknow),
 				inputId(-1),
 				dimention(0,0),
 				repeateKey(false),
 				stateIsDown(false),
 				keyboardChar(0),
-				keyboardMove(gale::key::keyboardUnknow)
+				keyboardMove(gale::key::keyboard_unknow)
 			{
 				
 			}
 	};
 };
 
-
+#if 0
 void gale::Context::inputEventTransfertWidget(std::shared_ptr<gale::Widget> _source,
                                               std::shared_ptr<gale::Widget> _destination) {
 	m_input.transfertEvent(_source, _destination);
@@ -143,6 +143,7 @@ void gale::Context::inputEventGrabPointer(std::shared_ptr<gale::Widget> _widget)
 void gale::Context::inputEventUnGrabPointer() {
 	m_input.unGrabPointer();
 }
+#endif
 
 void gale::Context::processEvents() {
 	int32_t nbEvent = 0;
@@ -160,8 +161,9 @@ void gale::Context::processEvents() {
 			case eSystemMessage::msgInit:
 				// this is due to the openGL context
 				/*bool returnVal = */
-				m_application->init(*this, m_initStepId);
-				m_initStepId++;
+				m_application->onCreate(*this);
+				m_application->onStart(*this);
+				m_application->onResume(*this);
 				break;
 			case eSystemMessage::msgRecalculateSize:
 				forceRedrawAll();
@@ -174,17 +176,18 @@ void gale::Context::processEvents() {
 				break;
 			case eSystemMessage::msgInputMotion:
 				//GALE_DEBUG("Receive MSG : THREAD_INPUT_MOTION");
-				m_input.motion(data->inputType, data->inputId, data->dimention);
+				// TODO : m_input.motion(data->inputType, data->inputId, data->dimention);
 				break;
 			case eSystemMessage::msgInputState:
 				//GALE_DEBUG("Receive MSG : THREAD_INPUT_STATE");
-				m_input.state(data->inputType, data->inputId, data->stateIsDown, data->dimention);
+				// TODO : m_input.state(data->inputType, data->inputId, data->stateIsDown, data->dimention);
 				break;
 			case eSystemMessage::msgKeyboardKey:
 			case eSystemMessage::msgKeyboardMove:
 				//GALE_DEBUG("Receive MSG : THREAD_KEYBORAD_KEY");
 				// store the keyboard special key status for mouse event...
-				m_input.setLastKeyboardSpecial(data->keyboardSpecial);
+				// TODO : m_input.setLastKeyboardSpecial(data->keyboardSpecial);
+				#if 0
 				if (nullptr != m_windowsCurrent) {
 					if (false == m_windowsCurrent->onEventShortCut(data->keyboardSpecial,
 					                                             data->keyboardChar,
@@ -231,14 +234,17 @@ void gale::Context::processEvents() {
 						}
 					}
 				}
+				#endif
 				break;
 			case eSystemMessage::msgClipboardArrive:
+				#if 0
 				{
 					std::shared_ptr<gale::Widget> tmpWidget = m_widgetManager.focusGet();
 					if (tmpWidget != nullptr) {
 						tmpWidget->onEventClipboard(data->clipboardID);
 					}
 				}
+				#endif
 				break;
 			case eSystemMessage::msgHide:
 				GALE_DEBUG("Receive MSG : msgHide");
@@ -282,12 +288,12 @@ void gale::Context::setArchiveDir(int _mode, const char* _str) {
 
 
 
-gale::Context::Context(gale::context::Application* _application, int32_t _argc, const char* _argv[]) :
-  //m_application(std::make_shared<gale::context::Application>(_application)),
+gale::Context::Context(gale::Application* _application, int32_t _argc, const char* _argv[]) :
+  //m_application(std::make_shared<gale::Application>(_application)),
   m_application(_application),
-  m_objectManager(*this),
+  //m_objectManager(*this),
   m_previousDisplayTime(0),
-  m_input(*this),
+  // TODO : m_input(*this),
 #if (defined(__TARGET_OS__Android) || defined(__TARGET_OS__IOs))
   m_displayFps(true),
 #else
@@ -297,7 +303,6 @@ gale::Context::Context(gale::context::Application* _application, int32_t _argc, 
   m_FpsSystemContext("Context   ", false),
   m_FpsSystem(       "Draw      ", true),
   m_FpsFlush(        "Flush     ", false),
-  m_windowsCurrent(nullptr),
   m_windowsSize(320,480),
   m_initStepId(0) {
 	// set a basic 
@@ -353,11 +358,11 @@ gale::Context::Context(gale::context::Application* _application, int32_t _argc, 
 	// force a recalculation
 	requestUpdateSize();
 	#if defined(__GALE_ANDROID_ORIENTATION_LANDSCAPE__)
-		forceOrientation(gale::screenLandscape);
+		forceOrientation(gale::orientation_screenLandscape);
 	#elif defined(__GALE_ANDROID_ORIENTATION_PORTRAIT__)
-		forceOrientation(gale::screenPortrait);
+		forceOrientation(gale::orientation_screenPortrait);
 	#else
-		forceOrientation(gale::screenAuto);
+		forceOrientation(gale::orientation_screenAuto);
 	#endif
 	// release the curent interface :
 	unLockContext();
@@ -369,25 +374,25 @@ gale::Context::~Context() {
 	// TODO : Clean the message list ...
 	// set the curent interface :
 	lockContext();
-	// Remove current windows
-	m_windowsCurrent.reset();
 	// clean all widget and sub widget with their resources:
-	m_objectManager.cleanInternalRemoved();
+	//m_objectManager.cleanInternalRemoved();
 	// call application to uninit
-	m_application->unInit(*this);
+	m_application->onPause(*this);
+	m_application->onStop(*this);
+	m_application->onDestroy(*this);
 	m_application.reset();
 	// clean all messages
 	m_msgSystem.clean();
 	// internal clean elements
-	m_objectManager.cleanInternalRemoved();
+	//m_objectManager.cleanInternalRemoved();
 	m_resourceManager.cleanInternalRemoved();
 	
 	GALE_INFO("List of all widget of this context must be equal at 0 ==> otherwise some remove is missing");
-	m_objectManager.displayListObject();
+	//m_objectManager.displayListObject();
 	// Resource is an lower element as objects ...
 	m_resourceManager.unInit();
 	// now All must be removed !!!
-	m_objectManager.unInit();
+	//m_objectManager.unInit();
 	// release the curent interface :
 	unLockContext();
 	GALE_INFO(" == > Gale system Un-Init (END)");
@@ -432,7 +437,7 @@ void gale::Context::OS_SetInputMotion(int _pointerID, const vec2& _pos ) {
 		return;
 	}
 	data->TypeMessage = eSystemMessage::msgInputMotion;
-	data->inputType = gale::key::typeFinger;
+	data->inputType = gale::key::type_finger;
 	data->inputId = _pointerID;
 	data->dimention = _pos;
 	m_msgSystem.post(data);
@@ -445,7 +450,7 @@ void gale::Context::OS_SetInputState(int _pointerID, bool _isDown, const vec2& _
 		return;
 	}
 	data->TypeMessage = eSystemMessage::msgInputState;
-	data->inputType = gale::key::typeFinger;
+	data->inputType = gale::key::type_finger;
 	data->inputId = _pointerID;
 	data->stateIsDown = _isDown;
 	data->dimention = _pos;
@@ -459,7 +464,7 @@ void gale::Context::OS_SetMouseMotion(int _pointerID, const vec2& _pos ) {
 		return;
 	}
 	data->TypeMessage = eSystemMessage::msgInputMotion;
-	data->inputType = gale::key::typeMouse;
+	data->inputType = gale::key::type_mouse;
 	data->inputId = _pointerID;
 	data->dimention = _pos;
 	m_msgSystem.post(data);
@@ -472,7 +477,7 @@ void gale::Context::OS_SetMouseState(int _pointerID, bool _isDown, const vec2& _
 		return;
 	}
 	data->TypeMessage = eSystemMessage::msgInputState;
-	data->inputType = gale::key::typeMouse;
+	data->inputType = gale::key::type_mouse;
 	data->inputId = _pointerID;
 	data->stateIsDown = _isDown;
 	data->dimention = _pos;
@@ -480,9 +485,9 @@ void gale::Context::OS_SetMouseState(int _pointerID, bool _isDown, const vec2& _
 }
 
 void gale::Context::OS_SetKeyboard(gale::key::Special& _special,
-                                    char32_t _myChar,
-                                    bool _isDown,
-                                    bool _isARepeateKey) {
+                                   char32_t _myChar,
+                                   bool _isDown,
+                                   bool _isARepeateKey) {
 	gale::eSystemMessage *data = new gale::eSystemMessage();
 	if (data == nullptr) {
 		GALE_ERROR("allocationerror of message");
@@ -575,7 +580,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		// set the curent interface :
 		lockContext();
 		processEvents();
-		if (m_initStepId < m_application->getNbStepInit()) {
+		{
 			gale::eSystemMessage *data = new gale::eSystemMessage();
 			if (data == nullptr) {
 				GALE_ERROR("allocation error of message");
@@ -585,18 +590,20 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 			}
 		}
 		// call all the widget that neded to do something periodicly
-		m_objectManager.timeCall(currentTime);
+		// TODO : m_objectManager.timeCall(currentTime);
 		// check if the user selected a windows
+		#if 0
 		if (nullptr != m_windowsCurrent) {
 			// Redraw all needed elements
 			m_windowsCurrent->onRegenerateDisplay();
 		}
+		#endif
 		if (m_displayFps == true) {
 			m_FpsSystemEvent.incrementCounter();
 			m_FpsSystemEvent.toc();
 		}
 		//! bool needRedraw = gale::widgetManager::isDrawingNeeded();
-		needRedraw = m_widgetManager.isDrawingNeeded();
+		// TODO : needRedraw = m_widgetManager.isDrawingNeeded();
 		// release the curent interface :
 		unLockContext();
 	}
@@ -608,6 +615,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		if (m_displayFps == true) {
 			m_FpsSystemContext.tic();
 		}
+		#if 0
 		if (nullptr != m_windowsCurrent) {
 			if(    true == needRedraw
 			    || true == _displayEveryTime) {
@@ -617,10 +625,12 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 				}
 			}
 		}
+		#endif
 		if (m_displayFps == true) {
 			m_FpsSystemContext.toc();
 			m_FpsSystem.tic();
 		}
+		#if 0
 		if (nullptr != m_windowsCurrent) {
 			if(    true == needRedraw
 			    || true == _displayEveryTime) {
@@ -629,6 +639,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 				hasDisplayDone = true;
 			}
 		}
+		#endif
 		if (m_displayFps == true) {
 			m_FpsSystem.toc();
 			m_FpsFlush.tic();
@@ -660,7 +671,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		m_resourceManager.updateContext();
 		// release open GL Context
 		gale::openGL::unLock();
-		m_objectManager.cleanInternalRemoved();
+		// TODO : m_objectManager.cleanInternalRemoved();
 		m_resourceManager.cleanInternalRemoved();
 		// release the curent interface :
 		unLockContext();
@@ -669,43 +680,31 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 }
 
 void gale::Context::resetIOEvent() {
-	m_input.newLayerSet();
+	// TODO : m_input.newLayerSet();
 }
 
 void gale::Context::OS_OpenGlContextDestroy() {
 	m_resourceManager.contextHasBeenDestroyed();
 }
 
-void gale::Context::setWindows(const std::shared_ptr<gale::widget::Windows>& _windows) {
-	// remove current focus :
-	m_widgetManager.focusSetDefault(nullptr);
-	m_widgetManager.focusRelease();
-	// set the new pointer as windows system
-	m_windowsCurrent = _windows;
-	// set the new default focus :
-	m_widgetManager.focusSetDefault(_windows);
-	// request all the widget redrawing
-	forceRedrawAll();
-}
-
-std::shared_ptr<gale::widget::Windows> gale::Context::getWindows() {
-	return m_windowsCurrent;
-};
-
 void gale::Context::forceRedrawAll() {
+	#if 0
 	if (m_windowsCurrent == nullptr) {
 		return;
 	}
 	m_windowsCurrent->calculateSize(vec2(m_windowsSize.x(), m_windowsSize.y()));
+	#endif
 }
 
 void gale::Context::OS_Stop() {
 	// set the curent interface :
 	lockContext();
 	GALE_INFO("OS_Stop...");
+	#if 0
 	if (m_windowsCurrent != nullptr) {
 		m_windowsCurrent->sysOnKill();
 	}
+	#endif
 	// release the curent interface :
 	unLockContext();
 }
@@ -715,9 +714,11 @@ void gale::Context::OS_Suspend() {
 	lockContext();
 	GALE_INFO("OS_Suspend...");
 	m_previousDisplayTime = -1;
+	#if 0
 	if (m_windowsCurrent != nullptr) {
 		m_windowsCurrent->onStateSuspend();
 	}
+	#endif
 	// release the curent interface :
 	unLockContext();
 }
@@ -727,10 +728,12 @@ void gale::Context::OS_Resume() {
 	lockContext();
 	GALE_INFO("OS_Resume...");
 	m_previousDisplayTime = gale::getTime();
-	m_objectManager.timeCallResume(m_previousDisplayTime);
+	// TODO : m_objectManager.timeCallResume(m_previousDisplayTime);
+	#if 0
 	if (m_windowsCurrent != nullptr) {
 		m_windowsCurrent->onStateResume();
 	}
+	#endif
 	// release the curent interface :
 	unLockContext();
 }
@@ -738,9 +741,11 @@ void gale::Context::OS_Foreground() {
 	// set the curent interface :
 	lockContext();
 	GALE_INFO("OS_Foreground...");
+	#if 0
 	if (m_windowsCurrent != nullptr) {
 		m_windowsCurrent->onStateForeground();
 	}
+	#endif
 	// release the curent interface :
 	unLockContext();
 }
@@ -749,9 +754,11 @@ void gale::Context::OS_Background() {
 	// set the curent interface :
 	lockContext();
 	GALE_INFO("OS_Background...");
+	#if 0
 	if (m_windowsCurrent != nullptr) {
 		m_windowsCurrent->onStateBackground();
 	}
+	#endif
 	// release the curent interface :
 	unLockContext();
 }
@@ -790,7 +797,7 @@ void gale::Context::keyboardHide() {
 	GALE_INFO("keyboardHide: NOT implemented ...");
 }
 
-
+#if 0
 bool gale::Context::systemKeyboradEvent(enum gale::key::keyboardSystem _key, bool _down) {
 	if (m_windowsCurrent == nullptr) {
 		return false;
@@ -800,3 +807,4 @@ bool gale::Context::systemKeyboradEvent(enum gale::key::keyboardSystem _key, boo
 	unLockContext();
 	return ret;
 }
+#endif

@@ -9,40 +9,173 @@
 #ifndef __GALE_CONTEXT_APPLICATION_H__
 #define __GALE_CONTEXT_APPLICATION_H__
 
+#include <memory>
+#include <etk/types.h>
+#include <etk/math/Vector2D.h>
+#include <gale/orientation.h>
+#include <gale/key/status.h>
+#include <gale/key/type.h>
+#include <gale/key/Special.h>
+#include <gale/context/cursor.h>
+
 namespace gale {
 	class Context;
 	class Application : public std::enable_shared_from_this<gale::Application> {
 		public:
-			Application() {};
-			virtual ~Application() {};
+			Application();
+			virtual ~Application();
 		public:
 			/**
-			 * @brief Initialize the Application
-			 * @param[in] _context Current gale context
-			 * @param[in] _initId Initialzation ID (start at 0 and will increment wile returning true)
-			 * @return true if the init is fisnished
-			 * @return false need more inits
+			 * @brief The application is created.
+			 * @param[in] _context Current gale context.
 			 */
-			virtual bool init(gale::Context& _context, size_t _initId) = 0;
+			virtual void onCreate(gale::Context& _context);
 			/**
-			 * @brief The application is ended ==> call this function before ended
+			 * @brief The application is started.
+			 * @param[in] _context Current gale context.
 			 */
-			virtual void unInit(gale::Context& _context) = 0;
+			virtual void onStart(gale::Context& _context);
+			/**
+			 * @brief The application is resumed (now visible).
+			 * @param[in] _context Current gale context.
+			 */
+			virtual void onResume(gale::Context& _context);
+			/**
+			 * @brief Call periodicly the application to draw all it is needed to draw ... (access on the openGL Context).
+			 * @param[in] _context Current gale context.
+			 */
+			virtual void onRun(gale::Context& _context);
+			/**
+			 * @brief The application is Hide / not visible.
+			 * @param[in] _context Current gale context.
+			 */
+			virtual void onPause(gale::Context& _context);
+			/**
+			 * @brief The application is stopped.
+			 * @param[in] _context Current gale context.
+			 */
+			virtual void onStop(gale::Context& _context);
+			/**
+			 * @brief The application is remoed (call destructor just adter it.).
+			 * @param[in] _context Current gale context.
+			 */
+			virtual void onDestroy(gale::Context& _context);
+			/**
+			 * @brief Exit the application (not availlable on IOs, ==> the user will not understand the comportement. He will think the application crash)
+			 * @param[in] _value value to return on the program
+			 */
+			virtual void exit(int32_t _value);
 		public:
 			/**
-			 * @brief Event on an input (finger, mouse, stilet)
-			 * @param[in] _event Event properties
+			 * @brief Get touch/mouse/... event.
+			 * @param[in] _type Type of pointer event
+			 * @param[in] _pointerID Pointer id of the touch event.
+			 * @param[in] _pos Position of the event (can be <0 if out of window).
+			 * @param[in] _state Key state (up/down/move)
 			 */
-			virtual void onEventInput(const ewol::event::Input& _event);
+			virtual void onPointer(enum gale::key::type _type, int32_t _pointerID, const vec2& _pos, gale::key::status _state);
 			/**
-			 * @brief Entry event.
-			 *        represent the physical event :
-			 *            - Keyboard (key event and move event)
-			 *            - Accelerometer
-			 *            - Joystick
-			 * @param[in] _event Event properties
+			 * @brief Get keyborad value input.
+			 * @param[in] _special Current special key status (ctrl/alt/shift ...).
+			 * @param[in] _type Type of the event.
+			 * @param[in] _value Unicode value of the char pushed (viable only if _type==gale::key::keyboard_char).
+			 * @param[in] _state State of the key (up/down/upRepeate/downRepeate)
 			 */
-			virtual void onEventEntry(const ewol::event::Entry& _event);
+			virtual void onKeyboard(gale::key::Special& _special,
+			                        enum gale::key::keyboard _type,
+			                        char32_t _value,
+			                        gale::key::status _state);
+			/**
+			 * @brief Show the virtal keyboard (if possible : only on iOs/Android)
+			 */
+			virtual void keyboardShow();
+			/**
+			 * @brief Hide the virtal keyboard (if possible : only on iOs/Android)
+			 */
+			virtual void keyboardHide();
+		public:
+			/**
+			 * @brief Event generated when user change the size of the window.
+			 * @param[in] _size New size of the window.
+			 */
+			virtual void onResize(const vec2& _size);
+			/**
+			 * @brief Set the size of the window (if possible: Android and Ios does not support it)
+			 * @param[in] _size New size of the window.
+			 * @return 
+			 */
+			virtual void setSize(const vec2& _size);
+			/**
+			 * @brief Get the size of the window.
+			 * @return Current size of the window.
+			 */
+			virtual vec2 getSize() const;
+		public:
+			/**
+			 * @brief Event generated when user change the position of the window.
+			 * @param[in] _size New position of the window.
+			 */
+			virtual void onMovePosition(const vec2& _size);
+			/**
+			 * @brief Set the position of the window (if possible: Android and Ios does not support it)
+			 * @param[in] _size New position of the window.
+			 */
+			virtual void setPosition(const vec2& _size);
+			/**
+			 * @brief Get the position of the window.
+			 * @return Current position of the window.
+			 */
+			virtual vec2 getPosition() const;
+		public:
+			/**
+			 * @brief Set the title of the application
+			 * @param[in] _title New title to set at the application (if possible: Android and Ios does not support it)
+			 */
+			virtual void setTitle(const std::string& _title);
+			/**
+			 * @brief Get the current title of the application
+			 * @return Current title
+			 */
+			virtual std::string getTitle();
+		public:
+			/**
+			 * @brief set the Icon of the application.
+			 * @param[in] _iconFile File name icon (.bmp/.png).
+			 */
+			virtual void setIcon(const std::string& _iconFile);
+			/**
+			 * @brief Get the current filename of the application.
+			 * @return Filename of the icon.
+			 */
+			virtual std::string getIcon();
+		public:
+			/**
+			 * @brief Set the cursor type.
+			 * @param[in] _newCursor Selected cursor.
+			 */
+			virtual void setCursor(enum gale::context::cursor _newCursor);
+			/**
+			 * @brief Get the cursor type.
+			 * @return the current cursor.
+			 */
+			virtual enum gale::context::cursor getCursor();
+		public:
+			/**
+			 * @brief Open an URL on an internal brother.
+			 * @param[in] _url URL to open.
+			 */
+			virtual void openURL(const std::string& _url);
+		public:
+			/**
+			 * @brief set the screen orientation (if possible : only on iOs/Android)
+			 * @param[in] _orientation New orientation.
+			 */
+			virtual void setOrientation(enum gale::orientation _orientation);
+			/**
+			 * @brief get the screen orientation (if possible : only on iOs/Android)
+			 * @return Current orientation.
+			 */
+			virtual enum gale::orientation getOrientation();
 	};
 }
 

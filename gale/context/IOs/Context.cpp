@@ -54,7 +54,7 @@ class MacOSInterface : public gale::Context {
 private:
 	gale::key::Special m_guiKeyBoardMode;
 public:
-	MacOSInterface(gale::context::Application* _application, int32_t _argc, const char* _argv[]) :
+	MacOSInterface(gale::Application* _application, int32_t _argc, const char* _argv[]) :
 	gale::Context(_application, _argc, _argv) {
 		// nothing to do ...
 	}
@@ -233,13 +233,13 @@ void IOs::foreground() {
 
 static int l_argc = 0;
 static const char **l_argv = nullptr;
-static gale::context::Application* l_application;
+static gale::Application* l_application;
 /**
  * @brief Main of the program
  * @param std IO
  * @return std IO
  */
-int gale::run(gale::context::Application* _application, int _argc, const char *_argv[]) {
+int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 	l_argc = _argc;
 	l_argv = _argv;
 	l_application = _application;

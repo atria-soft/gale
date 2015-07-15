@@ -20,7 +20,6 @@
 #include <gale/gale.h>
 #include <gale/key/key.h>
 #include <gale/context/commandLine.h>
-#include <gale/widget/Manager.h>
 #include <gale/resource/Manager.h>
 #include <gale/context/Context.h>
 #include <gale/Dimension.h>
@@ -97,7 +96,7 @@ extern "C" {
 	} Hints;
 }
 
-#include <egami/egami.h>
+// TODO : #include <egami/egami.h>
 
 #include <X11/cursorfont.h>
 
@@ -140,10 +139,10 @@ class X11Interface : public gale::Context {
 		Atom XAtomeTargetTarget;
 		Atom XAtomeGALE;
 		Atom XAtomeDeleteWindows;
-		enum gale::context::cursorDisplay m_currentCursor; //!< select the current cursor to display :
+		enum gale::context::cursor m_currentCursor; //!< select the current cursor to display :
 		char32_t m_lastKeyPressed; //!< The last element key presed...
 	public:
-		X11Interface(gale::context::Application* _application, int32_t _argc, const char* _argv[]) :
+		X11Interface(gale::Application* _application, int32_t _argc, const char* _argv[]) :
 		  gale::Context(_application, _argc, _argv),
 		  m_display(nullptr),
 		  m_originX(0),
@@ -169,7 +168,7 @@ class X11Interface : public gale::Context {
 		  XAtomeTargetTarget(0),
 		  XAtomeGALE(0),
 		  XAtomeDeleteWindows(0),
-		  m_currentCursor(gale::context::cursorArrow),
+		  m_currentCursor(gale::context::cursor_arrow),
 		  m_lastKeyPressed(0) {
 			X11_INFO("X11:INIT");
 			for (int32_t iii=0; iii<MAX_MANAGE_INPUT; iii++) {
@@ -770,7 +769,7 @@ class X11Interface : public gale::Context {
 		}
 		*/
 		/****************************************************************************************/
-		virtual void setCursor(enum gale::context::cursorDisplay _newCursor) {
+		virtual void setCursor(enum gale::context::cursor _newCursor) {
 			if (_newCursor != m_currentCursor) {
 				X11_DEBUG("X11-API: set New Cursor : " << _newCursor);
 				// undefine previous cursors ...
@@ -779,7 +778,7 @@ class X11Interface : public gale::Context {
 				m_currentCursor = _newCursor;
 				Cursor myCursor = None;
 				switch (m_currentCursor) {
-					case gale::context::cursorNone:
+					case gale::context::cursor_none:
 						{
 							Pixmap bitmapNoData;
 							XColor black;
@@ -792,61 +791,61 @@ class X11Interface : public gale::Context {
 							                               &black, &black, 0, 0);
 						}
 						break;
-					case gale::context::cursorLeftArrow:
+					case gale::context::cursor_leftArrow:
 						myCursor = XCreateFontCursor(m_display, XC_top_left_arrow);
 						break;
-					case gale::context::cursorInfo:
+					case gale::context::cursor_info:
 						myCursor = XCreateFontCursor(m_display, XC_hand1);
 						break;
-					case gale::context::cursorDestroy:
+					case gale::context::cursor_destroy:
 						myCursor = XCreateFontCursor(m_display, XC_pirate);
 						break;
-					case gale::context::cursorHelp:
+					case gale::context::cursor_help:
 						myCursor = XCreateFontCursor(m_display, XC_question_arrow);
 						break;
-					case gale::context::cursorCycle:
+					case gale::context::cursor_cycle:
 						myCursor = XCreateFontCursor(m_display, XC_exchange);
 						break;
-					case gale::context::cursorSpray:
+					case gale::context::cursor_spray:
 						myCursor = XCreateFontCursor(m_display, XC_spraycan);
 						break;
-					case gale::context::cursorWait:
+					case gale::context::cursor_wait:
 						myCursor = XCreateFontCursor(m_display, XC_watch);
 						break;
-					case gale::context::cursorText:
+					case gale::context::cursor_text:
 						myCursor = XCreateFontCursor(m_display, XC_xterm);
 						break;
-					case gale::context::cursorCrossHair:
+					case gale::context::cursor_crossHair:
 						myCursor = XCreateFontCursor(m_display, XC_crosshair);
 						break;
-					case gale::context::cursorSlideUpDown:
+					case gale::context::cursor_slideUpDown:
 						myCursor = XCreateFontCursor(m_display, XC_sb_v_double_arrow);
 						break;
-					case gale::context::cursorSlideLeftRight:
+					case gale::context::cursor_slideLeftRight:
 						myCursor = XCreateFontCursor(m_display, XC_sb_h_double_arrow);
 						break;
-					case gale::context::cursorResizeUp:
+					case gale::context::cursor_resizeUp:
 						myCursor = XCreateFontCursor(m_display, XC_top_side);
 						break;
-					case gale::context::cursorResizeDown:
+					case gale::context::cursor_resizeDown:
 						myCursor = XCreateFontCursor(m_display, XC_bottom_side);
 						break;
-					case gale::context::cursorResizeLeft:
+					case gale::context::cursor_resizeLeft:
 						myCursor = XCreateFontCursor(m_display, XC_left_side);
 						break;
-					case gale::context::cursorResizeRight:
+					case gale::context::cursor_resizeRight:
 						myCursor = XCreateFontCursor(m_display, XC_right_side);
 						break;
-					case gale::context::cursorCornerTopLeft:
+					case gale::context::cursor_cornerTopLeft:
 						myCursor = XCreateFontCursor(m_display, XC_top_left_corner);
 						break;
-					case gale::context::cursorCornerTopRight:
+					case gale::context::cursor_cornerTopRight:
 						myCursor = XCreateFontCursor(m_display, XC_top_right_corner);
 						break;
-					case gale::context::cursorCornerButtomLeft:
+					case gale::context::cursor_cornerButtomLeft:
 						myCursor = XCreateFontCursor(m_display, XC_bottom_right_corner);
 						break;
-					case gale::context::cursorCornerButtomRight:
+					case gale::context::cursor_cornerButtomRight:
 						myCursor = XCreateFontCursor(m_display, XC_bottom_left_corner);
 						break;
 					default :
@@ -1061,6 +1060,8 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		void setIcon(const std::string& _inputFile) {
+			// TODO :  ...
+			#if 0
 			egami::Image dataImage;
 			// load data
 			if (false == egami::load(dataImage, _inputFile)) {
@@ -1195,7 +1196,7 @@ class X11Interface : public gale::Context {
 			myImage->data = nullptr;
 			XDestroyImage(myImage);
 			delete[] tmpVal;
-			
+			#endif
 		}
 		/****************************************************************************************/
 		static void setVSync(bool _sync) {
@@ -1322,7 +1323,7 @@ class X11Interface : public gale::Context {
  * @param std IO
  * @return std IO
  */
-int gale::run(gale::context::Application* _application, int _argc, const char *_argv[]) {
+int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 	etk::init(_argc, _argv);
 	X11Interface* interface = new X11Interface(_application, _argc, _argv);
 	if (interface == nullptr) {

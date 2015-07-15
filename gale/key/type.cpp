@@ -9,20 +9,15 @@
 #include <gale/key/type.h>
 
 
-static const char* typeDescriptionString[gale::key::typeCount+1] = {
-	"typeUnknow",
-	"typeMouse",
-	"typeFinger",
-	"typeStylet",
-	"typeCount"
+static const char* typeDescriptionString[] = {
+	"type_unknow",
+	"type_mouse",
+	"type_finger",
+	"type_stylet"
 };
 
 std::ostream& gale::operator <<(std::ostream& _os, const enum gale::key::type _obj) {
-	if (_obj >= 0 && _obj < gale::key::typeCount) {
-		_os << typeDescriptionString[_obj];
-	} else {
-		_os << "[ERROR]";
-	}
+	_os << typeDescriptionString[_obj];
 	return _os;
 }
 

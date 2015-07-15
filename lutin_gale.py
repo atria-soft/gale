@@ -21,7 +21,9 @@ def create(target):
 	myModule.add_src_file([
 		'gale/gale.cpp',
 		'gale/debug.cpp',
-		'gale/Dimension.cpp'
+		'gale/Dimension.cpp',
+		'gale/orientation.cpp',
+		'gale/Application.cpp',
 		])
 	
 	# context :
@@ -30,7 +32,7 @@ def create(target):
 		'gale/context/commandLine.cpp',
 		'gale/context/Context.cpp',
 		'gale/context/cursor.cpp',
-		'gale/context/InputManager.cpp'
+		#'gale/context/InputManager.cpp'
 		])
 	if target.name=="Linux":
 		myModule.add_src_file('gale/context/X11/Context.cpp')
@@ -106,6 +108,7 @@ def create(target):
 		])
 	
 	if target.name=="Linux":
+		# todo : myModule.add_module_depend(['egami'])
 		myModule.add_export_flag('link', '-lGL')
 		#`pkg-config --cflags directfb` `pkg-config --libs directfb`
 		#ifeq ("$(CONFIG___GALE_LINUX_GUI_MODE_X11__)","y")

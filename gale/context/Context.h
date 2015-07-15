@@ -14,32 +14,24 @@
 #include <gale/gale.h>
 #include <gale/key/key.h>
 #include <gale/resource/Manager.h>
-#include <gale/context/Application.h>
+#include <gale/Application.h>
 #include <gale/context/clipBoard.h>
 #include <gale/context/commandLine.h>
-#include <gale/context/InputManager.h>
+// TODO : #include <gale/context/InputManager.h>
 #include <gale/context/Fps.h>
 #include <memory>
+#include <gale/orientation.h>
 
 namespace gale {
 	/**
 	 * @not-in-doc
 	 */
 	class eSystemMessage;
-	/**
-	 * @not-in-doc
-	 */
-	enum orientation{
-		screenAuto = 0,
-		screenLandscape,
-		screenPortrait
-	};
-	
 	class Context/* : private gale::object::RemoveEvent */{
 		private:
-			std::shared_ptr<gale::context::Application> m_application; //!< Application handle
+			std::shared_ptr<gale::Application> m_application; //!< Application handle
 		public:
-			std::shared_ptr<gale::context::Application> getApplication() {
+			std::shared_ptr<gale::Application> getApplication() {
 				return m_application;
 			}
 		private:
@@ -55,7 +47,7 @@ namespace gale {
 				return m_resourceManager;
 			};
 		public:
-			Context(gale::context::Application* _application, int32_t _argc=0, const char* _argv[]=nullptr);
+			Context(gale::Application* _application, int32_t _argc=0, const char* _argv[]=nullptr);
 			virtual ~Context();
 		protected:
 			/**
@@ -70,7 +62,7 @@ namespace gale {
 			void unLockContext();
 		private:
 			int64_t m_previousDisplayTime;  // this is to limit framerate ... in case...
-			gale::context::InputManager m_input;
+			// TODO : gale::context::InputManager m_input;
 			etk::Fifo<gale::eSystemMessage*> m_msgSystem;
 			bool m_displayFps;
 			gale::context::Fps m_FpsSystemEvent;
@@ -139,19 +131,6 @@ namespace gale {
 			 */
 			virtual void stop();
 		private:
-			std::shared_ptr<gale::widget::Windows> m_windowsCurrent; //!< curent displayed windows
-		public:
-			/**
-			 * @brief set the current windows to display :
-			 * @param _windows Windows that might be displayed
-			 */
-			void setWindows(const std::shared_ptr<gale::widget::Windows>& _windows);
-			/**
-			 * @brief get the current windows that is displayed
-			 * @return the current handle on the windows (can be null)
-			 */
-			std::shared_ptr<gale::widget::Windows> getWindows();
-		private:
 			vec2 m_windowsSize; //!< current size of the system
 		public:
 			/**
@@ -203,6 +182,7 @@ namespace gale {
 			void forceRedrawAll();
 			
 			// TODO : Later ...
+			#if 0
 			/**
 			 * @brief This is to transfert the event from one widget to another one
 			 * @param source the widget where the event came from
@@ -218,6 +198,7 @@ namespace gale {
 			 * @brief This fonction un-lock the pointer properties to move in relative instead of absolute
 			 */
 			void inputEventUnGrabPointer();
+			#endif
 			
 			/**
 			 * @brief display the virtal keyboard (for touch system only)
@@ -268,7 +249,7 @@ namespace gale {
 			 * @brief set the cursor display type.
 			 * @param[in] _newCursor selected new cursor.
 			 */
-			virtual void setCursor(enum gale::context::cursorDisplay _newCursor) { };
+			virtual void setCursor(enum gale::context::cursor _newCursor) { };
 			/**
 			 * @brief set the Icon of the program
 			 * @param[in] _inputFile new filename icon of the curent program.
@@ -307,13 +288,16 @@ namespace gale {
 			 */
 			void setInitImage(const std::string& _fileName);
 		protected:
+			#if 0
+				TODO : Rework this ==> but how ...
 			/**
 			 * @brief HARDWARE keyboard event from the system
 			 * @param[in] _key event type
 			 * @param[in] _status Up or down status
 			 * @return Keep the event or not
 			 */
-			virtual bool systemKeyboradEvent(enum gale::key::keyboardSystem _key, bool _down);
+			virtual bool systemKeyboradEvent(enum gale::key::keyboard _key, bool _down);
+			#endif
 	};
 	/**
 	 * @brief From everyware in the program, we can get the context inteface.

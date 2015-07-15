@@ -48,7 +48,7 @@ class WindowsContext : public gale::Context {
 		bool m_run = true;
 		bool m_clipBoardOwnerStd = false;
 	public:
-		WindowsContext(gale::context::Application* _application, int32_t _argc, const char* _argv[]) :
+		WindowsContext(gale::Application* _application, int32_t _argc, const char* _argv[]) :
 		  gale::Context(_application, _argc, _argv) {
 			for (int32_t iii=0; iii<MAX_MANAGE_INPUT; ++iii) {
 				m_inputIsPressed[iii] = false;
@@ -478,7 +478,7 @@ class WindowsContext : public gale::Context {
  * @param std IO
  * @return std IO
  */
-int gale::run(gale::context::Application* _application, int _argc, const char *_argv[]) {
+int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 	etk::init(_argc, _argv);
 	GLenum err = glewInit();
 	if (GLEW_OK != err) {

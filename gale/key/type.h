@@ -17,11 +17,10 @@ namespace gale {
 		 * @brief type of input : Note that the keyboard is not prevent due to the fact that data is too different
 		 */
 		enum type {
-			typeUnknow = 0, //!< Unknow input Type
-			typeMouse,      //!< Mouse type
-			typeFinger,     //!< Finger type
-			typeStylet,     //!< Stylet type
-			typeCount       //!< number of types
+			type_unknow = 0, //!< Unknow input Type
+			type_mouse,      //!< Mouse type
+			type_finger,     //!< Finger type
+			type_stylet,     //!< Stylet type
 		};
 	};
 	/**

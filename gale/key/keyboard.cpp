@@ -8,73 +8,55 @@
 
 #include <gale/key/keyboard.h>
 
-static const char* keyboardDescriptionString[gale::key::keyboardCount+1] = {
-	"keyboardUnknow",
-	"keyboardChar",
-	"keyboardLeft",
-	"keyboardRight",
-	"keyboardUp",
-	"keyboardDown",
-	"keyboardPageUp",
-	"keyboardPageDown",
-	"keyboardStart",
-	"keyboardEnd",
-	"keyboardPrint",
-	"keyboardStopDefil",
-	"keyboardWait",
-	"keyboardInsert",
-	"keyboardF1",
-	"keyboardF2",
-	"keyboardF3",
-	"keyboardF4",
-	"keyboardF5",
-	"keyboardF6",
-	"keyboardF7",
-	"keyboardF8",
-	"keyboardF9",
-	"keyboardF10",
-	"keyboardF11",
-	"keyboardF12",
-	"keyboardCapLock",
-	"keyboardShiftLeft",
-	"keyboardShiftRight",
-	"keyboardCtrlLeft",
-	"keyboardCtrlRight",
-	"keyboardMetaLeft",
-	"keyboardMetaRight",
-	"keyboardAlt",
-	"keyboardAltGr",
-	"keyboardContextMenu",
-	"keyboardNumLock",
-	"keyboardCount"
+static const char* keyboardDescriptionString[] = {
+	"keyboard_unknow",
+	"keyboard_char",
+	"keyboard_left",
+	"keyboard_right",
+	"keyboard_up",
+	"keyboard_down",
+	"keyboard_pageUp",
+	"keyboard_pageDown",
+	"keyboard_start",
+	"keyboard_end",
+	"keyboard_print",
+	"keyboard_stopDefil",
+	"keyboard_wait",
+	"keyboard_insert",
+	"keyboard_f1",
+	"keyboard_f2",
+	"keyboard_f3",
+	"keyboard_f4",
+	"keyboard_f5",
+	"keyboard_f6",
+	"keyboard_f7",
+	"keyboard_f8",
+	"keyboard_f9",
+	"keyboard_f10",
+	"keyboard_f11",
+	"keyboard_f12",
+	"keyboard_capLock",
+	"keyboard_shiftLeft",
+	"keyboard_shiftRight",
+	"keyboard_ctrlLeft",
+	"keyboard_ctrlRight",
+	"keyboard_metaLeft",
+	"keyboard_metaRight",
+	"keyboard_alt",
+	"keyboard_altGr",
+	"keyboard_contextMenu",
+	"keyboard_numLock",
+	// harware section:
+	"keyboard_volumeUp",
+	"keyboard_volumeDown",
+	"keyboard_menu",
+	"keyboard_camera",
+	"keyboard_home",
+	"keyboard_power",
+	"keyboard_back",
 };
 
 std::ostream& gale::key::operator <<(std::ostream& _os, const enum gale::key::keyboard _obj) {
-	if (_obj >= 0 && _obj <gale::key::keyboardCount) {
-		_os << keyboardDescriptionString[_obj];
-	} else {
-		_os << "[ERROR]";
-	}
-	return _os;
-}
-
-static const char* keyboardSystemDescriptionString[gale::key::keyboardSystemCount+1] = {
-	"keyboardSystemUnknow",
-	"keyboardSystemVolumeUp",
-	"keyboardSystemVolumeDown",
-	"keyboardSystemMenu",
-	"keyboardSystemCamera",
-	"keyboardSystemHome",
-	"keyboardSystemPower",
-	"keyboardSystemBack",
-	"keyboardSystemCount"
-};
-
-std::ostream& gale::key::operator <<(std::ostream& _os, const enum gale::key::keyboardSystem _obj) {
-	if (_obj >= 0 && _obj <gale::key::keyboardSystemCount) {
-		_os << keyboardSystemDescriptionString[_obj];
-	} else {
-		_os << "[ERROR]";
-	}
+	_os << keyboardDescriptionString[_obj];
 	return _os;
 }

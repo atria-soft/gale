@@ -17,21 +17,22 @@ namespace gale {
 		 * @brief Keybord event or joyestick event
 		 */
 		enum status {
-			statusUnknow = 0,
-			statusDown, // availlable on Keyboard too
-			statusMove,
-			statusSingle,
-			statusDouble,
-			statusTriple,
-			statusQuad,
-			statusQuinte,
-			statusUp, // availlable on Keyboard too
-			statusUpAfter, // mouse input & finger input this appear after the single event (depending on some case...)
-			statusEnter,
-			statusLeave,
-			statusAbort, // Appeare when an event is tranfert betwwen widgets (the widget which receive this has lost the events)
-			statusTransfert, // Appeare when an event is tranfert betwwen widgets (the widget which receive this has receive the transfert of the event)
-			statusCount, // number max of imput possible
+			status_unknow = 0,
+			status_down, // availlable on Keyboard too
+			status_downRepeate, // availlable on Keyboard too: the down event us in repeate cycle
+			status_move,
+			status_single,
+			status_double,
+			status_triple,
+			status_quad,
+			status_quinte,
+			status_up, // availlable on Keyboard too
+			status_upRepeate, // availlable on Keyboard too: the up event us in repeate cycle
+			status_upAfter, // mouse input & finger input this appear after the single event (depending on some case...)
+			status_enter,
+			status_leave,
+			status_abort, // Appeare when an event is tranfert betwwen widgets (the widget which receive this has lost the events)
+			status_transfert // Appeare when an event is tranfert betwwen widgets (the widget which receive this has receive the transfert of the event)
 		};
 		/**
 		 * @brief Debug operator To display the curent element in a Human redeable information

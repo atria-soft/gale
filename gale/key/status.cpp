@@ -8,30 +8,27 @@
 
 #include <gale/key/status.h>
 
-static const char* statusDescriptionString[gale::key::statusCount+1] = {
-	"statusUnknow",
-	"statusDown",
-	"statusMove",
-	"statusSingle",
-	"statusDouble",
-	"statusTriple",
-	"statusQuad",
-	"statusQuinte",
-	"statusUp",
-	"statusUpAfter",
-	"statusEnter",
-	"statusLeave",
-	"statusAbort",
-	"statusTransfert",
-	"statusCount"
+static const char* statusDescriptionString[] = {
+	"status_unknow",
+	"status_down",
+	"status_downRepeate",
+	"status_move",
+	"status_single",
+	"status_double",
+	"status_triple",
+	"status_quad",
+	"status_quinte",
+	"status_up",
+	"status_upRepeate",
+	"status_upAfter",
+	"status_enter",
+	"status_leave",
+	"status_abort",
+	"status_transfert"
 };
 
 std::ostream& gale::key::operator <<(std::ostream& _os, const enum gale::key::status _obj) {
-	if (_obj >= 0 && _obj <gale::key::statusCount) {
-		_os << statusDescriptionString[_obj];
-	} else {
-		_os << "[ERROR]";
-	}
+	_os << statusDescriptionString[_obj];
 	return _os;
 }
 

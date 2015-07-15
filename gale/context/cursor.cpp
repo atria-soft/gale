@@ -8,37 +8,32 @@
 
 #include <gale/context/cursor.h>
 
-static const char* cursorDescriptionString[gale::context::cursorCount+1] = {
-	"cursorArrow",
-	"cursorLeftArrow",
-	"cursorInfo",
-	"cursorDestroy",
-	"cursorHelp",
-	"cursorCycle",
-	"cursorSpray",
-	"cursorWait",
-	"cursorText",
-	"cursorCrossHair",
-	"cursorSlideUpDown",
-	"cursorSlideLeftRight",
-	"cursorResizeUp",
-	"cursorResizeDown",
-	"cursorResizeLeft",
-	"cursorResizeRight",
-	"cursorCornerTopLeft",
-	"cursorCornerTopRight",
-	"cursorCornerButtomLeft",
-	"cursorCornerButtomRight",
-	"cursorNone",
-	"cursorCount"
+static const char* cursorDescriptionString[] = {
+	"cursor_arrow",
+	"cursor_leftArrow",
+	"cursor_info",
+	"cursor_destroy",
+	"cursor_help",
+	"cursor_cycle",
+	"cursor_spray",
+	"cursor_wait",
+	"cursor_text",
+	"cursor_crossHair",
+	"cursor_slideUpDown",
+	"cursor_slideLeftRight",
+	"cursor_resizeUp",
+	"cursor_resizeDown",
+	"cursor_resizeLeft",
+	"cursor_resizeRight",
+	"cursor_cornerTopLeft",
+	"cursor_cornerTopRight",
+	"cursor_cornerButtomLeft",
+	"cursor_cornerButtomRight",
+	"cursor_none"
 };
 
-std::ostream& gale::operator <<(std::ostream& _os, const enum gale::context::cursorDisplay _obj) {
-	if (_obj >= 0 && _obj <gale::context::cursorCount) {
-		_os << cursorDescriptionString[_obj];
-	} else {
-		_os << "[ERROR]";
-	}
+std::ostream& gale::operator <<(std::ostream& _os, const enum gale::context::cursor _obj) {
+	_os << cursorDescriptionString[_obj];
 	return _os;
 }
 

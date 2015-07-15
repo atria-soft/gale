@@ -10,7 +10,7 @@
 #define __GALE_H__
 
 #include <etk/types.h>
-#include <gale/context/Application.h>
+#include <gale/Application.h>
 
 namespace gale {
 	/**
@@ -25,7 +25,7 @@ namespace gale {
 	 * @param[in] _argv Standard argv
 	 * @return normal error int for the application error management
 	 */
-	int32_t run(gale::context::Application* _application, int32_t _argc = 0, const char* _argv[] = NULL);
+	int32_t run(gale::Application* _application, int32_t _argc = 0, const char* _argv[] = NULL);
 	/**
 	 * @brief get GALE version
 	 * @return The string that describe gale version
