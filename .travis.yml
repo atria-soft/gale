@@ -1,0 +1,57 @@
+# language type:
+language:
+- cpp
+- Objective-c
+
+# compilator system:
+compiler:
+- clang
+- gcc
+
+# build branch requested
+branches:
+  only:
+    - master
+    - dev
+
+# previous actions:
+before_script: 
+  - cd ..
+  - mkdir bin
+  - curl https://storage.googleapis.com/git-repo-downloads/repo > bin/repo
+  - chmod a+x bin/repo
+  - git config --global user.email "travis@travis.com"
+  - git config --global user.name "Travis"
+  - git config --global color.ui "auto"
+  - git config --global core.editor "vi"
+  - mkdir WORKING_DIRECTORY
+  - cd WORKING_DIRECTORY
+  - ../bin/repo init -u https://github.com/atria-soft/manifest.git
+  - ../bin/repo sync -j8
+  - rm -rf atria-soft/ewol
+  - cd ..
+  - pwd
+  - ls -l
+  - if [ "$CXX" == "clang++" ]; then BUILDER=clang; else BUILDER=gcc; fi
+
+install:
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq libstdc++-4.9-dev
+  - sudo apt-get install -qq g++-4.9
+  - sudo rm /usr/bin/gcc /usr/bin/g++
+  - sudo ln -s /usr/bin/gcc-4.9 /usr/bin/gcc
+  - sudo ln -s /usr/bin/g++-4.9 /usr/bin/g++
+  - sudo pip install lutin
+
+# build sequence with Lutin :
+script: 
+  - lutin -C -P -c$BUILDER -mdebug -p ewol etk-test exml-test ejson-test enet-test 0XX_customwidget 001_HelloWord
+  - ./out/Linux_x86_64/debug/staging/$BUILDER/etk-test/usr/bin/etk-test
+  - ./out/Linux_x86_64/debug/staging/$BUILDER/ejson-test/usr/bin/ejson-test
+  - ./out/Linux_x86_64/debug/staging/$BUILDER/exml-test/usr/bin/exml-test
+
+#send e-mail on compilation result:
+notifications:
+  email:
+    - yui.heero@gmail.com
