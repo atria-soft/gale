@@ -8,7 +8,7 @@
 
 #include <vector>
 #include <gale/debug.h>
-#include <gale/openGL/openGL.h>
+#include <gale/renderer/openGL/openGL.h>
 #include <etk/stdTools.h>
 #include <mutex>
 //#define DIRECT_MODE

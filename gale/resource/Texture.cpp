@@ -8,7 +8,7 @@
 
 #include <etk/types.h>
 #include <gale/gale.h>
-#include <gale/openGL/openGL.h>
+#include <gale/renderer/openGL/openGL.h>
 #include <gale/resource/Manager.h>
 #include <gale/resource/Texture.h>
 
@@ -40,11 +40,14 @@ void gale::resource::Texture::init() {
 	gale::Resource::init();
 }
 
-gale::resource::Texture::Texture() {
+gale::resource::Texture::Texture() :
+  m_texId(0),
+  m_endPointSize(1,1),
+  m_loaded(false),
+  m_size(0,0),
+  m_dataType(gale::resource::Texture::dataType_int16),
+  m_dataColorSpace(gale::resource::Texture::color_mono) {
 	addResourceType("gale::compositing::Texture");
-	m_loaded = false;
-	m_texId = 0;
-	m_endPointSize.setValue(1.0,1.0);
 }
 
 gale::resource::Texture::~Texture() {
@@ -68,16 +71,16 @@ void gale::resource::Texture::updateContext() {
 	//--- Mode linear
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	GALE_INFO("TEXTURE: add [" << getId() << "]=" << m_data.getSize() << " OGl_Id=" <<m_texId);
+	GALE_INFO("TEXTURE: add [" << getId() << "]=" << m_size << " OGl_Id=" << m_texId);
 	glTexImage2D(GL_TEXTURE_2D, // Target
 	             0, // Level
 	             GL_RGBA, // Format internal
-	             m_data.getWidth(),
-	             m_data.getHeight(),
+	             m_size.x(),
+	             m_size.y(),
 	             0, // Border
 	             GL_RGBA, // format
 	             GL_UNSIGNED_BYTE, // type
-	             m_data.getTextureDataPointer() );
+	             &((*m_data)[0]) );
 	// now the data is loaded
 	m_loaded = true;
 }
@@ -101,7 +104,13 @@ void gale::resource::Texture::flush() {
 	getManager().update(std::dynamic_pointer_cast<gale::Resource>(shared_from_this()));
 }
 
-void gale::resource::Texture::setImageSize(ivec2 _newSize) {
-	_newSize.setValue( nextP2(_newSize.x()), nextP2(_newSize.y()) );
-	m_data.resize(_newSize);
+void gale::resource::Texture::setTexture(const std::shared_ptr<std::vector<char>>& _data,
+                                         const ivec2& _size,
+                                         enum gale::resource::Texture::dataType _dataType,
+                                         enum gale::resource::Texture::color _dataColorSpace) {
+	m_data = _data;
+	m_size = _size;
+	m_dataType = _dataType;
+	m_dataColorSpace = _dataColorSpace;
+	// TODO : Reload ...
 }

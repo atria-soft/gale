@@ -183,6 +183,7 @@ namespace gale {
 		 * @brief disable Texture on the system
 		 * @param[in] flagID The flag requested
 		 */
+		// TODO : rename Disable
 		void desActiveTexture(uint32_t _flagID);
 		/**
 		 * @brief draw a specific array  == > this enable mode difference ...

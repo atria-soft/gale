@@ -6,6 +6,7 @@
  * @license APACHE v2.0 (see license file)
  */
 
+#include <etk/types.h>
 #include <gale/orientation.h>
 
 static const char* listValues[] = {

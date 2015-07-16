@@ -19,7 +19,7 @@
 
 #define DECLARE_RESOURCE_FACTORY(className) \
 	template<typename ... T> static std::shared_ptr<className> create( T&& ... all ) { \
-		std::shared_ptr<className> object(new className()); \
+		std::shared_ptr<className> resource(new className()); \
 		if (resource == nullptr) { \
 			GALE_ERROR("Factory resource error"); \
 			return nullptr; \
@@ -103,9 +103,6 @@ namespace gale {
 	 * :** ...
 	 */
 	class Resource : public std::enable_shared_from_this<gale::Resource> {
-		private:
-			size_t m_id; //!< unique ID definition
-			bool m_resourceHasBeenInit; //!< Know if the init function has bben called
 		protected:
 			/**
 			 * @brief generic protected contructor (use factory to create this class)
@@ -123,9 +120,43 @@ namespace gale {
 			virtual ~Resource() {
 				
 			};
+		private:
+			size_t m_id; //!< unique ID definition
+		public:
+			size_t getId() {
+				return m_id;
+			}
+		private:
+			bool m_resourceHasBeenInit; //!< Know if the init function has bben called
+		public:
 			bool resourceHasBeenCorectlyInit() {
 				return m_resourceHasBeenInit;
 			}
+		private:
+			std::vector<const char*> m_listType;
+		public:
+			/**
+			 * @brief get the current type of the Resource
+			 * @return the last type name of the element
+			 */
+			const char* const getObjectType();
+			/**
+			 * @brief Get the herarchic of the Resource type.
+			 * @return descriptive string.
+			 */
+			std::string getTypeDescription();
+			/**
+			 * @brief check  if the element herited from a specific type
+			 * @param[in] _type Type to check.
+			 * @return true if the element is compatible.
+			 */
+			bool isTypeCompatible(const std::string& _type);
+		protected:
+			/**
+			 * @brief Add a type of the list of Object.
+			 * @param[in] _type new type to add.
+			 */
+			void addResourceType(const char* _type);
 		protected:
 			std::string m_name; //!< name of the resource ...
 		public:

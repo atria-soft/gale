@@ -12,7 +12,7 @@
 #include <etk/types.h>
 #include <etk/math/Vector4D.h>
 #include <gale/debug.h>
-#include <gale/openGL/openGL.h>
+#include <gale/renderer/openGL/openGL.h>
 #include <gale/resource/Resource.h>
 #include <gale/resource/Shader.h>
 #include <gale/resource/VirtualBufferObject.h>

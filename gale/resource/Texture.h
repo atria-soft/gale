@@ -11,22 +11,26 @@
 
 #include <etk/types.h>
 #include <gale/debug.h>
-#include <egami/Image.h>
-#include <gale/openGL/openGL.h>
+#include <gale/renderer/openGL/openGL.h>
 #include <gale/resource/Resource.h>
 
 namespace gale {
 	namespace resource {
 		class Texture : public gale::Resource {
+			public:
+				enum color {
+					color_mono = 0, //!< Monochrome color
+					color_rgb, //!< red/green/blue data
+					color_rgba //!< red/green/blue/alpha data
+				};
+				enum dataType {
+					dataType_int16 = 0, //!< Image data are stored on integer 16 bit for each element
+					dataType_float, //!< Image data are stored on flaoting point value on 32 bit for each element
+				};
 			protected:
-				// openGl Context propoerties :
-				egami::Image m_data;
-				// openGl textureID :
-				GLuint m_texId;
-				// some image are not square  == > we need to sqared it to prevent some openGl api error the the displayable size is not all the time 0.0 -> 1.0
-				vec2 m_endPointSize;
-				// internal state of the openGl system :
-				bool m_loaded;
+				GLuint m_texId; //!< openGl textureID.
+				vec2 m_endPointSize; //!< some image are not square  == > we need to sqared it to prevent some openGl api error the the displayable size is not all the time 0.0 -> 1.0.
+				bool m_loaded; //!< internal state of the openGl system.
 			// Gale internal API:
 			public:
 				void updateContext();
@@ -34,14 +38,14 @@ namespace gale {
 				void removeContextToLate();
 			// middleware interface:
 			public:
-				GLuint getId() const {
+				GLuint getRendererId() const {
 					return m_texId;
 				};
 				const vec2& getUsableSize() const {
 					return m_endPointSize;
 				};
 				const ivec2& getOpenGlSize() const {
-					return m_data.getSize();
+					return m_size;
 				};
 			// Public API:
 			protected:
@@ -52,14 +56,20 @@ namespace gale {
 				DECLARE_RESOURCE_FACTORY(Texture);
 				virtual ~Texture();
 			public:
-				// you must set the size here, because it will be set in multiple of pow(2)
-				void setImageSize(ivec2 newSize);
-				// get the reference on this image to draw nomething on it ...
-				inline egami::Image& get() {
-					return m_data;
-				};
 				// flush the data to send it at the openGl system
 				void flush();
+			
+			private:
+				// Image propoerties:
+				std::shared_ptr<std::vector<char>> m_data; //!< pointer on the image data.
+				ivec2 m_size; //!< size of the image data.
+				enum dataType m_dataType; //!< Type of the image.
+				enum color m_dataColorSpace; //!< Color space of the image.
+			public:
+				void setTexture(const std::shared_ptr<std::vector<char>>& _data,
+				                const ivec2& _size,
+				                enum gale::resource::Texture::dataType _dataType,
+				                enum gale::resource::Texture::color _dataColorSpace);
 		};
 	};
 };

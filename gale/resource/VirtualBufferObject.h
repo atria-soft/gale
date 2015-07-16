@@ -13,7 +13,7 @@
 #include <etk/math/Vector2D.h>
 #include <gale/debug.h>
 #include <gale/resource/Resource.h>
-#include <gale/openGL/openGL.h>
+#include <gale/renderer/openGL/openGL.h>
 #include <etk/Color.h>
 
 namespace gale {

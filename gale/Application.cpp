@@ -11,44 +11,59 @@
 #include <gale/context/Context.h>
 
 
-gale::Application::Application() {
-	GALE_INFO("Constructor Gale Application");
+gale::Application::Application() :
+  m_needRedraw(true) {
+	GALE_VERBOSE("Constructor Gale Application");
 }
 
 gale::Application::~Application() {
-	GALE_INFO("destructor of Gale Application");
+	GALE_VERBOSE("destructor of Gale Application");
 }
 
 void gale::Application::onCreate(gale::Context& _context) {
-	GALE_INFO("Create Gale Application");
+	GALE_VERBOSE("Create Gale Application");
 }
 
 void gale::Application::onStart(gale::Context& _context) {
-	GALE_INFO("Start Gale Application");
+	GALE_VERBOSE("Start Gale Application");
 }
 
 void gale::Application::onResume(gale::Context& _context) {
-	GALE_INFO("Resume Gale Application");
+	GALE_VERBOSE("Resume Gale Application");
 }
 
-void gale::Application::onRun(gale::Context& _context) {
-	GALE_INFO("Run Gale Application");
+void gale::Application::onRegenerateDisplay(gale::Context& _context) {
+	GALE_VERBOSE("Regenerate Gale Application");
+	markDrawingIsNeeded();
+}
+
+void gale::Application::markDrawingIsNeeded() {
+	m_needRedraw = true;
+}
+
+bool gale::Application::isDrawingNeeded() {
+	bool tmp = m_needRedraw;
+	m_needRedraw = false;
+	return tmp;
+}
+void gale::Application::onDraw(gale::Context& _context) {
+	GALE_VERBOSE("draw Gale Application");
 }
 
 void gale::Application::onPause(gale::Context& _context) {
-	GALE_INFO("Pause Gale Application");
+	GALE_VERBOSE("Pause Gale Application");
 }
 
 void gale::Application::onStop(gale::Context& _context) {
-	GALE_INFO("Stop Gale Application");
+	GALE_VERBOSE("Stop Gale Application");
 }
 
 void gale::Application::onDestroy(gale::Context& _context) {
-	GALE_INFO("Destroy Gale Application");
+	GALE_VERBOSE("Destroy Gale Application");
 }
 
 void gale::Application::exit(int32_t _value) {
-	GALE_INFO("Exit Requested");
+	GALE_VERBOSE("Exit Requested");
 }
 
 void gale::Application::onPointer(enum gale::key::type _type, int32_t _pointerID, const vec2& _pos, gale::key::status _state) {

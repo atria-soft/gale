@@ -9,9 +9,8 @@
 #include <etk/types.h>
 #include <gale/debug.h>
 #include <gale/resource/Manager.h>
-#include <gale/resource/FontFreeType.h>
 #include <gale/gale.h>
-#include <gale/openGL/openGL.h>
+#include <gale/renderer/openGL/openGL.h>
 #include <gale/context/Context.h>
 
 

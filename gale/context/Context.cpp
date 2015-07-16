@@ -580,66 +580,48 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		// set the curent interface :
 		lockContext();
 		processEvents();
-		{
-			gale::eSystemMessage *data = new gale::eSystemMessage();
-			if (data == nullptr) {
-				GALE_ERROR("allocation error of message");
-			} else {
-				data->TypeMessage = eSystemMessage::msgInit;
-				m_msgSystem.post(data);
-			}
-		}
 		// call all the widget that neded to do something periodicly
 		// TODO : m_objectManager.timeCall(currentTime);
 		// check if the user selected a windows
-		#if 0
-		if (nullptr != m_windowsCurrent) {
+		if (m_application != nullptr) {
 			// Redraw all needed elements
-			m_windowsCurrent->onRegenerateDisplay();
+			m_application->onRegenerateDisplay(*this);
+			needRedraw = m_application->isDrawingNeeded();
 		}
-		#endif
 		if (m_displayFps == true) {
 			m_FpsSystemEvent.incrementCounter();
 			m_FpsSystemEvent.toc();
 		}
-		//! bool needRedraw = gale::widgetManager::isDrawingNeeded();
-		// TODO : needRedraw = m_widgetManager.isDrawingNeeded();
 		// release the curent interface :
 		unLockContext();
 	}
 	bool hasDisplayDone = false;
-	//! drawing section :
+	//! drawing section:
 	{
 		// Lock openGl context:
 		gale::openGL::lock();
 		if (m_displayFps == true) {
 			m_FpsSystemContext.tic();
 		}
-		#if 0
-		if (nullptr != m_windowsCurrent) {
-			if(    true == needRedraw
-			    || true == _displayEveryTime) {
-				m_resourceManager.updateContext();
-				if (m_displayFps == true) {
-					m_FpsSystemContext.incrementCounter();
-				}
+		if(    needRedraw == true
+		    || _displayEveryTime == true) {
+			m_resourceManager.updateContext();
+			if (m_displayFps == true) {
+				m_FpsSystemContext.incrementCounter();
 			}
 		}
-		#endif
 		if (m_displayFps == true) {
 			m_FpsSystemContext.toc();
 			m_FpsSystem.tic();
 		}
-		#if 0
-		if (nullptr != m_windowsCurrent) {
+		if (m_application != nullptr) {
 			if(    true == needRedraw
 			    || true == _displayEveryTime) {
 				m_FpsSystem.incrementCounter();
-				m_windowsCurrent->sysDraw();
+				m_application->onDraw(*this);
 				hasDisplayDone = true;
 			}
 		}
-		#endif
 		if (m_displayFps == true) {
 			m_FpsSystem.toc();
 			m_FpsFlush.tic();

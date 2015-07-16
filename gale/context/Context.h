@@ -22,6 +22,8 @@
 #include <memory>
 #include <gale/orientation.h>
 
+#define MAX_MANAGE_INPUT (15)
+
 namespace gale {
 	/**
 	 * @not-in-doc

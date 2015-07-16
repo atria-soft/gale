@@ -11,7 +11,7 @@
 
 #include <etk/types.h>
 #include <gale/debug.h>
-#include <gale/openGL/openGL.h>
+#include <gale/renderer/openGL/openGL.h>
 #include <gale/resource/Resource.h>
 
 namespace gale {

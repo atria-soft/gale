@@ -41,10 +41,15 @@ namespace gale {
 			 */
 			virtual void onResume(gale::Context& _context);
 			/**
-			 * @brief Call periodicly the application to draw all it is needed to draw ... (access on the openGL Context).
+			 * @brief call application to precalculate drawing.
 			 * @param[in] _context Current gale context.
 			 */
-			virtual void onRun(gale::Context& _context);
+			virtual void onRegenerateDisplay(gale::Context& _context);
+			/**
+			 * @brief Real draw of the application
+			 * @param[in] _context Current gale context.
+			 */
+			virtual void onDraw(gale::Context& _context);
 			/**
 			 * @brief The application is Hide / not visible.
 			 * @param[in] _context Current gale context.
@@ -65,6 +70,12 @@ namespace gale {
 			 * @param[in] _value value to return on the program
 			 */
 			virtual void exit(int32_t _value);
+			
+		private:
+			bool m_needRedraw;
+		public:
+			virtual void markDrawingIsNeeded();
+			virtual bool isDrawingNeeded();
 		public:
 			/**
 			 * @brief Get touch/mouse/... event.

@@ -67,13 +67,6 @@ def create(target):
 	else:
 		debug.error("unknow mode...")
 	
-	# event properties :
-	myModule.add_src_file([
-		'gale/event/Entry.cpp',
-		'gale/event/Time.cpp',
-		'gale/event/Input.cpp'
-		])
-	
 	# Key properties :
 	myModule.add_src_file([
 		'gale/key/keyboard.cpp',

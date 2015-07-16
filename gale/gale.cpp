@@ -7,7 +7,6 @@
  */
 
 #include <gale/gale.h>
-#include <gale/widget/Manager.h>
 #include <gale/context/Context.h>
 
 #include <gale/context/commandLine.h>

@@ -11,7 +11,6 @@
 
 #include <gale/Application.h>
 
-#define MAX_MANAGE_INPUT (15)
 
 namespace gale {
 	namespace context {
