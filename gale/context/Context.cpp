@@ -618,7 +618,10 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 			if(    true == needRedraw
 			    || true == _displayEveryTime) {
 				m_FpsSystem.incrementCounter();
+				// set the curent interface :
+				lockContext();
 				m_application->onDraw(*this);
+				unLockContext();
 				hasDisplayDone = true;
 			}
 		}

@@ -146,6 +146,20 @@ void gale::openGL::swap() {
 	
 }
 
+void gale::openGL::clearColor(const etk::Color<float>& _color) {
+	glClearColor(_color.r(), _color.g(), _color.b(), _color.a());
+}
+
+void gale::openGL::clearDepth(float _value) {
+	glClearDepth(_value);
+}
+void gale::openGL::clearStencil(int32_t _value) {
+	glClearStencil(_value);
+}
+
+void gale::openGL::clear(uint32_t _flags) {
+	glClear(_flags);
+}
 
 std::ostream& gale::operator <<(std::ostream& _os, const enum openGL::openGlFlags& _obj) {
 	static std::vector<std::pair<enum openGL::openGlFlags, const char*>> list = {
@@ -197,16 +211,16 @@ std::ostream& gale::operator <<(std::ostream& _os, const enum openGL::openGlFlag
 
 std::vector<std::pair<enum gale::openGL::renderMode, std::string>>& getListRenderMode() {
 	static std::vector<std::pair<enum gale::openGL::renderMode, std::string>> list = {
-		std::make_pair(gale::openGL::renderPoint, "POINTS"),
-		std::make_pair(gale::openGL::renderLine, "LINES"),
-		std::make_pair(gale::openGL::renderLineStrip, "LINES_STRIP"),
-		std::make_pair(gale::openGL::renderLineLoop, "LINE_LOOP"),
-		std::make_pair(gale::openGL::renderTriangle, "TRIANGLE"),
-		std::make_pair(gale::openGL::renderTriangleStrip, "TRIANGLE_STRIP"),
-		std::make_pair(gale::openGL::renderTriangleFan, "TRIANGLE_FAN"),
-		std::make_pair(gale::openGL::renderQuad, "QUAD"),
-		std::make_pair(gale::openGL::renderQuadStrip, "QUAD_STRIP"),
-		std::make_pair(gale::openGL::renderPolygon, "POLYGON"),
+		std::make_pair(gale::openGL::render_point, "POINTS"),
+		std::make_pair(gale::openGL::render_line, "LINES"),
+		std::make_pair(gale::openGL::render_lineStrip, "LINES_STRIP"),
+		std::make_pair(gale::openGL::render_lineLoop, "LINE_LOOP"),
+		std::make_pair(gale::openGL::render_triangle, "TRIANGLE"),
+		std::make_pair(gale::openGL::render_triangleStrip, "TRIANGLE_STRIP"),
+		std::make_pair(gale::openGL::render_triangleFan, "TRIANGLE_FAN"),
+		std::make_pair(gale::openGL::render_quad, "QUAD"),
+		std::make_pair(gale::openGL::render_quadStrip, "QUAD_STRIP"),
+		std::make_pair(gale::openGL::render_polygon, "POLYGON"),
 	};
 	return list;
 }
@@ -233,7 +247,7 @@ namespace etk {
 			}
 		}
 		GALE_WARNING("Can not parse : '" << _value << "' set Triangle default value");
-		_variableRet = gale::openGL::renderTriangle;
+		_variableRet = gale::openGL::render_triangle;
 		return false;
 	}
 	template<> bool from_string<gale::openGL::renderMode>(gale::openGL::renderMode& _variableRet, const std::u32string& _value) {

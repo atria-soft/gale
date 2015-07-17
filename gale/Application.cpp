@@ -90,11 +90,13 @@ void gale::Application::onResize(const vec2& _size) {
 }
 
 void gale::Application::setSize(const vec2& _size) {
-	
+	gale::Context& context = gale::getContext();
+	context.setSize(_size);
 }
 
 vec2 gale::Application::getSize() const {
-	return vec2(0,0);
+	gale::Context& context = gale::getContext();
+	return context.getSize();
 }
 
 void gale::Application::onMovePosition(const vec2& _size) {

@@ -12,6 +12,7 @@
 #include <etk/types.h>
 #include <vector>
 #include <etk/math/Matrix4.h>
+#include <etk/Color.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -110,6 +111,34 @@ namespace gale {
 		 */
 		void swap();
 		
+		/**
+		 * @brief Specifies the clear color value When clear is requested
+		 * @param[in] _value to set [0..1]
+		 */
+		void clearColor(const etk::Color<float>& _color);
+		/**
+		 * @brief Specifies the depth value used when the depth buffer is cleared. The initial value is 1.
+		 * @param[in] _value to set [0..1]
+		 */
+		void clearDepth(float _value);
+		/**
+		 * @brief Specifies the index used by clear to clear the stencil buffer. s is masked with 2 m - 1 , where m is the number of bits in the stencil buffer.
+		 * @param[in] _value 
+		 */
+		void clearStencil(int32_t _value);
+		
+		enum clearFlag {
+			clearFlag_colorBuffer = GL_COLOR_BUFFER_BIT, //!< Indicates the buffers currently enabled for color writing.
+			clearFlag_depthBuffer = GL_DEPTH_BUFFER_BIT, //!< Indicates the depth buffer.
+			clearFlag_stencilBuffer = GL_STENCIL_BUFFER_BIT //!< Indicates the stencil buffer.
+		};
+		/**
+		 * @brief clear sets the bitplane area of the window to values previously selected by clearColor, clearDepth, and clearStencil. Multiple color buffers can be cleared simultaneously by selecting more than one buffer at a time using drawBuffer.
+		 * The pixel ownership test, the scissor test, dithering, and the buffer writemasks affect the operation of clear. The scissor box bounds the cleared region. Alpha function, blend function, logical operation, stenciling, texture mapping, and depth-buffering are ignored by clear.
+		 * @param[in] _flags This is the bitwise OR of several values indicating which buffer is to be cleared.
+		 */
+		void clear(uint32_t _flags);
+		
 		enum openGlFlags {
 			FLAG_BLEND = 1<<0, //!< If enabled, blend the computed fragment color values with the values in the color buffers. See glBlendFunc.
 			FLAG_CLIP_DISTANCE_I = 1<<1, //!< If enabled, clip geometry against user-defined half space i.
@@ -142,17 +171,17 @@ namespace gale {
 			FLAG_FOG = 1<<28, //!< 
 		};
 		enum renderMode {
-			renderPoint = GL_POINTS,
-			renderLine = GL_LINES,
-			renderLineStrip = GL_LINE_STRIP, //!< Not supported in GALE (TODO : Later)
-			renderLineLoop = GL_LINE_LOOP,
-			renderTriangle = GL_TRIANGLES,
-			renderTriangleStrip = GL_TRIANGLE_STRIP, //!< Not supported in GALE (TODO : Later)
-			renderTriangleFan = GL_TRIANGLE_FAN, //!< Not supported in GALE (TODO : Later)
+			render_point = GL_POINTS,
+			render_line = GL_LINES,
+			render_lineStrip = GL_LINE_STRIP, //!< Not supported in GALE (TODO : Later)
+			render_lineLoop = GL_LINE_LOOP,
+			render_triangle = GL_TRIANGLES,
+			render_triangleStrip = GL_TRIANGLE_STRIP, //!< Not supported in GALE (TODO : Later)
+			render_triangleFan = GL_TRIANGLE_FAN, //!< Not supported in GALE (TODO : Later)
 			#if (!defined(__TARGET_OS__IOs) && !defined(__TARGET_OS__Android))
-				renderQuad = GL_QUADS, //!< Not supported in OpenGL-ES2
-				renderQuadStrip = GL_QUAD_STRIP, //!< Not supported in OpenGL-ES2
-				renderPolygon = GL_POLYGON //!< Not supported in OpenGL-ES2
+				render_quad = GL_QUADS, //!< Not supported in OpenGL-ES2
+				render_quadStrip = GL_QUAD_STRIP, //!< Not supported in OpenGL-ES2
+				render_polygon = GL_POLYGON //!< Not supported in OpenGL-ES2
 			#else
 				renderQuad, //!< Not supported in OpenGL-ES2
 				renderQuadStrip, //!< Not supported in OpenGL-ES2

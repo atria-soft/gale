@@ -86,7 +86,8 @@ def create(target):
 		'gale/resource/Program.cpp',
 		'gale/resource/Resource.cpp',
 		'gale/resource/Shader.cpp',
-		'gale/resource/Texture.cpp'
+		'gale/resource/Texture.cpp',
+		'gale/resource/VirtualBufferObject.cpp'
 		])
 	
 	# name of the dependency

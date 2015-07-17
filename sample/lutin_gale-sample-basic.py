@@ -13,6 +13,8 @@ def create(target):
 		])
 	# add dependency of gale
 	myModule.add_module_depend(['gale'])
+	myModule.copy_file('basic.frag')
+	myModule.copy_file('basic.vert')
 	return myModule
 
 
