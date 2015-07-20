@@ -36,7 +36,7 @@ class MainApplication : public gale::Application {
 		void onDraw(gale::Context& _context) {
 			ivec2 size = getSize();
 			// set the basic openGL view port: (position drawed in the windows)
-			glViewport(0,0,size.x(),size.y());
+			gale::openGL::setViewPort(ivec2(0,0),size);
 			// Clear all the stacked matrix ...
 			gale::openGL::setBasicMatrix(mat4());
 			// clear background
@@ -76,7 +76,7 @@ class MainApplication : public gale::Application {
 			// color :
 			m_GLprogram->sendAttribute(m_GLColor, 4/*r,g,b,a*/, color, 4*sizeof(float));
 			// Request the draw od the elements : 
-			gale::openGL::drawArrays(GL_TRIANGLES, 0, 3 /*number of points*/);
+			gale::openGL::drawArrays(gale::openGL::render_triangle, 0, 3 /*number of points*/);
 			m_GLprogram->unUse();
 			// Restore context of matrix
 			gale::openGL::pop();

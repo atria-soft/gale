@@ -24,7 +24,7 @@ namespace gale {
 		class VirtualBufferObject : public gale::Resource {
 			private :
 				bool m_exist;  //!< This data is availlable in the Graphic card
-				std::vector<GLuint> m_vbo; //!< openGl ID of this VBO
+				std::vector<uint32_t> m_vbo; //!< openGl ID of this VBO
 				std::vector<bool> m_vboUsed; //!< true if the VBO is allocated or used ...
 				std::vector<std::vector<float>> m_buffer; //!< data that is availlable in the VBO system ...
 				std::vector<int8_t> m_vboSizeDataOffset; //!< Internal size of the VBO (dynamicly set)
@@ -46,7 +46,7 @@ namespace gale {
 				 * @brief get the real openGL ID.
 				 * @return the Ogl id reference of this VBO.
 				 */
-				GLuint getGL_ID(int32_t _id) {
+				int64_t getGL_ID(int32_t _id) {
 					return m_vbo[_id];
 				};
 				/**

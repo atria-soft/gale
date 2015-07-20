@@ -15,6 +15,7 @@
 #undef __class__
 #define __class__ "resource::Texture"
 
+
 /**
  * @brief get the next power 2 if the input
  * @param[in] value Value that we want the next power of 2

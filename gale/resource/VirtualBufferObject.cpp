@@ -10,6 +10,7 @@
 #include <gale/debug.h>
 #include <gale/resource/Manager.h>
 #include <gale/resource/VirtualBufferObject.h>
+#include <gale/renderer/openGL/openGL-include.h>
 
 #undef __class__
 #define __class__ "resource::VirtualBufferObject"
@@ -49,7 +50,7 @@ void gale::resource::VirtualBufferObject::updateContext() {
 			// select the buffer to set data inside it ...
 			if (m_buffer[iii].size()>0) {
 				gale::openGL::bindBuffer(m_vbo[iii]);
-				gale::openGL::bufferData(sizeof(float)*m_buffer[iii].size(), &((m_buffer[iii])[0]), GL_STATIC_DRAW);
+				gale::openGL::bufferData(sizeof(float)*m_buffer[iii].size(), &((m_buffer[iii])[0]), gale::openGL::usage_staticDraw);
 			}
 		}
 	}

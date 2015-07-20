@@ -12,42 +12,7 @@
 #include <etk/stdTools.h>
 #include <mutex>
 //#define DIRECT_MODE
-
-
-extern "C" {
-	#if defined(__TARGET_OS__Linux)
-		// TO ENABLE THE SHADER api ...
-		#define GL_GLEXT_PROTOTYPES
-		#include <GL/gl.h>
-		// TODO : Check it it work
-		// This is to prevent the use of these element that is not allowed in the openGL ES
-		#undef glVertexPointer
-		#undef glTexCoordPointer
-		#undef glColorPointer
-		#undef glPopMatrix
-		#undef glPushMatrix
-		#undef glMatrixMode
-		#undef glLoadIdentity
-		#undef glTranslatef
-	#elif defined(__TARGET_OS__Android)
-		// Include openGL ES 2
-		#include <GLES2/gl2.h>
-		#include <GLES2/gl2ext.h>
-	#elif defined(__TARGET_OS__Windows)
-		// TO ENABLE THE SHADER api ...
-		//#define GL_GLEXT_PROTOTYPES
-		#define GLEW_STATIC
-		#include <GL/glew.h>
-	#elif defined(__TARGET_OS__MacOs)
-		#include <OpenGL/gl.h>
-		#include <OpenGL/glu.h>
-	#elif defined(__TARGET_OS__IOs)
-		#include <OpenGLES/ES2/gl.h>
-	#else
-		#error you need to specify a __TAGET_OS__ ...
-	#endif
-}
-
+#include <gale/renderer/openGL/openGL-include.h>
 
 #define CHECK_ERROR_OPENGL
 
@@ -182,18 +147,24 @@ void gale::openGL::swap() {
 	
 }
 
+void gale::openGL::setViewPort(const ivec2& _start, const ivec2& _stop) {
+	glViewport(_start.x(), _start.y(), _stop.x(), _stop.y());
+}
+
+void gale::openGL::setViewPort(const vec2& _start, const vec2& _stop) {
+	glViewport(_start.x(), _start.y(), _stop.x(), _stop.y());
+}
+
 
 struct correspondenceTableClear {
 	enum gale::openGL::clearFlag curentFlag;
 	GLbitfield OGlFlag;
 };
-
 static struct correspondenceTableClear basicFlagClear[] = {
 	{gale::openGL::clearFlag_colorBuffer, GL_COLOR_BUFFER_BIT},
 	{gale::openGL::clearFlag_depthBuffer, GL_DEPTH_BUFFER_BIT},
 	{gale::openGL::clearFlag_stencilBuffer, GL_STENCIL_BUFFER_BIT}
 };
-
 static int32_t basicFlagClearCount = sizeof(basicFlagClear) / sizeof(struct correspondenceTableClear);
 
 
@@ -211,7 +182,7 @@ void gale::openGL::clearStencil(int32_t _value) {
 void gale::openGL::clear(uint32_t _flags) {
 	GLbitfield field = 0;
 	for (int32_t iii=0; iii<basicFlagClearCount ; iii++) {
-		if ( (basicFlagClear[iii].curentFlag & _flagID) != 0) {
+		if ( (basicFlagClear[iii].curentFlag & _flags) != 0) {
 			field |= basicFlagClear[iii].OGlFlag;
 		}
 	}
@@ -323,14 +294,14 @@ struct correspondenceTable {
 	GLenum OGlFlag;
 };
 
-static correspondenceTable_ts basicFlag[] = {
+static struct correspondenceTable basicFlag[] = {
 	{gale::openGL::flag_blend, GL_BLEND},
 	#if 0
 	!(defined(__TARGET_OS__Android) || defined(__TARGET_OS__MacOs))
 	{gale::openGL::flag_clipDistanceI, GL_CLIP_DISTANCE0},
 	{gale::openGL::flag_colorLogigOP, GL_COLOR_LOGIC_OP},
 	#endif
-	{(uint32_t)gale::openGL::flag_cullFace, GL_CULL_FACE},
+	{gale::openGL::flag_cullFace, GL_CULL_FACE},
 	#if 0
 		!(defined(__TARGET_OS__Android) || defined(__TARGET_OS__MacOs))
 	{gale::openGL::flag_debugOutput, GL_DEBUG_OUTPUT},
@@ -479,7 +450,7 @@ const uint32_t convertRenderMode[] = {
 	#endif
 };
 
-void gale::openGL::drawArrays(enum renderMode _mode, int32_t _first, int32_t _count) {
+void gale::openGL::drawArrays(enum gale::openGL::renderMode _mode, int32_t _first, int32_t _count) {
 	if (l_programId >= 0) {
 		updateAllFlags();
 		glDrawArrays(convertRenderMode[_mode], _first, _count);
@@ -572,10 +543,14 @@ bool gale::openGL::bindBuffer(uint32_t _bufferId) {
 	return true;
 }
 
- GL_STREAM_DRAW, GL_STATIC_DRAW, or GL_DYNAMIC_DRAW
- 
-bool gale::openGL::bufferData(size_t _size, const void* _data, GLenum _usage) {
-	glBufferData(GL_ARRAY_BUFFER, _size, _data, _usage);
+static GLenum convertUsage[] = {
+	GL_STREAM_DRAW,
+	GL_STATIC_DRAW,
+	GL_DYNAMIC_DRAW
+};
+
+bool gale::openGL::bufferData(size_t _size, const void* _data, enum gale::openGL::usage _usage) {
+	glBufferData(GL_ARRAY_BUFFER, _size, _data, convertUsage[_usage]);
 	checkGlError("glBufferData", __LINE__);
 	return true;
 }
@@ -584,5 +559,168 @@ bool gale::openGL::unbindBuffer() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	checkGlError("glBindBuffer(0)", __LINE__);
 	return true;
+}
+
+static void checkGlError(const char* _op) {
+	for (GLint error = glGetError(); error; error = glGetError()) {
+		GALE_ERROR("after " << _op << "() glError (" << error << ")");
+	}
+}
+#define LOG_OGL_INTERNAL_BUFFER_LEN    (8192)
+static char l_bufferDisplayError[LOG_OGL_INTERNAL_BUFFER_LEN] = "";
+
+int64_t gale::openGL::shader::create(enum gale::openGL::shader::type _type) {
+	GLuint shader = 0;
+	if (_type == gale::openGL::shader::type_vertex) {
+		shader = glCreateShader(GL_VERTEX_SHADER);
+	} else if (_type == gale::openGL::shader::type_fragment) {
+		shader = glCreateShader(GL_FRAGMENT_SHADER);
+	} else {
+		GALE_ERROR("create shader with wrong type ...");
+		return -1;
+	}
+	if (shader == 0) {
+		GALE_ERROR("glCreateShader return error ...");
+		checkGlError("glCreateShader");
+		return -1;
+	}
+	return int64_t(shader);
+}
+
+void gale::openGL::shader::remove(int64_t& _shader) {
+	if (_shader < 0) {
+		return;
+	}
+	glDeleteShader(GLuint(_shader));
+	_shader = -1;
+}
+
+bool gale::openGL::shader::compile(int64_t _shader, const std::string& _data) {
+	const char* data = &_data[0];
+	glShaderSource(GLuint(_shader), 1, (const char**)&data, nullptr);
+	glCompileShader(GLuint(_shader));
+	GLint compiled = 0;
+	glGetShaderiv(GLuint(_shader), GL_COMPILE_STATUS, &compiled);
+	if (!compiled) {
+		GLint infoLen = 0;
+		l_bufferDisplayError[0] = '\0';
+		glGetShaderInfoLog(GLuint(_shader), LOG_OGL_INTERNAL_BUFFER_LEN, &infoLen, l_bufferDisplayError);
+		GALE_ERROR("Error " << l_bufferDisplayError);
+		std::vector<std::string> lines = etk::split(_data, '\n');
+		for (size_t iii=0; iii<lines.size(); iii++) {
+			GALE_ERROR("file " << (iii+1) << "|" << lines[iii]);
+		}
+		return false;
+	}
+	return true;
+}
+
+
+int64_t gale::openGL::program::create() {
+	GLuint program = glCreateProgram();
+	if (program == 0) {
+		GALE_ERROR("program creation return error ...");
+		checkGlError("glCreateProgram", __LINE__);
+		return -1;
+	}
+	GALE_DEBUG("Create program with oglID=" << program);
+	return int64_t(program);
+}
+
+void gale::openGL::program::remove(int64_t& _prog) {
+	if (_prog < 0) {
+		return;
+	}
+	glDeleteProgram(GLuint(_prog));
+	checkGlError("glDeleteProgram", __LINE__);
+	_prog = -1;
+}
+
+bool gale::openGL::program::attach(int64_t _prog, int64_t _shader) {
+	if (_prog < 0) {
+		GALE_ERROR("wrong program ID");
+		return false;
+	}
+	if (_shader < 0) {
+		GALE_ERROR("wrong shader ID");
+		return false;
+	}
+	glAttachShader(GLuint(_prog), GLuint(_shader));
+	checkGlError("glAttachShader", __LINE__);
+	return true;
+}
+bool gale::openGL::program::compile(int64_t _prog) {
+	if (_prog < 0) {
+		GALE_ERROR("wrong program ID");
+		return false;
+	}
+	glLinkProgram(GLuint(_prog));
+	checkGlError("glLinkProgram", __LINE__);
+	GLint linkStatus = GL_FALSE;
+	glGetProgramiv(GLuint(_prog), GL_LINK_STATUS, &linkStatus);
+	checkGlError("glGetProgramiv", __LINE__);
+	if (linkStatus != GL_TRUE) {
+		GLint bufLength = 0;
+		l_bufferDisplayError[0] = '\0';
+		glGetProgramInfoLog(GLuint(_prog), LOG_OGL_INTERNAL_BUFFER_LEN, &bufLength, l_bufferDisplayError);
+		char tmpLog[256];
+		int32_t idOut=0;
+		GALE_ERROR("Could not compile \"PROGRAM\":");
+		for (size_t iii=0; iii<LOG_OGL_INTERNAL_BUFFER_LEN ; iii++) {
+			tmpLog[idOut] = l_bufferDisplayError[iii];
+			if (    tmpLog[idOut] == '\n'
+			     || tmpLog[idOut] == '\0'
+			     || idOut >= 256) {
+				tmpLog[idOut] = '\0';
+				GALE_ERROR("     == > " << tmpLog);
+				idOut=0;
+			} else {
+				idOut++;
+			}
+			if (l_bufferDisplayError[iii] == '\0') {
+				break;
+			}
+		}
+		if (idOut != 0) {
+			tmpLog[idOut] = '\0';
+			GALE_ERROR("     == > " << tmpLog);
+		}
+		return false;
+	}
+	return true;
+}
+
+int32_t gale::openGL::program::getAttributeLocation(int64_t _prog, const std::string& _name) {
+	if (_prog < 0) {
+		GALE_ERROR("wrong program ID");
+		return -1;
+	}
+	if (_name.size() == 0) {
+		GALE_ERROR("wrong name of attribure");
+		return -1;
+	}
+	GLint val = glGetAttribLocation(GLuint(_prog), _name.c_str());
+	if (val < 0) {
+		checkGlError("glGetAttribLocation", __LINE__);
+		GALE_WARNING("glGetAttribLocation(\"" << _name << "\") = " << val);
+	}
+	return val;
+}
+
+int32_t gale::openGL::program::getUniformLocation(int64_t _prog, const std::string& _name) {
+	if (_prog < 0) {
+		GALE_ERROR("wrong program ID");
+		return -1;
+	}
+	if (_name.size() == 0) {
+		GALE_ERROR("wrong name of uniform");
+		return -1;
+	}
+	GLint val = glGetUniformLocation(GLuint(_prog), _name.c_str());
+	if (val < 0) {
+		checkGlError("glGetUniformLocation", __LINE__);
+		GALE_WARNING("glGetUniformLocation(\"" << _name << "\") = " << val);
+	}
+	return val;
 }
 

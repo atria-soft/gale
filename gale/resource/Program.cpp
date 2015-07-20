@@ -12,6 +12,7 @@
 #include <gale/resource/Manager.h>
 #include <etk/os/FSNode.h>
 #include <gale/gale.h>
+#include <gale/renderer/openGL/openGL-include.h>
 
 //#define LOCAL_DEBUG  GALE_VERBOSE
 #define LOCAL_DEBUG  GALE_DEBUG
@@ -153,6 +154,7 @@ void gale::resource::Program::checkGlError(const char* _op, int32_t _localLine, 
 #define LOG_OGL_INTERNAL_BUFFER_LEN    (8192)
 static char l_bufferDisplayError[LOG_OGL_INTERNAL_BUFFER_LEN] = "";
 
+
 bool gale::resource::Program::checkIdValidity(int32_t _idElem) {
 	if (    _idElem < 0
 	     || (size_t)_idElem > m_elementList.size()) {
@@ -171,12 +173,11 @@ int32_t gale::resource::Program::getAttribute(std::string _elementName) {
 	progAttributeElement tmp;
 	tmp.m_name = _elementName;
 	tmp.m_isAttribute = true;
-	tmp.m_elementId = glGetAttribLocation(m_program, tmp.m_name.c_str());
+	tmp.m_elementId = gale::openGL::program::getAttributeLocation(m_program, tmp.m_name);
 	tmp.m_isLinked = true;
 	if (tmp.m_elementId<0) {
 		GALE_WARNING("    [" << m_elementList.size() << "] glGetAttribLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
 		tmp.m_isLinked = false;
-		checkGlError("glGetAttribLocation", __LINE__, tmp.m_elementId);
 	} else {
 		GALE_INFO("    [" << m_elementList.size() << "] glGetAttribLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
 	}
@@ -194,12 +195,11 @@ int32_t gale::resource::Program::getUniform(std::string _elementName) {
 	progAttributeElement tmp;
 	tmp.m_name = _elementName;
 	tmp.m_isAttribute = false;
-	tmp.m_elementId = glGetUniformLocation(m_program, tmp.m_name.c_str());
+	tmp.m_elementId = gale::openGL::program::getUniformLocation(m_program, tmp.m_name);
 	tmp.m_isLinked = true;
 	if (tmp.m_elementId<0) {
 		GALE_WARNING("    [" << m_elementList.size() << "] glGetUniformLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
 		tmp.m_isLinked = false;
-		checkGlError("glGetUniformLocation", __LINE__, tmp.m_elementId);
 	} else {
 		GALE_INFO("    [" << m_elementList.size() << "] glGetUniformLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
 	}
@@ -213,82 +213,44 @@ void gale::resource::Program::updateContext() {
 	} else {
 		// create the Shader
 		GALE_INFO("Create the Program ... \"" << m_name << "\"");
-		m_program = glCreateProgram();
-		if (0 == m_program) {
-			GALE_ERROR("program creation return error ...");
-			checkGlError("glCreateProgram", __LINE__);
+		m_program = gale::openGL::program::create();
+		if (m_program < 0) {
 			return;
 		}
-		GALE_DEBUG("Create program with oglID=" << m_program);
 		// first attach vertex shader, and after fragment shader
 		for (size_t iii=0; iii<m_shaderList.size(); iii++) {
 			if (nullptr != m_shaderList[iii]) {
-				if (m_shaderList[iii]->getShaderType() == GL_VERTEX_SHADER) {
-					glAttachShader(m_program, m_shaderList[iii]->getGL_ID());
-					checkGlError("glAttachShader", __LINE__);
+				if (m_shaderList[iii]->getShaderType() == gale::openGL::shader::type_vertex) {
+					gale::openGL::program::attach(m_program, m_shaderList[iii]->getGL_ID());
 				}
 			}
 		}
 		for (size_t iii=0; iii<m_shaderList.size(); iii++) {
 			if (nullptr != m_shaderList[iii]) {
-				if (m_shaderList[iii]->getShaderType() == GL_FRAGMENT_SHADER) {
-					glAttachShader(m_program, m_shaderList[iii]->getGL_ID());
-					checkGlError("glAttachShader", __LINE__);
+				if (m_shaderList[iii]->getShaderType() == gale::openGL::shader::type_fragment) {
+					gale::openGL::program::attach(m_program, m_shaderList[iii]->getGL_ID());
 				}
 			}
 		}
-		glLinkProgram(m_program);
-		checkGlError("glLinkProgram", __LINE__);
-		GLint linkStatus = GL_FALSE;
-		glGetProgramiv(m_program, GL_LINK_STATUS, &linkStatus);
-		checkGlError("glGetProgramiv", __LINE__);
-		if (linkStatus != GL_TRUE) {
-			GLint bufLength = 0;
-			l_bufferDisplayError[0] = '\0';
-			glGetProgramInfoLog(m_program, LOG_OGL_INTERNAL_BUFFER_LEN, &bufLength, l_bufferDisplayError);
-			char tmpLog[256];
-			int32_t idOut=0;
+		if (gale::openGL::program::compile(m_program) == false) {
 			GALE_ERROR("Could not compile \"PROGRAM\": \"" << m_name << "\"");
-			for (size_t iii=0; iii<LOG_OGL_INTERNAL_BUFFER_LEN ; iii++) {
-				tmpLog[idOut] = l_bufferDisplayError[iii];
-				if (tmpLog[idOut] == '\n' || tmpLog[idOut] == '\0' || idOut >= 256) {
-					tmpLog[idOut] = '\0';
-					GALE_ERROR("     == > " << tmpLog);
-					idOut=0;
-				} else {
-					idOut++;
-				}
-				if (l_bufferDisplayError[iii] == '\0') {
-					break;
-				}
-			}
-			if (idOut != 0) {
-				tmpLog[idOut] = '\0';
-				GALE_ERROR("     == > " << tmpLog);
-			}
-			glDeleteProgram(m_program);
-			checkGlError("glDeleteProgram", __LINE__);
-			m_program = 0;
+			gale::openGL::program::remove(m_program);
 			return;
 		}
 		m_exist = true;
 		// now get the old attribute requested priviously ...
 		for(size_t iii=0; iii<m_elementList.size(); iii++) {
-			if (true == m_elementList[iii].m_isAttribute) {
-				m_elementList[iii].m_elementId = glGetAttribLocation(m_program, m_elementList[iii].m_name.c_str());
+			if (m_elementList[iii].m_isAttribute == true) {
+				m_elementList[iii].m_elementId = gale::openGL::program::getAttributeLocation(m_program, m_elementList[iii].m_name);
 				m_elementList[iii].m_isLinked = true;
-				if (m_elementList[iii].m_elementId<0) {
+				if (m_elementList[iii].m_elementId < 0) {
 					m_elementList[iii].m_isLinked = false;
-					checkGlError("glGetAttribLocation", __LINE__);
-					GALE_WARNING("glGetAttribLocation(\"" << m_elementList[iii].m_name << "\") = " << m_elementList[iii].m_elementId);
 				}
 			} else {
-				m_elementList[iii].m_elementId = glGetUniformLocation(m_program, m_elementList[iii].m_name.c_str());
+				m_elementList[iii].m_elementId = gale::openGL::program::getUniformLocation(m_program, m_elementList[iii].m_name);
 				m_elementList[iii].m_isLinked = true;
-				if (m_elementList[iii].m_elementId<0) {
+				if (m_elementList[iii].m_elementId < 0) {
 					m_elementList[iii].m_isLinked = false;
-					checkGlError("glGetUniformLocation", __LINE__);
-					GALE_WARNING("glGetUniformLocation(\"" << m_elementList[iii].m_name << "\") = " << m_elementList[iii].m_elementId);
 				}
 			}
 		}
@@ -296,8 +258,8 @@ void gale::resource::Program::updateContext() {
 }
 
 void gale::resource::Program::removeContext() {
-	if (true == m_exist) {
-		glDeleteProgram(m_program);
+	if (m_exist == true) {
+		gale::openGL::program::remove(m_program);
 		m_program = 0;
 		m_exist = false;
 		for(size_t iii=0; iii<m_elementList.size(); iii++) {
@@ -764,7 +726,7 @@ void gale::resource::Program::use() {
 }
 
 
-void gale::resource::Program::setTexture0(int32_t _idElem, GLint _textureOpenGlID) {
+void gale::resource::Program::setTexture0(int32_t _idElem, int64_t _textureOpenGlID) {
 	if (0 == m_program) {
 		return;
 	}
@@ -789,7 +751,7 @@ void gale::resource::Program::setTexture0(int32_t _idElem, GLint _textureOpenGlI
 	m_hasTexture = true;
 }
 
-void gale::resource::Program::setTexture1(int32_t _idElem, GLint _textureOpenGlID) {
+void gale::resource::Program::setTexture1(int32_t _idElem, int64_t _textureOpenGlID) {
 	if (0 == m_program) {
 		return;
 	}

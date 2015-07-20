@@ -12,15 +12,17 @@
 #include <gale/resource/Shader.h>
 #include <gale/resource/Manager.h>
 
+#include <gale/renderer/openGL/openGL-include.h>
+
 #undef __class__
 #define __class__ "resource::Shader"
 
 gale::resource::Shader::Shader() :
   gale::Resource(),
   m_exist(false),
-  m_fileData(nullptr),
-  m_shader(0),
-  m_type(0) {
+  m_fileData(""),
+  m_shader(-1),
+  m_type(gale::openGL::shader::type_vertex) {
 	addResourceType("gale::Shader");
 	m_resourceLevel = 0;
 }
@@ -31,9 +33,9 @@ void gale::resource::Shader::init(const std::string& _filename) {
 	// load data from file "all the time ..."
 	
 	if (etk::end_with(m_name, ".frag") == true) {
-		m_type = GL_FRAGMENT_SHADER;
+		m_type = gale::openGL::shader::type_fragment;
 	} else if (etk::end_with(m_name, ".vert") == true) {
-		m_type = GL_VERTEX_SHADER;
+		m_type = gale::openGL::shader::type_vertex;
 	} else {
 		GALE_ERROR("File does not have extention \".vert\" for Vertex Shader or \".frag\" for Fragment Shader. but : \"" << m_name << "\"");
 		return;
@@ -42,62 +44,34 @@ void gale::resource::Shader::init(const std::string& _filename) {
 }
 
 gale::resource::Shader::~Shader() {
-	if (nullptr != m_fileData) {
-		delete [] m_fileData;
-		m_fileData = nullptr;
-	}
-	if (0!=m_shader) {
-		glDeleteShader(m_shader);
-		m_shader = 0;
-	}
+	m_fileData.clear();
+	gale::openGL::shader::remove(m_shader);
 	m_exist = false;
 }
 
-static void checkGlError(const char* _op) {
-	for (GLint error = glGetError(); error; error = glGetError()) {
-		GALE_ERROR("after " << _op << "() glError (" << error << ")");
-	}
-}
-#define LOG_OGL_INTERNAL_BUFFER_LEN    (8192)
-static char l_bufferDisplayError[LOG_OGL_INTERNAL_BUFFER_LEN] = "";
-
 void gale::resource::Shader::updateContext() {
-	if (true == m_exist) {
+	if (m_exist == true) {
 		// Do nothing  == > too dangerous ...
 	} else {
 		// create the Shader
-		if (nullptr == m_fileData) {
-			m_shader = 0;
+		if (m_fileData.size() == 0) {
+			m_shader = -1;
 			return;
 		}
 		GALE_INFO("Create Shader : '" << m_name << "'");
-		m_shader = glCreateShader(m_type);
-		if (!m_shader) {
-			GALE_ERROR("glCreateShader return error ...");
-			checkGlError("glCreateShader");
+		m_shader = gale::openGL::shader::create(m_type);
+		if (m_shader < 0) {
 			GALE_CRITICAL(" can not load shader");
 			return;
 		} else {
 			GALE_INFO("Compile shader with GLID=" << m_shader);
-			glShaderSource(m_shader, 1, (const char**)&m_fileData, nullptr);
-			glCompileShader(m_shader);
-			GLint compiled = 0;
-			glGetShaderiv(m_shader, GL_COMPILE_STATUS, &compiled);
-			if (!compiled) {
-				GLint infoLen = 0;
-				l_bufferDisplayError[0] = '\0';
-				glGetShaderInfoLog(m_shader, LOG_OGL_INTERNAL_BUFFER_LEN, &infoLen, l_bufferDisplayError);
-				const char * tmpShaderType = "GL_FRAGMENT_SHADER";
-				if (m_type == GL_VERTEX_SHADER){
-					tmpShaderType = "GL_VERTEX_SHADER";
+			bool ret = gale::openGL::shader::compile(m_shader, m_fileData);
+			if (ret == false) {
+				const char * tmpShaderType = "FRAGMENT SHADER";
+				if (m_type == gale::openGL::shader::type_vertex){
+					tmpShaderType = "VERTEX SHADER";
 				}
-				GALE_ERROR("Could not compile \"" << tmpShaderType << "\" name='" << m_name << "'");
-				GALE_ERROR("Error " << l_bufferDisplayError);
-				std::vector<std::string> lines = etk::split(m_fileData, '\n');
-				for (size_t iii=0 ; iii<lines.size() ; iii++) {
-					GALE_ERROR("file " << (iii+1) << "|" << lines[iii]);
-				}
-				GALE_CRITICAL(" can not load shader");
+				GALE_CRITICAL("Could not compile \"" << tmpShaderType << "\" name='" << m_name << "'");
 				return;
 			}
 		}
@@ -107,9 +81,8 @@ void gale::resource::Shader::updateContext() {
 
 void gale::resource::Shader::removeContext() {
 	if (true == m_exist) {
-		glDeleteShader(m_shader);
+		gale::openGL::shader::remove(m_shader);
 		m_exist = false;
-		m_shader = 0;
 	}
 }
 
@@ -134,20 +107,7 @@ void gale::resource::Shader::reload() {
 		GALE_CRITICAL("Can not open the file : " << file);
 		return;
 	}
-	// remove previous data ...
-	if (nullptr != m_fileData) {
-		delete[] m_fileData;
-		m_fileData = 0;
-	}
-	// allocate data
-	m_fileData = new char[fileSize+5];
-	if (nullptr == m_fileData) {
-		GALE_CRITICAL("Error Memory allocation size=" << fileSize);
-		return;
-	}
-	memset(m_fileData, 0, (fileSize+5)*sizeof(char));
-	// load data from the file :
-	file.fileRead(m_fileData, 1, fileSize);
+	m_fileData = file.fileReadAllString();
 	// close the file:
 	file.fileClose();
 	

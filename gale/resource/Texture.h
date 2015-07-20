@@ -28,7 +28,7 @@ namespace gale {
 					dataType_float, //!< Image data are stored on flaoting point value on 32 bit for each element
 				};
 			protected:
-				GLuint m_texId; //!< openGl textureID.
+				uint32_t m_texId; //!< openGl textureID.
 				vec2 m_endPointSize; //!< some image are not square  == > we need to sqared it to prevent some openGl api error the the displayable size is not all the time 0.0 -> 1.0.
 				bool m_loaded; //!< internal state of the openGl system.
 			// Gale internal API:
@@ -38,7 +38,7 @@ namespace gale {
 				void removeContextToLate();
 			// middleware interface:
 			public:
-				GLuint getRendererId() const {
+				uint32_t getRendererId() const {
 					return m_texId;
 				};
 				const vec2& getUsableSize() const {

@@ -29,7 +29,7 @@ namespace gale {
 		class progAttributeElement {
 			public :
 				std::string m_name; //!< Name of the element
-				GLint m_elementId; //!< openGl Id if this element  == > can not exist ==> @ref m_isLinked
+				int32_t m_elementId; //!< openGl Id if this element  == > can not exist ==> @ref m_isLinked
 				bool m_isAttribute; //!< true if it was an attribute element, otherwite it was an uniform
 				bool m_isLinked; //!< if this element does not exist this is false
 		};
@@ -53,7 +53,7 @@ namespace gale {
 		class Program : public gale::Resource {
 			private :
 				bool m_exist; //!< the file existed
-				GLuint m_program; //!< openGL id of the current program
+				int64_t m_program; //!< openGL id of the current program
 				std::vector<std::shared_ptr<gale::resource::Shader>> m_shaderList; //!< List of all the shader loaded
 				std::vector<gale::resource::progAttributeElement> m_elementList; //!< List of all the attribute requested by the user
 				bool m_hasTexture; //!< A texture has been set to the current shader
@@ -280,8 +280,8 @@ namespace gale {
 				 * @param[in] _idElem Id of the uniform that might be sended.
 				 * @param[in] _textureOpenGlID Real openGL texture ID
 				 */
-				void setTexture0(int32_t _idElem, GLint _textureOpenGlID);
-				void setTexture1(int32_t _idElem, GLint _textureOpenGlID);
+				void setTexture0(int32_t _idElem, int64_t _textureOpenGlID);
+				void setTexture1(int32_t _idElem, int64_t _textureOpenGlID);
 				/**
 				 * @brief Stop the processing of this program
 				 */

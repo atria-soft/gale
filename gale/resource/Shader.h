@@ -22,9 +22,9 @@ namespace gale {
 		class Shader : public gale::Resource {
 			private :
 				bool m_exist; //!< The shader file existed and has been loaded
-				char* m_fileData; //!< A copy of the data loaded from the file (usefull only when opengl context is removed)
-				GLuint m_shader; //!< opengl id of this element
-				GLenum m_type; //!< Type of the current shader(vertex/fragment)
+				std::string m_fileData; //!< A copy of the data loaded from the file (usefull only when opengl context is removed)
+				int64_t m_shader; //!< opengl id of this element
+				gale::openGL::shader::type m_type; //!< Type of the current shader(vertex/fragment)
 			protected:
 				/**
 				 * @brief Contructor of an opengl Shader
@@ -43,14 +43,14 @@ namespace gale {
 				 * @brief get the opengl reference id of this shader.
 				 * @return The opengl id.
 				 */
-				GLuint getGL_ID() {
+				int64_t getGL_ID() {
 					return m_shader;
 				};
 				/**
 				 * @brief get the opengl type of this shader.
 				 * @return The type of this loaded shader.
 				 */
-				GLenum getShaderType() {
+				gale::openGL::shader::type getShaderType() {
 					return m_type;
 				};
 				/**
