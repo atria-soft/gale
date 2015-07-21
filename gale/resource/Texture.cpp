@@ -11,6 +11,7 @@
 #include <gale/renderer/openGL/openGL.h>
 #include <gale/resource/Manager.h>
 #include <gale/resource/Texture.h>
+#include <gale/renderer/openGL/openGL-include.h>
 
 #undef __class__
 #define __class__ "resource::Texture"
