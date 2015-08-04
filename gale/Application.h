@@ -17,6 +17,7 @@
 #include <gale/key/type.h>
 #include <gale/key/Special.h>
 #include <gale/context/cursor.h>
+#include <gale/context/clipBoard.h>
 
 namespace gale {
 	class Context;
@@ -187,6 +188,12 @@ namespace gale {
 			 * @return Current orientation.
 			 */
 			virtual enum gale::orientation getOrientation();
+		public:
+			/**
+			 * @brief A clipboard data is back (apear after a request of a new clipboard).
+			 * @param[in] _clipboardId Id of the clipboard.
+			 */
+			virtual void onClipboardEvent(enum gale::context::clipBoard::clipboardListe _clipboardId);
 	};
 }
 

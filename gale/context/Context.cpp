@@ -237,14 +237,12 @@ void gale::Context::processEvents() {
 				#endif
 				break;
 			case eSystemMessage::msgClipboardArrive:
-				#if 0
 				{
-					std::shared_ptr<gale::Widget> tmpWidget = m_widgetManager.focusGet();
-					if (tmpWidget != nullptr) {
-						tmpWidget->onEventClipboard(data->clipboardID);
+					std::shared_ptr<gale::Application> appl = m_application;
+					if (appl != nullptr) {
+						appl->onClipboardEvent(data->clipboardID);
 					}
 				}
-				#endif
 				break;
 			case eSystemMessage::msgHide:
 				GALE_DEBUG("Receive MSG : msgHide");
@@ -560,6 +558,8 @@ void gale::Context::clipBoardSet(enum gale::context::clipBoard::clipboardListe _
 }
 
 bool gale::Context::OS_Draw(bool _displayEveryTime) {
+	// TODO : Remove this force at true ...
+	_displayEveryTime = true;
 	int64_t currentTime = gale::getTime();
 	// this is to prevent the multiple display at the a high frequency ...
 	#if (!defined(__TARGET_OS__Android) && !defined(__TARGET_OS__Windows))

@@ -146,3 +146,7 @@ void gale::Application::setOrientation(enum gale::orientation _orientation) {
 enum gale::orientation gale::Application::getOrientation() {
 	return gale::orientation_screenAuto;
 }
+
+void gale::Application::onClipboardEvent(enum gale::context::clipBoard::clipboardListe _clipboardId) {
+	
+}

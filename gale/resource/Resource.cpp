@@ -32,7 +32,7 @@ void gale::Resource::init(const std::string& _name) {
 	m_name = _name;
 }
 
-const char * const gale::Resource::getObjectType() {
+const char * const gale::Resource::getType() {
 	if (m_listType.size() == 0) {
 		return "gale::Resource";
 	}

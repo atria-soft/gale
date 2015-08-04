@@ -139,7 +139,7 @@ namespace gale {
 			 * @brief get the current type of the Resource
 			 * @return the last type name of the element
 			 */
-			const char* const getObjectType();
+			const char* const getType();
 			/**
 			 * @brief Get the herarchic of the Resource type.
 			 * @return descriptive string.

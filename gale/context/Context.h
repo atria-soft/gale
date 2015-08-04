@@ -21,6 +21,7 @@
 #include <gale/context/Fps.h>
 #include <memory>
 #include <gale/orientation.h>
+#include <gale/context/clipBoard.h>
 
 #define MAX_MANAGE_INPUT (15)
 

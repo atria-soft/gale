@@ -33,9 +33,9 @@ namespace gale {
 				bool m_loaded; //!< internal state of the openGl system.
 			// Gale internal API:
 			public:
-				void updateContext();
-				void removeContext();
-				void removeContextToLate();
+				virtual void updateContext();
+				virtual void removeContext();
+				virtual void removeContextToLate();
 			// middleware interface:
 			public:
 				uint32_t getRendererId() const {

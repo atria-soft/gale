@@ -61,7 +61,7 @@ void gale::resource::Manager::display() {
 		std::shared_ptr<gale::Resource> tmpRessource = it.lock();
 		if (tmpRessource != nullptr) {
 			GALE_INFO("    [" << tmpRessource->getId() << "]"
-			          << tmpRessource->getObjectType()
+			          << tmpRessource->getType()
 			          << "=\"" << tmpRessource->getName() << "\" "
 			          << tmpRessource.use_count() << " elements");
 		}
@@ -80,7 +80,7 @@ void gale::resource::Manager::reLoadResources() {
 				if(tmpRessource != nullptr) {
 					if (jjj == tmpRessource->getResourceLevel()) {
 						tmpRessource->reload();
-						GALE_INFO("        [" << tmpRessource->getId() << "]="<< tmpRessource->getObjectType());
+						GALE_INFO("        [" << tmpRessource->getId() << "]="<< tmpRessource->getType());
 					}
 				}
 			}
@@ -106,6 +106,7 @@ void gale::resource::Manager::update(const std::shared_ptr<gale::Resource>& _obj
 
 // Specific to load or update the data in the openGl context  == > system use only
 void gale::resource::Manager::updateContext() {
+	// TODO : Check the number of call this ... GALE_INFO("update open-gl context ... ");
 	if (m_contextHasBeenRemoved == true) {
 		// need to update all ...
 		m_contextHasBeenRemoved = false;
