@@ -85,7 +85,7 @@ void gale::Application::keyboardHide() {
 	
 }
 
-void gale::Application::onResize(const vec2& _size) {
+void gale::Application::onResize(const ivec2& _size) {
 	
 }
 

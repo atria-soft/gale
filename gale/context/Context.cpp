@@ -176,65 +176,43 @@ void gale::Context::processEvents() {
 				break;
 			case eSystemMessage::msgInputMotion:
 				//GALE_DEBUG("Receive MSG : THREAD_INPUT_MOTION");
-				// TODO : m_input.motion(data->inputType, data->inputId, data->dimention);
+				if (m_application == nullptr) {
+					return;
+				}
+				m_application->onPointer(data->inputType,
+				                         data->inputId,
+				                         data->dimention,
+				                         gale::key::status_move);
 				break;
 			case eSystemMessage::msgInputState:
 				//GALE_DEBUG("Receive MSG : THREAD_INPUT_STATE");
-				// TODO : m_input.state(data->inputType, data->inputId, data->stateIsDown, data->dimention);
+				if (m_application == nullptr) {
+					return;
+				}
+				m_application->onPointer(data->inputType,
+				                         data->inputId,
+				                         data->dimention,
+				                         (data->stateIsDown==true?gale::key::status_down:gale::key::status_up));
 				break;
 			case eSystemMessage::msgKeyboardKey:
 			case eSystemMessage::msgKeyboardMove:
 				//GALE_DEBUG("Receive MSG : THREAD_KEYBORAD_KEY");
-				// store the keyboard special key status for mouse event...
-				// TODO : m_input.setLastKeyboardSpecial(data->keyboardSpecial);
-				#if 0
-				if (nullptr != m_windowsCurrent) {
-					if (false == m_windowsCurrent->onEventShortCut(data->keyboardSpecial,
-					                                             data->keyboardChar,
-					                                             data->keyboardMove,
-					                                             data->stateIsDown) ) {
-						// get the current focused Widget :
-						std::shared_ptr<gale::Widget> tmpWidget = m_widgetManager.focusGet();
-						if (nullptr != tmpWidget) {
-							// check if the widget allow repeating key events.
-							//GALE_DEBUG("repeating test :" << data->repeateKey << " widget=" << tmpWidget->getKeyboardRepeate() << " state=" << data->stateIsDown);
-							if(    false == data->repeateKey
-							    || (    true == data->repeateKey
-							         && true == tmpWidget->getKeyboardRepeate()) ) {
-								// check Widget shortcut
-								if (false == tmpWidget->onEventShortCut(data->keyboardSpecial,
-								                                      data->keyboardChar,
-								                                      data->keyboardMove,
-								                                      data->stateIsDown) ) {
-									// generate the direct event ...
-									if (data->TypeMessage == eSystemMessage::msgKeyboardKey) {
-										gale::event::EntrySystem tmpEntryEvent(gale::key::keyboardChar,
-										                                     gale::key::statusUp,
-										                                     data->keyboardSpecial,
-										                                     data->keyboardChar);
-										if(true == data->stateIsDown) {
-											tmpEntryEvent.m_event.setStatus(gale::key::statusDown);
-										}
-										tmpWidget->systemEventEntry(tmpEntryEvent);
-									} else { // THREAD_KEYBORAD_MOVE
-										GALE_DEBUG("THREAD_KEYBORAD_MOVE" << data->keyboardMove << " " << data->stateIsDown);
-										gale::event::EntrySystem tmpEntryEvent(data->keyboardMove,
-										                                     gale::key::statusUp,
-										                                     data->keyboardSpecial,
-										                                     0);
-										if(true == data->stateIsDown) {
-											tmpEntryEvent.m_event.setStatus(gale::key::statusDown);
-										}
-										tmpWidget->systemEventEntry(tmpEntryEvent);
-									}
-								} else {
-									GALE_DEBUG("remove Repeate key ...");
-								}
-							}
+				if (m_application == nullptr) {
+					return;
+				} else {
+					gale::key::status state = data->stateIsDown==true?gale::key::status_down:gale::key::status_up;
+					if (data->repeateKey == true) {
+						if (state == gale::key::status_down) {
+							state = gale::key::status_downRepeate;
+						} else {
+							state = gale::key::status_upRepeate;
 						}
 					}
+					m_application->onKeyboard(data->keyboardSpecial,
+					                          data->keyboardMove,
+					                          data->keyboardChar,
+					                          state);
 				}
-				#endif
 				break;
 			case eSystemMessage::msgClipboardArrive:
 				{
@@ -304,7 +282,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
   m_windowsSize(320,480),
   m_initStepId(0) {
 	// set a basic 
-	etk::thread::setName("gale");
+	etk::thread::setName("galeThread");
 	if (m_application == nullptr) {
 		GALE_CRITICAL("Can not start context with no Application ==> rtfm ...");
 	}
@@ -673,12 +651,10 @@ void gale::Context::OS_OpenGlContextDestroy() {
 }
 
 void gale::Context::forceRedrawAll() {
-	#if 0
-	if (m_windowsCurrent == nullptr) {
+	if (m_application == nullptr) {
 		return;
 	}
-	m_windowsCurrent->calculateSize(vec2(m_windowsSize.x(), m_windowsSize.y()));
-	#endif
+	m_application->onResize(m_windowsSize);
 }
 
 void gale::Context::OS_Stop() {

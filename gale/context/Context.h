@@ -134,13 +134,13 @@ namespace gale {
 			 */
 			virtual void stop();
 		private:
-			vec2 m_windowsSize; //!< current size of the system
+			ivec2 m_windowsSize; //!< current size of the system
 		public:
 			/**
 			 * @brief get the current windows size
 			 * @return the current size ...
 			 */
-			const vec2& getSize() {
+			const ivec2& getSize() {
 				return m_windowsSize;
 			};
 			/**

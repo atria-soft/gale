@@ -110,7 +110,7 @@ namespace gale {
 			 * @brief Event generated when user change the size of the window.
 			 * @param[in] _size New size of the window.
 			 */
-			virtual void onResize(const vec2& _size);
+			virtual void onResize(const ivec2& _size);
 			/**
 			 * @brief Set the size of the window (if possible: Android and Ios does not support it)
 			 * @param[in] _size New size of the window.

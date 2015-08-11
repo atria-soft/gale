@@ -112,7 +112,9 @@ void gale::resource::Texture::setTexture(const std::shared_ptr<std::vector<char>
                                          enum gale::resource::Texture::color _dataColorSpace) {
 	m_data = _data;
 	m_size = _size;
+	m_endPointSize = _size;
 	m_dataType = _dataType;
 	m_dataColorSpace = _dataColorSpace;
 	// TODO : Reload ...
+	flush();
 }
