@@ -471,6 +471,7 @@ void gale::Context::OS_SetKeyboard(gale::key::Special& _special,
 	}
 	data->TypeMessage = eSystemMessage::msgKeyboardKey;
 	data->stateIsDown = _isDown;
+	data->keyboardMove = gale::key::keyboard_char;
 	data->keyboardChar = _myChar;
 	data->keyboardSpecial = _special;
 	data->repeateKey = _isARepeateKey;
@@ -536,8 +537,6 @@ void gale::Context::clipBoardSet(enum gale::context::clipBoard::clipboardListe _
 }
 
 bool gale::Context::OS_Draw(bool _displayEveryTime) {
-	// TODO : Remove this force at true ...
-	_displayEveryTime = true;
 	int64_t currentTime = gale::getTime();
 	// this is to prevent the multiple display at the a high frequency ...
 	#if (!defined(__TARGET_OS__Android) && !defined(__TARGET_OS__Windows))
@@ -558,9 +557,10 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		// set the curent interface :
 		lockContext();
 		processEvents();
-		// call all the widget that neded to do something periodicly
-		// TODO : m_objectManager.timeCall(currentTime);
-		// check if the user selected a windows
+		// call all the application for periodic request (the application manage multiple instance ...
+		if (m_application != nullptr) {
+			m_application->onPeriod(currentTime);
+		}
 		if (m_application != nullptr) {
 			// Redraw all needed elements
 			m_application->onRegenerateDisplay(*this);

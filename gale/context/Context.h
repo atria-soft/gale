@@ -111,9 +111,9 @@ namespace gale {
 			 * @brief The current context is set in background (framerate is slowing down (max fps)/5 # 4fps)
 			 */
 			virtual void OS_Background();
-			
+		public:
 			void requestUpdateSize();
-			
+		protected:
 			// return true if a flush is needed
 			bool OS_Draw(bool _displayEveryTime);
 		public:

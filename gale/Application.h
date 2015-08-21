@@ -194,6 +194,12 @@ namespace gale {
 			 * @param[in] _clipboardId Id of the clipboard.
 			 */
 			virtual void onClipboardEvent(enum gale::context::clipBoard::clipboardListe _clipboardId);
+		public:
+			/**
+			 * @brief Call every time a draw is called (not entirely periodic, but faster at we can ...
+			 * @param[in] _time Current time of the call;
+			 */
+			virtual void onPeriod(int64_t _time) {};
 	};
 }
 
