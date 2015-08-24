@@ -36,6 +36,8 @@ def create(target):
 		])
 	if target.name=="Linux":
 		myModule.add_src_file('gale/context/X11/Context.cpp')
+		# check if egami is present in the worktree: this is for the icon parsing ...
+		myModule.add_optionnal_module_depend('egami', ["c++", "-DGALE_BUILD_EGAMI"])
 	elif target.name=="Windows":
 		myModule.add_src_file('gale/context/Windows/Context.cpp')
 	elif target.name=="Android":

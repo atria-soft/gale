@@ -96,7 +96,9 @@ extern "C" {
 	} Hints;
 }
 
-// TODO : #include <egami/egami.h>
+#ifdef GALE_BUILD_EGAMI
+	#include <egami/egami.h>
+#endif
 
 #include <X11/cursorfont.h>
 
@@ -1060,142 +1062,141 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		void setIcon(const std::string& _inputFile) {
-			// TODO :  ...
-			#if 0
-			egami::Image dataImage;
-			// load data
-			if (false == egami::load(dataImage, _inputFile)) {
-				GALE_ERROR("Error when loading Icon");
-				return;
-			}
-			int32_t depth = DefaultDepth(m_display, DefaultScreen(m_display) );
-			GALE_DEBUG("X11 Create icon size=(" << dataImage.getWidth() << "," << dataImage.getHeight() << ") depth=" << depth);
-			switch(depth) {
-				case 8:
-					GALE_CRITICAL("Not manage pixmap in 8 bit...  == > no icon ...");
+			#ifdef GALE_BUILD_EGAMI
+				egami::Image dataImage;
+				// load data
+				if (false == egami::load(dataImage, _inputFile)) {
+					GALE_ERROR("Error when loading Icon");
 					return;
-				case 16:
-					break;
-				case 24:
-					break;
-				case 32:
-					break;
-				default:
-					GALE_CRITICAL("Unknow thys type of bitDepth : " << depth);
+				}
+				int32_t depth = DefaultDepth(m_display, DefaultScreen(m_display) );
+				GALE_DEBUG("X11 Create icon size=(" << dataImage.getWidth() << "," << dataImage.getHeight() << ") depth=" << depth);
+				switch(depth) {
+					case 8:
+						GALE_CRITICAL("Not manage pixmap in 8 bit...  == > no icon ...");
+						return;
+					case 16:
+						break;
+					case 24:
+						break;
+					case 32:
+						break;
+					default:
+						GALE_CRITICAL("Unknow thys type of bitDepth : " << depth);
+						return;
+				}
+				char* tmpVal = new char[4*dataImage.getWidth()*dataImage.getHeight()];
+				if (nullptr == tmpVal) {
+					GALE_CRITICAL("Allocation error ...");
 					return;
-			}
-			char* tmpVal = new char[4*dataImage.getWidth()*dataImage.getHeight()];
-			if (nullptr == tmpVal) {
-				GALE_CRITICAL("Allocation error ...");
-				return;
-			}
-			char* tmpPointer = tmpVal;
-			switch(depth) {
-				case 16:
-					for(ivec2 pos(0,0); pos.y()<dataImage.getHeight(); pos.setY(pos.y()+1)) {
-						for(pos.setX(0); pos.x()<dataImage.getHeight();  pos.setX(pos.x()+1)) {
-							etk::Color<> tmpColor = dataImage.get(pos);
-							int16_t tmpVal =   (((uint16_t)((uint16_t)tmpColor.r()>>3))<<11)
-							                 + (((uint16_t)((uint16_t)tmpColor.g()>>2))<<5)
-							                 +  ((uint16_t)((uint16_t)tmpColor.b()>>3));
-							*tmpPointer++ = (uint8_t)(tmpVal>>8);
-							*tmpPointer++ = (uint8_t)(tmpVal&0x00FF);
+				}
+				char* tmpPointer = tmpVal;
+				switch(depth) {
+					case 16:
+						for(ivec2 pos(0,0); pos.y()<dataImage.getHeight(); pos.setY(pos.y()+1)) {
+							for(pos.setX(0); pos.x()<dataImage.getHeight();  pos.setX(pos.x()+1)) {
+								etk::Color<> tmpColor = dataImage.get(pos);
+								int16_t tmpVal =   (((uint16_t)((uint16_t)tmpColor.r()>>3))<<11)
+								                 + (((uint16_t)((uint16_t)tmpColor.g()>>2))<<5)
+								                 +  ((uint16_t)((uint16_t)tmpColor.b()>>3));
+								*tmpPointer++ = (uint8_t)(tmpVal>>8);
+								*tmpPointer++ = (uint8_t)(tmpVal&0x00FF);
+							}
 						}
-					}
-					break;
-				case 24:
-					for(ivec2 pos(0,0); pos.y()<dataImage.getHeight(); pos.setY(pos.y()+1)) {
-						for(pos.setX(0); pos.x()<dataImage.getHeight();  pos.setX(pos.x()+1)) {
-							etk::Color<> tmpColor = dataImage.get(pos);
-							*tmpPointer++ = tmpColor.b();
-							*tmpPointer++ = tmpColor.g();
-							*tmpPointer++ = tmpColor.r();
-							tmpPointer++;
+						break;
+					case 24:
+						for(ivec2 pos(0,0); pos.y()<dataImage.getHeight(); pos.setY(pos.y()+1)) {
+							for(pos.setX(0); pos.x()<dataImage.getHeight();  pos.setX(pos.x()+1)) {
+								etk::Color<> tmpColor = dataImage.get(pos);
+								*tmpPointer++ = tmpColor.b();
+								*tmpPointer++ = tmpColor.g();
+								*tmpPointer++ = tmpColor.r();
+								tmpPointer++;
+							}
 						}
-					}
-					break;
-				case 32:
-					for(ivec2 pos(0,0); pos.y()<dataImage.getHeight(); pos.setY(pos.y()+1)) {
-						for(pos.setX(0); pos.x()<dataImage.getHeight();  pos.setX(pos.x()+1)) {
-							etk::Color<> tmpColor = dataImage.get(pos);
-							*tmpPointer++ = tmpColor.a();
-							*tmpPointer++ = tmpColor.b();
-							*tmpPointer++ = tmpColor.g();
-							*tmpPointer++ = tmpColor.r();
+						break;
+					case 32:
+						for(ivec2 pos(0,0); pos.y()<dataImage.getHeight(); pos.setY(pos.y()+1)) {
+							for(pos.setX(0); pos.x()<dataImage.getHeight();  pos.setX(pos.x()+1)) {
+								etk::Color<> tmpColor = dataImage.get(pos);
+								*tmpPointer++ = tmpColor.a();
+								*tmpPointer++ = tmpColor.b();
+								*tmpPointer++ = tmpColor.g();
+								*tmpPointer++ = tmpColor.r();
+							}
 						}
-					}
-					break;
-				default:
+						break;
+					default:
+						return;
+				}
+				
+				XImage* myImage = XCreateImage(m_display,
+				                              m_visual->visual,
+				                              depth,
+				                              ZPixmap,
+				                              0,
+				                              (char*)tmpVal,
+				                              dataImage.getWidth(),
+				                              dataImage.getHeight(),
+				                              32,
+				                              0);
+				
+				Pixmap tmpPixmap = XCreatePixmap(m_display, m_WindowHandle, dataImage.getWidth(), dataImage.getHeight(), depth);
+				switch(tmpPixmap) {
+					case BadAlloc:
+						GALE_ERROR("X11: BadAlloc");
+						break;
+					case BadDrawable:
+						GALE_ERROR("X11: BadDrawable");
+						break;
+					case BadValue:
+						GALE_ERROR("X11: BadValue");
+						break;
+					default:
+						GALE_DEBUG("Create Pixmap OK");
+						break;
+				}
+				GC tmpGC = DefaultGC(m_display, DefaultScreen(m_display) );
+				int error = XPutImage(m_display, tmpPixmap, tmpGC, myImage, 0, 0, 0, 0, dataImage.getWidth(), dataImage.getHeight());
+				switch(error) {
+					case BadDrawable:
+						GALE_ERROR("X11: BadDrawable");
+						break;
+					case BadGC:
+						GALE_ERROR("X11: BadGC");
+						break;
+					case BadMatch:
+						GALE_ERROR("X11: BadMatch");
+						break;
+					case BadValue:
+						GALE_ERROR("X11: BadValue");
+						break;
+					default:
+						GALE_DEBUG("insert image OK");
+						break;
+				}
+				// allocate a WM hints structure.
+				XWMHints* win_hints = XAllocWMHints();
+				if (!win_hints) {
+					GALE_ERROR("XAllocWMHints - out of memory");
 					return;
-			}
-			
-			XImage* myImage = XCreateImage(m_display,
-			                              m_visual->visual,
-			                              depth,
-			                              ZPixmap,
-			                              0,
-			                              (char*)tmpVal,
-			                              dataImage.getWidth(),
-			                              dataImage.getHeight(),
-			                              32,
-			                              0);
-			
-			Pixmap tmpPixmap = XCreatePixmap(m_display, m_WindowHandle, dataImage.getWidth(), dataImage.getHeight(), depth);
-			switch(tmpPixmap) {
-				case BadAlloc:
-					GALE_ERROR("X11: BadAlloc");
-					break;
-				case BadDrawable:
-					GALE_ERROR("X11: BadDrawable");
-					break;
-				case BadValue:
-					GALE_ERROR("X11: BadValue");
-					break;
-				default:
-					GALE_DEBUG("Create Pixmap OK");
-					break;
-			}
-			GC tmpGC = DefaultGC(m_display, DefaultScreen(m_display) );
-			int error = XPutImage(m_display, tmpPixmap, tmpGC, myImage, 0, 0, 0, 0, dataImage.getWidth(), dataImage.getHeight());
-			switch(error) {
-				case BadDrawable:
-					GALE_ERROR("X11: BadDrawable");
-					break;
-				case BadGC:
-					GALE_ERROR("X11: BadGC");
-					break;
-				case BadMatch:
-					GALE_ERROR("X11: BadMatch");
-					break;
-				case BadValue:
-					GALE_ERROR("X11: BadValue");
-					break;
-				default:
-					GALE_DEBUG("insert image OK");
-					break;
-			}
-			// allocate a WM hints structure.
-			XWMHints* win_hints = XAllocWMHints();
-			if (!win_hints) {
-				GALE_ERROR("XAllocWMHints - out of memory");
-				return;
-			}
-			// initialize the structure appropriately. first, specify which size hints we want to fill in. in our case - setting the icon's pixmap.
-			win_hints->flags = IconPixmapHint;
-			// next, specify the desired hints data. in our case - supply the icon's desired pixmap.
-			win_hints->icon_pixmap = tmpPixmap;
-			// pass the hints to the window manager.
-			XSetWMHints(m_display, m_WindowHandle, win_hints);
-			GALE_INFO("     == > might be done ");
-			// finally, we can free the WM hints structure.
-			XFree(win_hints);
-			
-			// Note when we free the pixmap ... the icon is removed ...  == > this is a real memory leek ...
-			//XFreePixmap(m_display, tmpPixmap);
-			
-			myImage->data = nullptr;
-			XDestroyImage(myImage);
-			delete[] tmpVal;
+				}
+				// initialize the structure appropriately. first, specify which size hints we want to fill in. in our case - setting the icon's pixmap.
+				win_hints->flags = IconPixmapHint;
+				// next, specify the desired hints data. in our case - supply the icon's desired pixmap.
+				win_hints->icon_pixmap = tmpPixmap;
+				// pass the hints to the window manager.
+				XSetWMHints(m_display, m_WindowHandle, win_hints);
+				GALE_INFO("     == > might be done ");
+				// finally, we can free the WM hints structure.
+				XFree(win_hints);
+				
+				// Note when we free the pixmap ... the icon is removed ...  == > this is a real memory leek ...
+				//XFreePixmap(m_display, tmpPixmap);
+				
+				myImage->data = nullptr;
+				XDestroyImage(myImage);
+				delete[] tmpVal;
 			#endif
 		}
 		/****************************************************************************************/

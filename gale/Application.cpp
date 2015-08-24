@@ -120,7 +120,8 @@ std::string gale::Application::getTitle() {
 }
 
 void gale::Application::setIcon(const std::string& _iconFile) {
-	
+	gale::Context& context = gale::getContext();
+	context.setIcon(_iconFile);
 }
 
 std::string gale::Application::getIcon() {
