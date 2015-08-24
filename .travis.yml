@@ -8,6 +8,10 @@ compiler:
   - clang
   - gcc
 
+os:
+  - linux
+  - osx
+
 branches:
   only:
     - master
@@ -19,6 +23,9 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - g++-4.9
+
+install:
+  - pip install --user lutin
 
 before_script:
   - cd ..
@@ -39,9 +46,6 @@ before_script:
   - ls -l
   - if [ "$CXX" == "clang++" ]; then BUILDER=clang; else BUILDER=gcc; fi
   - if [ "$CXX" == "g++" ]; then COMPILATOR_OPTION="--compilator-version=4.9"; else COMPILATOR_OPTION=""; fi
-
-install:
-  - pip install --user lutin
 
 script:
   - lutin -C -P -c$BUILDER $COMPILATOR_OPTION -mdebug -p gale gale-sample-basic
