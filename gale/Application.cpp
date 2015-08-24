@@ -12,7 +12,11 @@
 
 
 gale::Application::Application() :
-  m_needRedraw(true) {
+  m_needRedraw(true),
+  m_title("gale"),
+  m_iconName(""),
+  m_cursor(gale::context::cursor_arrow),
+  m_orientation(gale::orientation_screenAuto) {
 	GALE_VERBOSE("Constructor Gale Application");
 }
 
@@ -112,40 +116,48 @@ vec2 gale::Application::getPosition() const {
 }
 
 void gale::Application::setTitle(const std::string& _title) {
-	
+	m_title = _title;
+	gale::Context& context = gale::getContext();
+	context.setTitle(m_title);
 }
 
 std::string gale::Application::getTitle() {
-	return "";
+	return m_title;
 }
 
 void gale::Application::setIcon(const std::string& _iconFile) {
+	m_iconName = _iconFile;
 	gale::Context& context = gale::getContext();
-	context.setIcon(_iconFile);
+	context.setIcon(m_iconName);
 }
 
 std::string gale::Application::getIcon() {
-	return "";
+	return m_iconName;
 }
 
 void gale::Application::setCursor(enum gale::context::cursor _newCursor) {
-	
+	m_cursor = _newCursor;
+	gale::Context& context = gale::getContext();
+	context.setCursor(m_cursor);
 }
 
 enum gale::context::cursor gale::Application::getCursor() {
-	return gale::context::cursor_arrow;
+	return m_cursor;
 }
 
 void gale::Application::openURL(const std::string& _url) {
-	
+	gale::Context& context = gale::getContext();
+	context.openURL(_url);
 }
 
 void gale::Application::setOrientation(enum gale::orientation _orientation) {
-	
+	m_orientation = _orientation;
+	gale::Context& context = gale::getContext();
+	context.forceOrientation(m_orientation);
 }
 
 enum gale::orientation gale::Application::getOrientation() {
-	return gale::orientation_screenAuto;
+	return m_orientation;
 }
 
 void gale::Application::onClipboardEvent(enum gale::context::clipBoard::clipboardListe _clipboardId) {

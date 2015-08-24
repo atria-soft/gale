@@ -138,6 +138,8 @@ namespace gale {
 			 * @return Current position of the window.
 			 */
 			virtual vec2 getPosition() const;
+		private:
+			std::string m_title;
 		public:
 			/**
 			 * @brief Set the title of the application
@@ -149,6 +151,8 @@ namespace gale {
 			 * @return Current title
 			 */
 			virtual std::string getTitle();
+		private:
+			std::string m_iconName;
 		public:
 			/**
 			 * @brief set the Icon of the application.
@@ -160,6 +164,8 @@ namespace gale {
 			 * @return Filename of the icon.
 			 */
 			virtual std::string getIcon();
+		private:
+			enum gale::context::cursor m_cursor;
 		public:
 			/**
 			 * @brief Set the cursor type.
@@ -177,6 +183,8 @@ namespace gale {
 			 * @param[in] _url URL to open.
 			 */
 			virtual void openURL(const std::string& _url);
+		private:
+			enum gale::orientation m_orientation;
 		public:
 			/**
 			 * @brief set the screen orientation (if possible : only on iOs/Android)
