@@ -4,10 +4,6 @@ language:
 
 sudo: false
 
-compiler:
-  - clang
-  - gcc
-
 os:
   - linux
   - osx
@@ -27,8 +23,18 @@ addons:
 install:
   - pip install --user lutin
 
+env:
+  - CONF=debug   BOARD=Linux BUILDER=clang GCOV=
+  - CONF=release BOARD=Linux BUILDER=clang GCOV=
+  - CONF=debug   BOARD=Linux BUILDER=gcc   GCOV=
+  - CONF=release BOARD=Linux BUILDER=gcc   GCOV=
+  - CONF=debug   BOARD=Linux BUILDER=gcc   GCOV=--gcov
+
 before_script:
   - cd ..
+  - wget http://atria-soft.com/ci/coverage_send.py
+  - wget http://atria-soft.com/ci/test_send.py
+  - wget http://atria-soft.com/ci/warning_send.py
   - mkdir bin
   - curl https://storage.googleapis.com/git-repo-downloads/repo > bin/repo
   - chmod a+x bin/repo
@@ -44,11 +50,17 @@ before_script:
   - cd ..
   - pwd
   - ls -l
-  - if [ "$CXX" == "clang++" ]; then BUILDER=clang; else BUILDER=gcc; fi
-  - if [ "$CXX" == "g++" ]; then COMPILATOR_OPTION="--compilator-version=4.9"; else COMPILATOR_OPTION=""; fi
+  - if [ "$BUILDER" == "gcc" ]; then COMPILATOR_OPTION="--compilator-version=4.9"; else COMPILATOR_OPTION=""; fi
 
 script:
-  - lutin -C -P -c$BUILDER $COMPILATOR_OPTION -mdebug -p gale gale-sample-basic
+  - lutin -w -j4 -C -P -c $BUILDER $COMPILATOR_OPTION -m $CONF $GCOV -p gale gale-sample-basic
+
+after_script:
+  - if [ "$GCOV" != "" ]; then python ./warning_send.py --find-path ./out/Linux_x86_64/$CONF/build/$BUILDER/gale/ ; fi
+  - ./out/Linux_x86_64/$CONF/staging/$BUILDER/gale-sample-basic/usr/bin/gale-sample-basic -l6 | tee out_test.txt
+  #- if [ "$GCOV" != "" ]; then python ./test_send.py --file=out_test.txt; fi
+  #- if [ "$GCOV" != "" ]; then lutin -C -P -c $BUILDER $COMPILATOR_OPTION -m $CONF -p gale?gcov; fi
+  #- if [ "$GCOV" != "" ]; then python ./coverage_send.py --json=out/Linux_x86_64/$CONF/build/$BUILDER/gale/gale_coverage.json; fi
 
 notifications:
   email:
