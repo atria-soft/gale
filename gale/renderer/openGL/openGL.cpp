@@ -37,6 +37,18 @@ static void checkGlError(const char* _op, int32_t _localLine) {
 //#define OPENGL_INFO(data) GALE_INFO(data)
 
 
+
+#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+	bool s_simulationMode = false;
+	/**
+	 * @brief Start the simulation mode of Open GL (can be usebull when no HW is availlable for testing System like buildfarm (eg: travis-ci)
+	 * This generate a non access on the openGL IO, and all function work corectly.
+	 */
+	void gale::openGL::startSimulationMode() {
+		s_simulationMode = true;
+	}
+#endif
+
 /**
  * @brief get the draw mutex (gale render).
  * @note due ti the fact that the system can be called for multiple instance, for naw we just limit the acces to one process at a time.
@@ -137,7 +149,13 @@ void gale::openGL::finish() {
 void gale::openGL::flush() {
 	l_programId = -1;
 	l_textureflags = 0;
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glFlush();
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 	OPENGL_INFO("========================" );
 	OPENGL_INFO("==   FLUSH OPEN GL    ==" );
 	OPENGL_INFO("========================");
@@ -148,11 +166,23 @@ void gale::openGL::swap() {
 }
 
 void gale::openGL::setViewPort(const ivec2& _start, const ivec2& _stop) {
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glViewport(_start.x(), _start.y(), _stop.x(), _stop.y());
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 }
 
 void gale::openGL::setViewPort(const vec2& _start, const vec2& _stop) {
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glViewport(_start.x(), _start.y(), _stop.x(), _stop.y());
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 }
 
 
@@ -169,14 +199,32 @@ static int32_t basicFlagClearCount = sizeof(basicFlagClear) / sizeof(struct corr
 
 
 void gale::openGL::clearColor(const etk::Color<float>& _color) {
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glClearColor(_color.r(), _color.g(), _color.b(), _color.a());
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 }
 
 void gale::openGL::clearDepth(float _value) {
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glClearDepth(_value);
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 }
 void gale::openGL::clearStencil(int32_t _value) {
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glClearStencil(_value);
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 }
 
 void gale::openGL::clear(uint32_t _flags) {
@@ -186,7 +234,13 @@ void gale::openGL::clear(uint32_t _flags) {
 			field |= basicFlagClear[iii].OGlFlag;
 		}
 	}
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glClear(field);
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 }
 
 std::ostream& gale::operator <<(std::ostream& _os, const enum openGL::flag& _obj) {
@@ -366,11 +420,17 @@ void gale::openGL::reset() {
 void gale::openGL::enable(enum gale::openGL::flag _flagID) {
 	//GALE_INFO("Enable : " <GALE_ERROR< _flagID);
 	#ifdef DIRECT_MODE
-	for (int32_t iii=0; iii<basicFlagCount ; iii++) {
-		if ( basicFlag[iii].curentFlag == (uint32_t)_flagID ) {
-			glEnable(basicFlag[iii].OGlFlag);
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			if (s_simulationMode == false) {
+		#endif
+		for (int32_t iii=0; iii<basicFlagCount ; iii++) {
+			if ( basicFlag[iii].curentFlag == (uint32_t)_flagID ) {
+				glEnable(basicFlag[iii].OGlFlag);
+			}
 		}
-	}
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			}
+		#endif
 	# else
 		//GALE_DEBUG("Enable FLAGS = " << l_flagsMustBeSet);
 		l_flagsMustBeSet |= (uint32_t)_flagID;
@@ -381,11 +441,17 @@ void gale::openGL::enable(enum gale::openGL::flag _flagID) {
 void gale::openGL::disable(enum gale::openGL::flag _flagID) {
 	//GALE_INFO("Disable : " << _flagID);
 	#ifdef DIRECT_MODE
-	for (int32_t iii=0; iii<basicFlagCount ; iii++) {
-		if ( basicFlag[iii].curentFlag == (uint32_t)_flagID ) {
-			glDisable(basicFlag[iii].OGlFlag);
+		for (int32_t iii=0; iii<basicFlagCount ; iii++) {
+			if ( basicFlag[iii].curentFlag == (uint32_t)_flagID ) {
+				#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+					if (s_simulationMode == false) {
+				#endif
+				glDisable(basicFlag[iii].OGlFlag);
+				#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+					}
+				#endif
+			}
 		}
-	}
 	# else
 		//GALE_DEBUG("Disable FLAGS = " << l_flagsMustBeSet);
 		l_flagsMustBeSet &= ~((uint32_t)_flagID);
@@ -407,10 +473,22 @@ void gale::openGL::updateAllFlags() {
 		uint32_t CurrentFlag = basicFlag[iii].curentFlag;
 		if ( (l_flagsMustBeSet&CurrentFlag)!=(l_flagsCurrent&CurrentFlag) ) {
 			if ( (l_flagsMustBeSet&CurrentFlag) != 0) {
+				#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+					if (s_simulationMode == false) {
+				#endif
 				glEnable(basicFlag[iii].OGlFlag);
+				#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+					}
+				#endif
 				OPENGL_INFO("    enable : " << (enum openGL::flag)basicFlag[iii].curentFlag);
 			} else {
+				#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+					if (s_simulationMode == false) {
+				#endif
 				glDisable(basicFlag[iii].OGlFlag);
+				#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+					}
+				#endif
 				OPENGL_INFO("    disable : " << (enum openGL::flag)basicFlag[iii].curentFlag);
 			}
 		}
@@ -421,7 +499,13 @@ void gale::openGL::updateAllFlags() {
 
 void gale::openGL::activeTexture(uint32_t _flagID) {
 	if (l_programId >= 0) {
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			if (s_simulationMode == false) {
+		#endif
 		glActiveTexture(_flagID);
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			}
+		#endif
 	}
 }
 
@@ -453,29 +537,53 @@ const uint32_t convertRenderMode[] = {
 void gale::openGL::drawArrays(enum gale::openGL::renderMode _mode, int32_t _first, int32_t _count) {
 	if (l_programId >= 0) {
 		updateAllFlags();
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			if (s_simulationMode == false) {
+		#endif
 		glDrawArrays(convertRenderMode[_mode], _first, _count);
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			}
+		#endif
 	}
 }
 
 void gale::openGL::drawElements(enum renderMode _mode, const std::vector<uint32_t>& _indices) {
 	if (l_programId >= 0) {
 		updateAllFlags();
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			if (s_simulationMode == false) {
+		#endif
 		//GALE_DEBUG("Request draw of " << indices.size() << "elements");
 		glDrawElements(convertRenderMode[_mode], _indices.size(), GL_UNSIGNED_INT, &_indices[0]);
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			}
+		#endif
 	}
 }
 
 void gale::openGL::drawElements16(enum renderMode _mode, const std::vector<uint16_t>& _indices) {
 	if (l_programId >= 0) {
 		updateAllFlags();
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			if (s_simulationMode == false) {
+		#endif
 		glDrawElements(convertRenderMode[_mode], _indices.size(), GL_UNSIGNED_SHORT, &_indices[0]);
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			}
+		#endif
 	}
 }
 
 void gale::openGL::drawElements8(enum renderMode _mode, const std::vector<uint8_t>& _indices) {
 	if (l_programId >= 0) {
 		updateAllFlags();
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			if (s_simulationMode == false) {
+		#endif
 		glDrawElements(convertRenderMode[_mode], _indices.size(), GL_UNSIGNED_BYTE, &_indices[0]);
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			}
+		#endif
 	}
 }
 
@@ -491,14 +599,32 @@ void gale::openGL::useProgram(int32_t _id) {
 		}
 		if (l_programId != _id) {
 			l_programId = _id;
+			#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+				if (s_simulationMode == false) {
+			#endif
 			glUseProgram(l_programId);
+			#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+				}
+			#endif
 		}
 	#else
 		if (-1 == _id) {
+			#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+				if (s_simulationMode == false) {
+			#endif
 			glUseProgram(0);
+			#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+				}
+			#endif
 		} else {
 			l_programId = _id;
+			#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+				if (s_simulationMode == false) {
+			#endif
 			glUseProgram(_id);
+			#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+				}
+			#endif
 		}
 	#endif
 }
@@ -512,8 +638,14 @@ bool gale::openGL::genBuffers(std::vector<uint32_t>& _buffers) {
 		return true;
 	}
 	OPENGL_INFO("Create N=" << _buffers.size() << " Buffer");
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glGenBuffers(_buffers.size(), &_buffers[0]);
 	checkGlError("glGenBuffers", __LINE__);
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 	bool hasError = false;
 	for (size_t iii=0; iii<_buffers.size(); iii++) {
 		if (_buffers[iii] == 0) {
@@ -529,8 +661,14 @@ bool gale::openGL::deleteBuffers(std::vector<uint32_t>& _buffers) {
 		GALE_WARNING("try to delete vector buffer with size 0");
 		return true;
 	}
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glDeleteBuffers(_buffers.size(), &_buffers[0]);
 	checkGlError("glDeleteBuffers", __LINE__);
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 	for (auto &it : _buffers) {
 		it = 0;
 	}
@@ -538,8 +676,14 @@ bool gale::openGL::deleteBuffers(std::vector<uint32_t>& _buffers) {
 }
 
 bool gale::openGL::bindBuffer(uint32_t _bufferId) {
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glBindBuffer(GL_ARRAY_BUFFER, _bufferId);
 	checkGlError("glBindBuffer", __LINE__);
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 	return true;
 }
 
@@ -550,14 +694,26 @@ static GLenum convertUsage[] = {
 };
 
 bool gale::openGL::bufferData(size_t _size, const void* _data, enum gale::openGL::usage _usage) {
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glBufferData(GL_ARRAY_BUFFER, _size, _data, convertUsage[_usage]);
 	checkGlError("glBufferData", __LINE__);
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 	return true;
 }
 
 bool gale::openGL::unbindBuffer() {
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	checkGlError("glBindBuffer(0)", __LINE__);
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 	return true;
 }
 
@@ -572,16 +728,40 @@ static char l_bufferDisplayError[LOG_OGL_INTERNAL_BUFFER_LEN] = "";
 int64_t gale::openGL::shader::create(enum gale::openGL::shader::type _type) {
 	GLuint shader = 0;
 	if (_type == gale::openGL::shader::type_vertex) {
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			if (s_simulationMode == false) {
+		#endif
 		shader = glCreateShader(GL_VERTEX_SHADER);
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			} else {
+				static int32_t count = 0;
+				shader = count++;
+			}
+		#endif
 	} else if (_type == gale::openGL::shader::type_fragment) {
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			if (s_simulationMode == false) {
+		#endif
 		shader = glCreateShader(GL_FRAGMENT_SHADER);
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			} else {
+				static int32_t count = 0;
+				shader = count++;
+			}
+		#endif
 	} else {
 		GALE_ERROR("create shader with wrong type ...");
 		return -1;
 	}
 	if (shader == 0) {
 		GALE_ERROR("glCreateShader return error ...");
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			if (s_simulationMode == false) {
+		#endif
 		checkGlError("glCreateShader");
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			}
+		#endif
 		return -1;
 	}
 	return int64_t(shader);
@@ -591,12 +771,21 @@ void gale::openGL::shader::remove(int64_t& _shader) {
 	if (_shader < 0) {
 		return;
 	}
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glDeleteShader(GLuint(_shader));
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 	_shader = -1;
 }
 
 bool gale::openGL::shader::compile(int64_t _shader, const std::string& _data) {
 	const char* data = &_data[0];
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glShaderSource(GLuint(_shader), 1, (const char**)&data, nullptr);
 	glCompileShader(GLuint(_shader));
 	GLint compiled = 0;
@@ -612,17 +801,30 @@ bool gale::openGL::shader::compile(int64_t _shader, const std::string& _data) {
 		}
 		return false;
 	}
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 	return true;
 }
 
 
 int64_t gale::openGL::program::create() {
-	GLuint program = glCreateProgram();
+	GLuint program = 0;
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
+	program = glCreateProgram();
 	if (program == 0) {
 		GALE_ERROR("program creation return error ...");
 		checkGlError("glCreateProgram", __LINE__);
 		return -1;
 	}
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		} else {
+			static uint32_t iii=0;
+			program = iii++;
+		}
+	#endif
 	GALE_DEBUG("Create program with oglID=" << program);
 	return int64_t(program);
 }
@@ -631,8 +833,14 @@ void gale::openGL::program::remove(int64_t& _prog) {
 	if (_prog < 0) {
 		return;
 	}
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glDeleteProgram(GLuint(_prog));
 	checkGlError("glDeleteProgram", __LINE__);
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 	_prog = -1;
 }
 
@@ -645,8 +853,14 @@ bool gale::openGL::program::attach(int64_t _prog, int64_t _shader) {
 		GALE_ERROR("wrong shader ID");
 		return false;
 	}
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glAttachShader(GLuint(_prog), GLuint(_shader));
 	checkGlError("glAttachShader", __LINE__);
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 	return true;
 }
 bool gale::openGL::program::compile(int64_t _prog) {
@@ -654,6 +868,9 @@ bool gale::openGL::program::compile(int64_t _prog) {
 		GALE_ERROR("wrong program ID");
 		return false;
 	}
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	glLinkProgram(GLuint(_prog));
 	checkGlError("glLinkProgram", __LINE__);
 	GLint linkStatus = GL_FALSE;
@@ -687,6 +904,9 @@ bool gale::openGL::program::compile(int64_t _prog) {
 		}
 		return false;
 	}
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 	return true;
 }
 
@@ -699,11 +919,18 @@ int32_t gale::openGL::program::getAttributeLocation(int64_t _prog, const std::st
 		GALE_ERROR("wrong name of attribure");
 		return -1;
 	}
-	GLint val = glGetAttribLocation(GLuint(_prog), _name.c_str());
+	GLint val = 0;
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
+	val = glGetAttribLocation(GLuint(_prog), _name.c_str());
 	if (val < 0) {
 		checkGlError("glGetAttribLocation", __LINE__);
 		GALE_WARNING("glGetAttribLocation(\"" << _name << "\") = " << val);
 	}
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 	return val;
 }
 
@@ -716,11 +943,18 @@ int32_t gale::openGL::program::getUniformLocation(int64_t _prog, const std::stri
 		GALE_ERROR("wrong name of uniform");
 		return -1;
 	}
+	GLint val = 0;
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		if (s_simulationMode == false) {
+	#endif
 	GLint val = glGetUniformLocation(GLuint(_prog), _name.c_str());
 	if (val < 0) {
 		checkGlError("glGetUniformLocation", __LINE__);
 		GALE_WARNING("glGetUniformLocation(\"" << _name << "\") = " << val);
 	}
+	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		}
+	#endif
 	return val;
 }
 

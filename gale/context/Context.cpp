@@ -79,26 +79,7 @@ void gale::Context::unLockContext() {
 
 namespace gale {
 	class eSystemMessage {
-		public:
-			enum theadMessage {
-				msgNone,
-				msgInit,
-				msgRecalculateSize,
-				msgResize,
-				msgHide,
-				msgShow,
-				
-				msgInputMotion,
-				msgInputState,
-				
-				msgKeyboardKey,
-				msgKeyboardMove,
-				
-				msgClipboardArrive
-			};
 		public :
-			// specify the message type
-			enum theadMessage TypeMessage;
 			// can not set a union ...
 			enum gale::context::clipBoard::clipboardListe clipboardID;
 			// InputId
@@ -114,7 +95,6 @@ namespace gale {
 			gale::key::Special keyboardSpecial;
 			
 			eSystemMessage() :
-				TypeMessage(msgNone),
 				clipboardID(gale::context::clipBoard::clipboardStd),
 				inputType(gale::key::type_unknow),
 				inputId(-1),
@@ -158,62 +138,6 @@ void gale::Context::processEvents() {
 		m_msgSystem.wait(data);
 		//GALE_DEBUG("EVENT");
 		switch (data->TypeMessage) {
-			case eSystemMessage::msgInit:
-				// this is due to the openGL context
-				/*bool returnVal = */
-				m_application->onCreate(*this);
-				m_application->onStart(*this);
-				m_application->onResume(*this);
-				break;
-			case eSystemMessage::msgRecalculateSize:
-				forceRedrawAll();
-				break;
-			case eSystemMessage::msgResize:
-				//GALE_DEBUG("Receive MSG : THREAD_RESIZE");
-				m_windowsSize = data->dimention;
-				gale::Dimension::setPixelWindowsSize(m_windowsSize);
-				forceRedrawAll();
-				break;
-			case eSystemMessage::msgInputMotion:
-				//GALE_DEBUG("Receive MSG : THREAD_INPUT_MOTION");
-				if (m_application == nullptr) {
-					return;
-				}
-				m_application->onPointer(data->inputType,
-				                         data->inputId,
-				                         data->dimention,
-				                         gale::key::status_move);
-				break;
-			case eSystemMessage::msgInputState:
-				//GALE_DEBUG("Receive MSG : THREAD_INPUT_STATE");
-				if (m_application == nullptr) {
-					return;
-				}
-				m_application->onPointer(data->inputType,
-				                         data->inputId,
-				                         data->dimention,
-				                         (data->stateIsDown==true?gale::key::status_down:gale::key::status_up));
-				break;
-			case eSystemMessage::msgKeyboardKey:
-			case eSystemMessage::msgKeyboardMove:
-				//GALE_DEBUG("Receive MSG : THREAD_KEYBORAD_KEY");
-				if (m_application == nullptr) {
-					return;
-				} else {
-					gale::key::status state = data->stateIsDown==true?gale::key::status_down:gale::key::status_up;
-					if (data->repeateKey == true) {
-						if (state == gale::key::status_down) {
-							state = gale::key::status_downRepeate;
-						} else {
-							state = gale::key::status_upRepeate;
-						}
-					}
-					m_application->onKeyboard(data->keyboardSpecial,
-					                          data->keyboardMove,
-					                          data->keyboardChar,
-					                          state);
-				}
-				break;
 			case eSystemMessage::msgClipboardArrive:
 				{
 					std::shared_ptr<gale::Application> appl = m_application;
@@ -221,19 +145,6 @@ void gale::Context::processEvents() {
 						appl->onClipboardEvent(data->clipboardID);
 					}
 				}
-				break;
-			case eSystemMessage::msgHide:
-				GALE_DEBUG("Receive MSG : msgHide");
-				//guiAbstraction::SendKeyboardEventMove(tmpData->isDown, tmpData->move);
-				//gui_uniqueWindows->SysOnHide();
-				break;
-			case eSystemMessage::msgShow:
-				GALE_DEBUG("Receive MSG : msgShow");
-				//guiAbstraction::SendKeyboardEventMove(tmpData->isDown, tmpData->move);
-				//gui_uniqueWindows->SysOnShow();
-				break;
-			default:
-				GALE_DEBUG("Receive MSG : UNKNOW");
 				break;
 		}
 	}
@@ -296,19 +207,49 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	etk::theme::setNameDefault("GUI", "shape/square/");
 	etk::theme::setNameDefault("COLOR", "color/black/");
 	// parse the debug level:
-	for(int32_t iii = 0; iii < m_commandLine.size() ; ++iii) {
+	for(int32_t iii=0; iii<m_commandLine.size(); ++iii) {
 		if (m_commandLine.get(iii) == "--gale-fps") {
 			m_displayFps=true;
+		} else if (etk::start_with(m_commandLine.get(iii), "--gale-simulation-file=") == true) {
+			
+		} else if (etk::start_with(m_commandLine.get(iii), "--gale-simulation-mode=") == true) {
+			
+		} else if (m_commandLine.get(iii) == "--gale-simulation-stop") {
+			
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+		} else if (m_commandLine.get(iii) == "--gale-disable-opengl") {
+			gale::openGL::startSimulationMode();
+		#endif
 		} else if (    m_commandLine.get(iii) == "-h"
-		            || m_commandLine.get(iii) == "--help") {
+		            || m_commandLine.get(iii) == "--help"
+		            || etk::start_with(m_commandLine.get(iii), "--gale") == true) {
 			GALE_PRINT("gale - help : ");
 			GALE_PRINT("    " << etk::getApplicationName() << " [options]");
-			GALE_PRINT("        --gale-fps:   Display the current fps of the display");
-			GALE_PRINT("        -h/--help:    Display this help");
+			GALE_PRINT("        --gale-simulation-file=XXX.gsim");
+			GALE_PRINT("                Enable the simulation mode of the gale IO, parameter: file (default:simulation Gale.gsim)");
+			GALE_PRINT("        --gale-simulation-mode=XXX");
+			GALE_PRINT("                Mode of the simulation");
+			GALE_PRINT("                    - record   Record all input of the playing element (default)");
+			GALE_PRINT("                    - play     Play all the sequence write in the simulation file");
+			GALE_PRINT("        --gale-simulation-stop");
+			GALE_PRINT("                Stop at the end of the simulation");
+			#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+				GALE_PRINT("        --gale-disable-opengl");
+				GALE_PRINT("                Disable openGL access (availlable in SIMULATION mode)");
+			#endif
+			GALE_PRINT("        --gale-fps");
+			GALE_PRINT("                Display the current fps of the display");
+			GALE_PRINT("        -h/--help");
+			GALE_PRINT("                Display this help");
 			GALE_PRINT("    example:");
 			GALE_PRINT("        " << etk::getApplicationName() << " --gale-fps");
-			// this is a global help system does not remove it
-			continue;
+			if (etk::start_with(m_commandLine.get(iii), "--gale") == true) {
+				GALE_ERROR("gale unknow element in parameter: '" << m_commandLine.get(iii) << "'");
+				// remove parameter ...
+			} else {
+				// this is a global help system does not remove it
+				continue;
+			}
 		} else {
 			continue;
 		}
@@ -322,15 +263,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	// TODO : remove this ...
 	etk::initDefaultFolder("galeApplNoName");
 	// request the init of the application in the main context of openGL ...
-	{
-		gale::eSystemMessage *data = new gale::eSystemMessage();
-		if (data == nullptr) {
-			GALE_ERROR("allocationerror of message");
-		} else {
-			data->TypeMessage = eSystemMessage::msgInit;
-			m_msgSystem.post(data);
-		}
-	}
+	m_msgSystem.post(std::make_shared<gale::context::LoopActionInit>());
 	// force a recalculation
 	requestUpdateSize();
 	#if defined(__GALE_ANDROID_ORIENTATION_LANDSCAPE__)
@@ -375,26 +308,13 @@ gale::Context::~Context() {
 }
 
 void gale::Context::requestUpdateSize() {
-	gale::eSystemMessage *data = new gale::eSystemMessage();
-	if (data == nullptr) {
-		GALE_ERROR("allocationerror of message");
-		return;
-	}
-	data->TypeMessage = eSystemMessage::msgRecalculateSize;
-	m_msgSystem.post(data);
+	m_msgSystem.post(std::make_shared<gale::context::LoopActionRecalculateSize>());
 }
 
 void gale::Context::OS_Resize(const vec2& _size) {
 	// TODO : Better in the thread ...  == > but generate some init error ...
 	gale::Dimension::setPixelWindowsSize(_size);
-	gale::eSystemMessage *data = new gale::eSystemMessage();
-	if (data == nullptr) {
-		GALE_ERROR("allocationerror of message");
-		return;
-	}
-	data->TypeMessage = eSystemMessage::msgResize;
-	data->dimention = _size;
-	m_msgSystem.post(data);
+	m_msgSystem.post(std::make_shared<gale::context::LoopActionResize>(_size));
 }
 void gale::Context::OS_Move(const vec2& _pos) {
 	/*
@@ -407,112 +327,74 @@ void gale::Context::OS_Move(const vec2& _pos) {
 }
 
 void gale::Context::OS_SetInputMotion(int _pointerID, const vec2& _pos ) {
-	gale::eSystemMessage *data = new gale::eSystemMessage();
-	if (data == nullptr) {
-		GALE_ERROR("allocationerror of message");
-		return;
-	}
-	data->TypeMessage = eSystemMessage::msgInputMotion;
-	data->inputType = gale::key::type_finger;
-	data->inputId = _pointerID;
-	data->dimention = _pos;
-	m_msgSystem.post(data);
+	m_msgSystem.post(std::make_shared<gale::context::LoopActionInput>(gale::key::type_finger,
+	                                                                  gale::key::status_move,
+	                                                                  _pointerID,
+	                                                                  _pos));
 }
 
 void gale::Context::OS_SetInputState(int _pointerID, bool _isDown, const vec2& _pos ) {
-	gale::eSystemMessage *data = new gale::eSystemMessage();
-	if (data == nullptr) {
-		GALE_ERROR("allocationerror of message");
-		return;
-	}
-	data->TypeMessage = eSystemMessage::msgInputState;
-	data->inputType = gale::key::type_finger;
-	data->inputId = _pointerID;
-	data->stateIsDown = _isDown;
-	data->dimention = _pos;
-	m_msgSystem.post(data);
+	m_msgSystem.post(std::make_shared<gale::context::LoopActionInput>(gale::key::type_finger,
+	                                                                  (_isDown==true?gale::key::status_down:gale::key::status_up),
+	                                                                  _pointerID,
+	                                                                  _pos));
 }
 
 void gale::Context::OS_SetMouseMotion(int _pointerID, const vec2& _pos ) {
-	gale::eSystemMessage *data = new gale::eSystemMessage();
-	if (data == nullptr) {
-		GALE_ERROR("allocationerror of message");
-		return;
-	}
-	data->TypeMessage = eSystemMessage::msgInputMotion;
-	data->inputType = gale::key::type_mouse;
-	data->inputId = _pointerID;
-	data->dimention = _pos;
-	m_msgSystem.post(data);
+	m_msgSystem.post(std::make_shared<gale::context::LoopActionInput>(gale::key::type_mouse,
+	                                                                  gale::key::status_move,
+	                                                                  _pointerID,
+	                                                                  _pos));
 }
 
 void gale::Context::OS_SetMouseState(int _pointerID, bool _isDown, const vec2& _pos ) {
-	gale::eSystemMessage *data = new gale::eSystemMessage();
-	if (data == nullptr) {
-		GALE_ERROR("allocationerror of message");
-		return;
-	}
-	data->TypeMessage = eSystemMessage::msgInputState;
-	data->inputType = gale::key::type_mouse;
-	data->inputId = _pointerID;
-	data->stateIsDown = _isDown;
-	data->dimention = _pos;
-	m_msgSystem.post(data);
+	m_msgSystem.post(std::make_shared<gale::context::LoopActionInput>(gale::key::type_mouse,
+	                                                                  (_isDown==true?gale::key::status_down:gale::key::status_up),
+	                                                                  _pointerID,
+	                                                                  _pos));
 }
 
 void gale::Context::OS_SetKeyboard(gale::key::Special& _special,
                                    char32_t _myChar,
                                    bool _isDown,
                                    bool _isARepeateKey) {
-	gale::eSystemMessage *data = new gale::eSystemMessage();
-	if (data == nullptr) {
-		GALE_ERROR("allocationerror of message");
-		return;
+	enum gale::key::status state = _isDown==true?gale::key::status_down:gale::key::status_up;
+	if (_isARepeateKey == true) {
+		if (state == gale::key::status_down) {
+			state = gale::key::status_downRepeate;
+		} else {
+			state = gale::key::status_upRepeate;
+		}
 	}
-	data->TypeMessage = eSystemMessage::msgKeyboardKey;
-	data->stateIsDown = _isDown;
-	data->keyboardMove = gale::key::keyboard_char;
-	data->keyboardChar = _myChar;
-	data->keyboardSpecial = _special;
-	data->repeateKey = _isARepeateKey;
-	m_msgSystem.post(data);
+	m_msgSystem.post(std::make_shared<gale::context::LoopActionKeyboard>(_special
+	                                                                     gale::key::keyboard_char,
+	                                                                     state,
+	                                                                     _myChar));
 }
 
 void gale::Context::OS_SetKeyboardMove(gale::key::Special& _special,
-                                        enum gale::key::keyboard _move,
-                                        bool _isDown,
-                                        bool _isARepeateKey) {
-	gale::eSystemMessage *data = new gale::eSystemMessage();
-	if (data == nullptr) {
-		GALE_ERROR("allocationerror of message");
-		return;
+                                       enum gale::key::keyboard _move,
+                                       bool _isDown,
+                                       bool _isARepeateKey) {
+	gale::key::status state = _isDown==true?gale::key::status_down:gale::key::status_up;
+	if (_isARepeateKey == true) {
+		if (state == gale::key::status_down) {
+			state = gale::key::status_downRepeate;
+		} else {
+			state = gale::key::status_upRepeate;
+		}
 	}
-	data->TypeMessage = eSystemMessage::msgKeyboardMove;
-	data->stateIsDown = _isDown;
-	data->keyboardMove = _move;
-	data->keyboardSpecial = _special;
-	data->repeateKey = _isARepeateKey;
-	m_msgSystem.post(data);
+	m_msgSystem.post(std::make_shared<gale::context::LoopActionKeyboard>(_special
+	                                                                     _move,
+	                                                                     state));
 }
 
 void gale::Context::OS_Hide() {
-	gale::eSystemMessage *data = new gale::eSystemMessage();
-	if (data == nullptr) {
-		GALE_ERROR("allocationerror of message");
-		return;
-	}
-	data->TypeMessage = eSystemMessage::msgHide;
-	m_msgSystem.post(data);
+	m_msgSystem.post(std::make_shared<gale::context::LoopActionView>(false));
 }
 
 void gale::Context::OS_Show() {
-	gale::eSystemMessage *data = new gale::eSystemMessage();
-	if (data == nullptr) {
-		GALE_ERROR("allocationerror of message");
-		return;
-	}
-	data->TypeMessage = eSystemMessage::msgShow;
-	m_msgSystem.post(data);
+	m_msgSystem.post(std::make_shared<gale::context::LoopActionView>(true));
 }
 
 

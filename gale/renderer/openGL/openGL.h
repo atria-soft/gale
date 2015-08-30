@@ -17,6 +17,13 @@
 
 namespace gale {
 	namespace openGL {
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			/**
+			 * @brief Start the simulation mode of Open GL (can be usebull when no HW is availlable for testing System like buildfarm (eg: travis-ci)
+			 * This generate a non access on the openGL IO, and all function work corectly.
+			 */
+			void startSimulationMode();
+		#endif
 		/**
 		 * @brief Lock the openGL context for one user only  == > better to keep flags and other things ...
 		 */
