@@ -201,7 +201,7 @@ void gale::key::Special::setInsert(bool _value) {
 	}
 }
 
-std::ostream& gale::key::operator <<(std::ostream& _os, const gale::key::Special _obj) {
+std::ostream& gale::key::operator <<(std::ostream& _os, const gale::key::Special& _obj) {
 	_os << " capLock=" << _obj.getCapsLock();
 	_os << " shift=" << _obj.getShift();
 	_os << " ctrl=" << _obj.getCtrl();
@@ -211,4 +211,56 @@ std::ostream& gale::key::operator <<(std::ostream& _os, const gale::key::Special
 	_os << " verNum=" << _obj.getNumLock();
 	_os << " insert=" << _obj.getInsert();
 	return _os;
+}
+
+namespace etk {
+	template<> std::string to_string<gale::key::Special>(const gale::key::Special& _obj) {
+		std::string out;
+		if (_obj.getCapsLock() == true) {
+			out = "CAPS";
+		}
+		if (_obj.getShift() == true) {
+			if (out.size() > 0) {
+				out += "|";
+			}
+			out = "SHIFT";
+		}
+		if (_obj.getCtrl() == true) {
+			if (out.size() > 0) {
+				out += "|";
+			}
+			out = "CTRL";
+		}
+		if (_obj.getMeta() == true) {
+			if (out.size() > 0) {
+				out += "|";
+			}
+			out = "META";
+		}
+		if (_obj.getAlt() == true) {
+			if (out.size() > 0) {
+				out += "|";
+			}
+			out = "ALT";
+		}
+		if (_obj.getAltGr() == true) {
+			if (out.size() > 0) {
+				out += "|";
+			}
+			out = "ALTGR";
+		}
+		if (_obj.getNumLock() == true) {
+			if (out.size() > 0) {
+				out += "|";
+			}
+			out = "NUM_LOCK";
+		}
+		if (_obj.getInsert() == true) {
+			if (out.size() > 0) {
+				out += "|";
+			}
+			out = "INSERT";
+		}
+		return out;
+	}
 }

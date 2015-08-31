@@ -10,6 +10,7 @@
 #define __GALE_CONTEXT_H__
 
 #include <etk/os/Fifo.h>
+#include <etk/os/FSNode.h>
 #include <gale/debug.h>
 #include <gale/gale.h>
 #include <gale/key/key.h>
@@ -22,15 +23,13 @@
 #include <memory>
 #include <gale/orientation.h>
 #include <gale/context/clipBoard.h>
+#include <gale/context/LoopAction.h>
 
 #define MAX_MANAGE_INPUT (15)
 
 namespace gale {
-	/**
-	 * @not-in-doc
-	 */
-	class eSystemMessage;
 	class Context/* : private gale::object::RemoveEvent */{
+		friend gale::context::LoopActionResize;
 		private:
 			std::shared_ptr<gale::Application> m_application; //!< Application handle
 		public:
@@ -64,9 +63,13 @@ namespace gale {
 			 */
 			void unLockContext();
 		private:
+			// simulation area:
+			bool m_imulationActive;
+			etk::FSNode m_simulationFile;
+		private:
 			int64_t m_previousDisplayTime;  // this is to limit framerate ... in case...
 			// TODO : gale::context::InputManager m_input;
-			etk::Fifo<gale::eSystemMessage*> m_msgSystem;
+			etk::Fifo<std::shared_ptr<gale::context::LoopAction> > m_msgSystem;
 			bool m_displayFps;
 			gale::context::Fps m_FpsSystemEvent;
 			gale::context::Fps m_FpsSystemContext;

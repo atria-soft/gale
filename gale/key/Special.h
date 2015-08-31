@@ -112,7 +112,7 @@ namespace gale {
 				 */
 				void update(enum gale::key::keyboard _move, bool _isDown);
 		};
-		std::ostream& operator <<(std::ostream& _os, const gale::key::Special _obj);
+		std::ostream& operator <<(std::ostream& _os, const gale::key::Special& _obj);
 	};
 };
 

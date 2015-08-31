@@ -6,6 +6,24 @@
  * @license APACHE v2.0 (see license file)
  */
 
+#include <unistd.h>
+
+#include <etk/types.h>
+#include <etk/etk.h>
+
+#include <etk/tool.h>
+#include <etk/os/Fifo.h>
+#include <etk/Hash.h>
+#include <etk/thread/tools.h>
+#include <mutex>
+#include <date/date.h>
+#include <gale/gale.h>
+#include <gale/Dimension.h>
+#include <gale/debug.h>
+
+#include <gale/context/LoopAction.h>
+#include <gale/context/Context.h>
+
 etk::Hash<std::function<std::shared_ptr<gale::context::LoopAction>(const std::string&)> >& getList() {
 	static etk::Hash<std::function<std::shared_ptr<gale::context::LoopAction>(const std::string&)> > list;
 	return list;
@@ -30,7 +48,7 @@ void gale::context::addFactory(const std::string& _type, const std::function<std
 		return;
 	}
 	//Keep name in lower case :
-	std::string nameLower = etk::tolower(_name);
+	std::string nameLower = etk::tolower(_type);
 	if (true == getList().exist(nameLower)) {
 		GALE_WARNING("Replace Creator of a loop action : " << nameLower);
 		getList()[nameLower] = _func;
@@ -48,18 +66,24 @@ gale::context::LoopAction::~LoopAction() {
 	
 }
 
-
+/////////////////////////////////////////////////////////////////////////////////////////
 
 void gale::context::LoopActionInit::doAction(gale::Context& _context) {
+	std::shared_ptr<gale::Application> appl = _context.getApplication();
 	// this is due to the openGL context
-	if (_context.m_application == nullptr) {
+	if (appl == nullptr) {
 		return;
 	}
-	_context.m_application->onCreate(*this);
-	_context.m_application->onStart(*this);
-	_context.m_application->onResume(*this);
+	appl->onCreate(_context);
+	appl->onStart(_context);
+	appl->onResume(_context);
 }
 
+std::string gale::context::LoopActionInit::createString() {
+	return etk::to_string(m_timestamp) + ":INIT";
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
 gale::context::LoopActionResize::LoopActionResize(const vec2& _size) :
   m_size(_size) {
 	
@@ -72,10 +96,35 @@ void gale::context::LoopActionResize::doAction(gale::Context& _context) {
 	_context.forceRedrawAll();
 }
 
+std::string gale::context::LoopActionResize::createString() {
+	return etk::to_string(m_timestamp) + ":RESIZE:" + etk::to_string(m_size);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+gale::context::LoopActionView::LoopActionView(bool _show) :
+  m_show(_show) {
+	
+}
+
+void gale::context::LoopActionView::doAction(gale::Context& _context) {
+	GALE_TODO("kjhkjhkhkjh");
+}
+
+std::string gale::context::LoopActionView::createString() {
+	return etk::to_string(m_timestamp) + ":VIEW:" + etk::to_string(m_show);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
 void gale::context::LoopActionRecalculateSize::doAction(gale::Context& _context) {
 	_context.forceRedrawAll();
 }
 
+std::string gale::context::LoopActionRecalculateSize::createString() {
+	return etk::to_string(m_timestamp) + ":RECALCULATE_SIZE";
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
 gale::context::LoopActionInput::LoopActionInput(enum gale::key::type _type,
                                                 enum gale::key::status _status,
                                                 int32_t _pointerID,
@@ -88,14 +137,21 @@ gale::context::LoopActionInput::LoopActionInput(enum gale::key::type _type,
 }
 
 void gale::context::LoopActionInput::doAction(gale::Context& _context) {
-	if (_context.m_application == nullptr) {
+	std::shared_ptr<gale::Application> appl = _context.getApplication();
+	if (appl == nullptr) {
 		return;
 	}
-	_context.m_application->onPointer(m_type,
-	                                  m_pointerID,
-	                                  m_pos,
-	                                  m_status);
+	appl->onPointer(m_type,
+	                m_pointerID,
+	                m_pos,
+	                m_status);
 }
+
+std::string gale::context::LoopActionInput::createString() {
+	return etk::to_string(m_timestamp) + ":INPUT:" + etk::to_string(m_type) + ":" + etk::to_string(m_status) + ":" + etk::to_string(m_pointerID) + ":" + etk::to_string(m_pos);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
 
 gale::context::LoopActionKeyboard::LoopActionKeyboard(const gale::key::Special& _special,
                                                       enum gale::key::keyboard _type,
@@ -109,11 +165,38 @@ gale::context::LoopActionKeyboard::LoopActionKeyboard(const gale::key::Special& 
 }
 
 void gale::context::LoopActionKeyboard::doAction(gale::Context& _context) {
-	if (_context.m_application == nullptr) {
+	std::shared_ptr<gale::Application> appl = _context.getApplication();
+	if (appl == nullptr) {
 		return;
 	}
-	_context.m_application->onKeyboard(m_special,
-	                                   m_type,
-	                                   m_char,
-	                                   m_state);
+	appl->onKeyboard(m_special,
+	                 m_type,
+	                 m_char,
+	                 m_state);
 }
+
+std::string gale::context::LoopActionKeyboard::createString() {
+	return etk::to_string(m_timestamp) + ":KEYBOARD:" + etk::to_string(m_special) + ":" + etk::to_string(m_type) + ":" + etk::to_string(m_state) + ":" + etk::to_string(uint64_t(m_char));
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+gale::context::LoopActionClipboardArrive::LoopActionClipboardArrive(enum gale::context::clipBoard::clipboardListe _id) :
+  m_id(_id) {
+	
+}
+
+void gale::context::LoopActionClipboardArrive::doAction(gale::Context& _context) {
+	std::shared_ptr<gale::Application> appl = _context.getApplication();
+	if (appl != nullptr) {
+		appl->onClipboardEvent(m_id);
+	}
+}
+
+std::string gale::context::LoopActionClipboardArrive::createString() {
+	return etk::to_string(m_timestamp) + ":CLIPBOARD_ARRIVE:" + etk::to_string(m_id);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+

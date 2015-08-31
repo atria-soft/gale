@@ -76,39 +76,6 @@ void gale::Context::unLockContext() {
 	mutexInterface().unlock();
 }
 
-
-namespace gale {
-	class eSystemMessage {
-		public :
-			// can not set a union ...
-			enum gale::context::clipBoard::clipboardListe clipboardID;
-			// InputId
-			enum gale::key::type inputType;
-			int32_t inputId;
-			// generic dimentions
-			vec2 dimention;
-			// keyboard events :
-			bool repeateKey;  //!< special flag for the repeating key on the PC interface
-			bool stateIsDown;
-			char32_t keyboardChar;
-			enum gale::key::keyboard keyboardMove;
-			gale::key::Special keyboardSpecial;
-			
-			eSystemMessage() :
-				clipboardID(gale::context::clipBoard::clipboardStd),
-				inputType(gale::key::type_unknow),
-				inputId(-1),
-				dimention(0,0),
-				repeateKey(false),
-				stateIsDown(false),
-				keyboardChar(0),
-				keyboardMove(gale::key::keyboard_unknow)
-			{
-				
-			}
-	};
-};
-
 #if 0
 void gale::Context::inputEventTransfertWidget(std::shared_ptr<gale::Widget> _source,
                                               std::shared_ptr<gale::Widget> _destination) {
@@ -128,25 +95,21 @@ void gale::Context::inputEventUnGrabPointer() {
 void gale::Context::processEvents() {
 	int32_t nbEvent = 0;
 	//GALE_DEBUG(" ********  Event");
-	gale::eSystemMessage* data = nullptr;
+	std::shared_ptr<gale::context::LoopAction> data;
 	while (m_msgSystem.count()>0) {
 		nbEvent++;
-		if (data != nullptr) {
-			delete(data);
-			data = nullptr;
-		}
 		m_msgSystem.wait(data);
-		//GALE_DEBUG("EVENT");
-		switch (data->TypeMessage) {
-			case eSystemMessage::msgClipboardArrive:
-				{
-					std::shared_ptr<gale::Application> appl = m_application;
-					if (appl != nullptr) {
-						appl->onClipboardEvent(data->clipboardID);
-					}
-				}
-				break;
+		if (data == nullptr) {
+			continue;
 		}
+		if (m_imulationActive == true) {
+			std::string dataExecuted = data->createString();
+			m_simulationFile.filePuts(dataExecuted);
+			m_simulationFile.filePuts("\n");
+			GALE_VERBOSE("plop: " + dataExecuted);
+		}
+		data->doAction(*this);
+		data.reset();
 	}
 }
 
@@ -178,6 +141,8 @@ void gale::Context::setArchiveDir(int _mode, const char* _str) {
 gale::Context::Context(gale::Application* _application, int32_t _argc, const char* _argv[]) :
   //m_application(std::make_shared<gale::Application>(_application)),
   m_application(_application),
+  m_imulationActive(false),
+  m_simulationFile("gale.gsim"),
   //m_objectManager(*this),
   m_previousDisplayTime(0),
   // TODO : m_input(*this),
@@ -211,9 +176,9 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 		if (m_commandLine.get(iii) == "--gale-fps") {
 			m_displayFps=true;
 		} else if (etk::start_with(m_commandLine.get(iii), "--gale-simulation-file=") == true) {
-			
+			m_simulationFile.setName(std::string(m_commandLine.get(iii).begin()+23, m_commandLine.get(iii).end()) );
 		} else if (etk::start_with(m_commandLine.get(iii), "--gale-simulation-mode=") == true) {
-			
+			m_imulationActive = true;
 		} else if (m_commandLine.get(iii) == "--gale-simulation-stop") {
 			
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
@@ -226,7 +191,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 			GALE_PRINT("gale - help : ");
 			GALE_PRINT("    " << etk::getApplicationName() << " [options]");
 			GALE_PRINT("        --gale-simulation-file=XXX.gsim");
-			GALE_PRINT("                Enable the simulation mode of the gale IO, parameter: file (default:simulation Gale.gsim)");
+			GALE_PRINT("                Enable the simulation mode of the gale IO, parameter: file (default:simulation gale.gsim)");
 			GALE_PRINT("        --gale-simulation-mode=XXX");
 			GALE_PRINT("                Mode of the simulation");
 			GALE_PRINT("                    - record   Record all input of the playing element (default)");
@@ -273,6 +238,10 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	#else
 		forceOrientation(gale::orientation_screenAuto);
 	#endif
+	if (m_imulationActive == true) {
+		// in simulation case:
+		m_simulationFile.fileOpenWrite();
+	}
 	// release the curent interface :
 	unLockContext();
 	GALE_INFO(" == > Gale system init (END)");
@@ -305,6 +274,10 @@ gale::Context::~Context() {
 	// release the curent interface :
 	unLockContext();
 	GALE_INFO(" == > Gale system Un-Init (END)");
+	if (m_imulationActive == true) {
+		// in simulation case:
+		m_simulationFile.fileClose();
+	}
 }
 
 void gale::Context::requestUpdateSize() {
@@ -366,7 +339,7 @@ void gale::Context::OS_SetKeyboard(gale::key::Special& _special,
 			state = gale::key::status_upRepeate;
 		}
 	}
-	m_msgSystem.post(std::make_shared<gale::context::LoopActionKeyboard>(_special
+	m_msgSystem.post(std::make_shared<gale::context::LoopActionKeyboard>(_special,
 	                                                                     gale::key::keyboard_char,
 	                                                                     state,
 	                                                                     _myChar));
@@ -384,7 +357,7 @@ void gale::Context::OS_SetKeyboardMove(gale::key::Special& _special,
 			state = gale::key::status_upRepeate;
 		}
 	}
-	m_msgSystem.post(std::make_shared<gale::context::LoopActionKeyboard>(_special
+	m_msgSystem.post(std::make_shared<gale::context::LoopActionKeyboard>(_special,
 	                                                                     _move,
 	                                                                     state));
 }
@@ -399,14 +372,7 @@ void gale::Context::OS_Show() {
 
 
 void gale::Context::OS_ClipBoardArrive(enum gale::context::clipBoard::clipboardListe _clipboardID) {
-	gale::eSystemMessage *data = new gale::eSystemMessage();
-	if (data == nullptr) {
-		GALE_ERROR("allocationerror of message");
-		return;
-	}
-	data->TypeMessage = eSystemMessage::msgClipboardArrive;
-	data->clipboardID = _clipboardID;
-	m_msgSystem.post(data);
+	m_msgSystem.post(std::make_shared<gale::context::LoopActionClipboardArrive>(_clipboardID));
 }
 
 void gale::Context::clipBoardGet(enum gale::context::clipBoard::clipboardListe _clipboardID) {

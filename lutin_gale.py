@@ -32,6 +32,7 @@ def create(target):
 		'gale/context/commandLine.cpp',
 		'gale/context/Context.cpp',
 		'gale/context/cursor.cpp',
+		'gale/context/LoopAction.cpp',
 		#'gale/context/InputManager.cpp'
 		])
 	if target.name=="Linux":

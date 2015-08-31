@@ -947,7 +947,7 @@ int32_t gale::openGL::program::getUniformLocation(int64_t _prog, const std::stri
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		if (s_simulationMode == false) {
 	#endif
-	GLint val = glGetUniformLocation(GLuint(_prog), _name.c_str());
+	val = glGetUniformLocation(GLuint(_prog), _name.c_str());
 	if (val < 0) {
 		checkGlError("glGetUniformLocation", __LINE__);
 		GALE_WARNING("glGetUniformLocation(\"" << _name << "\") = " << val);

@@ -50,6 +50,11 @@ std::ostream& gale::operator <<(std::ostream& _os, const enum gale::context::cli
 	return _os;
 }
 
+namespace etk {
+	template<> std::string to_string<enum gale::context::clipBoard::clipboardListe>(const enum gale::context::clipBoard::clipboardListe& _obj) {
+		return clipboardDescriptionString[_obj];
+	}
+}
 
 void gale::context::clipBoard::init() {
 	GALE_INFO("Initialyse ClipBoards");

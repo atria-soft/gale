@@ -32,4 +32,9 @@ std::ostream& gale::key::operator <<(std::ostream& _os, const enum gale::key::st
 	return _os;
 }
 
+namespace etk {
+	template<> std::string to_string<enum gale::key::status>(const enum gale::key::status& _obj) {
+		return statusDescriptionString[_obj];
+	}
+}
 

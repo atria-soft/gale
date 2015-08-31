@@ -21,3 +21,8 @@ std::ostream& gale::operator <<(std::ostream& _os, const enum gale::key::type _o
 	return _os;
 }
 
+namespace etk {
+	template<> std::string to_string<enum gale::key::type>(const enum gale::key::type& _obj) {
+		return typeDescriptionString[_obj];
+	}
+}

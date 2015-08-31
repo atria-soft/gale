@@ -60,3 +60,10 @@ std::ostream& gale::key::operator <<(std::ostream& _os, const enum gale::key::ke
 	_os << keyboardDescriptionString[_obj];
 	return _os;
 }
+
+namespace etk {
+	template<> std::string to_string<enum gale::key::keyboard>(const enum gale::key::keyboard& _obj) {
+		return keyboardDescriptionString[_obj];
+	}
+}
+
