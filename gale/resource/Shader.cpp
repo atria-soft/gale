@@ -28,6 +28,7 @@ gale::resource::Shader::Shader() :
 }
 
 void gale::resource::Shader::init(const std::string& _filename) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	gale::Resource::init(_filename);
 	GALE_DEBUG("OGL : load SHADER \"" << _filename << "\"");
 	// load data from file "all the time ..."
@@ -44,12 +45,14 @@ void gale::resource::Shader::init(const std::string& _filename) {
 }
 
 gale::resource::Shader::~Shader() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	m_fileData.clear();
 	gale::openGL::shader::remove(m_shader);
 	m_exist = false;
 }
 
 void gale::resource::Shader::updateContext() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	if (m_exist == true) {
 		// Do nothing  == > too dangerous ...
 	} else {
@@ -80,6 +83,7 @@ void gale::resource::Shader::updateContext() {
 }
 
 void gale::resource::Shader::removeContext() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	if (true == m_exist) {
 		gale::openGL::shader::remove(m_shader);
 		m_exist = false;
@@ -87,11 +91,13 @@ void gale::resource::Shader::removeContext() {
 }
 
 void gale::resource::Shader::removeContextToLate() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	m_exist = false;
 	m_shader = 0;
 }
 
 void gale::resource::Shader::reload() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	etk::FSNode file(m_name);
 	if (false == file.exist()) {
 		GALE_CRITICAL("File does not Exist : '" << file << "' : '" << file.getFileSystemName() << "'");
@@ -112,7 +118,17 @@ void gale::resource::Shader::reload() {
 	file.fileClose();
 	
 	// now change the OGL context ...
-	removeContext();
-	updateContext();
+	
+	if (gale::openGL::hasContext() == true) {
+		GALE_DEBUG("OGL : load SHADER \"" << m_name << "\" ==> call update context (direct)");
+		removeContext();
+		updateContext();
+	} else {
+		GALE_DEBUG("OGL : load SHADER \"" << m_name << "\" ==> tagged has update context needed");
+		// TODO : Check this, this is a leek ==> in the GPU ... really bad ...
+			m_exist = false;
+			m_shader = 0;
+		getManager().update(std::dynamic_pointer_cast<gale::Resource>(shared_from_this()));
+	}
 }
 

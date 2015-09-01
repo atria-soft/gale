@@ -439,11 +439,13 @@ void gale::Context::clipBoardSet(enum gale::context::clipBoard::clipboardListe _
 }
 
 bool gale::Context::OS_Draw(bool _displayEveryTime) {
+	gale::openGL::threadHasContext();
 	int64_t currentTime = gale::getTime();
 	// this is to prevent the multiple display at the a high frequency ...
 	#if (!defined(__TARGET_OS__Android) && !defined(__TARGET_OS__Windows))
 	if(currentTime - m_previousDisplayTime < 1000000/120) {
 		usleep(1000);
+		gale::openGL::threadHasNoMoreContext();
 		return false;
 	}
 	#endif
@@ -541,6 +543,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		// release the curent interface :
 		unLockContext();
 	}
+	gale::openGL::threadHasNoMoreContext();
 	return hasDisplayDone;
 }
 

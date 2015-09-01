@@ -39,6 +39,7 @@ void gale::resource::VirtualBufferObject::retreiveData() {
 }
 
 void gale::resource::VirtualBufferObject::updateContext() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	if (false == m_exist) {
 		// Allocate and assign a Vertex Array Object to our handle
 		gale::openGL::genBuffers(m_vbo);
@@ -59,6 +60,7 @@ void gale::resource::VirtualBufferObject::updateContext() {
 }
 
 void gale::resource::VirtualBufferObject::removeContext() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	if (true == m_exist) {
 		gale::openGL::deleteBuffers(m_vbo);
 		m_exist = false;
@@ -66,6 +68,7 @@ void gale::resource::VirtualBufferObject::removeContext() {
 }
 
 void gale::resource::VirtualBufferObject::removeContextToLate() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	m_exist = false;
 	for (size_t iii=0; iii<m_vbo.size(); iii++) {
 		m_vbo[iii] = 0;
@@ -73,16 +76,19 @@ void gale::resource::VirtualBufferObject::removeContextToLate() {
 }
 
 void gale::resource::VirtualBufferObject::reload() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	removeContext();
 	updateContext();
 }
 
 void gale::resource::VirtualBufferObject::flush() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	// request to the manager to be call at the next update ...
 	getManager().update(std::dynamic_pointer_cast<gale::Resource>(shared_from_this()));
 }
 
 void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const vec3& _data) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	if (m_vboSizeDataOffset[_id] == -1) {
 		m_vboSizeDataOffset[_id] = 3;
 	} else if (m_vboSizeDataOffset[_id] != 3) {
@@ -96,6 +102,7 @@ void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const vec3& 
 }
 
 vec3 gale::resource::VirtualBufferObject::getOnBufferVec3(int32_t _id, int32_t _elementID) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	if ((size_t)_elementID*3 > m_buffer[_id].size()) {
 		return vec3(0,0,0);
 	}
@@ -105,13 +112,16 @@ vec3 gale::resource::VirtualBufferObject::getOnBufferVec3(int32_t _id, int32_t _
 }
 
 int32_t gale::resource::VirtualBufferObject::bufferSize(int32_t _id) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	return m_buffer[_id].size()/m_vboSizeDataOffset[_id];
 }
 int32_t gale::resource::VirtualBufferObject::getElementSize(int32_t _id) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	return m_vboSizeDataOffset[_id];
 }
 
 void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const vec2& _data) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	if (m_vboSizeDataOffset[_id] == -1) {
 		m_vboSizeDataOffset[_id] = 2;
 	} else if (m_vboSizeDataOffset[_id] != 2) {
@@ -124,6 +134,7 @@ void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const vec2& 
 }
 
 vec2 gale::resource::VirtualBufferObject::getOnBufferVec2(int32_t _id, int32_t _elementID) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	if ((size_t)_elementID*2 > m_buffer[_id].size()) {
 		return vec2(0,0);
 	}
@@ -133,6 +144,7 @@ vec2 gale::resource::VirtualBufferObject::getOnBufferVec2(int32_t _id, int32_t _
 
 
 void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::Color<float,4>& _data) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	if (m_vboSizeDataOffset[_id] == -1) {
 		m_vboSizeDataOffset[_id] = 4;
 	} else if (m_vboSizeDataOffset[_id] != 4) {
@@ -147,6 +159,7 @@ void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::C
 }
 
 void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::Color<float,3>& _data) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	if (m_vboSizeDataOffset[_id] == -1) {
 		m_vboSizeDataOffset[_id] = 3;
 	} else if (m_vboSizeDataOffset[_id] != 3) {
@@ -160,6 +173,7 @@ void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::C
 }
 
 void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::Color<float,2>& _data) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	if (m_vboSizeDataOffset[_id] == -1) {
 		m_vboSizeDataOffset[_id] = 2;
 	} else if (m_vboSizeDataOffset[_id] != 2) {
@@ -172,6 +186,7 @@ void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::C
 }
 
 void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::Color<float,1>& _data) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	if (m_vboSizeDataOffset[_id] == -1) {
 		m_vboSizeDataOffset[_id] = 1;
 	} else if (m_vboSizeDataOffset[_id] != 1) {

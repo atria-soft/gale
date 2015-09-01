@@ -25,6 +25,21 @@ namespace gale {
 			void startSimulationMode();
 		#endif
 		/**
+		 * @brief Get the current thread context status.
+		 * @return true The thread can acces to openGL.
+		 * @return false The Thread Can not acces to OpenGL.
+		 */
+		bool hasContext();
+		/**
+		 * @brief must be called by the thread that has openGl context to notify the system
+		 * @note Call @ref gale::openGL::threadHasNoMoreContext when ended
+		 */
+		void threadHasContext();
+		/**
+		 * @brief At the end of the thread exection, set the thead has no more openGL cotext
+		 */
+		void threadHasNoMoreContext();
+		/**
 		 * @brief Lock the openGL context for one user only  == > better to keep flags and other things ...
 		 */
 		void lock();

@@ -21,6 +21,7 @@ gale::resource::Manager::Manager() :
 }
 
 gale::resource::Manager::~Manager() {
+	std11::unique_lock<std11::mutex> lock(m_mutex);
 	bool hasError = false;
 	if (m_resourceListToUpdate.size()!=0) {
 		GALE_ERROR("Must not have anymore resources to update !!!");
@@ -37,6 +38,7 @@ gale::resource::Manager::~Manager() {
 }
 
 void gale::resource::Manager::unInit() {
+	std11::unique_lock<std11::mutex> lock(m_mutex);
 	display();
 	m_resourceListToUpdate.clear();
 	// remove all resources ...
@@ -57,6 +59,7 @@ void gale::resource::Manager::unInit() {
 void gale::resource::Manager::display() {
 	GALE_INFO("Resources loaded : ");
 	// remove all resources ...
+	std11::unique_lock<std11::mutex> lock(m_mutex);
 	for (auto &it : m_resourceList) {
 		std::shared_ptr<gale::Resource> tmpRessource = it.lock();
 		if (tmpRessource != nullptr) {
@@ -72,6 +75,7 @@ void gale::resource::Manager::display() {
 void gale::resource::Manager::reLoadResources() {
 	GALE_INFO("-------------  Resources re-loaded  -------------");
 	// remove all resources ...
+	std11::unique_lock<std11::mutex> lock(m_mutex);
 	if (m_resourceList.size() != 0) {
 		for (size_t jjj=0; jjj<MAX_RESOURCE_LEVEL; jjj++) {
 			GALE_INFO("    Reload level : " << jjj << "/" << (MAX_RESOURCE_LEVEL-1));
@@ -93,6 +97,7 @@ void gale::resource::Manager::reLoadResources() {
 
 void gale::resource::Manager::update(const std::shared_ptr<gale::Resource>& _object) {
 	// chek if not added before
+	std11::unique_lock<std11::mutex> lock(m_mutex);
 	for (auto &it : m_resourceListToUpdate) {
 		if (    it != nullptr
 		     && it == _object) {
@@ -106,6 +111,7 @@ void gale::resource::Manager::update(const std::shared_ptr<gale::Resource>& _obj
 
 // Specific to load or update the data in the openGl context  == > system use only
 void gale::resource::Manager::updateContext() {
+	std11::unique_lock<std11::mutex> lock(m_mutex);
 	// TODO : Check the number of call this ... GALE_INFO("update open-gl context ... ");
 	if (m_contextHasBeenRemoved == true) {
 		// need to update all ...
@@ -142,6 +148,7 @@ void gale::resource::Manager::updateContext() {
 
 // in this case, it is really too late ...
 void gale::resource::Manager::contextHasBeenDestroyed() {
+	std11::unique_lock<std11::mutex> lock(m_mutex);
 	for (auto &it : m_resourceList) {
 		std::shared_ptr<gale::Resource> tmpRessource = it.lock();
 		if (tmpRessource != nullptr) {
@@ -154,6 +161,7 @@ void gale::resource::Manager::contextHasBeenDestroyed() {
 
 // internal generic keeper ...
 std::shared_ptr<gale::Resource> gale::resource::Manager::localKeep(const std::string& _filename) {
+	std11::unique_lock<std11::mutex> lock(m_mutex);
 	GALE_VERBOSE("KEEP (DEFAULT) : file : '" << _filename << "' in " << m_resourceList.size() << " resources");
 	for (auto &it : m_resourceList) {
 		std::shared_ptr<gale::Resource> tmpRessource = it.lock();
@@ -168,6 +176,7 @@ std::shared_ptr<gale::Resource> gale::resource::Manager::localKeep(const std::st
 
 // internal generic keeper ...
 void gale::resource::Manager::localAdd(const std::shared_ptr<gale::Resource>& _object) {
+	std11::unique_lock<std11::mutex> lock(m_mutex);
 	//Add ... find empty slot
 	for (auto &it : m_resourceList) {
 		std::shared_ptr<gale::Resource> tmpRessource = it.lock();
@@ -182,6 +191,7 @@ void gale::resource::Manager::localAdd(const std::shared_ptr<gale::Resource>& _o
 
 // in case of error ...
 void gale::resource::Manager::cleanInternalRemoved() {
+	std11::unique_lock<std11::mutex> lock(m_mutex);
 	//GALE_INFO("remove object in Manager");
 	updateContext();
 	for (auto it(m_resourceList.begin()); it!=m_resourceList.end(); ++it) {

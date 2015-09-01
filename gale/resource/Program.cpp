@@ -32,6 +32,7 @@ gale::resource::Program::Program() :
 
 void gale::resource::Program::init(const std::string& _filename) {
 	gale::Resource::init(_filename);
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	GALE_DEBUG("OGL : load PROGRAM '" << m_name << "'");
 	// load data from file "all the time ..."
 	
@@ -97,7 +98,11 @@ void gale::resource::Program::init(const std::string& _filename) {
 		// close the file:
 		file.fileClose();
 	}
-	updateContext();
+	if (gale::openGL::hasContext() == true) {
+		updateContext();
+	} else {
+		getManager().update(std::dynamic_pointer_cast<gale::Resource>(shared_from_this()));
+	}
 }
 
 gale::resource::Program::~Program() {
@@ -156,6 +161,7 @@ static char l_bufferDisplayError[LOG_OGL_INTERNAL_BUFFER_LEN] = "";
 
 
 bool gale::resource::Program::checkIdValidity(int32_t _idElem) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	if (    _idElem < 0
 	     || (size_t)_idElem > m_elementList.size()) {
 		return false;
@@ -164,6 +170,7 @@ bool gale::resource::Program::checkIdValidity(int32_t _idElem) {
 }
 
 int32_t gale::resource::Program::getAttribute(std::string _elementName) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	// check if it exist previously :
 	for(size_t iii=0; iii<m_elementList.size(); iii++) {
 		if (m_elementList[iii].m_name == _elementName) {
@@ -173,19 +180,26 @@ int32_t gale::resource::Program::getAttribute(std::string _elementName) {
 	progAttributeElement tmp;
 	tmp.m_name = _elementName;
 	tmp.m_isAttribute = true;
-	tmp.m_elementId = gale::openGL::program::getAttributeLocation(m_program, tmp.m_name);
-	tmp.m_isLinked = true;
-	if (tmp.m_elementId<0) {
-		GALE_WARNING("    [" << m_elementList.size() << "] glGetAttribLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
-		tmp.m_isLinked = false;
+	if (m_exist == true) {
+		tmp.m_elementId = gale::openGL::program::getAttributeLocation(m_program, tmp.m_name);
+		tmp.m_isLinked = true;
+		if (tmp.m_elementId<0) {
+			GALE_WARNING("    [" << m_elementList.size() << "] glGetAttribLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
+			tmp.m_isLinked = false;
+		} else {
+			GALE_INFO("    [" << m_elementList.size() << "] glGetAttribLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
+		}
 	} else {
-		GALE_INFO("    [" << m_elementList.size() << "] glGetAttribLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
+		// program is not loaded ==> just local reister ...
+		tmp.m_elementId = gale::openGL::program::getUniformLocation(m_program, tmp.m_name);
+		tmp.m_isLinked = false;
 	}
 	m_elementList.push_back(tmp);
 	return m_elementList.size()-1;
 }
 
 int32_t gale::resource::Program::getUniform(std::string _elementName) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	// check if it exist previously :
 	for(size_t iii=0; iii<m_elementList.size(); iii++) {
 		if (m_elementList[iii].m_name == _elementName) {
@@ -195,20 +209,27 @@ int32_t gale::resource::Program::getUniform(std::string _elementName) {
 	progAttributeElement tmp;
 	tmp.m_name = _elementName;
 	tmp.m_isAttribute = false;
-	tmp.m_elementId = gale::openGL::program::getUniformLocation(m_program, tmp.m_name);
-	tmp.m_isLinked = true;
-	if (tmp.m_elementId<0) {
-		GALE_WARNING("    [" << m_elementList.size() << "] glGetUniformLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
-		tmp.m_isLinked = false;
+	if (m_exist == true) {
+		tmp.m_elementId = gale::openGL::program::getUniformLocation(m_program, tmp.m_name);
+		tmp.m_isLinked = true;
+		if (tmp.m_elementId<0) {
+			GALE_WARNING("    [" << m_elementList.size() << "] glGetUniformLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
+			tmp.m_isLinked = false;
+		} else {
+			GALE_INFO("    [" << m_elementList.size() << "] glGetUniformLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
+		}
 	} else {
-		GALE_INFO("    [" << m_elementList.size() << "] glGetUniformLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
+		// program is not loaded ==> just local reister ...
+		tmp.m_elementId = gale::openGL::program::getUniformLocation(m_program, tmp.m_name);
+		tmp.m_isLinked = false;
 	}
 	m_elementList.push_back(tmp);
 	return m_elementList.size()-1;
 }
 
 void gale::resource::Program::updateContext() {
-	if (true == m_exist) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == true) {
 		// Do nothing  == > too dangerous ...
 	} else {
 		// create the Shader
@@ -239,36 +260,47 @@ void gale::resource::Program::updateContext() {
 		}
 		m_exist = true;
 		// now get the old attribute requested priviously ...
-		for(size_t iii=0; iii<m_elementList.size(); iii++) {
-			if (m_elementList[iii].m_isAttribute == true) {
-				m_elementList[iii].m_elementId = gale::openGL::program::getAttributeLocation(m_program, m_elementList[iii].m_name);
-				m_elementList[iii].m_isLinked = true;
-				if (m_elementList[iii].m_elementId < 0) {
-					m_elementList[iii].m_isLinked = false;
+		size_t iii = 0;
+		for(auto &it : m_elementList) {
+			if (it.m_isAttribute == true) {
+				it.m_elementId = gale::openGL::program::getAttributeLocation(m_program, it.m_name);
+				it.m_isLinked = true;
+				if (it.m_elementId<0) {
+					GALE_WARNING("    [" << iii << "] openGL::getAttributeLocation(\"" << it.m_name << "\") = " << it.m_elementId);
+					it.m_isLinked = false;
+				} else {
+					GALE_DEBUG("    [" << iii << "] openGL::getAttributeLocation(\"" << it.m_name << "\") = " << it.m_elementId);
 				}
 			} else {
-				m_elementList[iii].m_elementId = gale::openGL::program::getUniformLocation(m_program, m_elementList[iii].m_name);
-				m_elementList[iii].m_isLinked = true;
-				if (m_elementList[iii].m_elementId < 0) {
-					m_elementList[iii].m_isLinked = false;
+				it.m_elementId = gale::openGL::program::getUniformLocation(m_program, it.m_name);
+				it.m_isLinked = true;
+				if (it.m_elementId < 0) {
+					GALE_WARNING("    [" << iii << "] openGL::getUniformLocation(\"" << it.m_name << "\") = " << it.m_elementId);
+					it.m_isLinked = false;
+				} else {
+					GALE_DEBUG("    [" << iii << "] openGL::getUniformLocation(\"" << it.m_name << "\") = " << it.m_elementId);
 				}
 			}
+			iii++;
 		}
 	}
 }
 
 void gale::resource::Program::removeContext() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	if (m_exist == true) {
 		gale::openGL::program::remove(m_program);
 		m_program = 0;
 		m_exist = false;
-		for(size_t iii=0; iii<m_elementList.size(); iii++) {
-			m_elementList[iii].m_elementId=0;
+		for(auto &it : m_elementList) {
+			it.m_elementId=0;
+			it.m_isLinked = false;
 		}
 	}
 }
 
 void gale::resource::Program::removeContextToLate() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
 	m_exist = false;
 	m_program = 0;
 }
