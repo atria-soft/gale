@@ -24,6 +24,7 @@ def create(target):
 		'gale/Dimension.cpp',
 		'gale/orientation.cpp',
 		'gale/Application.cpp',
+		'gale/Thread.cpp',
 		])
 	
 	# context :

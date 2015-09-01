@@ -25,6 +25,7 @@
 #include <gale/renderer/openGL/openGL.h>
 #include <gale/context/Context.h>
 #include <gale/resource/Manager.h>
+#include <map>
 
 
 
@@ -40,16 +41,69 @@ static std::mutex& mutexInterface() {
 }
 
 
-static gale::Context* l_curentInterface=nullptr;
+static std11::mutex g_lockContextMap;
+static std::map<std11::thread::id, gale::Context*>& getContextList() {
+	static std::map<std11::thread::id, gale::Context*> g_val;
+	return g_val;
+}
+
 gale::Context& gale::getContext() {
+	std::map<std11::thread::id, gale::Context*>& list = getContextList();
+	g_lockContextMap.lock();
+	std::map<std11::thread::id, gale::Context*>::iterator it = list.find(std11::this_thread::get_id());
+	gale::Context* out = nullptr;
+	if (it != list.end()) {
+		out = it->second;
+	}
+	g_lockContextMap.unlock();
 	#if DEBUG_LEVEL > 2
-		if(nullptr == l_curentInterface){
+		if(out ==nullptr){
 			GALE_CRITICAL("[CRITICAL] try acces at an empty interface");
 		}
 	#endif
-	return *l_curentInterface;
+	return *out;
 }
 
+static void setContext(gale::Context* _context) {
+	std::map<std11::thread::id, gale::Context*>& list = getContextList();
+	g_lockContextMap.lock();
+	std::map<std11::thread::id, gale::Context*>::iterator it = list.find(std11::this_thread::get_id());
+	if (it == list.end()) {
+		list.insert(std::pair<std11::thread::id, gale::Context*>(std11::this_thread::get_id(), _context));
+	} else {
+		it->second = _context;
+	}
+	g_lockContextMap.unlock();
+}
+
+void gale::contextRegisterThread(std11::thread* _thread) {
+	if (_thread == nullptr) {
+		return;
+	}
+	gale::Context* context = &gale::getContext();
+	std::map<std11::thread::id, gale::Context*>& list = getContextList();
+	g_lockContextMap.lock();
+	std::map<std11::thread::id, gale::Context*>::iterator it = list.find(_thread->get_id());
+	if (it == list.end()) {
+		list.insert(std::pair<std11::thread::id, gale::Context*>(_thread->get_id(), context));
+	} else {
+		it->second = context;
+	}
+	g_lockContextMap.unlock();
+}
+
+void gale::contextUnRegisterThread(std11::thread* _thread) {
+	if (_thread == nullptr) {
+		return;
+	}
+	std::map<std11::thread::id, gale::Context*>& list = getContextList();
+	g_lockContextMap.lock();
+	std::map<std11::thread::id, gale::Context*>::iterator it = list.find(_thread->get_id());
+	if (it != list.end()) {
+		list.erase(it);
+	}
+	g_lockContextMap.unlock();
+}
 
 
 void gale::Context::setInitImage(const std::string& _fileName) {
@@ -64,7 +118,7 @@ void gale::Context::setInitImage(const std::string& _fileName) {
  */
 void gale::Context::lockContext() {
 	mutexInterface().lock();
-	l_curentInterface = this;
+	setContext(this);
 }
 
 /**
@@ -72,7 +126,7 @@ void gale::Context::lockContext() {
  * @note this un-lock the main mutex
  */
 void gale::Context::unLockContext() {
-	l_curentInterface = nullptr;
+	setContext(nullptr);
 	mutexInterface().unlock();
 }
 
