@@ -51,21 +51,25 @@ gale::resource::Shader::~Shader() {
 	m_exist = false;
 }
 
-void gale::resource::Shader::updateContext() {
-	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+bool gale::resource::Shader::updateContext() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex, std11::defer_lock);
+	if (lock.try_lock() == false) {
+		//Lock error ==> try later ...
+		return false;
+	}
 	if (m_exist == true) {
 		// Do nothing  == > too dangerous ...
 	} else {
 		// create the Shader
 		if (m_fileData.size() == 0) {
 			m_shader = -1;
-			return;
+			return true;
 		}
 		GALE_INFO("Create Shader : '" << m_name << "'");
 		m_shader = gale::openGL::shader::create(m_type);
 		if (m_shader < 0) {
 			GALE_CRITICAL(" can not load shader");
-			return;
+			return true;
 		} else {
 			GALE_INFO("Compile shader with GLID=" << m_shader);
 			bool ret = gale::openGL::shader::compile(m_shader, m_fileData);
@@ -75,11 +79,12 @@ void gale::resource::Shader::updateContext() {
 					tmpShaderType = "VERTEX SHADER";
 				}
 				GALE_CRITICAL("Could not compile \"" << tmpShaderType << "\" name='" << m_name << "'");
-				return;
+				return true;
 			}
 		}
 		m_exist = true;
 	}
+	return true;
 }
 
 void gale::resource::Shader::removeContext() {

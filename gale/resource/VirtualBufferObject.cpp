@@ -38,8 +38,12 @@ void gale::resource::VirtualBufferObject::retreiveData() {
 	GALE_ERROR("TODO ... ");
 }
 
-void gale::resource::VirtualBufferObject::updateContext() {
-	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+bool gale::resource::VirtualBufferObject::updateContext() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex, std11::defer_lock);
+	if (lock.try_lock() == false) {
+		//Lock error ==> try later ...
+		return false;
+	}
 	if (false == m_exist) {
 		// Allocate and assign a Vertex Array Object to our handle
 		gale::openGL::genBuffers(m_vbo);
@@ -57,6 +61,7 @@ void gale::resource::VirtualBufferObject::updateContext() {
 	}
 	// un-bind it to permet to have no erreor in the next display ...
 	gale::openGL::unbindBuffer();
+	return true;
 }
 
 void gale::resource::VirtualBufferObject::removeContext() {

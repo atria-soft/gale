@@ -33,7 +33,7 @@ namespace gale {
 				bool m_loaded; //!< internal state of the openGl system.
 			// Gale internal API:
 			public:
-				virtual void updateContext();
+				virtual bool updateContext();
 				virtual void removeContext();
 				virtual void removeContextToLate();
 			// middleware interface:

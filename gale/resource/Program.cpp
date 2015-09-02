@@ -141,13 +141,19 @@ void gale::resource::Program::checkGlError(const char* _op, int32_t _localLine, 
 		if (isPresent == true) {
 			GALE_ERROR("    in program name : " << m_name);
 			GALE_ERROR("    program OpenGL ID =" << m_program);
-			GALE_ERROR("    List IO :");
+			GALE_ERROR("    List Uniform:");
 			int32_t id = 0;
 			for (auto &it : m_elementList) {
-				if (id == _idElem) {
-					GALE_ERROR("      * name :" << it.m_name << " OpenGL ID=" << it.m_elementId << " attribute=" << it.m_isAttribute << " is linked=" << it.m_isLinked);
-				} else {
-					GALE_ERROR("        name :" << it.m_name << " OpenGL ID=" << it.m_elementId << " attribute=" << it.m_isAttribute << " is linked=" << it.m_isLinked);
+				if (it.m_isAttribute == false) {
+					GALE_ERROR("      " << (id==_idElem?"*":" ") << " name :" << it.m_name << " OpenGL ID=" << it.m_elementId << " is linked=" << it.m_isLinked);
+				}
+				id++;
+			}
+			GALE_ERROR("    List Attribute:");
+			id = 0;
+			for (auto &it : m_elementList) {
+				if (it.m_isAttribute == true) {
+					GALE_ERROR("      " << (id==_idElem?"*":" ") << " name :" << it.m_name << " OpenGL ID=" << it.m_elementId << " is linked=" << it.m_isLinked);
 				}
 				id++;
 			}
@@ -180,18 +186,22 @@ int32_t gale::resource::Program::getAttribute(std::string _elementName) {
 	progAttributeElement tmp;
 	tmp.m_name = _elementName;
 	tmp.m_isAttribute = true;
-	if (m_exist == true) {
+	if (gale::openGL::hasContext() == false) {
+		getManager().update(std::dynamic_pointer_cast<gale::Resource>(shared_from_this()));
+		tmp.m_elementId = -1;
+		tmp.m_isLinked = false;
+	} else if (m_exist == true) {
 		tmp.m_elementId = gale::openGL::program::getAttributeLocation(m_program, tmp.m_name);
 		tmp.m_isLinked = true;
 		if (tmp.m_elementId<0) {
-			GALE_WARNING("    [" << m_elementList.size() << "] glGetAttribLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
+			GALE_WARNING("    {" << m_program << "}[" << m_elementList.size() << "] glGetAttribLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
 			tmp.m_isLinked = false;
 		} else {
-			GALE_INFO("    [" << m_elementList.size() << "] glGetAttribLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
+			GALE_INFO("    {" << m_program << "}[" << m_elementList.size() << "] glGetAttribLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
 		}
 	} else {
 		// program is not loaded ==> just local reister ...
-		tmp.m_elementId = gale::openGL::program::getUniformLocation(m_program, tmp.m_name);
+		tmp.m_elementId = -1;
 		tmp.m_isLinked = false;
 	}
 	m_elementList.push_back(tmp);
@@ -209,26 +219,34 @@ int32_t gale::resource::Program::getUniform(std::string _elementName) {
 	progAttributeElement tmp;
 	tmp.m_name = _elementName;
 	tmp.m_isAttribute = false;
-	if (m_exist == true) {
+	if (gale::openGL::hasContext() == false) {
+		getManager().update(std::dynamic_pointer_cast<gale::Resource>(shared_from_this()));
+		tmp.m_elementId = -1;
+		tmp.m_isLinked = false;
+	} else if (m_exist == true) {
 		tmp.m_elementId = gale::openGL::program::getUniformLocation(m_program, tmp.m_name);
 		tmp.m_isLinked = true;
 		if (tmp.m_elementId<0) {
-			GALE_WARNING("    [" << m_elementList.size() << "] glGetUniformLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
+			GALE_WARNING("    {" << m_program << "}[" << m_elementList.size() << "] glGetUniformLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
 			tmp.m_isLinked = false;
 		} else {
-			GALE_INFO("    [" << m_elementList.size() << "] glGetUniformLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
+			GALE_INFO("    {" << m_program << "}[" << m_elementList.size() << "] glGetUniformLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
 		}
 	} else {
 		// program is not loaded ==> just local reister ...
-		tmp.m_elementId = gale::openGL::program::getUniformLocation(m_program, tmp.m_name);
+		tmp.m_elementId = -1;
 		tmp.m_isLinked = false;
 	}
 	m_elementList.push_back(tmp);
 	return m_elementList.size()-1;
 }
 
-void gale::resource::Program::updateContext() {
-	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+bool gale::resource::Program::updateContext() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex, std11::defer_lock);
+	if (lock.try_lock() == false) {
+		//Lock error ==> try later ...
+		return false;
+	}
 	if (m_exist == true) {
 		// Do nothing  == > too dangerous ...
 	} else {
@@ -236,7 +254,7 @@ void gale::resource::Program::updateContext() {
 		GALE_INFO("Create the Program ... \"" << m_name << "\"");
 		m_program = gale::openGL::program::create();
 		if (m_program < 0) {
-			return;
+			return true;
 		}
 		// first attach vertex shader, and after fragment shader
 		for (size_t iii=0; iii<m_shaderList.size(); iii++) {
@@ -256,9 +274,8 @@ void gale::resource::Program::updateContext() {
 		if (gale::openGL::program::compile(m_program) == false) {
 			GALE_ERROR("Could not compile \"PROGRAM\": \"" << m_name << "\"");
 			gale::openGL::program::remove(m_program);
-			return;
+			return true;
 		}
-		m_exist = true;
 		// now get the old attribute requested priviously ...
 		size_t iii = 0;
 		for(auto &it : m_elementList) {
@@ -266,24 +283,27 @@ void gale::resource::Program::updateContext() {
 				it.m_elementId = gale::openGL::program::getAttributeLocation(m_program, it.m_name);
 				it.m_isLinked = true;
 				if (it.m_elementId<0) {
-					GALE_WARNING("    [" << iii << "] openGL::getAttributeLocation(\"" << it.m_name << "\") = " << it.m_elementId);
+					GALE_WARNING("    {" << m_program << "}[" << iii << "] openGL::getAttributeLocation(\"" << it.m_name << "\") = " << it.m_elementId);
 					it.m_isLinked = false;
 				} else {
-					GALE_DEBUG("    [" << iii << "] openGL::getAttributeLocation(\"" << it.m_name << "\") = " << it.m_elementId);
+					GALE_DEBUG("    {" << m_program << "}[" << iii << "] openGL::getAttributeLocation(\"" << it.m_name << "\") = " << it.m_elementId);
 				}
 			} else {
 				it.m_elementId = gale::openGL::program::getUniformLocation(m_program, it.m_name);
 				it.m_isLinked = true;
 				if (it.m_elementId < 0) {
-					GALE_WARNING("    [" << iii << "] openGL::getUniformLocation(\"" << it.m_name << "\") = " << it.m_elementId);
+					GALE_WARNING("    {" << m_program << "}[" << iii << "] openGL::getUniformLocation(\"" << it.m_name << "\") = " << it.m_elementId);
 					it.m_isLinked = false;
 				} else {
-					GALE_DEBUG("    [" << iii << "] openGL::getUniformLocation(\"" << it.m_name << "\") = " << it.m_elementId);
+					GALE_DEBUG("    {" << m_program << "}[" << iii << "] openGL::getUniformLocation(\"" << it.m_name << "\") = " << it.m_elementId);
 				}
 			}
 			iii++;
 		}
+		// It will existed only when all is updated...
+		m_exist = true;
 	}
+	return true;
 }
 
 void gale::resource::Program::removeContext() {
@@ -350,7 +370,8 @@ void gale::resource::Program::sendAttribute(int32_t _idElem,
                                             int32_t _nbElement,
                                             const void* _pointer,
                                             int32_t _jumpBetweenSample) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (    _idElem < 0
@@ -378,7 +399,8 @@ void gale::resource::Program::sendAttributePointer(int32_t _idElem,
                                                    int32_t _index,
                                                    int32_t _jumpBetweenSample,
                                                    int32_t _offset) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -415,7 +437,8 @@ void gale::resource::Program::sendAttributePointer(int32_t _idElem,
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 void gale::resource::Program::uniformMatrix(int32_t _idElem, const mat4& _matrix, bool _transpose) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -440,7 +463,8 @@ void gale::resource::Program::uniformMatrix(int32_t _idElem, const mat4& _matrix
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 void gale::resource::Program::uniform1f(int32_t _idElem, float _value1) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -454,7 +478,8 @@ void gale::resource::Program::uniform1f(int32_t _idElem, float _value1) {
 	checkGlError("glUniform1f", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform2f(int32_t _idElem, float  _value1, float _value2) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -468,7 +493,8 @@ void gale::resource::Program::uniform2f(int32_t _idElem, float  _value1, float _
 	checkGlError("glUniform2f", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform3f(int32_t _idElem, float _value1, float _value2, float _value3) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -482,7 +508,8 @@ void gale::resource::Program::uniform3f(int32_t _idElem, float _value1, float _v
 	checkGlError("glUniform3f", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform4f(int32_t _idElem, float _value1, float _value2, float _value3, float _value4) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -499,7 +526,8 @@ void gale::resource::Program::uniform4f(int32_t _idElem, float _value1, float _v
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 void gale::resource::Program::uniform1i(int32_t _idElem, int32_t _value1) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -513,7 +541,8 @@ void gale::resource::Program::uniform1i(int32_t _idElem, int32_t _value1) {
 	checkGlError("glUniform1i", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform2i(int32_t _idElem, int32_t _value1, int32_t _value2) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -527,7 +556,8 @@ void gale::resource::Program::uniform2i(int32_t _idElem, int32_t _value1, int32_
 	checkGlError("glUniform2i", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform3i(int32_t _idElem, int32_t _value1, int32_t _value2, int32_t _value3) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -541,7 +571,8 @@ void gale::resource::Program::uniform3i(int32_t _idElem, int32_t _value1, int32_
 	checkGlError("glUniform3i", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform4i(int32_t _idElem, int32_t _value1, int32_t _value2, int32_t _value3, int32_t _value4) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -559,7 +590,8 @@ void gale::resource::Program::uniform4i(int32_t _idElem, int32_t _value1, int32_
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 void gale::resource::Program::uniform1fv(int32_t _idElem, int32_t _nbElement, const float *_value) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -581,7 +613,8 @@ void gale::resource::Program::uniform1fv(int32_t _idElem, int32_t _nbElement, co
 	checkGlError("glUniform1fv", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform2fv(int32_t _idElem, int32_t _nbElement, const float *_value) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -603,7 +636,8 @@ void gale::resource::Program::uniform2fv(int32_t _idElem, int32_t _nbElement, co
 	checkGlError("glUniform2fv", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform3fv(int32_t _idElem, int32_t _nbElement, const float *_value) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -626,7 +660,8 @@ void gale::resource::Program::uniform3fv(int32_t _idElem, int32_t _nbElement, co
 	checkGlError("glUniform3fv", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform4fv(int32_t _idElem, int32_t _nbElement, const float *_value) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -652,7 +687,8 @@ void gale::resource::Program::uniform4fv(int32_t _idElem, int32_t _nbElement, co
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 void gale::resource::Program::uniform1iv(int32_t _idElem, int32_t _nbElement, const int32_t *_value) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -674,7 +710,8 @@ void gale::resource::Program::uniform1iv(int32_t _idElem, int32_t _nbElement, co
 	checkGlError("glUniform1iv", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform2iv(int32_t _idElem, int32_t _nbElement, const int32_t *_value) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -696,7 +733,8 @@ void gale::resource::Program::uniform2iv(int32_t _idElem, int32_t _nbElement, co
 	checkGlError("glUniform2iv", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform3iv(int32_t _idElem, int32_t _nbElement, const int32_t *_value) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -718,7 +756,8 @@ void gale::resource::Program::uniform3iv(int32_t _idElem, int32_t _nbElement, co
 	checkGlError("glUniform3iv", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform4iv(int32_t _idElem, int32_t _nbElement, const int32_t *_value) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -759,7 +798,8 @@ void gale::resource::Program::use() {
 
 
 void gale::resource::Program::setTexture0(int32_t _idElem, int64_t _textureOpenGlID) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -784,7 +824,8 @@ void gale::resource::Program::setTexture0(int32_t _idElem, int64_t _textureOpenG
 }
 
 void gale::resource::Program::setTexture1(int32_t _idElem, int64_t _textureOpenGlID) {
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
@@ -811,7 +852,8 @@ void gale::resource::Program::setTexture1(int32_t _idElem, int64_t _textureOpenG
 
 void gale::resource::Program::unUse() {
 	//GALE_WARNING("Will use program : " << m_program);
-	if (0 == m_program) {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
 		return;
 	}
 	#if 0

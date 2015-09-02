@@ -56,8 +56,12 @@ gale::resource::Texture::~Texture() {
 	removeContext();
 }
 
-void gale::resource::Texture::updateContext() {
-	std11::unique_lock<std11::recursive_mutex> lock(m_mutex);
+bool gale::resource::Texture::updateContext() {
+	std11::unique_lock<std11::recursive_mutex> lock(m_mutex, std11::defer_lock);
+	if (lock.try_lock() == false) {
+		//Lock error ==> try later ...
+		return false;
+	}
 	if (false == m_loaded) {
 		// Request a new texture at openGl :
 		glGenTextures(1, &m_texId);
@@ -86,6 +90,7 @@ void gale::resource::Texture::updateContext() {
 	             &((*m_data)[0]) );
 	// now the data is loaded
 	m_loaded = true;
+	return true;
 }
 
 void gale::resource::Texture::removeContext() {

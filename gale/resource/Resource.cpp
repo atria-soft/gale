@@ -68,8 +68,9 @@ bool gale::Resource::isTypeCompatible(const std::string& _type) {
 }
 
 
-void gale::Resource::updateContext() {
+bool gale::Resource::updateContext() {
 	GALE_DEBUG("Not set for : [" << getId() << "]" << getName() << " loaded " << shared_from_this().use_count() << " time(s)");
+	return true;
 }
 
 void gale::Resource::removeContext() {

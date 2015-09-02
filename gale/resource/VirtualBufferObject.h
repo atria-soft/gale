@@ -107,7 +107,7 @@ namespace gale {
 				/**
 				 * @brief This load/reload the data in the opengl context, needed when removed previously.
 				 */
-				void updateContext();
+				bool updateContext();
 				/**
 				 * @brief remove the data from the opengl context.
 				 */

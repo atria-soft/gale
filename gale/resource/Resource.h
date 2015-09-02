@@ -189,8 +189,10 @@ namespace gale {
 			/**
 			 * @brief Call when need to send data on the harware (openGL)
 			 * @note This is done asynchronously with the create of the Resource.
+			 * @return true The context is updated
+			 * @return false The context is not updated
 			 */
-			virtual void updateContext();
+			virtual bool updateContext();
 			/**
 			 * @brief The current OpenGl context is removing ==> remove yout own system data
 			 */
