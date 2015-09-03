@@ -353,32 +353,60 @@ void gale::Context::OS_Move(const vec2& _pos) {
 	*/
 }
 
+void gale::Context::OS_SetInput(enum gale::key::type _type,
+                                enum gale::key::status _status,
+                                int32_t _pointerID,
+                                const vec2& _pos ) {
+	if (m_imulationActive == true) {
+		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(":INPUT:";);
+		m_simulationFile.filePuts(etk::to_string(_type));
+		m_simulationFile.filePuts(":");
+		m_simulationFile.filePuts(etk::to_string(_status));
+		m_simulationFile.filePuts(":");
+		m_simulationFile.filePuts(etk::to_string(_pointerID));
+		m_simulationFile.filePuts(":");
+		m_simulationFile.filePuts(etk::to_string(_pos));
+		m_simulationFile.filePuts("\n");
+	}
+	m_msgSystem.post([_type, _status, _pointerID, _pos](gale::Context& _context){
+		std::shared_ptr<gale::Application> appl = _context.getApplication();
+		if (appl == nullptr) {
+			return;
+		}
+		appl->onPointer(_type,
+		                _pointerID,
+		                _pos,
+		                _status);
+	});
+}
+
 void gale::Context::OS_SetInputMotion(int _pointerID, const vec2& _pos ) {
-	m_msgSystem.post(std::make_shared<gale::context::LoopActionInput>(gale::key::type_finger,
-	                                                                  gale::key::status_move,
-	                                                                  _pointerID,
-	                                                                  _pos));
+	OS_SetInput(gale::key::type_finger,
+	            gale::key::status_move,
+	            _pointerID,
+	            _pos));
 }
 
 void gale::Context::OS_SetInputState(int _pointerID, bool _isDown, const vec2& _pos ) {
-	m_msgSystem.post(std::make_shared<gale::context::LoopActionInput>(gale::key::type_finger,
-	                                                                  (_isDown==true?gale::key::status_down:gale::key::status_up),
-	                                                                  _pointerID,
-	                                                                  _pos));
+	OS_SetInput(gale::key::type_finger,
+	            (_isDown==true?gale::key::status_down:gale::key::status_up),
+	            _pointerID,
+	            _pos));
 }
 
 void gale::Context::OS_SetMouseMotion(int _pointerID, const vec2& _pos ) {
-	m_msgSystem.post(std::make_shared<gale::context::LoopActionInput>(gale::key::type_mouse,
-	                                                                  gale::key::status_move,
-	                                                                  _pointerID,
-	                                                                  _pos));
+	OS_SetInput(gale::key::type_mouse,
+	            gale::key::status_move,
+	            _pointerID,
+	            _pos));
 }
 
 void gale::Context::OS_SetMouseState(int _pointerID, bool _isDown, const vec2& _pos ) {
-	m_msgSystem.post(std::make_shared<gale::context::LoopActionInput>(gale::key::type_mouse,
-	                                                                  (_isDown==true?gale::key::status_down:gale::key::status_up),
-	                                                                  _pointerID,
-	                                                                  _pos));
+	OS_SetInput(gale::key::type_mouse,
+	            (_isDown==true?gale::key::status_down:gale::key::status_up),
+	            _pointerID,
+	            _pos));
 }
 
 void gale::Context::OS_SetKeyboard(gale::key::Special& _special,

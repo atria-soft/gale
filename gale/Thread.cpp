@@ -17,8 +17,7 @@ gale::Thread::Thread() :
 }
 
 gale::Thread::~Thread() {
-	delete m_thread;
-	m_thread = nullptr;
+	stop();
 }
 
 void gale::Thread::start() {
@@ -35,10 +34,15 @@ void gale::Thread::start() {
 }
 
 void gale::Thread::stop() {
-	if (m_state != state_running) {
+	if (m_state == state_stop) {
 		return;
 	}
-	m_state = state_stopping;
+	while (    m_state == state_running
+	        || m_state == state_starting) {
+		// requesting a stop ...
+		GALE_INFO("wait Thread stopping");
+		usleep(500000);
+	}
 	m_thread->join();
 	gale::contextUnRegisterThread(m_thread);
 	delete m_thread;
@@ -53,7 +57,9 @@ void gale::Thread::threadCall() {
 			continue;
 		}
 		if (onThreadCall() == true) {
+			m_state = state_stopping;
 			return;
 		}
 	}
+	m_state = state_stopping;
 }
