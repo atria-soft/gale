@@ -398,9 +398,15 @@ class WindowsContext : public gale::Context {
 					GALE_DEBUG("kjhkjhkjhkjhkj = " << _wParam);
 					if (tmpChar == 0) {
 						//GALE_DEBUG("eventKey Move type : " << getCharTypeMoveEvent(keyInput) );
-						OS_SetKeyboardMove(m_guiKeyBoardMode, keyInput, buttonIsDown);
+						OS_setKeyboard(m_guiKeyBoardMode,
+						               move,
+						               (buttonIsDown==true?gale::key::status_down:gale::key::status_up));
 					} else {
-						OS_SetKeyboard(m_guiKeyBoardMode, tmpChar, buttonIsDown);
+						OS_setKeyboard(m_guiKeyBoardMode,
+						               gale::key::keyboard_char,
+						               (buttonIsDown==true?gale::key::status_down:gale::key::status_up),
+						               false,
+						               tmpChar);
 					}
 					return 0;
 				}
@@ -414,7 +420,10 @@ class WindowsContext : public gale::Context {
 					pos.setValue(GET_X_LPARAM(_lParam),
 					             m_currentHeight-GET_Y_LPARAM(_lParam));
 					m_inputIsPressed[mouseButtonId] = buttonIsDown;
-					OS_SetMouseState(mouseButtonId, buttonIsDown, vec2(pos.x(),pos.y()));
+					OS_SetInput(gale::key::type_mouse,
+					            (buttonIsDown==true?gale::key::status_down:gale::key::status_up),
+					            mouseButtonId,
+					             vec2(pos.x(),pos.y()));
 					return 0;
 				
 				case WM_MBUTTONUP:
@@ -424,7 +433,10 @@ class WindowsContext : public gale::Context {
 					pos.setValue(GET_X_LPARAM(_lParam),
 					             m_currentHeight-GET_Y_LPARAM(_lParam));
 					m_inputIsPressed[mouseButtonId] = buttonIsDown;
-					OS_SetMouseState(mouseButtonId, buttonIsDown, vec2(pos.x(),pos.y()));
+					OS_SetInput(gale::key::type_mouse,
+					            (buttonIsDown==true?gale::key::status_down:gale::key::status_up),
+					            mouseButtonId,
+					            vec2(pos.x(),pos.y()));
 					return 0;
 				
 				case WM_RBUTTONUP:
@@ -434,7 +446,10 @@ class WindowsContext : public gale::Context {
 					pos.setValue(GET_X_LPARAM(_lParam),
 					             m_currentHeight-GET_Y_LPARAM(_lParam));
 					m_inputIsPressed[mouseButtonId] = buttonIsDown;
-					OS_SetMouseState(mouseButtonId, buttonIsDown, vec2(pos.x(),pos.y()));
+					OS_SetInput(gale::key::type_mouse,
+					            (buttonIsDown==true?gale::key::status_down:gale::key::status_up),
+					            mouseButtonId,
+					            vec2(pos.x(),pos.y()));
 					return 0;
 				
 				case WM_MOUSEWHEEL:
@@ -447,8 +462,14 @@ class WindowsContext : public gale::Context {
 					}
 					pos.setValue(GET_X_LPARAM(_lParam),
 					             m_currentHeight-GET_Y_LPARAM(_lParam));
-					OS_SetMouseState(mouseButtonId, true,  vec2(pos.x(),pos.y()));
-					OS_SetMouseState(mouseButtonId, false, vec2(pos.x(),pos.y()));
+					OS_SetInput(gale::key::type_mouse,
+					            gale::key::status_down,
+					            mouseButtonId,
+					            vec2(pos.x(),pos.y()));
+					OS_SetInput(gale::key::type_mouse,
+					            gale::key::status_up,
+					            mouseButtonId,
+					            vec2(pos.x(),pos.y()));
 					return 0;
 				
 				case WM_MOUSEHOVER:
@@ -458,12 +479,18 @@ class WindowsContext : public gale::Context {
 					for (int32_t iii=0; iii<MAX_MANAGE_INPUT ; iii++) {
 						if (true == m_inputIsPressed[iii]) {
 							GALE_VERBOSE("Windows event: bt=" << iii << " " << _message << " = \"WM_MOUSEMOVE\" " << pos );
-							OS_SetMouseMotion(iii, vec2(pos.x(),pos.y()));
+							OS_SetInput(gale::key::type_mouse,
+							            gale::key::status_motion),
+							            iii,
+							            vec2(pos.x(),pos.y()));
 							return 0;
 						}
 					}
 					GALE_VERBOSE("Windows event: bt=" << 0 << " " << _message << " = \"WM_MOUSEMOVE\" " << pos );
-					OS_SetMouseMotion(0, vec2(pos.x(),pos.y()));
+					OS_SetInput(gale::key::type_mouse,
+					            gale::key::status_motion),
+					            0,
+					            vec2(pos.x(),pos.y()));
 					return 0;
 				
 				default:

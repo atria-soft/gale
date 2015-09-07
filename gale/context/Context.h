@@ -23,14 +23,12 @@
 #include <memory>
 #include <gale/orientation.h>
 #include <gale/context/clipBoard.h>
-#include <gale/context/LoopAction.h>
 #include <etk/thread/tools.h>
 
 #define MAX_MANAGE_INPUT (15)
 
 namespace gale {
 	class Context/* : private gale::object::RemoveEvent */{
-		friend gale::context::LoopActionResize;
 		private:
 			std::shared_ptr<gale::Application> m_application; //!< Application handle
 		public:
@@ -70,7 +68,7 @@ namespace gale {
 		private:
 			int64_t m_previousDisplayTime;  // this is to limit framerate ... in case...
 			// TODO : gale::context::InputManager m_input;
-			etk::Fifo<std::shared_ptr<gale::context::LoopAction> > m_msgSystem;
+			etk::Fifo<std::function<void(gale::Context& _context)> > m_msgSystem;
 			bool m_displayFps;
 			gale::context::Fps m_FpsSystemEvent;
 			gale::context::Fps m_FpsSystemContext;
@@ -84,20 +82,15 @@ namespace gale {
 			
 			virtual void setArchiveDir(int _mode, const char* _str);
 			
-			virtual void OS_SetInputMotion(int _pointerID, const vec2& _pos);
-			virtual void OS_SetInputState(int _pointerID, bool _isDown, const vec2& _pos);
-			
-			virtual void OS_SetMouseMotion(int _pointerID, const vec2& _pos);
-			virtual void OS_SetMouseState(int _pointerID, bool _isDown, const vec2& _pos);
-			
-			virtual void OS_SetKeyboard(gale::key::Special& _special,
-			                            char32_t _myChar,
-			                            bool _isDown,
-			                            bool _isARepeateKey=false);
-			virtual void OS_SetKeyboardMove(gale::key::Special& _special,
-			                                enum gale::key::keyboard _move,
-			                                bool _isDown,
-			                                bool _isARepeateKey=false);
+			virtual void OS_SetInput(enum gale::key::type _type,
+			                         enum gale::key::status _status,
+			                         int32_t _pointerID,
+			                         const vec2& _pos);
+			virtual void OS_setKeyboard(const gale::key::Special& _special,
+			                            enum gale::key::keyboard _type,
+			                            enum gale::key::status _state,
+			                            bool _isARepeateKey = false,
+			                            char32_t _char = u32char::Null);
 			/**
 			 * @brief The current context is suspended
 			 */
@@ -285,9 +278,6 @@ namespace gale {
 			 * @return normal error int for the application error management
 			 */
 			static int main(int _argc, const char *_argv[]);
-		private:
-			size_t m_initStepId;
-			size_t m_initTotalStep;
 		public:
 			/**
 			 * @brief Special for init (main) set the start image when loading data

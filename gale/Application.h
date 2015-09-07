@@ -93,7 +93,7 @@ namespace gale {
 			 * @param[in] _value Unicode value of the char pushed (viable only if _type==gale::key::keyboard_char).
 			 * @param[in] _state State of the key (up/down/upRepeate/downRepeate)
 			 */
-			virtual void onKeyboard(gale::key::Special& _special,
+			virtual void onKeyboard(const gale::key::Special& _special,
 			                        enum gale::key::keyboard _type,
 			                        char32_t _value,
 			                        gale::key::status _state);

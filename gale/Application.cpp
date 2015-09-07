@@ -74,7 +74,7 @@ void gale::Application::onPointer(enum gale::key::type _type, int32_t _pointerID
 	
 }
 
-void gale::Application::onKeyboard(gale::key::Special& _special,
+void gale::Application::onKeyboard(const gale::key::Special& _special,
                                    enum gale::key::keyboard _type,
                                    char32_t _value,
                                    gale::key::status _state) {

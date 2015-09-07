@@ -435,7 +435,10 @@ class X11Interface : public gale::Context {
 							if (event.xbutton.button < MAX_MANAGE_INPUT) {
 								m_inputIsPressed[event.xbutton.button] = true;
 							}
-							OS_SetMouseState(event.xbutton.button, true, vec2(event.xbutton.x, m_cursorEventY));
+							OS_SetInput(gale::key::type_mouse,
+							            gale::key::status_down,
+							            event.xbutton.button,
+							            vec2(event.xbutton.x, m_cursorEventY));
 							break;
 						case ButtonRelease:
 							X11_INFO("X11 event ButtonRelease");
@@ -444,7 +447,10 @@ class X11Interface : public gale::Context {
 							if (event.xbutton.button < MAX_MANAGE_INPUT) {
 								m_inputIsPressed[event.xbutton.button] = false;
 							}
-							OS_SetMouseState(event.xbutton.button, false, vec2(event.xbutton.x, m_cursorEventY));
+							OS_SetInput(gale::key::type_mouse,
+							            gale::key::status_up,
+							            event.xbutton.button,
+							            vec2(event.xbutton.x, m_cursorEventY));
 							break;
 						case EnterNotify:
 							X11_INFO("X11 event EnterNotify");
@@ -490,13 +496,19 @@ class X11Interface : public gale::Context {
 								for (int32_t iii=0; iii<MAX_MANAGE_INPUT ; iii++) {
 									if (true == m_inputIsPressed[iii]) {
 										X11_DEBUG("X11 event: bt=" << iii << " " << event.type << " = \"MotionNotify\" (" << m_cursorEventX << "," << m_cursorEventY << ")");
-										OS_SetMouseMotion(iii, vec2(m_cursorEventX, m_cursorEventY));
+										OS_SetInput(gale::key::type_mouse,
+										            gale::key::status_move,
+										            iii,
+										            vec2(m_cursorEventX, m_cursorEventY));
 										findOne = true;
 									}
 								}
 								if (false == findOne) {
 									X11_DEBUG("X11 event: bt=" << 0 << " " << event.type << " = \"MotionNotify\" (" << m_cursorEventX << "," << m_cursorEventY << ")");
-									OS_SetMouseMotion(0, vec2(m_cursorEventX, m_cursorEventY));
+										OS_SetInput(gale::key::type_mouse,
+										            gale::key::status_move,
+										            0,
+										            vec2(m_cursorEventX, m_cursorEventY));
 								}
 								if (true == m_grabAllEvent) {
 									if (m_positionChangeRequested == false) {
@@ -644,22 +656,46 @@ class X11Interface : public gale::Context {
 									case 91: // Suppr on keypad
 										find = false;
 										if(m_guiKeyBoardMode.getNumLock() == true){
-											OS_SetKeyboard(m_guiKeyBoardMode, '.', (event.type == KeyPress), thisIsAReapeateKey);
+											OS_setKeyboard(m_guiKeyBoardMode,
+											               gale::key::keyboard_char,
+											               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
+											               thisIsAReapeateKey,
+											               '.');
 											if (true == thisIsAReapeateKey) {
-												OS_SetKeyboard(m_guiKeyBoardMode, '.', !(event.type == KeyPress), thisIsAReapeateKey);
+												OS_setKeyboard(m_guiKeyBoardMode,
+												               gale::key::keyboard_char,
+												               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
+												               thisIsAReapeateKey,
+												               '.');
 											}
 										} else {
-											OS_SetKeyboard(m_guiKeyBoardMode, 0x7F, (event.type == KeyPress), thisIsAReapeateKey);
+											OS_setKeyboard(m_guiKeyBoardMode,
+											               gale::key::keyboard_char,
+											               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
+											               thisIsAReapeateKey,
+											               0x7F);
 											if (true == thisIsAReapeateKey) {
-												OS_SetKeyboard(m_guiKeyBoardMode, 0x7F, !(event.type == KeyPress), thisIsAReapeateKey);
+												OS_setKeyboard(m_guiKeyBoardMode,
+												               gale::key::keyboard_char,
+												               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
+												               thisIsAReapeateKey,
+												               0x7F);
 											}
 										}
 										break;
 									case 23: // special case for TAB
 										find = false;
-										OS_SetKeyboard(m_guiKeyBoardMode, 0x09, (event.type == KeyPress), thisIsAReapeateKey);
+										OS_setKeyboard(m_guiKeyBoardMode,
+										               gale::key::keyboard_char,
+										               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
+										               thisIsAReapeateKey,
+										               0x09);
 										if (true == thisIsAReapeateKey) {
-											OS_SetKeyboard(m_guiKeyBoardMode, 0x09, !(event.type == KeyPress), thisIsAReapeateKey);
+											OS_setKeyboard(m_guiKeyBoardMode,
+											               gale::key::keyboard_char,
+											               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
+											               thisIsAReapeateKey,
+											               0x09);
 										}
 										break;
 									default:
@@ -691,9 +727,17 @@ class X11Interface : public gale::Context {
 													m_lastKeyPressed = utf8::convertChar32(buf);
 												}
 												X11_INFO("event Key : " << event.xkey.keycode << " char=\"" << buf << "\"'len=" << strlen(buf) << " unicode=" << m_lastKeyPressed);
-												OS_SetKeyboard(m_guiKeyBoardMode, m_lastKeyPressed, (event.type == KeyPress), thisIsAReapeateKey);
+												OS_setKeyboard(m_guiKeyBoardMode,
+												               gale::key::keyboard_char,
+												               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
+												               thisIsAReapeateKey,
+												               m_lastKeyPressed);
 												if (true == thisIsAReapeateKey) {
-													OS_SetKeyboard(m_guiKeyBoardMode, m_lastKeyPressed, !(event.type == KeyPress), thisIsAReapeateKey);
+													OS_setKeyboard(m_guiKeyBoardMode,
+													               gale::key::keyboard_char,
+													               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
+													               thisIsAReapeateKey,
+													               m_lastKeyPressed);
 												}
 											} else {
 												GALE_WARNING("Unknow event Key : " << event.xkey.keycode << " res='" << buf << "' repeate=" << thisIsAReapeateKey);
@@ -703,9 +747,15 @@ class X11Interface : public gale::Context {
 								}
 								if (true == find) {
 									//GALE_DEBUG("eventKey Move type : " << getCharTypeMoveEvent(keyInput) );
-									OS_SetKeyboardMove(m_guiKeyBoardMode, keyInput, (event.type == KeyPress), thisIsAReapeateKey);
+									OS_setKeyboard(m_guiKeyBoardMode,
+									               keyInput,
+									               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
+									               thisIsAReapeateKey);
 									if (true == thisIsAReapeateKey) {
-										OS_SetKeyboardMove(m_guiKeyBoardMode, keyInput, !(event.type == KeyPress), thisIsAReapeateKey);
+										OS_setKeyboard(m_guiKeyBoardMode,
+										               keyInput,
+										               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
+										               thisIsAReapeateKey);
 									}
 								}
 							}

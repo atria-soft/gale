@@ -149,21 +149,14 @@ void gale::Context::inputEventUnGrabPointer() {
 void gale::Context::processEvents() {
 	int32_t nbEvent = 0;
 	//GALE_DEBUG(" ********  Event");
-	std::shared_ptr<gale::context::LoopAction> data;
 	while (m_msgSystem.count()>0) {
 		nbEvent++;
-		m_msgSystem.wait(data);
-		if (data == nullptr) {
+		std::function<void(gale::Context& _context)> func;
+		m_msgSystem.wait(func);
+		if (func == nullptr) {
 			continue;
 		}
-		if (m_imulationActive == true) {
-			std::string dataExecuted = data->createString();
-			m_simulationFile.filePuts(dataExecuted);
-			m_simulationFile.filePuts("\n");
-			GALE_VERBOSE("plop: " + dataExecuted);
-		}
-		data->doAction(*this);
-		data.reset();
+		func(*this);
 	}
 }
 
@@ -193,7 +186,6 @@ void gale::Context::setArchiveDir(int _mode, const char* _str) {
 
 
 gale::Context::Context(gale::Application* _application, int32_t _argc, const char* _argv[]) :
-  //m_application(std::make_shared<gale::Application>(_application)),
   m_application(_application),
   m_imulationActive(false),
   m_simulationFile("gale.gsim"),
@@ -209,8 +201,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
   m_FpsSystemContext("Context   ", false),
   m_FpsSystem(       "Draw      ", true),
   m_FpsFlush(        "Flush     ", false),
-  m_windowsSize(320,480),
-  m_initStepId(0) {
+  m_windowsSize(320,480) {
 	// set a basic 
 	etk::thread::setName("galeThread");
 	if (m_application == nullptr) {
@@ -282,7 +273,21 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	// TODO : remove this ...
 	etk::initDefaultFolder("galeApplNoName");
 	// request the init of the application in the main context of openGL ...
-	m_msgSystem.post(std::make_shared<gale::context::LoopActionInit>());
+	if (m_imulationActive == true) {
+		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(":INIT");
+		m_simulationFile.filePuts("\n");
+	}
+	m_msgSystem.post([](gale::Context& _context){
+		std::shared_ptr<gale::Application> appl = _context.getApplication();
+		if (appl == nullptr) {
+			return;
+		}
+		appl->onCreate(_context);
+		appl->onStart(_context);
+		appl->onResume(_context);
+	});
+	
 	// force a recalculation
 	requestUpdateSize();
 	#if defined(__GALE_ANDROID_ORIENTATION_LANDSCAPE__)
@@ -335,13 +340,31 @@ gale::Context::~Context() {
 }
 
 void gale::Context::requestUpdateSize() {
-	m_msgSystem.post(std::make_shared<gale::context::LoopActionRecalculateSize>());
+	if (m_imulationActive == true) {
+		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(":RECALCULATE_SIZE\n");
+	}
+	m_msgSystem.post([](gale::Context& _context){
+		//GALE_DEBUG("Receive MSG : THREAD_RESIZE");
+		_context.forceRedrawAll();
+	});
 }
 
 void gale::Context::OS_Resize(const vec2& _size) {
-	// TODO : Better in the thread ...  == > but generate some init error ...
+	// TODO : Better in the thread ...  ==> but generate some init error ...
 	gale::Dimension::setPixelWindowsSize(_size);
-	m_msgSystem.post(std::make_shared<gale::context::LoopActionResize>(_size));
+	if (m_imulationActive == true) {
+		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(":RESIZE:");
+		m_simulationFile.filePuts(etk::to_string(_size));
+		m_simulationFile.filePuts("\n");
+	}
+	m_msgSystem.post([_size](gale::Context& _context){
+		//GALE_DEBUG("Receive MSG : THREAD_RESIZE");
+		_context.m_windowsSize = _size;
+		gale::Dimension::setPixelWindowsSize(_context.m_windowsSize);
+		_context.forceRedrawAll();
+	});
 }
 void gale::Context::OS_Move(const vec2& _pos) {
 	/*
@@ -359,7 +382,7 @@ void gale::Context::OS_SetInput(enum gale::key::type _type,
                                 const vec2& _pos ) {
 	if (m_imulationActive == true) {
 		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
-		m_simulationFile.filePuts(":INPUT:";);
+		m_simulationFile.filePuts(":INPUT:");
 		m_simulationFile.filePuts(etk::to_string(_type));
 		m_simulationFile.filePuts(":");
 		m_simulationFile.filePuts(etk::to_string(_status));
@@ -381,80 +404,96 @@ void gale::Context::OS_SetInput(enum gale::key::type _type,
 	});
 }
 
-void gale::Context::OS_SetInputMotion(int _pointerID, const vec2& _pos ) {
-	OS_SetInput(gale::key::type_finger,
-	            gale::key::status_move,
-	            _pointerID,
-	            _pos));
-}
-
-void gale::Context::OS_SetInputState(int _pointerID, bool _isDown, const vec2& _pos ) {
-	OS_SetInput(gale::key::type_finger,
-	            (_isDown==true?gale::key::status_down:gale::key::status_up),
-	            _pointerID,
-	            _pos));
-}
-
-void gale::Context::OS_SetMouseMotion(int _pointerID, const vec2& _pos ) {
-	OS_SetInput(gale::key::type_mouse,
-	            gale::key::status_move,
-	            _pointerID,
-	            _pos));
-}
-
-void gale::Context::OS_SetMouseState(int _pointerID, bool _isDown, const vec2& _pos ) {
-	OS_SetInput(gale::key::type_mouse,
-	            (_isDown==true?gale::key::status_down:gale::key::status_up),
-	            _pointerID,
-	            _pos));
-}
-
-void gale::Context::OS_SetKeyboard(gale::key::Special& _special,
-                                   char32_t _myChar,
-                                   bool _isDown,
-                                   bool _isARepeateKey) {
-	enum gale::key::status state = _isDown==true?gale::key::status_down:gale::key::status_up;
+void gale::Context::OS_setKeyboard(const gale::key::Special& _special,
+                                   enum gale::key::keyboard _type,
+                                   enum gale::key::status _state,
+                                   bool _isARepeateKey,
+                                   char32_t _char) {
 	if (_isARepeateKey == true) {
-		if (state == gale::key::status_down) {
-			state = gale::key::status_downRepeate;
+		if (_state == gale::key::status_down) {
+			_state = gale::key::status_downRepeate;
 		} else {
-			state = gale::key::status_upRepeate;
+			_state = gale::key::status_upRepeate;
 		}
 	}
-	m_msgSystem.post(std::make_shared<gale::context::LoopActionKeyboard>(_special,
-	                                                                     gale::key::keyboard_char,
-	                                                                     state,
-	                                                                     _myChar));
-}
-
-void gale::Context::OS_SetKeyboardMove(gale::key::Special& _special,
-                                       enum gale::key::keyboard _move,
-                                       bool _isDown,
-                                       bool _isARepeateKey) {
-	gale::key::status state = _isDown==true?gale::key::status_down:gale::key::status_up;
-	if (_isARepeateKey == true) {
-		if (state == gale::key::status_down) {
-			state = gale::key::status_downRepeate;
-		} else {
-			state = gale::key::status_upRepeate;
-		}
+	if (m_imulationActive == true) {
+		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(":KEYBOARD:");
+		m_simulationFile.filePuts(etk::to_string(_special));
+		m_simulationFile.filePuts(":");
+		m_simulationFile.filePuts(etk::to_string(_type));
+		m_simulationFile.filePuts(":");
+		m_simulationFile.filePuts(etk::to_string(_state));
+		m_simulationFile.filePuts(":");
+		m_simulationFile.filePuts(etk::to_string(uint64_t(_char)));
+		m_simulationFile.filePuts("\n");
 	}
-	m_msgSystem.post(std::make_shared<gale::context::LoopActionKeyboard>(_special,
-	                                                                     _move,
-	                                                                     state));
+	m_msgSystem.post([_special, _type, _state, _char](gale::Context& _context){
+		std::shared_ptr<gale::Application> appl = _context.getApplication();
+		if (appl == nullptr) {
+			return;
+		}
+		appl->onKeyboard(_special,
+		                 _type,
+		                 _char,
+		                 _state);
+	});
 }
 
 void gale::Context::OS_Hide() {
-	m_msgSystem.post(std::make_shared<gale::context::LoopActionView>(false));
+	if (m_imulationActive == true) {
+		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(":VIEW:false\n");
+	}
+	m_msgSystem.post([](gale::Context& _context){
+		/*
+		std::shared_ptr<gale::Application> appl = _context.getApplication();
+		if (appl == nullptr) {
+			return;
+		}
+		appl->onKeyboard(_special,
+		                 _type,
+		                 _char,
+		                 _state);
+		*/
+		GALE_TODO("HIDE ... ");
+	});
 }
 
 void gale::Context::OS_Show() {
-	m_msgSystem.post(std::make_shared<gale::context::LoopActionView>(true));
+	if (m_imulationActive == true) {
+		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(":VIEW:true\n");
+	}
+	m_msgSystem.post([](gale::Context& _context){
+		/*
+		std::shared_ptr<gale::Application> appl = _context.getApplication();
+		if (appl == nullptr) {
+			return;
+		}
+		appl->onKeyboard(_special,
+		                 _type,
+		                 _char,
+		                 _state);
+		*/
+		GALE_TODO("SHOW ... ");
+	});
 }
 
 
 void gale::Context::OS_ClipBoardArrive(enum gale::context::clipBoard::clipboardListe _clipboardID) {
-	m_msgSystem.post(std::make_shared<gale::context::LoopActionClipboardArrive>(_clipboardID));
+	if (m_imulationActive == true) {
+		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(":CLIPBOARD_ARRIVE:");
+		m_simulationFile.filePuts(etk::to_string(_clipboardID));
+		m_simulationFile.filePuts("\n");
+	}
+	m_msgSystem.post([_clipboardID](gale::Context& _context){
+		std::shared_ptr<gale::Application> appl = _context.getApplication();
+		if (appl != nullptr) {
+			appl->onClipboardEvent(_clipboardID);
+		}
+	});
 }
 
 void gale::Context::clipBoardGet(enum gale::context::clipBoard::clipboardListe _clipboardID) {

@@ -74,12 +74,18 @@ class MacOSInterface : public ewol::Context {
 			OS_Resize(vec2(_x,_y));
 		}
 		void MAC_SetMouseState(int32_t _id, bool _isDown, float _x, float _y) {
-			OS_SetMouseState(_id, _isDown, vec2(_x, _y));
+			OS_SetInput(gale::key::type_mouse,
+			            (_isDown==true?gale::key::status_down:gale::key::status_up),
+			            _id,
+			            vec2(_x, _y));
 		}
 		void MAC_SetMouseMotion(int32_t _id, float _x, float _y) {
-			OS_SetMouseMotion(_id, vec2(_x, _y));
+			OS_SetInput(gale::key::type_mouse,
+			            gale::key::status_move,
+			            _id,
+			            vec2(_x, _y));
 		}
-		void MAC_SetKeyboard(ewol::key::Special _keyboardMode, int32_t _unichar, bool _isDown, bool _isAReapeateKey) {
+		void MAC_SetKeyboard(ewol::key::Special _special, int32_t _unichar, bool _isDown, bool _isAReapeateKey) {
 			if (char32_t(_unichar) == u32char::Delete) {
 				_unichar = u32char::Suppress;
 			} else if (char32_t(_unichar) == u32char::Suppress) {
@@ -105,16 +111,16 @@ class MacOSInterface : public ewol::Context {
 						move = ewol::key::keyboardRight;
 						break;
 				}
-				OS_SetKeyboardMove(_keyboardMode, move, !_isDown, _isAReapeateKey);
+				OS_setKeyboard(_special, move, (_isDown==false?gale::key::status_down:gale::key::status_up), _isAReapeateKey);
 			} else {
-				OS_SetKeyboard(_keyboardMode, _unichar, !_isDown, _isAReapeateKey);
+				OS_setKeyboard(_special, gale::key::keyboard_char, (_isDown==false?gale::key::status_down:gale::key::status_up), _isAReapeateKey, _unichar);
 			}
 		}
 		void MAC_SetKeyboardMove(ewol::key::Special& _special,
 								enum ewol::key::keyboard _move,
 								bool _isDown,
 								bool _isAReapeateKey) {
-			OS_SetKeyboardMove(_special, _move, _isDown, _isAReapeateKey);
+			OS_setKeyboard(_special, _move, (_isDown==true?gale::key::status_down:gale::key::status_up), _isAReapeateKey);
 		}
 		void openURL(const std::string& _url) {
 			std::string req = "open " + _url;

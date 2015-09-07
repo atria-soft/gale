@@ -33,8 +33,6 @@ def create(target):
 		'gale/context/commandLine.cpp',
 		'gale/context/Context.cpp',
 		'gale/context/cursor.cpp',
-		'gale/context/LoopAction.cpp',
-		#'gale/context/InputManager.cpp'
 		])
 	if target.name=="Linux":
 		myModule.add_src_file('gale/context/X11/Context.cpp')

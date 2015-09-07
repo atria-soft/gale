@@ -431,24 +431,19 @@ class AndroidContext : public gale::Context {
 			java_detach_current_thread(status);
 		}
 	public:
-		void OS_SetInputMotion(int _pointerID, const vec2& _pos) {
-			gale::Context::OS_SetInputMotion(_pointerID, vec2(_pos.x(),m_currentHeight-_pos.y()) );
-		}
-		
-		void OS_SetInputState(int _pointerID, bool _isDown, const vec2& _pos) {
-			gale::Context::OS_SetInputState(_pointerID, _isDown, vec2(_pos.x(),m_currentHeight-_pos.y()) );
-		}
-		
-		void OS_SetMouseMotion(int _pointerID, const vec2& _pos) {
-			gale::Context::OS_SetMouseMotion(_pointerID, vec2(_pos.x(),m_currentHeight-_pos.y()) );
-		}
-		
-		void OS_SetMouseState(int _pointerID, bool _isDown, const vec2& _pos) {
-			gale::Context::OS_SetMouseState(_pointerID, _isDown, vec2(_pos.x(),m_currentHeight-_pos.y()) );
+		void OS_SetInput(enum gale::key::type _type,
+		                 enum gale::key::status _status,
+		                 int32_t _pointerID,
+		                 const vec2& _pos) {
+			gale::Context::OS_SetInput(_type, _status, _pointerID, vec2(_pos.x(),m_currentHeight-_pos.y()));
 		}
 		
 		void ANDROID_SetKeyboard(char32_t _myChar, bool _isDown, bool _isARepeateKey=false) {
-			OS_SetKeyboard(m_guiKeyBoardSpecialKeyMode, _myChar, _isDown, _isARepeateKey);
+			OS_setKeyboard(m_guiKeyBoardSpecialKeyMode,
+			               gale::key::keyboard_char,
+			               (_isDown==true?gale::key::status_down:gale::key::status_up),
+			               _isARepeateKey,
+			               _myChar);
 		}
 		
 		bool ANDROID_systemKeyboradEvent(enum gale::key::keyboardSystem _key, bool _down) {
@@ -458,7 +453,10 @@ class AndroidContext : public gale::Context {
 			// direct wrapping :
 			enum gale::key::keyboard move = (enum gale::key::keyboard)_move;
 			m_guiKeyBoardSpecialKeyMode.update(move, _isDown);
-			OS_SetKeyboardMove(m_guiKeyBoardSpecialKeyMode, move, _isDown, _isARepeateKey);
+			OS_setKeyboard(m_guiKeyBoardSpecialKeyMode,
+			               move,
+			               (_isDown==true?gale::key::status_down:gale::key::status_up),
+			               _isARepeateKey);
 		}
 		
 		void OS_Resize(const vec2& _size) {
@@ -683,7 +681,10 @@ extern "C" {
 			// TODO : generate error in java to stop the current instance
 			return;
 		}
-		s_listInstance[_id]->OS_SetInputMotion(_pointerID+1, vec2(_x,_y));
+		s_listInstance[_id]->OS_SetInput(gale::key::type_finger,
+		                                 gale::key::status_move,
+		                                 _pointerID+1,
+		                                 vec2(_x,_y));
 	}
 	
 	void Java_org_gale_Gale_EWinputEventState(JNIEnv* _env,
@@ -701,7 +702,10 @@ extern "C" {
 			// TODO : generate error in java to stop the current instance
 			return;
 		}
-		s_listInstance[_id]->OS_SetInputState(_pointerID+1, _isUp, vec2(_x,_y));
+		s_listInstance[_id]->OS_SetInput(gale::key::type_finger,
+		                                 (_isUp==false?gale::key::status_down:gale::key::status_up),
+		                                 _pointerID+1,
+		                                 vec2(_x,_y));
 	}
 	
 	void Java_org_gale_Gale_EWmouseEventMotion(JNIEnv* _env,
@@ -718,7 +722,10 @@ extern "C" {
 			// TODO : generate error in java to stop the current instance
 			return;
 		}
-		s_listInstance[_id]->OS_SetMouseMotion(_pointerID+1, vec2(_x,_y));
+		s_listInstance[_id]->OS_SetInput(gale::key::type_mouse,
+		                                 gale::key::status_move,
+		                                 _pointerID+1,
+		                                 vec2(_x,_y));
 	}
 	
 	void Java_org_gale_Gale_EWmouseEventState(JNIEnv* _env,
@@ -736,7 +743,10 @@ extern "C" {
 			// TODO : generate error in java to stop the current instance
 			return;
 		}
-		s_listInstance[_id]->OS_SetMouseState(_pointerID+1, _isUp, vec2(_x,_y));
+		s_listInstance[_id]->OS_SetInput(gale::key::type_mouse,
+		                                 (_isUp==false?gale::key::status_down:gale::key::status_up),
+		                                 _pointerID+1,
+		                                 vec2(_x,_y));
 	}
 	
 	void Java_org_gale_Gale_EWunknowEvent(JNIEnv* _env,
