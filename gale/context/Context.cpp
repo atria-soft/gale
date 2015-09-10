@@ -16,8 +16,6 @@
 #include <etk/thread/tools.h>
 #include <mutex>
 
-#include <date/date.h>
-
 #include <gale/gale.h>
 #include <gale/Dimension.h>
 #include <gale/debug.h>
@@ -269,7 +267,6 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	//etk::cout.setOutputFile(true);
 	
 	GALE_INFO("GALE v:" << gale::getVersion());
-	GALE_INFO("Build Date: " << date::getYear() << "/" << date::getMonth() << "/" << date::getDay() << " " << date::getHour() << "h" << date::getMinute());
 	// TODO : remove this ...
 	etk::initDefaultFolder("galeApplNoName");
 	// request the init of the application in the main context of openGL ...

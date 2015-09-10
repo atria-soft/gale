@@ -26,6 +26,13 @@ def create(target):
 		'gale/Application.cpp',
 		'gale/Thread.cpp',
 		])
+	myModule.add_header_file([
+		'gale/gale.h',
+		'gale/Dimension.h',
+		'gale/orientation.h',
+		'gale/Application.h',
+		'gale/Thread.h',
+		])
 	
 	# context :
 	myModule.add_src_file([
@@ -33,6 +40,12 @@ def create(target):
 		'gale/context/commandLine.cpp',
 		'gale/context/Context.cpp',
 		'gale/context/cursor.cpp',
+		])
+	myModule.add_header_file([
+		'gale/context/clipBoard.h',
+		'gale/context/commandLine.h',
+		'gale/context/Context.h',
+		'gale/context/cursor.h',
 		])
 	if target.name=="Linux":
 		myModule.add_src_file('gale/context/X11/Context.cpp')
@@ -76,10 +89,19 @@ def create(target):
 		'gale/key/status.cpp',
 		'gale/key/type.cpp'
 		])
+	myModule.add_header_file([
+		'gale/key/keyboard.h',
+		'gale/key/Special.h',
+		'gale/key/status.h',
+		'gale/key/type.h'
+		])
 	
 	# OpenGL interface :
 	myModule.add_src_file([
 		'gale/renderer/openGL/openGL.cpp'
+		])
+	myModule.add_header_file([
+		'gale/renderer/openGL/openGL.h'
 		])
 	
 	# resources :
@@ -91,9 +113,17 @@ def create(target):
 		'gale/resource/Texture.cpp',
 		'gale/resource/VirtualBufferObject.cpp'
 		])
+	myModule.add_header_file([
+		'gale/resource/Manager.h',
+		'gale/resource/Program.h',
+		'gale/resource/Resource.h',
+		'gale/resource/Shader.h',
+		'gale/resource/Texture.h',
+		'gale/resource/VirtualBufferObject.h'
+		])
 	
 	# name of the dependency
-	myModule.add_module_depend(['etk', 'date'])
+	myModule.add_module_depend(['etk'])
 	
 	myModule.add_export_path(tools.get_current_path(__file__))
 

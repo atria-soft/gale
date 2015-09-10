@@ -12,7 +12,6 @@
 #include <gale/context/commandLine.h>
 #include <etk/os/FSNode.h>
 #include <gale/Dimension.h>
-#include <date/date.h>
 
 #undef __class__
 #define __class__ "gale"
