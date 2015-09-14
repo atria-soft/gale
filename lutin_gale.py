@@ -27,6 +27,7 @@ def create(target):
 		'gale/Thread.cpp',
 		])
 	myModule.add_header_file([
+		'gale/debug.h',
 		'gale/gale.h',
 		'gale/Dimension.h',
 		'gale/orientation.h',
@@ -46,6 +47,7 @@ def create(target):
 		'gale/context/commandLine.h',
 		'gale/context/Context.h',
 		'gale/context/cursor.h',
+		'gale/context/Fps.h'
 		])
 	if target.name=="Linux":
 		myModule.add_src_file('gale/context/X11/Context.cpp')
@@ -93,7 +95,8 @@ def create(target):
 		'gale/key/keyboard.h',
 		'gale/key/Special.h',
 		'gale/key/status.h',
-		'gale/key/type.h'
+		'gale/key/type.h',
+		'gale/key/key.h'
 		])
 	
 	# OpenGL interface :
@@ -101,7 +104,8 @@ def create(target):
 		'gale/renderer/openGL/openGL.cpp'
 		])
 	myModule.add_header_file([
-		'gale/renderer/openGL/openGL.h'
+		'gale/renderer/openGL/openGL.h',
+		'gale/renderer/openGL/openGL-include.h'
 		])
 	
 	# resources :
@@ -125,7 +129,7 @@ def create(target):
 	# name of the dependency
 	myModule.add_module_depend(['etk'])
 	
-	myModule.add_export_path(tools.get_current_path(__file__))
+	myModule.add_path(tools.get_current_path(__file__))
 
 	tagFile = tools.get_current_path(__file__) + "/tag"
 	galeVersionID = tools.file_read_data(tagFile)
