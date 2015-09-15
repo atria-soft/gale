@@ -110,7 +110,7 @@ namespace gale {
 			virtual void OS_Background();
 		public:
 			void requestUpdateSize();
-		protected:
+		public:
 			// return true if a flush is needed
 			bool OS_Draw(bool _displayEveryTime);
 		public:

@@ -446,9 +446,13 @@ class AndroidContext : public gale::Context {
 			               _myChar);
 		}
 		
-		bool ANDROID_systemKeyboradEvent(enum gale::key::keyboardSystem _key, bool _down) {
-			return systemKeyboradEvent(_key, _down);
+		bool ANDROID_systemKeyboradEvent(enum gale::key::keyboard _key, bool _isDown) {
+			OS_setKeyboard(m_guiKeyBoardSpecialKeyMode,
+			               _key,
+			               (_isDown==true?gale::key::status_down:gale::key::status_up));
+			return false;
 		}
+		
 		void ANDROID_SetKeyboardMove(int _move, bool _isDown, bool _isARepeateKey=false) {
 			// direct wrapping :
 			enum gale::key::keyboard move = (enum gale::key::keyboard)_move;
@@ -832,25 +836,25 @@ extern "C" {
 		switch (_keyVal) {
 			case org_gale_GaleConstants_GALE_SYSTEM_KEY_VOLUME_UP:
 				GALE_VERBOSE("IO keyboard Key system \"VOLUME_UP\" is down=" << _isdown);
-				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboardSystemVolumeUp, _isdown);
+				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard_volumeUp, _isdown);
 			case org_gale_GaleConstants_GALE_SYSTEM_KEY_VOLUME_DOWN:
 				GALE_DEBUG("IO keyboard Key system \"VOLUME_DOWN\" is down=" << _isdown);
-				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboardSystemVolumeDown, _isdown);
+				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard_volumeDown, _isdown);
 			case org_gale_GaleConstants_GALE_SYSTEM_KEY_MENU:
 				GALE_DEBUG("IO keyboard Key system \"MENU\" is down=" << _isdown);
-				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboardSystemMenu, _isdown);
+				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard_menu, _isdown);
 			case org_gale_GaleConstants_GALE_SYSTEM_KEY_CAMERA:
 				GALE_DEBUG("IO keyboard Key system \"CAMERA\" is down=" << _isdown);
-				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboardSystemCamera, _isdown);
+				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard_camera, _isdown);
 			case org_gale_GaleConstants_GALE_SYSTEM_KEY_HOME:
 				GALE_DEBUG("IO keyboard Key system \"HOME\" is down=" << _isdown);
-				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboardSystemHome, _isdown);
+				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard_home, _isdown);
 			case org_gale_GaleConstants_GALE_SYSTEM_KEY_POWER:
 				GALE_DEBUG("IO keyboard Key system \"POWER\" is down=" << _isdown);
-				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboardSystemPower, _isdown);
+				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard_power, _isdown);
 			case org_gale_GaleConstants_GALE_SYSTEM_KEY_BACK:
 				GALE_DEBUG("IO keyboard Key system \"BACK\" is down=" << _isdown);
-				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboardSystemBack, _isdown);
+				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard_back, _isdown);
 			default:
 				GALE_ERROR("IO keyboard Key system event : \"" << _keyVal << "\" is down=" << _isdown);
 				break;

@@ -252,7 +252,9 @@ void gale::openGL::clearDepth(float _value) {
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		if (s_simulationMode == false) {
 	#endif
-	glClearDepth(_value);
+	#if !(defined(__TARGET_OS__Android) || defined(__TARGET_OS__MacOs))
+		glClearDepth(_value);
+	#endif
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
