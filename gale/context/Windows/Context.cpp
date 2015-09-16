@@ -14,12 +14,12 @@
 
 #include <etk/math/Vector2D.h>
 #include <etk/math/Vector3D.h>
-#include <gale/widget/Manager.h>
 
+#include <gale/key/key.h>
 #include <gale/resource/Texture.h>
-#include <gale/resource/Image.h>
 #include <gale/context/Context.h>
-#include <gale/openGL/openGL.h>
+#include <gale/renderer/openGL/openGL.h>
+#include <gale/renderer/openGL/openGL-include.h>
 
 #include <sys/time.h>
 #include <windows.h>
@@ -280,39 +280,39 @@ class WindowsContext : public gale::Context {
 					enum gale::key::keyboard keyInput;
 					switch (_wParam) {
 						//case 80: // keypad
-						case VK_UP:     keyInput = gale::key::keyboardUp; break;
+						case VK_UP:     keyInput = gale::key::keyboard_up; break;
 						//case 83: // keypad
-						case VK_LEFT:   keyInput = gale::key::keyboardLeft; break;
+						case VK_LEFT:   keyInput = gale::key::keyboard_left; break;
 						//case 85: // keypad
-						case VK_RIGHT:  keyInput = gale::key::keyboardRight; break;
+						case VK_RIGHT:  keyInput = gale::key::keyboard_right; break;
 						//case 88: // keypad
-						case VK_DOWN:   keyInput = gale::key::keyboardDown; break;
+						case VK_DOWN:   keyInput = gale::key::keyboard_down; break;
 						//case 81: // keypad
-						case VK_PRIOR:  keyInput = gale::key::keyboardPageUp; break;
+						case VK_PRIOR:  keyInput = gale::key::keyboard_pageUp; break;
 						//case 89: // keypad
-						case VK_NEXT:   keyInput = gale::key::keyboardPageDown; break;
+						case VK_NEXT:   keyInput = gale::key::keyboard_pageDown; break;
 						//case 79: // keypad
-						case VK_HOME:   keyInput = gale::key::keyboardStart; break;
+						case VK_HOME:   keyInput = gale::key::keyboard_start; break;
 						//case 87: // keypad
-						case VK_END:    keyInput = gale::key::keyboardEnd; break;
+						case VK_END:    keyInput = gale::key::keyboard_end; break;
 						//case VK_:     keyInput = gale::key::keyboardStopDefil; break;
-						case VK_PAUSE:  keyInput = gale::key::keyboardWait; break;
+						case VK_PAUSE:  keyInput = gale::key::keyboard_wait; break;
 						//case 90: // keypad
 						case VK_INSERT:
-							keyInput = gale::key::keyboardInsert;
+							keyInput = gale::key::keyboard_insert;
 							m_guiKeyBoardMode.setInsert(buttonIsDown);
 							break;
-						case VK_F1: keyInput = gale::key::keyboardF1; break;
-						case VK_F2: keyInput = gale::key::keyboardF2; break;
-						case VK_F3: keyInput = gale::key::keyboardF3; break;
-						case VK_F4: keyInput = gale::key::keyboardF4; break;
-						case VK_F5: keyInput = gale::key::keyboardF5; break;
-						case VK_F6: keyInput = gale::key::keyboardF6; break;
-						case VK_F7: keyInput = gale::key::keyboardF7; break;
-						case VK_F8: keyInput = gale::key::keyboardF8; break;
-						case VK_F9: keyInput = gale::key::keyboardF9; break;
-						case VK_F10: keyInput = gale::key::keyboardF10; break;
-						case VK_F11: keyInput = gale::key::keyboardF11; break;
+						case VK_F1: keyInput = gale::key::keyboard_f1; break;
+						case VK_F2: keyInput = gale::key::keyboard_f2; break;
+						case VK_F3: keyInput = gale::key::keyboard_f3; break;
+						case VK_F4: keyInput = gale::key::keyboard_f4; break;
+						case VK_F5: keyInput = gale::key::keyboard_f5; break;
+						case VK_F6: keyInput = gale::key::keyboard_f6; break;
+						case VK_F7: keyInput = gale::key::keyboard_f7; break;
+						case VK_F8: keyInput = gale::key::keyboard_f8; break;
+						case VK_F9: keyInput = gale::key::keyboard_f9; break;
+						case VK_F10: keyInput = gale::key::keyboard_f10; break;
+						case VK_F11: keyInput = gale::key::keyboard_f11; break;
 						case VK_F12:
 						case VK_F13:
 						case VK_F14:
@@ -325,49 +325,49 @@ class WindowsContext : public gale::Context {
 						case VK_F21:
 						case VK_F22:
 						case VK_F23:
-						case VK_F24: keyInput = gale::key::keyboardF12; break;
+						case VK_F24: keyInput = gale::key::keyboard_f12; break;
 						case VK_CAPITAL:
-							keyInput = gale::key::keyboardCapLock;
+							keyInput = gale::key::keyboard_capLock;
 							m_guiKeyBoardMode.setCapsLock(buttonIsDown);
 							break;
 						case VK_SHIFT:
 						case VK_LSHIFT:
-							keyInput = gale::key::keyboardShiftLeft;
+							keyInput = gale::key::keyboard_shiftLeft;
 							m_guiKeyBoardMode.setShift(buttonIsDown);
 							break;
 						case VK_RSHIFT:
-							keyInput = gale::key::keyboardShiftRight;
+							keyInput = gale::key::keyboard_shiftRight;
 							m_guiKeyBoardMode.setShift(buttonIsDown);
 							break;
 						case VK_CONTROL:
 						case VK_LCONTROL:
-							keyInput = gale::key::keyboardCtrlLeft;
+							keyInput = gale::key::keyboard_ctrlLeft;
 							m_guiKeyBoardMode.setCtrl(buttonIsDown);
 							break;
 						case VK_RCONTROL:
-							keyInput = gale::key::keyboardCtrlRight;
+							keyInput = gale::key::keyboard_ctrlRight;
 							m_guiKeyBoardMode.setCtrl(buttonIsDown);
 							break;
 						case VK_LWIN:
-							keyInput = gale::key::keyboardMetaLeft;
+							keyInput = gale::key::keyboard_metaLeft;
 							m_guiKeyBoardMode.setMeta(buttonIsDown);
 							break;
 						case VK_RWIN:
-							keyInput = gale::key::keyboardMetaRight;
+							keyInput = gale::key::keyboard_metaRight;
 							m_guiKeyBoardMode.setMeta(buttonIsDown);
 							break;
 						case VK_MENU:
 						case VK_LMENU:
-							keyInput = gale::key::keyboardAlt;
+							keyInput = gale::key::keyboard_alt;
 							m_guiKeyBoardMode.setAlt(buttonIsDown);
 							break;
 						case VK_RMENU:
-							keyInput = gale::key::keyboardAltGr;
+							keyInput = gale::key::keyboard_altGr;
 							m_guiKeyBoardMode.setAltGr(buttonIsDown);
 							break;
 						//case :   keyInput = gale::key::keyboardContextMenu; break;
 						case VK_NUMLOCK:
-							keyInput = gale::key::keyboardNumLock;
+							keyInput = gale::key::keyboard_numLock;
 							m_guiKeyBoardMode.setNumLock(buttonIsDown);
 							break;
 						case VK_BACK: // DEL
@@ -399,7 +399,7 @@ class WindowsContext : public gale::Context {
 					if (tmpChar == 0) {
 						//GALE_DEBUG("eventKey Move type : " << getCharTypeMoveEvent(keyInput) );
 						OS_setKeyboard(m_guiKeyBoardMode,
-						               move,
+						               keyInput,
 						               (buttonIsDown==true?gale::key::status_down:gale::key::status_up));
 					} else {
 						OS_setKeyboard(m_guiKeyBoardMode,
@@ -480,7 +480,7 @@ class WindowsContext : public gale::Context {
 						if (true == m_inputIsPressed[iii]) {
 							GALE_VERBOSE("Windows event: bt=" << iii << " " << _message << " = \"WM_MOUSEMOVE\" " << pos );
 							OS_SetInput(gale::key::type_mouse,
-							            gale::key::status_motion),
+							            gale::key::status_move,
 							            iii,
 							            vec2(pos.x(),pos.y()));
 							return 0;
@@ -488,7 +488,7 @@ class WindowsContext : public gale::Context {
 					}
 					GALE_VERBOSE("Windows event: bt=" << 0 << " " << _message << " = \"WM_MOUSEMOVE\" " << pos );
 					OS_SetInput(gale::key::type_mouse,
-					            gale::key::status_motion),
+					            gale::key::status_move,
 					            0,
 					            vec2(pos.x(),pos.y()));
 					return 0;
