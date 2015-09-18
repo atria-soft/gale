@@ -80,7 +80,7 @@ namespace gale {
 			void processEvents();
 		public:
 			
-			virtual void setArchiveDir(int _mode, const char* _str);
+			virtual void setArchiveDir(int _mode, const char* _str, const char* _applName=nullptr);
 			
 			virtual void OS_SetInput(enum gale::key::type _type,
 			                         enum gale::key::status _status,

@@ -27,8 +27,8 @@ public class Gale {
 	public void setJavaVirtualMachineStop() {
 		EWsetJavaVirtualMachineStop(m_instanceID);
 	}
-	public void paramSetArchiveDir(int _mode, String _myString) {
-		EWparamSetArchiveDir(m_instanceID, _mode, _myString);
+	public void paramSetArchiveDir(int _mode, String _myString, String _applicationName) {
+		EWparamSetArchiveDir(m_instanceID, _mode, _myString, _applicationName);
 	}
 	
 	public boolean getHardKeyboardHidden() {
@@ -108,7 +108,7 @@ public class Gale {
 	
 	private native <T extends GaleCallback> int EWsetJavaVirtualMachineStart(T _activityInstance, int _typeApplication);
 	private native void EWsetJavaVirtualMachineStop(int _instanceId);
-	private native void EWparamSetArchiveDir(int _instanceId, int _mode, String _myString);
+	private native void EWparamSetArchiveDir(int _instanceId, int _mode, String _myString, String _applicationName);
 	
 	// activity status
 	private native void EWonCreate(int _instanceId);

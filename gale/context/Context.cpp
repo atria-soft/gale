@@ -158,11 +158,11 @@ void gale::Context::processEvents() {
 	}
 }
 
-void gale::Context::setArchiveDir(int _mode, const char* _str) {
+void gale::Context::setArchiveDir(int _mode, const char* _str, const char* _applName) {
 	switch(_mode) {
 		case 0:
 			GALE_DEBUG("Directory APK : path=" << _str);
-			etk::setBaseFolderData(_str);
+			etk::setBaseFolderData(_str, _applName);
 			break;
 		case 1:
 			GALE_DEBUG("Directory mode=FILE path=" << _str);

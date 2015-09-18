@@ -478,7 +478,8 @@ extern "C" {
 	                                             jclass _cls,
 	                                             jint _id,
 	                                             jint _mode,
-	                                             jstring _myString) {
+	                                             jstring _myString,
+	                                             jstring _applicationName) {
 		std::unique_lock<std::mutex> lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
@@ -491,11 +492,18 @@ extern "C" {
 		// direct setting of the date in the string system ...
 		jboolean isCopy;
 		const char* str = _env->GetStringUTFChars(_myString, &isCopy);
-		s_listInstance[_id]->setArchiveDir(_mode, str);
+		jboolean isCopy2;
+		const char* str2 = _env->GetStringUTFChars(_applicationName, &isCopy2);
+		s_listInstance[_id]->setArchiveDir(_mode, str, str2);
 		if (isCopy == JNI_TRUE) {
 			// from here str is reset ...
 			_env->ReleaseStringUTFChars(_myString, str);
 			str = nullptr;
+		}
+		if (isCopy2 == JNI_TRUE) {
+			// from here str is reset ...
+			_env->ReleaseStringUTFChars(_applicationName, str2);
+			str2 = nullptr;
 		}
 	}
 	

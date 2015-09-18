@@ -151,7 +151,7 @@ def create(target):
 		myModule.add_module_depend(["SDK", "jvm-basics"])
 		myModule.add_export_flag('link', "-lGLESv2")
 		# add tre creator of the basic java class ...
-		target.add_action("PACKAGE", 50, "gale-auto-wrapper", tool_generate_main_java_class)
+		target.add_action("BINARY", 50, "gale-auto-wrapper", tool_generate_main_java_class)
 		# TODO : Add the same for BINARY to create a console interface ?
 	elif target.name=="Windows":
 		myModule.add_module_depend("glew")
@@ -188,18 +188,18 @@ def tool_generate_main_java_class(target, module, package_name):
 	application_name = package_name
 	if target.config["mode"] == "debug":
 		application_name += "debug"
-	target.folder_java_project=   target.get_build_folder(package_name) \
+	target.path_java_project=   target.get_build_path(package_name) \
 	                            + "/src/" \
 	                            + module.package_prop["COMPAGNY_TYPE"] \
 	                            + "/" + module.package_prop["COMPAGNY_NAME2"] \
 	                            + "/" + application_name + "/"
 	
-	java_file_wrapper = target.folder_java_project + "/" + application_name + ".java"
+	java_file_wrapper = target.path_java_project + "/" + application_name + ".java"
 	
 	android_package_name = module.package_prop["COMPAGNY_TYPE"]+"."+module.package_prop["COMPAGNY_NAME2"]+"." + application_name
 	
 	debug.print_element("pkg", "absractionFile", "<==", "dynamic file")
-	# Create folder :
+	# Create path :
 	tools.create_directory_of_file(java_file_wrapper)
 	debug.debug("create file : '" + java_file_wrapper + "'")
 	# Create file :
@@ -246,7 +246,7 @@ def tool_generate_main_java_class(target, module, package_name):
 	if module.package_prop["ANDROID_APPL_TYPE"]!="APPL":
 		tmpFile.write( "	public Engine onCreateEngine() {\n")
 		tmpFile.write( "		Engine tmpEngine = super.onCreateEngine();\n")
-		tmpFile.write( "		initApkPath(\"" + module.package_prop["COMPAGNY_TYPE"]+"\", \""+module.package_prop["COMPAGNY_NAME2"]+"\", \"" + application_name + "\");\n")
+		tmpFile.write( "		initApkPath(\"" + module.package_prop["COMPAGNY_TYPE"]+"\", \""+module.package_prop["COMPAGNY_NAME2"]+"\", \"" + application_name + "\", \"" + package_name + "\");\n")
 		tmpFile.write( "		return tmpEngine;\n")
 		tmpFile.write( "	}\n")
 	
@@ -259,7 +259,7 @@ def tool_generate_main_java_class(target, module, package_name):
 	
 	tmpFile.write( "	public void onCreate(android.os.Bundle savedInstanceState) {\n")
 	tmpFile.write( "		super.onCreate(savedInstanceState);\n")
-	tmpFile.write( "		initApkPath(\"" + module.package_prop["COMPAGNY_TYPE"]+"\", \""+module.package_prop["COMPAGNY_NAME2"]+"\", \"" + application_name + "\");\n")
+	tmpFile.write( "		initApkPath(\"" + module.package_prop["COMPAGNY_TYPE"]+"\", \""+module.package_prop["COMPAGNY_NAME2"]+"\", \"" + application_name + "\", \"" + package_name + "\");\n")
 	
 	if "GENERATE_SECTION__ON_CREATE" in module.package_prop:
 		for elem in module.package_prop["GENERATE_SECTION__ON_CREATE"]:
@@ -325,13 +325,13 @@ def tool_generate_main_java_class(target, module, package_name):
 	
 	"""
 	    ## todo:
-	tools.create_directory_of_file(target.get_staging_folder(package_name) + "/res/drawable/icon.png");
+	tools.create_directory_of_file(target.get_staging_path(package_name) + "/res/drawable/icon.png");
 	if     "ICON" in module.package_prop.keys() \
 	   and module.package_prop["ICON"] != "":
-		image.resize(module.package_prop["ICON"], target.get_staging_folder(package_name) + "/res/drawable/icon.png", 256, 256)
+		image.resize(module.package_prop["ICON"], target.get_staging_path(package_name) + "/res/drawable/icon.png", 256, 256)
 	else:
 		# to be sure that we have all time a resource ...
-		tmpFile = open(target.get_staging_folder(package_name) + "/res/drawable/plop.txt", 'w')
+		tmpFile = open(target.get_staging_path(package_name) + "/res/drawable/plop.txt", 'w')
 		tmpFile.write('plop\n')
 		tmpFile.flush()
 		tmpFile.close()
@@ -339,7 +339,7 @@ def tool_generate_main_java_class(target, module, package_name):
 	"""
 	if module.package_prop["ANDROID_MANIFEST"] == "":
 		# force manifest file:
-		module.package_prop["ANDROID_MANIFEST"] = target.get_build_folder(package_name) + "/AndroidManifest.xml";
+		module.package_prop["ANDROID_MANIFEST"] = target.get_build_path(package_name) + "/AndroidManifest.xml";
 		debug.debug(" create file: '" + module.package_prop["ANDROID_MANIFEST"] + "'")
 		if "VERSION_CODE" not in module.package_prop:
 			module.package_prop["VERSION_CODE"] = "1"
@@ -466,8 +466,8 @@ def tool_generate_main_java_class(target, module, package_name):
 		if module.package_prop["ANDROID_APPL_TYPE"]!="APPL":
 			#create the Wallpaper sub files : (main element for the application
 			debug.print_element("pkg", application_name + "_resource.xml", "<==", "package configurations")
-			tools.create_directory_of_file(target.get_build_folder(package_name) + "/res/xml/" + application_name + "_resource.xml")
-			tmpFile = open(target.get_build_folder(package_name) + "/res/xml/" + application_name + "_resource.xml", 'w')
+			tools.create_directory_of_file(target.get_build_path(package_name) + "/res/xml/" + application_name + "_resource.xml")
+			tmpFile = open(target.get_build_path(package_name) + "/res/xml/" + application_name + "_resource.xml", 'w')
 			tmpFile.write( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 			tmpFile.write( "<wallpaper xmlns:android=\"http://schemas.android.com/apk/res/android\"\n")
 			if len(module.package_prop["ANDROID_WALLPAPER_PROPERTIES"])!=0:
@@ -479,9 +479,9 @@ def tool_generate_main_java_class(target, module, package_name):
 			tmpFile.close()
 			# create wallpaper setting if needed (class and config file)
 			if len(module.package_prop["ANDROID_WALLPAPER_PROPERTIES"])!=0:
-				tools.create_directory_of_file(target.folder_java_project + application_name + "Settings.java")
-				debug.print_element("pkg", target.folder_java_project + application_name + "Settings.java", "<==", "package configurations")
-				tmpFile = open(target.folder_java_project + application_name + "Settings.java", 'w');
+				tools.create_directory_of_file(target.path_java_project + application_name + "Settings.java")
+				debug.print_element("pkg", target.path_java_project + application_name + "Settings.java", "<==", "package configurations")
+				tmpFile = open(target.path_java_project + application_name + "Settings.java", 'w');
 				tmpFile.write( "package " + android_package_name + ";\n")
 				tmpFile.write( "\n")
 				tmpFile.write( "import " + android_package_name + ".R;\n")
@@ -510,9 +510,9 @@ def tool_generate_main_java_class(target, module, package_name):
 				tmpFile.flush()
 				tmpFile.close()
 				
-				debug.print_element("pkg", target.get_build_folder(package_name) + "/res/xml/" + application_name + "_settings.xml", "<==", "package configurations")
-				tools.create_directory_of_file(target.get_build_folder(package_name) + "/res/xml/" + application_name + "_settings.xml")
-				tmpFile = open(target.get_build_folder(package_name) + "/res/xml/" + application_name + "_settings.xml", 'w');
+				debug.print_element("pkg", target.get_build_path(package_name) + "/res/xml/" + application_name + "_settings.xml", "<==", "package configurations")
+				tools.create_directory_of_file(target.get_build_path(package_name) + "/res/xml/" + application_name + "_settings.xml")
+				tmpFile = open(target.get_build_path(package_name) + "/res/xml/" + application_name + "_settings.xml", 'w');
 				tmpFile.write( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 				tmpFile.write( "<PreferenceScreen xmlns:android=\"http://schemas.android.com/apk/res/android\"\n")
 				tmpFile.write( "                  android:title=\"Settings\"\n")
@@ -541,9 +541,9 @@ def tool_generate_main_java_class(target, module, package_name):
 				if WALL_haveArray==True:
 					for WALL_type, WALL_key, WALL_title, WALL_summary, WALL_other in module.package_prop["ANDROID_WALLPAPER_PROPERTIES"]:
 						if WALL_type == "list":
-							debug.print_element("pkg", target.get_build_folder(package_name) + "/res/values/" + WALL_key + ".xml", "<==", "package configurations")
-							tools.create_directory_of_file(target.get_build_folder(package_name) + "/res/values/" + WALL_key + ".xml")
-							tmpFile = open(target.get_build_folder(package_name) + "/res/values/" + WALL_key + ".xml", 'w');
+							debug.print_element("pkg", target.get_build_path(package_name) + "/res/values/" + WALL_key + ".xml", "<==", "package configurations")
+							tools.create_directory_of_file(target.get_build_path(package_name) + "/res/values/" + WALL_key + ".xml")
+							tmpFile = open(target.get_build_path(package_name) + "/res/values/" + WALL_key + ".xml", 'w');
 							tmpFile.write( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 							tmpFile.write( "<resources xmlns:xliff=\"urn:oasis:names:tc:xliff:document:1.2\">\n")
 							tmpFile.write( "	<string-array name=\"" + application_name + "_" + WALL_key + "_names\">\n")
@@ -569,35 +569,35 @@ def tool_generate_main_java_class(target, module, package_name):
 	for res_source, res_dest in module.package_prop["ANDROID_RESOURCES"]:
 		if res_source == "":
 			continue
-		tools.copy_file(res_source , target.get_staging_folder(package_name) + "/res/" + res_dest + "/" + os.path.basename(res_source), force=True)
+		tools.copy_file(res_source , target.get_staging_path(package_name) + "/res/" + res_dest + "/" + os.path.basename(res_source), force=True)
 	"""
 	"""
 	# Doc :
 	# http://asantoso.wordpress.com/2009/09/15/how-to-build-android-application-package-apk-from-the-command-line-using-the-sdk-tools-continuously-integrated-using-cruisecontrol/
 	debug.print_element("pkg", "R.java", "<==", "Resources files")
-	tools.create_directory_of_file(target.get_staging_folder(package_name) + "/src/noFile")
-	androidToolPath = target.folder_sdk + "/build-tools/"
+	tools.create_directory_of_file(target.get_staging_path(package_name) + "/src/noFile")
+	androidToolPath = target.path_sdk + "/build-tools/"
 	# find android tool version
-	dirnames = tools.get_list_sub_folder(androidToolPath)
+	dirnames = tools.get_list_sub_path(androidToolPath)
 	if len(dirnames) != 1:
 		debug.error("an error occured when getting the tools for android")
 	androidToolPath += dirnames[0] + "/"
 	
-	adModResouceFolder = ""
+	adModResoucepath = ""
 	if "ADMOD_ID" in module.package_prop:
-		adModResouceFolder = " -S " + target.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/res/ "
+		adModResoucepath = " -S " + target.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/res/ "
 	cmdLine = androidToolPath + "aapt p -f " \
-	          + "-M " + target.get_staging_folder(package_name) + "/AndroidManifest.xml " \
-	          + "-F " + target.get_staging_folder(package_name) + "/resources.res " \
-	          + "-I " + target.folder_sdk + "/platforms/android-" + str(target.boardId) + "/android.jar "\
-	          + "-S " + target.get_staging_folder(package_name) + "/res/ " \
-	          + adModResouceFolder \
-	          + "-J " + target.get_staging_folder(package_name) + "/src/ "
+	          + "-M " + target.get_staging_path(package_name) + "/AndroidManifest.xml " \
+	          + "-F " + target.get_staging_path(package_name) + "/resources.res " \
+	          + "-I " + target.path_sdk + "/platforms/android-" + str(target.boardId) + "/android.jar "\
+	          + "-S " + target.get_staging_path(package_name) + "/res/ " \
+	          + adModResoucepath \
+	          + "-J " + target.get_staging_path(package_name) + "/src/ "
 	multiprocess.run_command(cmdLine)
 	#aapt  package -f -M ${manifest.file} -F ${packaged.resource.file} -I ${path.to.android-jar.library} 
-	#      -S ${android-resource-directory} [-m -J ${folder.to.output.the.R.java}]
+	#      -S ${android-resource-directory} [-m -J ${path.to.output.the.R.java}]
 	
-	tools.create_directory_of_file(target.get_staging_folder(package_name) + "/build/classes/noFile")
+	tools.create_directory_of_file(target.get_staging_path(package_name) + "/build/classes/noFile")
 	debug.print_element("pkg", "*.class", "<==", "*.java")
 	# more information with : -Xlint
 	#          + java_file_wrapper + " "\ # this generate ex: out/Android/debug/staging/tethys/src/com/edouarddupin/tethys/edn.java
@@ -606,44 +606,44 @@ def tool_generate_main_java_class(target, module, package_name):
 	filesString=""
 	for element in module.package_prop["ANDROID_JAVA_FILES"]:
 		if element=="DEFAULT":
-			filesString += target.folder_gale + "/android/src/org/gale/GaleAudioTask.java "
-			filesString += target.folder_gale + "/android/src/org/gale/GaleCallback.java "
-			filesString += target.folder_gale + "/android/src/org/gale/GaleConstants.java "
-			filesString += target.folder_gale + "/android/src/org/gale/Gale.java "
-			filesString += target.folder_gale + "/android/src/org/gale/GaleRendererGL.java "
-			filesString += target.folder_gale + "/android/src/org/gale/GaleSurfaceViewGL.java "
-			filesString += target.folder_gale + "/android/src/org/gale/GaleActivity.java "
-			filesString += target.folder_gale + "/android/src/org/gale/GaleWallpaper.java "
+			filesString += target.path_gale + "/android/src/org/gale/GaleAudioTask.java "
+			filesString += target.path_gale + "/android/src/org/gale/GaleCallback.java "
+			filesString += target.path_gale + "/android/src/org/gale/GaleConstants.java "
+			filesString += target.path_gale + "/android/src/org/gale/Gale.java "
+			filesString += target.path_gale + "/android/src/org/gale/GaleRendererGL.java "
+			filesString += target.path_gale + "/android/src/org/gale/GaleSurfaceViewGL.java "
+			filesString += target.path_gale + "/android/src/org/gale/GaleActivity.java "
+			filesString += target.path_gale + "/android/src/org/gale/GaleWallpaper.java "
 		else:
 			filesString += element + " "
 	
 	if "ADMOD_ID" in module.package_prop:
-		filesString += target.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/src/android/UnusedStub.java "
+		filesString += target.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/src/android/UnusedStub.java "
 		
 	if len(module.package_prop["ANDROID_WALLPAPER_PROPERTIES"])!=0:
-		filesString += target.folder_java_project + application_name + "Settings.java "
+		filesString += target.path_java_project + application_name + "Settings.java "
 	
 	adModJarFile = ""
 	if "ADMOD_ID" in module.package_prop:
-		adModJarFile = ":" + target.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar"
+		adModJarFile = ":" + target.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar"
 	
 	cmdLine = "javac " \
-	          + "-d " + target.get_staging_folder(package_name) + "/build/classes " \
-	          + "-classpath " + target.folder_sdk + "/platforms/android-" + str(target.boardId) + "/android.jar" \
+	          + "-d " + target.get_staging_path(package_name) + "/build/classes " \
+	          + "-classpath " + target.path_sdk + "/platforms/android-" + str(target.boardId) + "/android.jar" \
 	          + adModJarFile + " " \
 	          + filesString \
 	          + java_file_wrapper + " "  \
-	          + target.get_staging_folder(package_name) + "/src/R.java "
+	          + target.get_staging_path(package_name) + "/src/R.java "
 	multiprocess.run_command(cmdLine)
 	
 	debug.print_element("pkg", ".dex", "<==", "*.class")
 	cmdLine = androidToolPath + "dx " \
 	          + "--dex --no-strict " \
-	          + "--output=" + target.get_staging_folder(package_name) + "/build/" + application_name + ".dex " \
-	          + target.get_staging_folder(package_name) + "/build/classes/ "
+	          + "--output=" + target.get_staging_path(package_name) + "/build/" + application_name + ".dex " \
+	          + target.get_staging_path(package_name) + "/build/classes/ "
 	
 	if "ADMOD_ID" in module.package_prop:
-		cmdLine += target.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar "
+		cmdLine += target.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar "
 	multiprocess.run_command(cmdLine)
 	"""
 	return {"files":file_list}

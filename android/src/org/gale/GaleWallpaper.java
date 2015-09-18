@@ -34,7 +34,7 @@ public abstract class GaleWallpaper extends WallpaperService implements GaleCall
 	private GLEngine mGLView;
 	private Gale m_galeNative;
 	
-	protected void initApkPath(String _org, String _vendor, String _project) {
+	protected void initApkPath(String _org, String _vendor, String _project, String _applName) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(_org).append(".");
 		sb.append(_vendor).append(".");
@@ -49,7 +49,7 @@ public abstract class GaleWallpaper extends WallpaperService implements GaleCall
 			throw new RuntimeException("Unable to locate assets, aborting...");
 		}
 		apkFilePath = appInfo.sourceDir;
-		m_galeNative.paramSetArchiveDir(0, apkFilePath);
+		m_galeNative.paramSetArchiveDir(0, apkFilePath, _applName);
 	}
 	
 	@Override public Engine onCreateEngine() {
@@ -57,8 +57,8 @@ public abstract class GaleWallpaper extends WallpaperService implements GaleCall
 		m_galeNative = new Gale(this, GALE_APPL_TYPE_WALLPAPER);
 		
 		// Load the application directory
-		m_galeNative.paramSetArchiveDir(1, getFilesDir().toString());
-		m_galeNative.paramSetArchiveDir(2, getCacheDir().toString());
+		m_galeNative.paramSetArchiveDir(1, getFilesDir().toString(), "");
+		m_galeNative.paramSetArchiveDir(2, getCacheDir().toString(), "");
 		// to enable extarnal storage: add in the manifest the restriction needed ...
 		//packageManager.checkPermission("android.permission.READ_SMS", myPackage) == PERMISSION_GRANTED; 
 		//Gale.paramSetArchiveDir(3, getExternalCacheDir().toString());
