@@ -24,7 +24,9 @@ namespace MacOs	{
 	void setKeyboard(gale::key::Special _keyboardMode, int32_t _unichar, bool _isDown, bool _isAReapeateKey);
 	void setKeyboardMove(gale::key::Special& _keyboardMode, enum gale::key::keyboard _move, bool _isDown, bool _isAReapeateKey);
 	void stopRequested();
+	/*
 	void setRedrawCallback(const std::function<void()>& _func);
+	*/
 };
 
 #endif

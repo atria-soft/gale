@@ -7,15 +7,15 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import <OpenGLES/EAGLDrawable.h>
-#include <ewol/context/IOs/Context.h>
-#include <ewol/Dimension.h>
+#include <gale/context/IOs/Context.h>
+#include <gale/Dimension.h>
 
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
 
 #import "OpenglView.h"
-#include <ewol/debug.h>
+#include <gale/debug.h>
 
 
 @interface OpenglView ()
@@ -123,7 +123,7 @@
 }
 
 - (void)setNeedsDisplay {
-	EWOL_INFO("**** setNeedsDisplay:" << vec2(self.frame.size.width, self.frame.size.height));
+	GALE_INFO("**** setNeedsDisplay:" << vec2(self.frame.size.width, self.frame.size.height));
 	// TODO : SIZE change ...
 
 }
@@ -133,13 +133,13 @@
 	m_currentSize = CGSizeMake(screenBounds.size.width * screenScale, screenBounds.size.height * screenScale);
 	//self.frame.size = m_currentSize;
 	
-	EWOL_INFO("**** screen size:" << vec2(m_currentSize.width, m_currentSize.height));
+	GALE_INFO("**** screen size:" << vec2(m_currentSize.width, m_currentSize.height));
 	float ratio = [self getScreenPPP];
-	EWOL_INFO("**** pixel ratio: " << ratio);
-	ewol::Dimension::setPixelRatio(vec2(1.0f/ratio, 1.0f/ratio), ewol::Dimension::Inch);
+	GALE_INFO("**** pixel ratio: " << ratio);
+	gale::Dimension::setPixelRatio(vec2(1.0f/ratio, 1.0f/ratio), gale::Dimension::Inch);
 	IOs::resize(m_currentSize.width, m_currentSize.height);
 	CGRect localBounds = [self bounds];
-	EWOL_INFO("**** localBounds:" << vec2(localBounds.size.width, localBounds.size.height));
+	GALE_INFO("**** localBounds:" << vec2(localBounds.size.width, localBounds.size.height));
 
 }
 - (void)setupLayer {
@@ -243,7 +243,7 @@
 	CGRect localBounds = [self bounds];
 	CGFloat screenScale = [[UIScreen mainScreen] scale];
 	vec2 positionEvent(touchLocation.x*screenScale, (localBounds.size.height - touchLocation.y)*screenScale);
-	EWOL_DEBUG(touches.count << " touchesBegan: " << positionEvent);
+	GALE_DEBUG(touches.count << " touchesBegan: " << positionEvent);
 	IOs::setInputState(1, true, positionEvent.x(), positionEvent.y());
 }
 
@@ -253,7 +253,7 @@
 	CGRect localBounds = [self bounds];
 	CGFloat screenScale = [[UIScreen mainScreen] scale];
 	vec2 positionEvent(touchLocation.x*screenScale, (localBounds.size.height - touchLocation.y)*screenScale);
-	EWOL_DEBUG(touches.count << " touchesEnded: " << positionEvent);
+	GALE_DEBUG(touches.count << " touchesEnded: " << positionEvent);
 	IOs::setInputState(1, false, positionEvent.x(), positionEvent.y());
 }
 
@@ -263,7 +263,7 @@
 	CGRect localBounds = [self bounds];
 	CGFloat screenScale = [[UIScreen mainScreen] scale];
 	vec2 positionEvent(touchLocation.x*screenScale, (localBounds.size.height - touchLocation.y)*screenScale);
-	EWOL_DEBUG(touches.count << " touchesMoved: " << positionEvent);
+	GALE_DEBUG(touches.count << " touchesMoved: " << positionEvent);
 	IOs::setInputMotion(1, positionEvent.x(), positionEvent.y());
 }
 

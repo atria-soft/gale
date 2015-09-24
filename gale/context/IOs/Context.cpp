@@ -13,7 +13,6 @@
 #include <gale/context/commandLine.h>
 #include <etk/types.h>
 #include <etk/os/FSNode.h>
-#include <gale/widget/Manager.h>
 
 #include <gale/resource/Manager.h>
 #include <gale/context/Context.h>
@@ -99,7 +98,7 @@ public:
 		            _id,
 		            vec2(_x, _y));
 	}
-	void MAC_SetKeyboard(gale::key::Special _keyboardMode, int32_t _unichar, bool _isDown, bool _isAReapeateKey) {
+	void MAC_SetKeyboard(gale::key::Special _special, int32_t _unichar, bool _isDown, bool _isARepeateKey) {
 		if (_unichar == u32char::Delete) {
 			_unichar = u32char::Suppress;
 		} else if (_unichar == u32char::Suppress) {
@@ -113,24 +112,24 @@ public:
 			enum gale::key::keyboard move;
 			switch(_unichar) {
 				case 0:
-					move = gale::key::keyboardUp;
+					move = gale::key::keyboard_up;
 					break;
 				case 1:
-					move = gale::key::keyboardDown;
+					move = gale::key::keyboard_down;
 					break;
 				case 2:
-					move = gale::key::keyboardLeft;
+					move = gale::key::keyboard_left;
 					break;
 				case 3:
-					move = gale::key::keyboardRight;
+					move = gale::key::keyboard_right;
 					break;
 			}
-			OS_setKeyboard(_keyboardMode,
+			OS_setKeyboard(_special,
 			               move,
 			               (_isDown==false?gale::key::status_down:gale::key::status_up),
 			               _isARepeateKey);
 		} else {
-			OS_setKeyboard(_keyboardMode,
+			OS_setKeyboard(_special,
 			               gale::key::keyboard_char,
 			               (_isDown==false?gale::key::status_down:gale::key::status_up),
 			               _isARepeateKey,
@@ -140,7 +139,7 @@ public:
 	void MAC_SetKeyboardMove(gale::key::Special& _special,
 							 enum gale::key::keyboard _move,
 							 bool _isDown) {
-		OS_setKeyboard(_keyboardMode,
+		OS_setKeyboard(_special,
 		               _move,
 		               (_isDown==true?gale::key::status_down:gale::key::status_up));
 	}
@@ -197,18 +196,18 @@ void IOs::setInputMotion(int32_t _id, float _x, float _y) {
 	interface->MAC_SetInputMotion(_id, _x, _y);
 }
 
-void IOs::setKeyboard(gale::key::Special _keyboardMode, int32_t _unichar, bool _isDown, bool _isAReapeateKey) {
+void IOs::setKeyboard(gale::key::Special _special, int32_t _unichar, bool _isDown, bool _isARepeateKey) {
 	if (interface == nullptr) {
 		return;
 	}
-	interface->MAC_SetKeyboard(_keyboardMode, _unichar, _isDown, _isAReapeateKey);
+	interface->MAC_SetKeyboard(_special, _unichar, _isDown, _isARepeateKey);
 }
 
-void IOs::setKeyboardMove(gale::key::Special& _keyboardMode, enum gale::key::keyboard _move, bool _isDown) {
+void IOs::setKeyboardMove(gale::key::Special& _special, enum gale::key::keyboard _move, bool _isDown) {
 	if (interface == nullptr) {
 		return;
 	}
-	interface->MAC_SetKeyboardMove(_keyboardMode, _move, _isDown);
+	interface->MAC_SetKeyboardMove(_special, _move, _isDown);
 }
 
 void IOs::start() {

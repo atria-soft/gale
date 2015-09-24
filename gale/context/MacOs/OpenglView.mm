@@ -7,18 +7,18 @@
  */
 
 
-#import <ewol/context/MacOs/OpenglView.h>
+#import <gale/context/MacOs/OpenglView.h>
 #include <OpenGL/gl.h>
-#include <ewol/context/MacOS/Context.h>
-#include <ewol/debug.h>
-#include <ewol/Dimension.h>
+#include <gale/context/MacOS/Context.h>
+#include <gale/debug.h>
+#include <gale/Dimension.h>
 
 
 @implementation OpenGLView
 
 
 - (void) prepareOpenGL {
-	EWOL_INFO("prepare");
+	GALE_INFO("prepare");
 	GLint swapInt = 1;
 	[[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
 	// set system dpi size : 
@@ -27,9 +27,9 @@
 	NSSize displayPixelSize = [[description objectForKey:NSDeviceSize] sizeValue];
 	CGSize displayPhysicalSize = CGDisplayScreenSize([[description objectForKey:@"NSScreenNumber"] unsignedIntValue]);
 	
-	ewol::Dimension::setPixelRatio(vec2((float)displayPixelSize.width/(float)displayPhysicalSize.width,
+	gale::Dimension::setPixelRatio(vec2((float)displayPixelSize.width/(float)displayPhysicalSize.width,
 	                                    (float)displayPixelSize.height/(float)displayPhysicalSize.height),
-	                                    ewol::Dimension::Millimeter);
+	                                    gale::Dimension::Millimeter);
 	_refreshTimer=[ [ NSTimer scheduledTimerWithTimeInterval:0.017 target:self selector:@selector(animationTimerFired:) userInfo:nil repeats:YES ] retain ] ;
 	_redraw = true;
 	
@@ -41,7 +41,7 @@
 -(void) drawRect: (NSRect) bounds {
 	if ( ! _refreshTimer ) {
 		_refreshTimer=[ [ NSTimer scheduledTimerWithTimeInterval:0.017 target:self selector:@selector(animationTimerFired:) userInfo:nil repeats:YES ] retain ] ;
-		EWOL_WARNING("create timer ... ");
+		GALE_WARNING("create timer ... ");
 	}
 	MacOs::draw(false);
 }
@@ -53,12 +53,12 @@
 	if (_redraw == true) {
 		//_redraw = false;
 		[self setNeedsDisplay:YES];
-		//EWOL_WARNING("view refresh ..." );
+		//GALE_WARNING("view refresh ..." );
 	}
 }
 
 -(void)reshape {
-	EWOL_INFO("view reshape (" << [self frame].size.width << "," << [self frame].size.height << ")" );
+	GALE_INFO("view reshape (" << [self frame].size.width << "," << [self frame].size.height << ")" );
 	// window resize; width and height are in pixel coordinates
 	// but they are floats
 	float width = [self frame].size.width;

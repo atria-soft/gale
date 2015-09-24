@@ -7,7 +7,7 @@
  */
 
 #import <UIKit/UIKit.h>
-#import <ewol/context/IOs/AppDelegate.h>
+#import <gale/context/IOs/AppDelegate.h>
 //#import "AppDelegate.h"
 
 

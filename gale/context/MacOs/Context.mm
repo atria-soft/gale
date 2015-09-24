@@ -7,20 +7,19 @@
  */
 
 
-#include <ewol/debug.h>
-#include <ewol/ewol.h>
-#include <ewol/key/key.h>
-#include <ewol/context/commandLine.h>
-#include <ewol/context/clipBoard.h>
+#include <gale/debug.h>
+#include <gale/gale.h>
+#include <gale/key/key.h>
+#include <gale/context/commandLine.h>
+#include <gale/context/clipBoard.h>
 #include <etk/types.h>
 #include <etk/os/FSNode.h>
-#include <ewol/widget/Manager.h>
 
-#include <ewol/resource/Manager.h>
-#include <ewol/context/Context.h>
+#include <gale/resource/Manager.h>
+#include <gale/context/Context.h>
 
-#include <ewol/context/MacOs/Interface.h>
-#include <ewol/context/MacOs/Context.h>
+#include <gale/context/MacOs/Interface.h>
+#include <gale/context/MacOs/Context.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -34,7 +33,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-int64_t ewol::getTime() {
+int64_t gale::getTime() {
 	struct timespec now;
 	clock_serv_t cclock;
 	mach_timespec_t mts;
@@ -43,7 +42,7 @@ int64_t ewol::getTime() {
 	mach_port_deallocate(mach_task_self(), cclock);
 	now.tv_sec = mts.tv_sec;
 	now.tv_nsec = mts.tv_nsec;
-	//EWOL_VERBOSE("current time : " << now.tv_sec << "s " << now.tv_usec << "us");
+	//GALE_VERBOSE("current time : " << now.tv_sec << "s " << now.tv_usec << "us");
 	return (int64_t)((int64_t)now.tv_sec*(int64_t)1000000 + (int64_t)now.tv_nsec/(int64_t)1000);
 }
 
@@ -52,12 +51,12 @@ int64_t ewol::getTime() {
 
 
 
-class MacOSInterface : public ewol::Context {
+class MacOSInterface : public gale::Context {
 	private:
-		ewol::key::Special m_guiKeyBoardMode;
+		gale::key::Special m_guiKeyBoardMode;
 	public:
-		MacOSInterface(ewol::context::Application* _application, int _argc, const char* _argv[]) :
-		  ewol::Context(_application, _argc, _argv) {
+		MacOSInterface(gale::Application* _application, int _argc, const char* _argv[]) :
+		  gale::Context(_application, _argc, _argv) {
 			mm_main(_argc, _argv);
 		}
 		
@@ -85,7 +84,7 @@ class MacOSInterface : public ewol::Context {
 			            _id,
 			            vec2(_x, _y));
 		}
-		void MAC_SetKeyboard(ewol::key::Special _special, int32_t _unichar, bool _isDown, bool _isAReapeateKey) {
+		void MAC_SetKeyboard(gale::key::Special _special, int32_t _unichar, bool _isDown, bool _isAReapeateKey) {
 			if (char32_t(_unichar) == u32char::Delete) {
 				_unichar = u32char::Suppress;
 			} else if (char32_t(_unichar) == u32char::Suppress) {
@@ -94,21 +93,21 @@ class MacOSInterface : public ewol::Context {
 			if (char32_t(_unichar) == u32char::CarrierReturn) {
 				_unichar = u32char::Return;
 			}
-			//EWOL_DEBUG("key: " << _unichar << " up=" << !_isDown);
+			//GALE_DEBUG("key: " << _unichar << " up=" << !_isDown);
 			if (_unichar <= 4) {
-				enum ewol::key::keyboard move;
+				enum gale::key::keyboard move;
 				switch(_unichar) {
 					case 0:
-						move = ewol::key::keyboardUp;
+						move = gale::key::keyboard_up;
 						break;
 					case 1:
-						move = ewol::key::keyboardDown;
+						move = gale::key::keyboard_down;
 						break;
 					case 2:
-						move = ewol::key::keyboardLeft;
+						move = gale::key::keyboard_left;
 						break;
 					case 3:
-						move = ewol::key::keyboardRight;
+						move = gale::key::keyboard_right;
 						break;
 				}
 				OS_setKeyboard(_special, move, (_isDown==false?gale::key::status_down:gale::key::status_up), _isAReapeateKey);
@@ -116,8 +115,8 @@ class MacOSInterface : public ewol::Context {
 				OS_setKeyboard(_special, gale::key::keyboard_char, (_isDown==false?gale::key::status_down:gale::key::status_up), _isAReapeateKey, _unichar);
 			}
 		}
-		void MAC_SetKeyboardMove(ewol::key::Special& _special,
-								enum ewol::key::keyboard _move,
+		void MAC_SetKeyboardMove(gale::key::Special& _special,
+								enum gale::key::keyboard _move,
 								bool _isDown,
 								bool _isAReapeateKey) {
 			OS_setKeyboard(_special, _move, (_isDown==true?gale::key::status_down:gale::key::status_up), _isAReapeateKey);
@@ -132,31 +131,31 @@ class MacOSInterface : public ewol::Context {
 		void stop() {
 			mm_stopApplication();
 		}
-		void clipBoardGet(enum ewol::context::clipBoard::clipboardListe _clipboardID) {
-			if (_clipboardID == ewol::context::clipBoard::clipboardStd) {
+		void clipBoardGet(enum gale::context::clipBoard::clipboardListe _clipboardID) {
+			if (_clipboardID == gale::context::clipBoard::clipboardStd) {
 				NSPasteboard* myPasteboard = [NSPasteboard generalPasteboard];
 				NSString* myString = [myPasteboard stringForType:NSPasteboardTypeString];
 				std::string val([myString UTF8String]);
-				ewol::context::clipBoard::setSystem(_clipboardID, val);
+				gale::context::clipBoard::setSystem(_clipboardID, val);
 				if (val.size() != 0) {
 					OS_ClipBoardArrive(_clipboardID);
 				}
 			} else {
-				ewol::Context::clipBoardGet(_clipboardID);
+				gale::Context::clipBoardGet(_clipboardID);
 			}
 		}
-		void clipBoardSet(enum ewol::context::clipBoard::clipboardListe _clipboardID) {
-			if (_clipboardID == ewol::context::clipBoard::clipboardStd) {
+		void clipBoardSet(enum gale::context::clipBoard::clipboardListe _clipboardID) {
+			if (_clipboardID == gale::context::clipBoard::clipboardStd) {
 				NSPasteboard* myPasteboard = [NSPasteboard generalPasteboard];
 				[myPasteboard clearContents];
-				//EWOL_ERROR(" copy: " << ewol::context::clipBoard::get(_clipboardID));
-				NSString *text = [[NSString alloc] initWithUTF8String:ewol::context::clipBoard::get(_clipboardID).c_str()];
+				//GALE_ERROR(" copy: " << gale::context::clipBoard::get(_clipboardID));
+				NSString *text = [[NSString alloc] initWithUTF8String:gale::context::clipBoard::get(_clipboardID).c_str()];
 				BOOL err = [myPasteboard setString:text forType:NSPasteboardTypeString];
 				if (err == FALSE) {
-					EWOL_ERROR("copy to clipboard can not be done ..."); 
+					GALE_ERROR("copy to clipboard can not be done ..."); 
 				}
 			} else {
-				ewol::Context::clipBoardSet(_clipboardID);
+				gale::Context::clipBoardSet(_clipboardID);
 			}
 		}
 	
@@ -196,14 +195,14 @@ void MacOs::setMouseMotion(int32_t _id, float _x, float _y) {
 	interface->MAC_SetMouseMotion(_id, _x, _y);
 }
 
-void MacOs::setKeyboard(ewol::key::Special _keyboardMode, int32_t _unichar, bool _isDown, bool _isAReapeateKey) {
+void MacOs::setKeyboard(gale::key::Special _keyboardMode, int32_t _unichar, bool _isDown, bool _isAReapeateKey) {
 	if (interface == nullptr) {
 		return;
 	}
 	interface->MAC_SetKeyboard(_keyboardMode, _unichar, _isDown, _isAReapeateKey);
 }
 
-void MacOs::setKeyboardMove(ewol::key::Special& _keyboardMode, enum ewol::key::keyboard _move, bool _isDown, bool _isAReapeateKey) {
+void MacOs::setKeyboardMove(gale::key::Special& _keyboardMode, enum gale::key::keyboard _move, bool _isDown, bool _isAReapeateKey) {
 	if (interface == nullptr) {
 		return;
 	}
@@ -216,29 +215,29 @@ void MacOs::stopRequested() {
 	}
 	interface->MAC_Stop();
 }
-
+/*
 void MacOs::setRedrawCallback(const std::function<void()>& _func) {
 	if (interface == nullptr) {
 		return;
 	}
 	interface->getWidgetManager().setCallbackonRedrawNeeded(_func);
 }
-
+*/
 /**
  * @brief Main of the program
  * @param std IO
  * @return std IO
  */
-int ewol::run(ewol::context::Application* _application, int _argc, const char* _argv[]) {
+int gale::run(gale::Application* _application, int _argc, const char* _argv[]) {
 	etk::init(_argc, _argv);
 	interface = new MacOSInterface(_application, _argc, _argv);
 	if (nullptr == interface) {
-		EWOL_CRITICAL("Can not create the X11 interface ... MEMORY allocation error");
+		GALE_CRITICAL("Can not create the X11 interface ... MEMORY allocation error");
 		return -2;
 	}
 	
 	int32_t retValue = interface->Run();
-	EWOL_INFO("Stop running");
+	GALE_INFO("Stop running");
 	delete(interface);
 	interface = nullptr;
 	return retValue;

@@ -7,17 +7,17 @@
  */
 #include "Context.h"
 #import <Cocoa/Cocoa.h>
-#include "ewol/context/MacOs/Interface.h"
+#include "gale/context/MacOs/Interface.h"
 
-#import <ewol/context/MacOs/OpenglView.h>
-#import <ewol/context/MacOs/Windows.h>
-#import <ewol/context/MacOs/AppDelegate.h>
-#import <ewol/debug.h>
+#import <gale/context/MacOs/OpenglView.h>
+#import <gale/context/MacOs/Windows.h>
+#import <gale/context/MacOs/AppDelegate.h>
+#import <gale/debug.h>
 
 id window = nil;
 
 void callbackSomeThingToDo() {
-	//EWOL_CRITICAL("ksdjlkqjsdlfkjsqdlkfjslqkdjflqksjdf");
+	//GALE_CRITICAL("ksdjlkqjsdlfkjsqdlkfjslqkdjflqksjdf");
 	[window UpdateScreenRequested];
 }
 
@@ -57,7 +57,7 @@ int mm_main(int _argc, const char* _argv[]) {
 	// -- basic windows creation :
 	// ---------------------------------------------------------------
 	// create a windows of size 800/600
-	window = [ [ [EwolMainWindows alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+	window = [ [ [GaleMainWindows alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
 	           styleMask:(NSTitledWindowMask|NSMiniaturizableWindowMask|NSClosableWindowMask) backing:NSBackingStoreBuffered defer:NO]
 	           autorelease];
 	[window setAcceptsMouseMovedEvents:YES];
@@ -90,15 +90,15 @@ int mm_main(int _argc, const char* _argv[]) {
 int mm_run(void) {
 	//MacOs::setRedrawCallback(std::bind(callbackSomeThingToDo));
 	[NSApp run];
-	EWOL_DEBUG("END of application");
+	GALE_DEBUG("END of application");
 	// return no error
 	return 0;
 }
 
 void mm_stopApplication() {
-	EWOL_DEBUG("NSApp terminate start.");
-	[window closeRequestEwol];
+	GALE_DEBUG("NSApp terminate start.");
+	[window closeRequestGale];
 	[NSApp stop:nil];
-	EWOL_DEBUG("NSApp terminate done");
+	GALE_DEBUG("NSApp terminate done");
 }
 
