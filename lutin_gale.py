@@ -13,12 +13,12 @@ def get_license():
 
 def create(target):
 	# module name is 'edn' and type binary.
-	myModule = module.Module(__file__, 'gale', 'LIBRARY')
+	my_module = module.Module(__file__, 'gale', 'LIBRARY')
 	
 	# add extra compilation flags :
-	myModule.add_extra_compile_flags()
+	my_module.add_extra_compile_flags()
 	# add the file to compile:
-	myModule.add_src_file([
+	my_module.add_src_file([
 		'gale/gale.cpp',
 		'gale/debug.cpp',
 		'gale/Dimension.cpp',
@@ -26,7 +26,7 @@ def create(target):
 		'gale/Application.cpp',
 		'gale/Thread.cpp',
 		])
-	myModule.add_header_file([
+	my_module.add_header_file([
 		'gale/debug.h',
 		'gale/gale.h',
 		'gale/Dimension.h',
@@ -36,13 +36,13 @@ def create(target):
 		])
 	
 	# context :
-	myModule.add_src_file([
+	my_module.add_src_file([
 		'gale/context/clipBoard.cpp',
 		'gale/context/commandLine.cpp',
 		'gale/context/Context.cpp',
 		'gale/context/cursor.cpp',
 		])
-	myModule.add_header_file([
+	my_module.add_header_file([
 		'gale/context/clipBoard.h',
 		'gale/context/commandLine.h',
 		'gale/context/Context.h',
@@ -50,14 +50,14 @@ def create(target):
 		'gale/context/Fps.h'
 		])
 	if target.name=="Linux":
-		myModule.add_src_file('gale/context/X11/Context.cpp')
+		my_module.add_src_file('gale/context/X11/Context.cpp')
 		# check if egami is present in the worktree: this is for the icon parsing ...
-		myModule.add_optionnal_module_depend('egami', ["c++", "-DGALE_BUILD_EGAMI"])
+		my_module.add_optionnal_module_depend('egami', ["c++", "-DGALE_BUILD_EGAMI"])
 	elif target.name=="Windows":
-		myModule.add_src_file('gale/context/Windows/Context.cpp')
+		my_module.add_src_file('gale/context/Windows/Context.cpp')
 	elif target.name=="Android":
-		myModule.add_src_file('gale/context/Android/Context.cpp')
-		myModule.add_src_file([
+		my_module.add_src_file('gale/context/Android/Context.cpp')
+		my_module.add_src_file([
 			'android/src/org/gale/GaleCallback.java',
 			'android/src/org/gale/GaleConstants.java',
 			'android/src/org/gale/Gale.java',
@@ -67,16 +67,16 @@ def create(target):
 			'android/src/org/gale/GaleWallpaper.java',
 			'org.gale.GaleConstants.javah'
 			])
-		myModule.add_path(tools.get_current_path(__file__) + '/android/src/', type='java')
+		my_module.add_path(tools.get_current_path(__file__) + '/android/src/', type='java')
 	elif target.name=="MacOs":
-		myModule.add_src_file([
+		my_module.add_src_file([
 			'gale/context/MacOs/Context.mm',
 			'gale/context/MacOs/Interface.mm',
 			'gale/context/MacOs/Windows.mm',
 			'gale/context/MacOs/OpenglView.mm',
 			'gale/context/MacOs/AppDelegate.mm'])
 	elif target.name=="IOs":
-		myModule.add_src_file([
+		my_module.add_src_file([
 			'gale/context/IOs/Context.cpp',
 			'gale/context/IOs/Interface.m',
 			'gale/context/IOs/OpenglView.mm',
@@ -85,13 +85,13 @@ def create(target):
 		debug.error("unknow mode...")
 	
 	# Key properties :
-	myModule.add_src_file([
+	my_module.add_src_file([
 		'gale/key/keyboard.cpp',
 		'gale/key/Special.cpp',
 		'gale/key/status.cpp',
 		'gale/key/type.cpp'
 		])
-	myModule.add_header_file([
+	my_module.add_header_file([
 		'gale/key/keyboard.h',
 		'gale/key/Special.h',
 		'gale/key/status.h',
@@ -100,16 +100,16 @@ def create(target):
 		])
 	
 	# OpenGL interface :
-	myModule.add_src_file([
+	my_module.add_src_file([
 		'gale/renderer/openGL/openGL.cpp'
 		])
-	myModule.add_header_file([
+	my_module.add_header_file([
 		'gale/renderer/openGL/openGL.h',
 		'gale/renderer/openGL/openGL-include.h'
 		])
 	
 	# resources :
-	myModule.add_src_file([
+	my_module.add_src_file([
 		'gale/resource/Manager.cpp',
 		'gale/resource/Program.cpp',
 		'gale/resource/Resource.cpp',
@@ -117,7 +117,7 @@ def create(target):
 		'gale/resource/Texture.cpp',
 		'gale/resource/VirtualBufferObject.cpp'
 		])
-	myModule.add_header_file([
+	my_module.add_header_file([
 		'gale/resource/Manager.h',
 		'gale/resource/Program.h',
 		'gale/resource/Resource.h',
@@ -127,42 +127,42 @@ def create(target):
 		])
 	
 	# name of the dependency
-	myModule.add_module_depend(['etk'])
+	my_module.add_module_depend(['etk'])
 	
-	myModule.add_path(tools.get_current_path(__file__))
+	my_module.add_path(tools.get_current_path(__file__))
 
 	tagFile = tools.get_current_path(__file__) + "/tag"
 	galeVersionID = tools.file_read_data(tagFile)
-	myModule.compile_flags('c++', [
+	my_module.compile_flags('c++', [
 		"-DGALE_VERSION=\"\\\""+galeVersionID+"\\\"\""
 		])
 	
 	if target.name=="Linux":
-		# todo : myModule.add_module_depend(['egami'])
-		myModule.add_export_flag('link', '-lGL')
+		# todo : my_module.add_module_depend(['egami'])
+		my_module.add_export_flag('link', '-lGL')
 		#`pkg-config --cflags directfb` `pkg-config --libs directfb`
 		#ifeq ("$(CONFIG___GALE_LINUX_GUI_MODE_X11__)","y")
-		myModule.add_export_flag('link', '-lX11')
+		my_module.add_export_flag('link', '-lX11')
 		#endif
 		#ifeq ("$(CONFIG___GALE_LINUX_GUI_MODE_DIRECT_FB__)","y")
-		#myModule.add_export_flag('link', ['-L/usr/local/lib', '-ldirectfb', '-lfusion', '-ldirect'])
+		#my_module.add_export_flag('link', ['-L/usr/local/lib', '-ldirectfb', '-lfusion', '-ldirect'])
 		#endif
 	elif target.name=="Android":
-		myModule.add_module_depend(["SDK", "jvm-basics"])
-		myModule.add_export_flag('link', "-lGLESv2")
+		my_module.add_module_depend(["SDK", "jvm-basics"])
+		my_module.add_export_flag('link', "-lGLESv2")
 		# add tre creator of the basic java class ...
 		target.add_action("BINARY", 50, "gale-auto-wrapper", tool_generate_main_java_class)
 		# TODO : Add the same for BINARY to create a console interface ?
 	elif target.name=="Windows":
-		myModule.add_module_depend("glew")
+		my_module.add_module_depend("glew")
 	elif target.name=="MacOs":
-		myModule.add_export_flag('link', [
+		my_module.add_export_flag('link', [
 			"-framework Cocoa",
 			"-framework OpenGL",
 			"-framework QuartzCore",
 			"-framework AppKit"])
 	elif target.name=="IOs":
-		myModule.add_export_flag('link', [
+		my_module.add_export_flag('link', [
 			"-framework OpenGLES",
 			"-framework CoreGraphics",
 			"-framework UIKit",
@@ -170,7 +170,7 @@ def create(target):
 			"-framework Foundation",
 			"-framework QuartzCore"])
 	
-	return myModule
+	return my_module
 
 
 
@@ -561,10 +561,10 @@ def tool_generate_main_java_class(target, module, package_name):
 	
 	"""
 	#add properties on wallpaper : 
-	# myModule.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["list", key, title, summary, [["key","value display"],["key2","value display 2"]])
-	# myModule.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["list", "testpattern", "Select test pattern", "Choose which test pattern to display", [["key","value display"],["key2","value display 2"]]])
-	# myModule.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["bool", key, title, summary, ["enable string", "disable String"])
-	# myModule.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["bool", "movement", "Motion", "Apply movement to test pattern", ["Moving test pattern", "Still test pattern"]
+	# my_module.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["list", key, title, summary, [["key","value display"],["key2","value display 2"]])
+	# my_module.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["list", "testpattern", "Select test pattern", "Choose which test pattern to display", [["key","value display"],["key2","value display 2"]]])
+	# my_module.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["bool", key, title, summary, ["enable string", "disable String"])
+	# my_module.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["bool", "movement", "Motion", "Apply movement to test pattern", ["Moving test pattern", "Still test pattern"]
 	#copy needed resources :
 	for res_source, res_dest in module.package_prop["ANDROID_RESOURCES"]:
 		if res_source == "":

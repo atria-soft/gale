@@ -6,16 +6,16 @@ def get_desc():
 	return "Simple windows with gale"
 
 def create(target):
-	myModule = module.Module(__file__, 'gale-sample-basic', 'BINARY')
+	my_module = module.Module(__file__, 'gale-sample-basic', 'BINARY')
 	# add the file to compile:
-	myModule.add_src_file([
+	my_module.add_src_file([
 		'basic.cpp'
 		])
 	# add dependency of gale
-	myModule.add_module_depend(['gale'])
-	myModule.copy_file('basic.frag')
-	myModule.copy_file('basic.vert')
-	return myModule
+	my_module.add_module_depend(['gale'])
+	my_module.copy_file('basic.frag')
+	my_module.copy_file('basic.vert')
+	return my_module
 
 
 
