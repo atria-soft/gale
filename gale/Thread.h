@@ -38,10 +38,10 @@ namespace gale {
 			virtual ~Thread();
 			void start();
 			void stop();
-		protected:
-			virtual bool onThreadCall() { return true; };
 		private:
 			void threadCall();
+		protected:
+			virtual bool onThreadCall() { return true; };
 	};
 };
 
