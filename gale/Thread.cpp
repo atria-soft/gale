@@ -26,13 +26,18 @@ void gale::Thread::start() {
 	if (m_state == state_stop) {
 		GALE_DEBUG("Allocate std11::thread [START]");
 		m_state = state_starting;
-		m_thread = new std11::thread(&gale::Thread::threadCall, this);
+		m_thread = new std11::thread(&gale::Thread::threadCall, this, &gale::getContext());
+		if (m_thread == nullptr) {
+			GALE_ERROR("Can not create thread ...");
+			return;
+		}
+		m_thread->detach();
 		GALE_DEBUG("Allocate std11::thread [Set priority]");
 		// set priority
 		
 		GALE_DEBUG("Allocate std11::thread [Register context]");
 		// set association with the gale context ...
-		gale::contextRegisterThread(m_thread);
+		//gale::contextRegisterThread(m_thread);
 		
 		GALE_DEBUG("Allocate std11::thread [set State]");
 		m_state = state_running;
@@ -52,7 +57,7 @@ void gale::Thread::stop() {
 	}
 	GALE_DEBUG("stop std11::thread [START]");
 	m_thread->join();
-	gale::contextUnRegisterThread(m_thread);
+	//gale::contextUnRegisterThread(m_thread);
 	GALE_DEBUG("stop std11::thread [delete]");
 	delete m_thread;
 	m_thread = nullptr;
@@ -61,8 +66,70 @@ void gale::Thread::stop() {
 	GALE_DEBUG("stop std11::thread [STOP]");
 }
 
-void gale::Thread::threadCall() {
-	GALE_DEBUG("THREAD MAIN [START]");
+void gale::Thread::threadCall(gale::Context* _context) {
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	GALE_ERROR("THREAD MAIN [START]");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	gale::setContext(_context);
 	while (m_state != state_stopping) {
 		if (m_state == state_starting) {
 			GALE_DEBUG("run std11::thread [NOTHING to do]");

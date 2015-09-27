@@ -53,6 +53,7 @@ gale::Context& gale::getContext() {
 	if (it != list.end()) {
 		out = it->second;
 	}
+	
 	g_lockContextMap.unlock();
 	#if DEBUG_LEVEL > 2
 		if(out ==nullptr){
@@ -62,8 +63,9 @@ gale::Context& gale::getContext() {
 	return *out;
 }
 
-static void setContext(gale::Context* _context) {
+void gale::setContext(gale::Context* _context) {
 	std::map<std11::thread::id, gale::Context*>& list = getContextList();
+	GALE_ERROR("Set context : " << std11::this_thread::get_id() << " context pointer : " << uint64_t(_context));
 	g_lockContextMap.lock();
 	std::map<std11::thread::id, gale::Context*>::iterator it = list.find(std11::this_thread::get_id());
 	if (it == list.end()) {
@@ -80,6 +82,7 @@ void gale::contextRegisterThread(std11::thread* _thread) {
 	}
 	gale::Context* context = &gale::getContext();
 	std::map<std11::thread::id, gale::Context*>& list = getContextList();
+	GALE_ERROR("REGISTER Thread : " << _thread->get_id() << " context pointer : " << uint64_t(context));
 	g_lockContextMap.lock();
 	std::map<std11::thread::id, gale::Context*>::iterator it = list.find(_thread->get_id());
 	if (it == list.end()) {
@@ -551,7 +554,9 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		}
 		if(    needRedraw == true
 		    || _displayEveryTime == true) {
+			lockContext();
 			m_resourceManager.updateContext();
+			unLockContext();
 			if (m_displayFps == true) {
 				m_FpsSystemContext.incrementCounter();
 			}

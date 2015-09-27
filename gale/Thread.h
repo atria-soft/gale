@@ -11,6 +11,7 @@
 
 #include <etk/types.h>
 #include <etk/thread/tools.h>
+#include <gale/context/Context.h>
 
 namespace gale {
 	/**
@@ -39,7 +40,7 @@ namespace gale {
 			void start();
 			void stop();
 		private:
-			void threadCall();
+			void threadCall(gale::Context* _context);
 		protected:
 			virtual bool onThreadCall() { return true; };
 	};

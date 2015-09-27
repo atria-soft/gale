@@ -302,6 +302,11 @@ namespace gale {
 	 */
 	Context& getContext();
 	/**
+	 * @brief Set a context of the current thread.
+	 * @param[in] _context Current context to associate.
+	 */
+	void setContext(gale::Context* _context);
+	/**
 	 * @brief When a new thread is created, it is needed to register it in the gale context interface to permit to get the context associated on it ...
 	 * @param[in] _thread generic C++11 thread handle
 	 */
