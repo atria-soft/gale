@@ -435,25 +435,32 @@ class AndroidContext : public gale::Context {
 		                 enum gale::key::status _status,
 		                 int32_t _pointerID,
 		                 const vec2& _pos) {
+			GALE_DEBUG("OS_SetInput [BEGIN]");
 			gale::Context::OS_SetInput(_type, _status, _pointerID, vec2(_pos.x(),m_currentHeight-_pos.y()));
+			GALE_DEBUG("OS_SetInput [END]");
 		}
 		
 		void ANDROID_SetKeyboard(char32_t _myChar, bool _isDown, bool _isARepeateKey=false) {
+			GALE_DEBUG("ANDROID_SetKeyboard [BEGIN]");
 			OS_setKeyboard(m_guiKeyBoardSpecialKeyMode,
 			               gale::key::keyboard_char,
 			               (_isDown==true?gale::key::status_down:gale::key::status_up),
 			               _isARepeateKey,
 			               _myChar);
+			GALE_DEBUG("ANDROID_SetKeyboard [END]");
 		}
 		
 		bool ANDROID_systemKeyboradEvent(enum gale::key::keyboard _key, bool _isDown) {
+			GALE_DEBUG("ANDROID_systemKeyboradEvent [BEGIN]");
 			OS_setKeyboard(m_guiKeyBoardSpecialKeyMode,
 			               _key,
 			               (_isDown==true?gale::key::status_down:gale::key::status_up));
+			GALE_DEBUG("ANDROID_systemKeyboradEvent [END]");
 			return false;
 		}
 		
 		void ANDROID_SetKeyboardMove(int _move, bool _isDown, bool _isARepeateKey=false) {
+			GALE_DEBUG("ANDROID_SetKeyboardMove [BEGIN]");
 			// direct wrapping :
 			enum gale::key::keyboard move = (enum gale::key::keyboard)_move;
 			m_guiKeyBoardSpecialKeyMode.update(move, _isDown);
@@ -461,11 +468,14 @@ class AndroidContext : public gale::Context {
 			               move,
 			               (_isDown==true?gale::key::status_down:gale::key::status_up),
 			               _isARepeateKey);
+			GALE_DEBUG("ANDROID_SetKeyboardMove [END]");
 		}
 		
 		void OS_Resize(const vec2& _size) {
+			GALE_DEBUG("OS_Resize [BEGIN]");
 			m_currentHeight = _size.y();
 			gale::Context::OS_Resize(_size);
+			GALE_DEBUG("OS_Resize [END]");
 		}
 };
 
@@ -878,6 +888,7 @@ extern "C" {
 	                                     jobject _thiz,
 	                                     jint _id) {
 		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		GALE_DEBUG("Java_org_gale_Gale_EWrenderInit [BEGIN]");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
 		    || nullptr == s_listInstance[_id] ) {
@@ -885,6 +896,7 @@ extern "C" {
 			// TODO : generate error in java to stop the current instance
 			return;
 		}
+		GALE_DEBUG("Java_org_gale_Gale_EWrenderInit [END]");
 	}
 	
 	void Java_org_gale_Gale_EWrenderResize(JNIEnv* _env,
@@ -893,6 +905,7 @@ extern "C" {
 	                                       jint _w,
 	                                       jint _h) {
 		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		GALE_DEBUG("Java_org_gale_Gale_EWrenderResize [BEGIN]");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
 		    || nullptr == s_listInstance[_id] ) {
@@ -901,6 +914,7 @@ extern "C" {
 			return;
 		}
 		s_listInstance[_id]->OS_Resize(vec2(_w, _h));
+		GALE_DEBUG("Java_org_gale_Gale_EWrenderResize [END]");
 	}
 	
 	// TODO : Return true or false to not redraw when the under draw has not be done (processing gain of time)
@@ -908,6 +922,7 @@ extern "C" {
 	                                     jobject _thiz,
 	                                     jint _id) {
 		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		GALE_DEBUG("Java_org_gale_Gale_EWrenderDraw [BEGIN]");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
 		    || nullptr == s_listInstance[_id] ) {
@@ -916,6 +931,7 @@ extern "C" {
 			return;
 		}
 		s_listInstance[_id]->OS_Draw(true);
+		GALE_DEBUG("Java_org_gale_Gale_EWrenderDraw [END]");
 	}
 };
 

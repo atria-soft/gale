@@ -13,6 +13,12 @@
 #include <etk/thread/tools.h>
 #include <gale/context/Context.h>
 
+#if defined(__TARGET_OS__Android)
+	#include <pthread.h>
+#else
+	#include <thread>
+#endif
+
 namespace gale {
 	/**
 	 * @brief in the dimention class we store the data as the more usefull unit (pixel) 
@@ -27,7 +33,12 @@ namespace gale {
 				state_stopping
 			};
 			enum state m_state;
-			std11::thread* m_thread;
+			#if defined(__TARGET_OS__Android)
+				pthread_t m_thread;
+			#else
+				std11::thread* m_thread;
+			#endif
+			gale::Context* m_context;
 		public:
 			/**
 			 * @brief Constructor (default :0,0 mode pixel)
@@ -39,8 +50,8 @@ namespace gale {
 			virtual ~Thread();
 			void start();
 			void stop();
-		private:
-			void threadCall(gale::Context* _context);
+		public:
+			void threadCall();
 		protected:
 			virtual bool onThreadCall() { return true; };
 	};

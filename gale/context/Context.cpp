@@ -506,6 +506,7 @@ void gale::Context::clipBoardSet(enum gale::context::clipBoard::clipboardListe _
 }
 
 bool gale::Context::OS_Draw(bool _displayEveryTime) {
+	GALE_INFO("plop 10");
 	gale::openGL::threadHasContext();
 	int64_t currentTime = gale::getTime();
 	// this is to prevent the multiple display at the a high frequency ...
@@ -517,11 +518,13 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 	}
 	#endif
 	m_previousDisplayTime = currentTime;
+	GALE_INFO("plop 20");
 	
 	// process the events
 	if (m_displayFps == true) {
 		m_FpsSystemEvent.tic();
 	}
+	GALE_INFO("plop 30");
 	bool needRedraw = false;
 	//! Event management section ...
 	{
@@ -544,6 +547,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		// release the curent interface :
 		unLockContext();
 	}
+	GALE_INFO("plop 40");
 	bool hasDisplayDone = false;
 	//! drawing section:
 	{
@@ -552,6 +556,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		if (m_displayFps == true) {
 			m_FpsSystemContext.tic();
 		}
+		GALE_INFO("plop 41");
 		if(    needRedraw == true
 		    || _displayEveryTime == true) {
 			lockContext();
@@ -561,10 +566,12 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 				m_FpsSystemContext.incrementCounter();
 			}
 		}
+		GALE_INFO("plop 42");
 		if (m_displayFps == true) {
 			m_FpsSystemContext.toc();
 			m_FpsSystem.tic();
 		}
+		GALE_INFO("plop 43");
 		if (m_application != nullptr) {
 			if(    true == needRedraw
 			    || true == _displayEveryTime) {
@@ -576,28 +583,35 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 				hasDisplayDone = true;
 			}
 		}
+		GALE_INFO("plop 44");
 		if (m_displayFps == true) {
 			m_FpsSystem.toc();
 			m_FpsFlush.tic();
 		}
+		GALE_INFO("plop 45");
 		if (hasDisplayDone == true) {
 			if (m_displayFps == true) {
 				m_FpsFlush.incrementCounter();
 			}
 			gale::openGL::flush();
 		}
+		GALE_INFO("plop 46");
 		if (m_displayFps == true) {
 			m_FpsFlush.toc();
 		}
+		GALE_INFO("plop 47");
 		// release open GL Context
 		gale::openGL::unLock();
+		GALE_INFO("plop 48");
 	}
+	GALE_INFO("plop 50");
 	if (m_displayFps == true) {
 		m_FpsSystemEvent.draw();
 		m_FpsSystemContext.draw();
 		m_FpsSystem.draw();
 		m_FpsFlush.draw();
 	}
+	GALE_INFO("plop 60");
 	{
 		// set the curent interface :
 		lockContext();
@@ -612,7 +626,9 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		// release the curent interface :
 		unLockContext();
 	}
+	GALE_INFO("plop 70");
 	gale::openGL::threadHasNoMoreContext();
+	GALE_INFO("plop 80");
 	return hasDisplayDone;
 }
 
