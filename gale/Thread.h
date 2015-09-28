@@ -36,7 +36,7 @@ namespace gale {
 			#if defined(__TARGET_OS__Android)
 				pthread_t m_thread;
 			#else
-				std11::thread* m_thread;
+				std11::shared_ptr<std11::thread> m_thread;
 			#endif
 			gale::Context* m_context;
 		public:
@@ -50,7 +50,10 @@ namespace gale {
 			virtual ~Thread();
 			void start();
 			void stop();
-		public:
+		private:
+			#if defined(__TARGET_OS__Android)
+				static void* threadCallback(void* _userData);
+			#endif
 			void threadCall();
 		protected:
 			virtual bool onThreadCall() { return true; };

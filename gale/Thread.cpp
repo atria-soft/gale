@@ -10,10 +10,8 @@
 #include <unistd.h>
 #include <gale/context/Context.h>
 
-
-
 #if defined(__TARGET_OS__Android)
-	static void* threadCallback(void* _userData) {
+	void* gale::Thread::threadCallback(void* _userData) {
 		gale::Thread* threadHandle = static_cast<gale::Thread*>(_userData);
 		if (threadHandle != nullptr) {
 			threadHandle->threadCall();
@@ -44,9 +42,9 @@ void gale::Thread::start() {
 		m_state = state_starting;
 		m_context = &gale::getContext();
 		#if defined(__TARGET_OS__Android)
-			pthread_create(&m_thread, nullptr, &threadCallback, this);
+			pthread_create(&m_thread, nullptr, &gale::Thread::threadCallback, this);
 		#else
-			m_thread = new std11::thread(&gale::Thread::threadCall, this);//, &gale::getContext());
+			m_thread = std11::make_shared<std11::thread>(&gale::Thread::threadCall, this);
 			if (m_thread == nullptr) {
 				GALE_ERROR("Can not create thread ...");
 				return;
@@ -78,17 +76,17 @@ void gale::Thread::stop() {
 	}
 	GALE_DEBUG("stop std11::thread [START]");
 	#if defined(__TARGET_OS__Android)
-		//m_thread.join();
+		void* ret = nullptr;
+		int val = pthread_join(m_thread, &ret);
 	#else
 		m_thread->join();
 	#endif
 	//gale::contextUnRegisterThread(m_thread);
 	GALE_DEBUG("stop std11::thread [delete]");
 	#if defined(__TARGET_OS__Android)
-	
+		
 	#else
-		delete m_thread;
-		m_thread = nullptr;
+		m_thread.reset();
 	#endif
 	GALE_DEBUG("stop std11::thread [set state]");
 	m_state = state_stop;
