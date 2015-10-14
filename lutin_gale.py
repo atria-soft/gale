@@ -5,17 +5,30 @@ import lutin.debug as debug
 import os
 import lutin.multiprocess as lutinMultiprocess
 
+
+def get_type():
+	return "LIBRARY"
+
 def get_desc():
 	return "gale is a main library to use widget in the openGl environement and manage all the wraping os"
 
-def get_license():
-	return "APACHE v2.0"
+def get_licence():
+	return "APACHE-2"
 
-def create(target):
-	# module name is 'edn' and type binary.
-	my_module = module.Module(__file__, 'gale', 'LIBRARY')
-	
-	# add extra compilation flags :
+def get_compagny_type():
+	return "com"
+
+def get_compagny_name():
+	return "atria-soft"
+
+def get_maintainer():
+	return ["Mr DUPIN Edouard <yui.heero@gmail.com>"]
+
+def get_version():
+	return [0,0,0]
+
+def create(target, module_name):
+	my_module = module.Module(__file__, module_name, get_type())
 	my_module.add_extra_compile_flags()
 	# add the file to compile:
 	my_module.add_src_file([
@@ -34,8 +47,7 @@ def create(target):
 		'gale/Application.h',
 		'gale/Thread.h',
 		])
-	
-	# context :
+	# context:
 	my_module.add_src_file([
 		'gale/context/clipBoard.cpp',
 		'gale/context/commandLine.cpp',
@@ -83,8 +95,7 @@ def create(target):
 			'gale/context/IOs/AppDelegate.mm'])
 	else:
 		debug.error("unknow mode...")
-	
-	# Key properties :
+	# Key properties:
 	my_module.add_src_file([
 		'gale/key/keyboard.cpp',
 		'gale/key/Special.cpp',
@@ -98,8 +109,7 @@ def create(target):
 		'gale/key/type.h',
 		'gale/key/key.h'
 		])
-	
-	# OpenGL interface :
+	# OpenGL interface:
 	my_module.add_src_file([
 		'gale/renderer/openGL/openGL.cpp'
 		])
@@ -107,8 +117,7 @@ def create(target):
 		'gale/renderer/openGL/openGL.h',
 		'gale/renderer/openGL/openGL-include.h'
 		])
-	
-	# resources :
+	# resources:
 	my_module.add_src_file([
 		'gale/resource/Manager.cpp',
 		'gale/resource/Program.cpp',
@@ -125,12 +134,9 @@ def create(target):
 		'gale/resource/Texture.h',
 		'gale/resource/VirtualBufferObject.h'
 		])
-	
-	# name of the dependency
 	my_module.add_module_depend(['etk'])
-	
 	my_module.add_path(tools.get_current_path(__file__))
-
+	
 	tagFile = tools.get_current_path(__file__) + "/tag"
 	galeVersionID = tools.file_read_data(tagFile)
 	my_module.compile_flags('c++', [
