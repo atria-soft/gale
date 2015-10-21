@@ -357,7 +357,7 @@ def tool_generate_main_java_class(target, module, package_name):
 		tmpFile.write( '<manifest xmlns:android="http://schemas.android.com/apk/res/android" \n')
 		tmpFile.write( '          package="' + android_package_name + '" \n')
 		tmpFile.write( '          android:versionCode="'+module.package_prop["VERSION_CODE"]+'" \n')
-		tmpFile.write( '          android:versionName="'+module.package_prop["VERSION"]+'"> \n')
+		tmpFile.write( '          android:versionName="'+tools.version_to_string(module.package_prop["VERSION"])+'"> \n')
 		tmpFile.write( '	<uses-feature android:glEsVersion="0x00020000" android:required="true" />\n')
 		tmpFile.write( '	<uses-sdk android:minSdkVersion="' + str(target.boardId) + '" \n')
 		tmpFile.write( '	          android:targetSdkVersion="' + str(target.boardId) + '" /> \n')
