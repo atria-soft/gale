@@ -359,8 +359,8 @@ def tool_generate_main_java_class(target, module, package_name):
 		tmpFile.write( '          android:versionCode="'+module.package_prop["VERSION_CODE"]+'" \n')
 		tmpFile.write( '          android:versionName="'+tools.version_to_string(module.package_prop["VERSION"])+'"> \n')
 		tmpFile.write( '	<uses-feature android:glEsVersion="0x00020000" android:required="true" />\n')
-		tmpFile.write( '	<uses-sdk android:minSdkVersion="' + str(target.boardId) + '" \n')
-		tmpFile.write( '	          android:targetSdkVersion="' + str(target.boardId) + '" /> \n')
+		tmpFile.write( '	<uses-sdk android:minSdkVersion="' + str(target.board_id) + '" \n')
+		tmpFile.write( '	          android:targetSdkVersion="' + str(target.board_id) + '" /> \n')
 		if module.package_prop["ANDROID_APPL_TYPE"]=="APPL":
 			tmpFile.write( '	<application android:label="' + application_name + '" \n')
 			if "ICON" in module.package_prop.keys():
@@ -595,7 +595,7 @@ def tool_generate_main_java_class(target, module, package_name):
 	cmdLine = androidToolPath + "aapt p -f " \
 	          + "-M " + target.get_staging_path(package_name) + "/AndroidManifest.xml " \
 	          + "-F " + target.get_staging_path(package_name) + "/resources.res " \
-	          + "-I " + target.path_sdk + "/platforms/android-" + str(target.boardId) + "/android.jar "\
+	          + "-I " + target.path_sdk + "/platforms/android-" + str(target.board_id) + "/android.jar "\
 	          + "-S " + target.get_staging_path(package_name) + "/res/ " \
 	          + adModResoucepath \
 	          + "-J " + target.get_staging_path(package_name) + "/src/ "
@@ -635,7 +635,7 @@ def tool_generate_main_java_class(target, module, package_name):
 	
 	cmdLine = "javac " \
 	          + "-d " + target.get_staging_path(package_name) + "/build/classes " \
-	          + "-classpath " + target.path_sdk + "/platforms/android-" + str(target.boardId) + "/android.jar" \
+	          + "-classpath " + target.path_sdk + "/platforms/android-" + str(target.board_id) + "/android.jar" \
 	          + adModJarFile + " " \
 	          + filesString \
 	          + java_file_wrapper + " "  \
