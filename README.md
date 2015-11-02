@@ -3,20 +3,44 @@ gale
 
 `gale` is an abtracter of the low level graphic windowing (like the SDL but in C++11)
 
-It is designed to abstract systems 
+It is designed to abstract systems
   - Linux
   - MacOs
   - Windows
   - Android
   - Ios
 
+Release (master)
+----------------
+
 [![Build Status](https://travis-ci.org/atria-soft/gale.svg?branch=master)](https://travis-ci.org/atria-soft/gale)
-
 [![Coverage Status](http://atria-soft.com/ci/coverage/atria-soft/gale.svg?branch=master)](http://atria-soft.com/ci/atria-soft/gale)
-
 [![Test Status](http://atria-soft.com/ci/test/atria-soft/gale.svg?branch=master)](http://atria-soft.com/ci/atria-soft/gale)
-
 [![Warning Status](http://atria-soft.com/ci/warning/atria-soft/gale.svg?branch=master)](http://atria-soft.com/ci/atria-soft/gale)
+
+[![Build Status](http://atria-soft.com/ci/build/atria-soft/gale.svg?branch=master&tag=Linux)](http://atria-soft.com/ci/atria-soft/gale)
+[![Build Status](http://atria-soft.com/ci/build/atria-soft/gale.svg?branch=master&tag=MacOs)](http://atria-soft.com/ci/atria-soft/gale)
+[![Build Status](http://atria-soft.com/ci/build/atria-soft/gale.svg?branch=master&tag=Mingw)](http://atria-soft.com/ci/atria-soft/gale)
+
+[![Build Status](http://atria-soft.com/ci/build/atria-soft/gale.svg?branch=master&tag=Android)](http://atria-soft.com/ci/atria-soft/gale)
+[![Build Status](http://atria-soft.com/ci/build/atria-soft/gale.svg?branch=master&tag=IOs)](http://atria-soft.com/ci/atria-soft/gale)
+
+Developement (dev)
+------------------
+
+[![Build Status](https://travis-ci.org/atria-soft/gale.svg?branch=dev)](https://travis-ci.org/atria-soft/gale)
+[![Coverage Status](http://atria-soft.com/ci/coverage/atria-soft/gale.svg?branch=dev)](http://atria-soft.com/ci/atria-soft/gale)
+[![Test Status](http://atria-soft.com/ci/test/atria-soft/gale.svg?branch=dev)](http://atria-soft.com/ci/atria-soft/gale)
+[![Warning Status](http://atria-soft.com/ci/warning/atria-soft/gale.svg?branch=dev)](http://atria-soft.com/ci/atria-soft/gale)
+
+[![Build Status](http://atria-soft.com/ci/build/atria-soft/gale.svg?branch=dev&tag=Linux)](http://atria-soft.com/ci/atria-soft/gale)
+[![Build Status](http://atria-soft.com/ci/build/atria-soft/gale.svg?branch=dev&tag=MacOs)](http://atria-soft.com/ci/atria-soft/gale)
+[![Build Status](http://atria-soft.com/ci/build/atria-soft/gale.svg?branch=dev&tag=Mingw)](http://atria-soft.com/ci/atria-soft/gale)
+
+[![Build Status](http://atria-soft.com/ci/build/atria-soft/gale.svg?branch=dev&tag=Android)](http://atria-soft.com/ci/atria-soft/gale)
+[![Build Status](http://atria-soft.com/ci/build/atria-soft/gale.svg?branch=dev&tag=IOs)](http://atria-soft.com/ci/atria-soft/gale)
+
+
 
 Instructions
 ============
