@@ -21,7 +21,7 @@ addons:
 matrix:
   include:
     - os: linux
-      env: CONF=release BUILDER=gcc TARGET=Linux TAG=Linux COMPILATOR_OPTION="--compilator-version=4.9"
+      env: CONF=release BUILDER=gcc TARGET=Linux TAG=Linux COMPILATOR_OPTION="--compilator-version=4.9" GCOV=--gcov
       compiler: gcc
     - os: linux
       env: CONF=debug BUILDER=clang TARGET=Linux
@@ -52,9 +52,6 @@ install:
 
 before_script:
   - cd ..
-  - wget http://atria-soft.com/ci/coverage_send.py
-  - wget http://atria-soft.com/ci/test_send.py
-  - wget http://atria-soft.com/ci/warning_send.py
   - mkdir bin
   - curl https://storage.googleapis.com/git-repo-downloads/repo > bin/repo
   - chmod a+x bin/repo
@@ -83,10 +80,10 @@ after_script:
   - if [ "$GCOV" != "" ]; then
         ./ci/warning_send.py --find-path ./out/Linux_x86_64/$CONF/build/$BUILDER/gale/;
     fi
-  - ./out/Linux_x86_64/$CONF/staging/$BUILDER/gale-sample-basic/gale-sample-basic.app/bin/gale-sample-basic -l6 | tee out_test.txt
+  - ./out/Linux_x86_64/$CONF/staging/$BUILDER/gale-sample-basic/gale-sample-basic.app/bin/gale-sample-basic --etk-log-level=6 | tee out_test.txt
   - if [ "$GCOV" != "" ]; then
         ./ci/test_send.py --file=out_test.txt;
-        lutin -C -P $TARGET -c $BUILDER $COMPILATOR_OPTION -m $CONF -p gale?gcov;
+        lutin -C -P -t $TARGET -c $BUILDER $COMPILATOR_OPTION $BUS -m $CONF -p gale?gcov;
         ./ci/coverage_send.py --json=out/Linux_x86_64/$CONF/build/$BUILDER/gale/gale_coverage.json;
     fi
 

@@ -45,6 +45,37 @@ Developement (dev)
 Instructions
 ============
 
+download Build system:
+----------------------
+
+	sudo pip install lutin
+	sudo pip install pillow
+
+need google repo:
+-----------------
+
+see: http://source.android.com/source/downloading.html#installing-repo
+
+	mkdir ~/.bin
+	PATH=~/.bin:$PATH
+	curl https://storage.googleapis.com/git-repo-downloads/repo > ~/.bin/repo
+	chmod a+x ~/.bin/repo
+
+
+download the software:
+----------------------
+
+	mkdir WORKING_DIRECTORY
+	cd WORKING_DIRECTORY
+	repo init -u git://github.com/atria-soft/manifest.git
+	repo sync -j8
+
+Compile software:
+-----------------
+
+	cd WORKING_DIRECTORY
+	lutin gale-sample-basic
+
 
 License (APACHE v2.0)
 =====================
