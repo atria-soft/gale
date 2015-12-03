@@ -137,10 +137,8 @@ def create(target, module_name):
 	my_module.add_module_depend(['etk'])
 	my_module.add_path(tools.get_current_path(__file__))
 	
-	tagFile = tools.get_current_path(__file__) + "/tag"
-	galeVersionID = tools.file_read_data(tagFile)
 	my_module.compile_flags('c++', [
-		"-DGALE_VERSION=\"\\\""+galeVersionID+"\\\"\""
+		"-DGALE_VERSION=\"\\\"" + tools.version_to_string(get_version()) + "\\\"\""
 		])
 	
 	if target.name=="Linux":
