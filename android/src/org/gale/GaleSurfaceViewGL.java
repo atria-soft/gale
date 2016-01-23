@@ -87,12 +87,12 @@ public class GaleSurfaceViewGL extends GLSurfaceView implements GaleConstants {
 					m_galeNative.inputEventMotion(_event.getPointerId(p), (float)_event.getX(p), (float)_event.getY(p));
 				}
 			}
-		} else if(	tmpActionType == MotionEvent.ACTION_POINTER_1_DOWN 
-					  || tmpActionType == MotionEvent.ACTION_DOWN) {
+		} else if (    tmpActionType == MotionEvent.ACTION_POINTER_1_DOWN
+		            || tmpActionType == MotionEvent.ACTION_DOWN) {
 			if (SDK_VERSION>=14) {
 				final int typeOfPointer = _event.getToolType(0);
-				if(   typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
-					  || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
+				if (    typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
+				     || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
 					m_galeNative.inputEventState(_event.getPointerId(0), true, (float)_event.getX(0), (float)_event.getY(0));
 				} else if(typeOfPointer == MotionEvent.TOOL_TYPE_MOUSE) {
 					m_galeNative.mouseEventState(_event.getPointerId(0), true, (float)_event.getX(0), (float)_event.getY(0));
@@ -101,13 +101,13 @@ public class GaleSurfaceViewGL extends GLSurfaceView implements GaleConstants {
 				m_galeNative.inputEventState(_event.getPointerId(0), true, (float)_event.getX(0), (float)_event.getY(0));
 			}
 			inputDown1 = true;
-		} else if(tmpActionType == MotionEvent.ACTION_POINTER_1_UP) {
-			if (SDK_VERSION>=14) {
+		} else if (tmpActionType == MotionEvent.ACTION_POINTER_1_UP) {
+			if (SDK_VERSION >= 14) {
 				final int typeOfPointer = _event.getToolType(0);
-				if(   typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
-					  || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
+				if (    typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
+				     || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
 					m_galeNative.inputEventState(_event.getPointerId(0), false, (float)_event.getX(0), (float)_event.getY(0));
-				} else if(typeOfPointer == MotionEvent.TOOL_TYPE_MOUSE) {
+				} else if (typeOfPointer == MotionEvent.TOOL_TYPE_MOUSE) {
 					m_galeNative.mouseEventState(_event.getPointerId(0), false, (float)_event.getX(0), (float)_event.getY(0));
 				}
 			} else {
@@ -117,8 +117,8 @@ public class GaleSurfaceViewGL extends GLSurfaceView implements GaleConstants {
 		} else if (tmpActionType == MotionEvent.ACTION_POINTER_2_DOWN) {
 			if (SDK_VERSION>=14) {
 				final int typeOfPointer = _event.getToolType(1);
-				if(   typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
-					  || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
+				if (    typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
+				     || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
 					m_galeNative.inputEventState(_event.getPointerId(1), true, (float)_event.getX(1), (float)_event.getY(1));
 				} else if(typeOfPointer == MotionEvent.TOOL_TYPE_MOUSE) {
 					m_galeNative.mouseEventState(_event.getPointerId(1), true, (float)_event.getX(1), (float)_event.getY(1));
@@ -130,8 +130,8 @@ public class GaleSurfaceViewGL extends GLSurfaceView implements GaleConstants {
 		} else if (tmpActionType == MotionEvent.ACTION_POINTER_2_UP) {
 			if (SDK_VERSION>=14) {
 				final int typeOfPointer = _event.getToolType(1);
-				if(   typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
-					  || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
+				if (    typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
+				     || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
 					m_galeNative.inputEventState(_event.getPointerId(1), false, (float)_event.getX(1), (float)_event.getY(1));
 				} else if(typeOfPointer == MotionEvent.TOOL_TYPE_MOUSE) {
 					m_galeNative.mouseEventState(_event.getPointerId(1), false, (float)_event.getX(1), (float)_event.getY(1));
@@ -141,10 +141,10 @@ public class GaleSurfaceViewGL extends GLSurfaceView implements GaleConstants {
 			}
 			inputDown2 = false;
 		} else if (tmpActionType == MotionEvent.ACTION_POINTER_3_DOWN) {
-			if (SDK_VERSION>=14) {
+			if (SDK_VERSION >= 14) {
 				final int typeOfPointer = _event.getToolType(2);
-				if(   typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
-					  || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
+				if (    typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
+				     || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
 					m_galeNative.inputEventState(_event.getPointerId(2), true, (float)_event.getX(2), (float)_event.getY(2));
 				} else if(typeOfPointer == MotionEvent.TOOL_TYPE_MOUSE) {
 					m_galeNative.mouseEventState(_event.getPointerId(2), true, (float)_event.getX(2), (float)_event.getY(2));
@@ -154,10 +154,10 @@ public class GaleSurfaceViewGL extends GLSurfaceView implements GaleConstants {
 			}
 			inputDown3 = true;
 		} else if (tmpActionType == MotionEvent.ACTION_POINTER_3_UP) {
-			if (SDK_VERSION>=14) {
+			if (SDK_VERSION >= 14) {
 				final int typeOfPointer = _event.getToolType(2);
-				if(   typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
-					  || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
+				if (    typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
+				     || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
 					m_galeNative.inputEventState(_event.getPointerId(2), false, (float)_event.getX(2), (float)_event.getY(2));
 				} else if(typeOfPointer == MotionEvent.TOOL_TYPE_MOUSE) {
 					m_galeNative.mouseEventState(_event.getPointerId(2), false, (float)_event.getX(2), (float)_event.getY(2));
@@ -168,10 +168,10 @@ public class GaleSurfaceViewGL extends GLSurfaceView implements GaleConstants {
 			inputDown3 = false;
 		} else if(tmpActionType == MotionEvent.ACTION_UP){
 			if (inputDown1) {
-				if (SDK_VERSION>=14) {
+				if (SDK_VERSION >= 14) {
 					final int typeOfPointer = _event.getToolType(0);
-					if(   typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
-						  || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
+					if (    typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
+					     || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
 						m_galeNative.inputEventState(_event.getPointerId(0), false, (float)_event.getX(0), (float)_event.getY(0));
 					} else if(typeOfPointer == MotionEvent.TOOL_TYPE_MOUSE) {
 						m_galeNative.mouseEventState(_event.getPointerId(0), false, (float)_event.getX(0), (float)_event.getY(0));
@@ -181,10 +181,10 @@ public class GaleSurfaceViewGL extends GLSurfaceView implements GaleConstants {
 				}
 				inputDown1 = false;
 			} else if (inputDown2) {
-				if (SDK_VERSION>=14) {
+				if (SDK_VERSION >= 14) {
 					final int typeOfPointer = _event.getToolType(0);
-					if(   typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
-						  || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
+					if (    typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
+					     || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
 						m_galeNative.inputEventState(_event.getPointerId(0), false, (float)_event.getX(0), (float)_event.getY(0));
 					} else if(typeOfPointer == MotionEvent.TOOL_TYPE_MOUSE) {
 						m_galeNative.mouseEventState(_event.getPointerId(0), false, (float)_event.getX(0), (float)_event.getY(0));
@@ -194,10 +194,10 @@ public class GaleSurfaceViewGL extends GLSurfaceView implements GaleConstants {
 				}
 				inputDown2 = false;
 			} else {
-				if (SDK_VERSION>=14) {
+				if (SDK_VERSION >= 14) {
 					final int typeOfPointer = _event.getToolType(0);
-					if(   typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
-						  || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
+					if (    typeOfPointer == MotionEvent.TOOL_TYPE_FINGER
+					     || typeOfPointer == MotionEvent.TOOL_TYPE_STYLUS) {
 						m_galeNative.inputEventState(_event.getPointerId(0), false, (float)_event.getX(0), (float)_event.getY(0));
 					} else if(typeOfPointer == MotionEvent.TOOL_TYPE_MOUSE) {
 						m_galeNative.mouseEventState(_event.getPointerId(0), false, (float)_event.getX(0), (float)_event.getY(0));

@@ -713,19 +713,19 @@ extern "C" {
 	                                          jobject _thiz,
 	                                          jint _id,
 	                                          jint _pointerID,
-	                                          jboolean _isUp,
+	                                          jboolean _isDown,
 	                                          jfloat _x,
 	                                          jfloat _y) {
 		std::unique_lock<std::mutex> lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
-		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || _id < 0
+		    || s_listInstance[_id] == nullptr ) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
 		}
 		s_listInstance[_id]->OS_SetInput(gale::key::type_finger,
-		                                 (_isUp==false?gale::key::status_down:gale::key::status_up),
+		                                 (_isDown==true?gale::key::status_down:gale::key::status_up),
 		                                 _pointerID+1,
 		                                 vec2(_x,_y));
 	}
@@ -754,7 +754,7 @@ extern "C" {
 	                                          jobject _thiz,
 	                                          jint _id,
 	                                          jint _pointerID,
-	                                          jboolean _isUp,
+	                                          jboolean _isDown,
 	                                          jfloat _x,
 	                                          jfloat _y) {
 		std::unique_lock<std::mutex> lock(g_interfaceMutex);
@@ -766,7 +766,7 @@ extern "C" {
 			return;
 		}
 		s_listInstance[_id]->OS_SetInput(gale::key::type_mouse,
-		                                 (_isUp==false?gale::key::status_down:gale::key::status_up),
+		                                 (_isDown==true?gale::key::status_down:gale::key::status_up),
 		                                 _pointerID+1,
 		                                 vec2(_x,_y));
 	}
