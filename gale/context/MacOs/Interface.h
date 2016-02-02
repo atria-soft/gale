@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __GALE_MM_INTERFACE_H__
-#define __GALE_MM_INTERFACE_H__
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,6 +17,4 @@ void mm_stopApplication();
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

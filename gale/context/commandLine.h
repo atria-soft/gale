@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __GALE_COMMAND_LINE_H__
-#define __GALE_COMMAND_LINE_H__
+#pragma once
 
 #include <gale/debug.h>
 
@@ -42,7 +40,6 @@ namespace gale {
 				 */
 				void remove(int32_t _id);
 		};
-	};
-};
+	}
+}
 
-#endif

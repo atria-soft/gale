@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __OPEN_GL_INCLUDE_H__
-#define __OPEN_GL_INCLUDE_H__
+#pragma once
 
 extern "C" {
 	#if defined(__TARGET_OS__Linux)
@@ -43,4 +41,3 @@ extern "C" {
 	#endif
 }
 
-#endif

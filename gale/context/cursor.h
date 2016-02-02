@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __GALE_CURSOR_H__
-#define __GALE_CURSOR_H__
+#pragma once
 
 #include <gale/debug.h>
 
@@ -41,8 +39,5 @@ namespace gale {
 	 * @brief Debug operator To display the curent element in a Human readable information
 	 */
 	std::ostream& operator <<(std::ostream& _os, const enum gale::context::cursor _obj);
-};
-
-#endif
-
+}
 

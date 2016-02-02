@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __OPEN_GL__PROGRAM_H__
-#define __OPEN_GL__PROGRAM_H__
+#pragma once
 
 #include <etk/types.h>
 #include <etk/math/Vector4D.h>
@@ -305,8 +303,6 @@ namespace gale {
 			private:
 				void checkGlError(const char* _op, int32_t _localLine, int32_t _idElem=-2);
 		};
-	};
-};
-
-#endif
+	}
+}
 

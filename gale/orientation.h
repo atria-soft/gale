@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __GALE_ORIENTATION_H__
-#define __GALE_ORIENTATION_H__
+#pragma once
 
 namespace gale {
 	enum orientation {
@@ -17,6 +15,3 @@ namespace gale {
 	};
 	std::ostream& operator <<(std::ostream& _os, enum gale::orientation _obj);
 }
-
-#endif
-

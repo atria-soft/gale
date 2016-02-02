@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __RESOURCES_MANAGER_H__
-#define __RESOURCES_MANAGER_H__
+#pragma once
 
 #include <list>
 #include <vector>
@@ -65,9 +63,6 @@ namespace gale {
 				void localAdd(const std::shared_ptr<gale::Resource>& _object);
 				virtual void cleanInternalRemoved();
 		};
-	};
-};
-
-
-#endif
+	}
+}
 

@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __GALE_DIMENSION_H__
-#define __GALE_DIMENSION_H__
+#pragma once
 
 #include <etk/types.h>
 #include <etk/types.h>
@@ -206,7 +204,5 @@ namespace gale {
 	};
 	std::ostream& operator <<(std::ostream& _os, enum gale::Dimension::distance _obj);
 	std::ostream& operator <<(std::ostream& _os, const gale::Dimension& _obj);
-};
-
-#endif
+}
 

@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __OPEN_GL__VIRTUAL_BUFFER_OBJECT_H__
-#define __OPEN_GL__VIRTUAL_BUFFER_OBJECT_H__
+#pragma once
 
 #include <etk/types.h>
 #include <etk/math/Vector2D.h>
@@ -122,7 +120,6 @@ namespace gale {
 				 */
 				void reload();
 		};
-	};
-};
-#endif
+	}
+}
 

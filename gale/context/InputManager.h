@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __GALE_SYSTEM_INPUT_H__
-#define __GALE_SYSTEM_INPUT_H__
+#pragma once
 
 #include <gale/Application.h>
 
@@ -99,8 +97,6 @@ namespace gale {
 					m_specialKey = _specialKey;
 				}
 		};
-	};
-};
-#endif
-
+	}
+}
 

@@ -5,9 +5,7 @@
  *
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __MAC_OS_CONTEXT_H__
-#define __MAC_OS_CONTEXT_H__
+#pragma once
 
 #include <gale/key/key.h>
 
@@ -34,7 +32,5 @@ namespace IOs {
 	void background();
 	void resume();
 	void suspend();
-};
+}
 
-
-#endif

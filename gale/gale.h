@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __GALE_H__
-#define __GALE_H__
+#pragma once
 
 #include <etk/types.h>
 #include <gale/Application.h>
@@ -47,6 +45,5 @@ namespace gale {
 	 * @return the string of the mode of commpilation
 	 */
 	std::string getBoardType();
-};
+}
 
-#endif

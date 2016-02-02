@@ -5,10 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-
-#ifndef __RESOURCES_H__
-#define __RESOURCES_H__
+#pragma once
 
 #include <mutex>
 #include <memory>
@@ -212,9 +209,7 @@ namespace gale {
 			 */
 			static gale::resource::Manager& getManager();
 	};
-};
+}
 
 #include <gale/resource/Manager.h>
-
-#endif
 

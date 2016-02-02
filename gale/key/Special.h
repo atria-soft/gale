@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __GALE_KEY_SPECIAL_H__
-#define __GALE_KEY_SPECIAL_H__
+#pragma once
 
 #include <gale/debug.h>
 #include <gale/key/keyboard.h>
@@ -113,9 +111,6 @@ namespace gale {
 				void update(enum gale::key::keyboard _move, bool _isDown);
 		};
 		std::ostream& operator <<(std::ostream& _os, const gale::key::Special& _obj);
-	};
-};
-
-#endif
-
+	}
+}
 

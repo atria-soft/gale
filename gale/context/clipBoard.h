@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __GALE_CLIPBOARD_H__
-#define __GALE_CLIPBOARD_H__
+#pragma once
 
 #include <gale/debug.h>
 
@@ -77,8 +75,4 @@ namespace gale {
 	 * @brief Debug operator To display the curent element in a Human redeable information
 	 */
 	std::ostream& operator <<(std::ostream& _os, const enum gale::context::clipBoard::clipboardListe _obj);
-};
-
-#endif
-
-
+}

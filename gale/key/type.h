@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __GALE_KEY_TYPE_H__
-#define __GALE_KEY_TYPE_H__
+#pragma once
 
 #include <gale/debug.h>
 
@@ -22,15 +20,10 @@ namespace gale {
 			type_finger,     //!< Finger type
 			type_stylet,     //!< Stylet type
 		};
-	};
+	}
 	/**
 	 * @brief Debug operator To display the curent element in a Human redeable information
 	 */
 	std::ostream& operator <<(std::ostream& _os, const enum gale::key::type _obj);
-};
-
-
-
-#endif
-
+}
 

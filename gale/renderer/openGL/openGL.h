@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __OPEN_GL_H__
-#define __OPEN_GL_H__
+#pragma once
 
 #include <etk/types.h>
 #include <vector>
@@ -239,7 +237,5 @@ namespace gale {
 	};
 	std::ostream& operator <<(std::ostream& _os, const enum openGL::flag& _obj);
 	std::ostream& operator <<(std::ostream& _os, const enum openGL::renderMode& _obj);
-};
+}
 
-
-#endif

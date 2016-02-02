@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __GALE_DEBUG_H__
-#define __GALE_DEBUG_H__
+#pragma once
 
 #include <etk/log.h>
 
@@ -39,6 +37,4 @@ namespace gale {
 			assert(!#cond); \
 		} \
 	} while (0)
-
-#endif
 

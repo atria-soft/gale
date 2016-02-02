@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __GALE_CONTEXT_APPLICATION_H__
-#define __GALE_CONTEXT_APPLICATION_H__
+#pragma once
 
 #include <memory>
 #include <etk/types.h>
@@ -210,5 +208,3 @@ namespace gale {
 			virtual void onPeriod(int64_t _time) {};
 	};
 }
-
-#endif

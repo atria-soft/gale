@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __OPEN_GL__SHADER_H__
-#define __OPEN_GL__SHADER_H__
+#pragma once
 
 #include <etk/types.h>
 #include <gale/debug.h>
@@ -71,8 +69,6 @@ namespace gale {
 				 */
 				void reload();
 		};
-	};
-};
-
-#endif
+	}
+}
 

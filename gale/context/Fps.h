@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __GALE_FPS_H__
-#define __GALE_FPS_H__
+#pragma once
 
 namespace gale {
 	namespace context {
@@ -135,7 +133,6 @@ namespace gale {
 					}
 				}
 		};
-	};
-};
-#endif
+	}
+}
 

@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __GALE_CONTEXT_H__
-#define __GALE_CONTEXT_H__
+#pragma once
 
 #include <etk/os/Fifo.h>
 #include <etk/os/FSNode.h>
@@ -316,7 +314,5 @@ namespace gale {
 	 * @param[in] _thread generic C++11 thread handle
 	 */
 	void contextUnRegisterThread(std11::thread* _thread);
-};
-
-#endif
+}
 

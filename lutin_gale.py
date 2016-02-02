@@ -143,17 +143,17 @@ def create(target, module_name):
 	
 	if target.name=="Linux":
 		# todo : my_module.add_module_depend(['egami'])
-		my_module.add_export_flag('link', '-lGL')
+		my_module.add_export_flag('link-lib', 'GL')
 		#`pkg-config --cflags directfb` `pkg-config --libs directfb`
 		#ifeq ("$(CONFIG___GALE_LINUX_GUI_MODE_X11__)","y")
-		my_module.add_export_flag('link', '-lX11')
+		my_module.add_export_flag('link-lib', 'X11')
 		#endif
 		#ifeq ("$(CONFIG___GALE_LINUX_GUI_MODE_DIRECT_FB__)","y")
 		#my_module.add_export_flag('link', ['-L/usr/local/lib', '-ldirectfb', '-lfusion', '-ldirect'])
 		#endif
 	elif target.name=="Android":
 		my_module.add_module_depend(["SDK", "jvm-basics"])
-		my_module.add_export_flag('link', "-lGLESv2")
+		my_module.add_export_flag('link-lib', "GLESv2")
 		# add tre creator of the basic java class ...
 		target.add_action("BINARY", 50, "gale-auto-wrapper", tool_generate_main_java_class)
 		# TODO : Add the same for BINARY to create a console interface ?
