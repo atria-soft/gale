@@ -61,8 +61,10 @@ before_script:
   - git config --global core.editor "vi"
   - mkdir WORKING_DIRECTORY
   - cd WORKING_DIRECTORY
-  - ../bin/repo init -u https://github.com/atria-soft/manifest.git --depth=10
-  - ../bin/repo sync -j2
+  - ../bin/repo init -u https://github.com/atria-soft/manifest.git
+  - ../bin/repo sync -j4
+  - ../bin/repo forall -c git checkout master
+  - ../bin/repo forall -c git checkout $TRAVIS_BRANCH; STATUS=$?
   - rm -rf atria-soft/gale
   - cd ..
   - pwd
