@@ -7,6 +7,7 @@
  */
 
 #include <gale/key/Special.h>
+#include <etk/stdTools.h>
 
 #define GALE_FLAG_KEY_CAPS_LOCK 0x00000001
 #define GALE_FLAG_KEY_SHIFT     0x00000002

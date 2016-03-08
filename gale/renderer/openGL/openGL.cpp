@@ -13,7 +13,7 @@
 #include <mutex>
 //#define DIRECT_MODE
 #include <gale/renderer/openGL/openGL-include.h>
-#include <etk/thread/tools.h>
+#include <ethread/tools.h>
 
 #define CHECK_ERROR_OPENGL
 
@@ -84,15 +84,15 @@ void gale::openGL::unLock() {
 	mutexOpenGl().unlock();
 }
 
-static std::vector<std11::thread::id>& getContextList() {
-	static std::vector<std11::thread::id> g_val;
+static std::vector<std::thread::id>& getContextList() {
+	static std::vector<std::thread::id> g_val;
 	return g_val;
 }
 
 bool gale::openGL::hasContext() {
 	bool ret = false;
 	mutexOpenGl().lock();
-	auto it = std::find(getContextList().begin(), getContextList().end(), std11::this_thread::get_id());
+	auto it = std::find(getContextList().begin(), getContextList().end(), std::this_thread::get_id());
 	if (it != getContextList().end()) {
 		ret = true;
 	}
@@ -102,18 +102,18 @@ bool gale::openGL::hasContext() {
 
 void gale::openGL::threadHasContext() {
 	mutexOpenGl().lock();
-	auto it = std::find(getContextList().begin(), getContextList().end(), std11::this_thread::get_id());
+	auto it = std::find(getContextList().begin(), getContextList().end(), std::this_thread::get_id());
 	if (it != getContextList().end()) {
 		GALE_ERROR("set openGL context associate with threadID a second time ... ");
 	} else {
-		getContextList().push_back(std11::this_thread::get_id());
+		getContextList().push_back(std::this_thread::get_id());
 	}
 	mutexOpenGl().unlock();
 }
 
 void gale::openGL::threadHasNoMoreContext() {
 	mutexOpenGl().lock();
-	auto it = std::find(getContextList().begin(), getContextList().end(), std11::this_thread::get_id());
+	auto it = std::find(getContextList().begin(), getContextList().end(), std::this_thread::get_id());
 	if (it != getContextList().end()) {
 		getContextList().erase(it);
 	} else {

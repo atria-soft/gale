@@ -7,6 +7,7 @@
  */
 
 #include <gale/key/status.h>
+#include <etk/stdTools.h>
 
 static const char* statusDescriptionString[] = {
 	"status_unknow",

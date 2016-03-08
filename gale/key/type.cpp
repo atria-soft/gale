@@ -7,6 +7,7 @@
  */
 
 #include <gale/key/type.h>
+#include <etk/stdTools.h>
 
 
 static const char* typeDescriptionString[] = {

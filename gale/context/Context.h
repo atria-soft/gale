@@ -21,7 +21,7 @@
 #include <memory>
 #include <gale/orientation.h>
 #include <gale/context/clipBoard.h>
-#include <etk/thread/tools.h>
+#include <ethread/tools.h>
 
 #define MAX_MANAGE_INPUT (15)
 
@@ -308,11 +308,11 @@ namespace gale {
 	 * @brief When a new thread is created, it is needed to register it in the gale context interface to permit to get the context associated on it ...
 	 * @param[in] _thread generic C++11 thread handle
 	 */
-	void contextRegisterThread(std11::thread* _thread);
+	void contextRegisterThread(std::thread* _thread);
 	/**
 	 * @brief Remove an associated thread
 	 * @param[in] _thread generic C++11 thread handle
 	 */
-	void contextUnRegisterThread(std11::thread* _thread);
+	void contextUnRegisterThread(std::thread* _thread);
 }
 

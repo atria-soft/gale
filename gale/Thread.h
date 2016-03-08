@@ -8,7 +8,7 @@
 #pragma once
 
 #include <etk/types.h>
-#include <etk/thread/tools.h>
+#include <ethread/tools.h>
 #include <gale/context/Context.h>
 
 #if defined(__TARGET_OS__Android)
@@ -34,7 +34,7 @@ namespace gale {
 			#if defined(__TARGET_OS__Android)
 				pthread_t m_thread;
 			#else
-				std11::shared_ptr<std11::thread> m_thread;
+				std::shared_ptr<std::thread> m_thread;
 			#endif
 			gale::Context* m_context;
 		public:

@@ -13,7 +13,7 @@
 
 #include <etk/tool.h>
 #include <etk/os/FSNode.h>
-#include <etk/thread/tools.h>
+#include <ethread/tools.h>
 #include <mutex>
 
 #include <gale/gale.h>
@@ -39,16 +39,16 @@ static std::mutex& mutexInterface() {
 }
 
 
-static std11::mutex g_lockContextMap;
-static std::map<std11::thread::id, gale::Context*>& getContextList() {
-	static std::map<std11::thread::id, gale::Context*> g_val;
+static std::mutex g_lockContextMap;
+static std::map<std::thread::id, gale::Context*>& getContextList() {
+	static std::map<std::thread::id, gale::Context*> g_val;
 	return g_val;
 }
 
 gale::Context& gale::getContext() {
-	std::map<std11::thread::id, gale::Context*>& list = getContextList();
+	std::map<std::thread::id, gale::Context*>& list = getContextList();
 	g_lockContextMap.lock();
-	std::map<std11::thread::id, gale::Context*>::iterator it = list.find(std11::this_thread::get_id());
+	std::map<std::thread::id, gale::Context*>::iterator it = list.find(std::this_thread::get_id());
 	gale::Context* out = nullptr;
 	if (it != list.end()) {
 		out = it->second;
@@ -64,42 +64,42 @@ gale::Context& gale::getContext() {
 }
 
 void gale::setContext(gale::Context* _context) {
-	std::map<std11::thread::id, gale::Context*>& list = getContextList();
-	//GALE_ERROR("Set context : " << std11::this_thread::get_id() << " context pointer : " << uint64_t(_context));
+	std::map<std::thread::id, gale::Context*>& list = getContextList();
+	//GALE_ERROR("Set context : " << std::this_thread::get_id() << " context pointer : " << uint64_t(_context));
 	g_lockContextMap.lock();
-	std::map<std11::thread::id, gale::Context*>::iterator it = list.find(std11::this_thread::get_id());
+	std::map<std::thread::id, gale::Context*>::iterator it = list.find(std::this_thread::get_id());
 	if (it == list.end()) {
-		list.insert(std::pair<std11::thread::id, gale::Context*>(std11::this_thread::get_id(), _context));
+		list.insert(std::pair<std::thread::id, gale::Context*>(std::this_thread::get_id(), _context));
 	} else {
 		it->second = _context;
 	}
 	g_lockContextMap.unlock();
 }
 
-void gale::contextRegisterThread(std11::thread* _thread) {
+void gale::contextRegisterThread(std::thread* _thread) {
 	if (_thread == nullptr) {
 		return;
 	}
 	gale::Context* context = &gale::getContext();
-	std::map<std11::thread::id, gale::Context*>& list = getContextList();
+	std::map<std::thread::id, gale::Context*>& list = getContextList();
 	//GALE_ERROR("REGISTER Thread : " << _thread->get_id() << " context pointer : " << uint64_t(context));
 	g_lockContextMap.lock();
-	std::map<std11::thread::id, gale::Context*>::iterator it = list.find(_thread->get_id());
+	std::map<std::thread::id, gale::Context*>::iterator it = list.find(_thread->get_id());
 	if (it == list.end()) {
-		list.insert(std::pair<std11::thread::id, gale::Context*>(_thread->get_id(), context));
+		list.insert(std::pair<std::thread::id, gale::Context*>(_thread->get_id(), context));
 	} else {
 		it->second = context;
 	}
 	g_lockContextMap.unlock();
 }
 
-void gale::contextUnRegisterThread(std11::thread* _thread) {
+void gale::contextUnRegisterThread(std::thread* _thread) {
 	if (_thread == nullptr) {
 		return;
 	}
-	std::map<std11::thread::id, gale::Context*>& list = getContextList();
+	std::map<std::thread::id, gale::Context*>& list = getContextList();
 	g_lockContextMap.lock();
-	std::map<std11::thread::id, gale::Context*>::iterator it = list.find(_thread->get_id());
+	std::map<std::thread::id, gale::Context*>::iterator it = list.find(_thread->get_id());
 	if (it != list.end()) {
 		list.erase(it);
 	}
@@ -204,7 +204,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
   m_FpsFlush(        "Flush     ", false),
   m_windowsSize(320,480) {
 	// set a basic 
-	etk::thread::setName("galeThread");
+	ethread::setName("galeThread");
 	if (m_application == nullptr) {
 		GALE_CRITICAL("Can not start context with no Application ==> rtfm ...");
 	}

@@ -7,12 +7,12 @@
  */
 #pragma once
 
-#include <etk/log.h>
+#include <elog/log.h>
 
 namespace gale {
 	int32_t getLogId();
 };
-#define GALE_BASE(info,data) TK_LOG_BASE(gale::getLogId(),info,data)
+#define GALE_BASE(info,data) ELOG_BASE(gale::getLogId(),info,data)
 
 #define GALE_PRINT(data)         GALE_BASE(-1, data)
 #define GALE_CRITICAL(data)      GALE_BASE(1, data)

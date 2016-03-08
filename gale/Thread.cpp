@@ -38,29 +38,29 @@ gale::Thread::~Thread() {
 
 void gale::Thread::start() {
 	if (m_state == state_stop) {
-		GALE_DEBUG("Allocate std11::thread [START]");
+		GALE_DEBUG("Allocate std::thread [START]");
 		m_state = state_starting;
 		m_context = &gale::getContext();
 		#if defined(__TARGET_OS__Android)
 			pthread_create(&m_thread, nullptr, &gale::Thread::threadCallback, this);
 		#else
-			m_thread = std11::make_shared<std11::thread>(&gale::Thread::threadCall, this);
+			m_thread = std::make_shared<std::thread>(&gale::Thread::threadCall, this);
 			if (m_thread == nullptr) {
 				GALE_ERROR("Can not create thread ...");
 				return;
 			}
 		#endif
 		//m_thread->detach();
-		GALE_DEBUG("Allocate std11::thread [Set priority]");
+		GALE_DEBUG("Allocate std::thread [Set priority]");
 		// set priority
 		
-		GALE_DEBUG("Allocate std11::thread [Register context]");
+		GALE_DEBUG("Allocate std::thread [Register context]");
 		// set association with the gale context ...
 		//gale::contextRegisterThread(m_thread);
 		
-		GALE_DEBUG("Allocate std11::thread [set State]");
+		GALE_DEBUG("Allocate std::thread [set State]");
 		m_state = state_running;
-		GALE_DEBUG("Allocate std11::thread [STOP]");
+		GALE_DEBUG("Allocate std::thread [STOP]");
 	}
 }
 
@@ -74,7 +74,7 @@ void gale::Thread::stop() {
 		GALE_INFO("wait Thread stopping");
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}
-	GALE_DEBUG("stop std11::thread [START]");
+	GALE_DEBUG("stop std::thread [START]");
 	#if defined(__TARGET_OS__Android)
 		void* ret = nullptr;
 		int val = pthread_join(m_thread, &ret);
@@ -82,15 +82,15 @@ void gale::Thread::stop() {
 		m_thread->join();
 	#endif
 	//gale::contextUnRegisterThread(m_thread);
-	GALE_DEBUG("stop std11::thread [delete]");
+	GALE_DEBUG("stop std::thread [delete]");
 	#if defined(__TARGET_OS__Android)
 		
 	#else
 		m_thread.reset();
 	#endif
-	GALE_DEBUG("stop std11::thread [set state]");
+	GALE_DEBUG("stop std::thread [set state]");
 	m_state = state_stop;
-	GALE_DEBUG("stop std11::thread [STOP]");
+	GALE_DEBUG("stop std::thread [STOP]");
 }
 
 void gale::Thread::threadCall() {
@@ -98,12 +98,12 @@ void gale::Thread::threadCall() {
 	gale::setContext(m_context);
 	while (m_state != state_stopping) {
 		if (m_state == state_starting) {
-			GALE_DEBUG("run std11::thread [NOTHING to do]");
+			GALE_DEBUG("run std::thread [NOTHING to do]");
 			usleep(1000);
 			continue;
 		}
 		if (onThreadCall() == true) {
-			GALE_DEBUG("run std11::thread [AUTO STOP]");
+			GALE_DEBUG("run std::thread [AUTO STOP]");
 			m_state = state_stopping;
 			return;
 		}

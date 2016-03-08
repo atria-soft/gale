@@ -101,7 +101,7 @@ namespace gale {
 	 */
 	class Resource : public std::enable_shared_from_this<gale::Resource> {
 		protected:
-			std11::recursive_mutex m_mutex;
+			std::recursive_mutex m_mutex;
 		protected:
 			/**
 			 * @brief generic protected contructor (use factory to create this class)

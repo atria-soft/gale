@@ -7,6 +7,7 @@
  */
 
 #include <gale/key/keyboard.h>
+#include <etk/stdTools.h>
 
 static const char* keyboardDescriptionString[] = {
 	"keyboard_unknow",

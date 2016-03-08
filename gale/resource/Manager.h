@@ -20,7 +20,7 @@ namespace gale {
 				std::list<std::weak_ptr<gale::Resource>> m_resourceList;
 				std::vector<std::shared_ptr<gale::Resource>> m_resourceListToUpdate;
 				bool m_contextHasBeenRemoved;
-				std11::recursive_mutex m_mutex;
+				std::recursive_mutex m_mutex;
 			public:
 				/**
 				 * @brief initialize the internal variable
