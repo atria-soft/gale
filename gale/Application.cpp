@@ -66,8 +66,14 @@ void gale::Application::onDestroy(gale::Context& _context) {
 	GALE_VERBOSE("Destroy Gale Application");
 }
 
+void gale::Application::onKillDemand(gale::Context& _context) {
+	GALE_INFO("Gale request auto destroy ==> no applification specification");
+	exit(0);
+}
+
 void gale::Application::exit(int32_t _value) {
 	GALE_VERBOSE("Exit Requested");
+	gale::getContext().stop();
 }
 
 void gale::Application::onPointer(enum gale::key::type _type, int32_t _pointerID, const vec2& _pos, gale::key::status _state) {

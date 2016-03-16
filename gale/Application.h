@@ -60,12 +60,17 @@ namespace gale {
 			 */
 			virtual void onStop(gale::Context& _context);
 			/**
-			 * @brief The application is remoed (call destructor just adter it.).
+			 * @brief The application is removed (call destructor just adter it.).
 			 * @param[in] _context Current gale context.
 			 */
 			virtual void onDestroy(gale::Context& _context);
 			/**
-			 * @brief Exit the application (not availlable on IOs, ==> the user will not understand the comportement. He will think the application crash)
+			 * @brief The user request application removing.
+			 * @param[in] _context Current gale context.
+			 */
+			virtual void onKillDemand(gale::Context& _context);
+			/**
+			 * @brief Exit the application (not availlable on IOs, ==> the user will not understand the comportement. He will think the application has crashed (Apple philosophie))
 			 * @param[in] _value value to return on the program
 			 */
 			virtual void exit(int32_t _value);

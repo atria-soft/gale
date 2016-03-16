@@ -635,11 +635,11 @@ void gale::Context::OS_Stop() {
 	// set the curent interface :
 	lockContext();
 	GALE_INFO("OS_Stop...");
-	#if 0
-	if (m_windowsCurrent != nullptr) {
-		m_windowsCurrent->sysOnKill();
+	if (m_application == nullptr) {
+		stop();
+		return;
 	}
-	#endif
+	m_application->onKillDemand(*this);
 	// release the curent interface :
 	unLockContext();
 }
@@ -732,14 +732,3 @@ void gale::Context::keyboardHide() {
 	GALE_INFO("keyboardHide: NOT implemented ...");
 }
 
-#if 0
-bool gale::Context::systemKeyboradEvent(enum gale::key::keyboardSystem _key, bool _down) {
-	if (m_windowsCurrent == nullptr) {
-		return false;
-	}
-	lockContext();
-	bool ret = m_windowsCurrent->onEventHardwareInput(_key, _down);
-	unLockContext();
-	return ret;
-}
-#endif

@@ -213,7 +213,8 @@ class X11Interface : public gale::Context {
 							if(XAtomeDeleteWindows == (uint64_t)event.xclient.data.l[0]) {
 								GALE_INFO("     == > Kill Requested ...");
 								OS_Stop();
-								m_run = false;
+								// We do not close here but in the application only:
+								//m_run = false;
 							}
 							break;
 						}
@@ -246,9 +247,9 @@ class X11Interface : public gale::Context {
 								}
 							}
 							#endif
-							if (true == m_clipBoardOwnerPrimary) {
+							if (m_clipBoardOwnerPrimary == true) {
 								m_clipBoardOwnerPrimary = false;
-							} else if (true == m_clipBoardOwnerStd) {
+							} else if (m_clipBoardOwnerStd == true) {
 								m_clipBoardOwnerStd = false;
 							} else {
 								GALE_ERROR("X11 event SelectionClear  == > but no selection requested anymore ...");
@@ -277,7 +278,7 @@ class X11Interface : public gale::Context {
 								                   &bytes, // *bytes_after_return
 								                   &buf// **prop_return);
 								                   );
-								if (true == m_clipBoardRequestPrimary) {
+								if (m_clipBoardRequestPrimary == true) {
 									std::string tmpppp((char*)buf);
 									gale::context::clipBoard::setSystem(gale::context::clipBoard::clipboardSelection, tmpppp);
 									// just transmit an event , we have the data in the system
@@ -383,11 +384,11 @@ class X11Interface : public gale::Context {
 						///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 						case Expose:
 							X11_INFO("X11 event Expose");
-							specialEventThatNeedARedraw=true;
+							specialEventThatNeedARedraw = true;
 							break;
 						case GraphicsExpose:
 							X11_INFO("X11 event GraphicsExpose");
-							specialEventThatNeedARedraw=true;
+							specialEventThatNeedARedraw = true;
 							break;
 						case NoExpose:
 							X11_INFO("X11 event NoExpose");
@@ -471,9 +472,9 @@ class X11Interface : public gale::Context {
 							break;
 						case MotionNotify:
 							X11_INFO("X11 event MotionNotify");
-							if(    true == m_grabAllEvent
-							    && event.xmotion.x == (int32_t)m_forcePos.x()
-							    && event.xmotion.y == (int32_t)m_forcePos.y()) {
+							if(    m_grabAllEvent == true
+							    && event.xmotion.x == int32_t(m_forcePos.x())
+							    && event.xmotion.y == int32_t(m_forcePos.y()) ) {
 								X11_VERBOSE("X11 reject mouse move (grab mode)");
 								// we get our requested position...
 								m_positionChangeRequested = false;
@@ -481,12 +482,12 @@ class X11Interface : public gale::Context {
 							} else {
 								m_cursorEventX = event.xmotion.x;
 								m_cursorEventY = (m_currentHeight-event.xmotion.y);
-								if(true == m_grabAllEvent) {
+								if(m_grabAllEvent == true) {
 									m_cursorEventX -= m_forcePos.x();
 									m_cursorEventY -= (m_currentHeight-m_forcePos.y());
 								}
 								vec2 newDelta = vec2(m_cursorEventX, m_cursorEventY);
-								if(true == m_grabAllEvent) {
+								if(m_grabAllEvent == true) {
 									m_cursorEventX -= m_curentGrabDelta.x();
 									m_cursorEventY -= m_curentGrabDelta.y();
 								}
@@ -494,7 +495,7 @@ class X11Interface : public gale::Context {
 								// For compatibility of the Android system : 
 								bool findOne = false;
 								for (int32_t iii=0; iii<MAX_MANAGE_INPUT ; iii++) {
-									if (true == m_inputIsPressed[iii]) {
+									if (m_inputIsPressed[iii] == true) {
 										X11_DEBUG("X11 event: bt=" << iii << " " << event.type << " = \"MotionNotify\" (" << m_cursorEventX << "," << m_cursorEventY << ")");
 										OS_SetInput(gale::key::type_mouse,
 										            gale::key::status_move,
@@ -503,14 +504,14 @@ class X11Interface : public gale::Context {
 										findOne = true;
 									}
 								}
-								if (false == findOne) {
+								if (findOne == false) {
 									X11_DEBUG("X11 event: bt=" << 0 << " " << event.type << " = \"MotionNotify\" (" << m_cursorEventX << "," << m_cursorEventY << ")");
 										OS_SetInput(gale::key::type_mouse,
 										            gale::key::status_move,
 										            0,
 										            vec2(m_cursorEventX, m_cursorEventY));
 								}
-								if (true == m_grabAllEvent) {
+								if (m_grabAllEvent == true) {
 									if (m_positionChangeRequested == false) {
 										X11_DEBUG("X11 set pointer position : " << m_forcePos);
 										XWarpPointer(m_display, None, m_WindowHandle, 0,0, 0, 0, m_forcePos.x(), m_forcePos.y());
@@ -549,7 +550,7 @@ class X11Interface : public gale::Context {
 									thisIsAReapeateKey = true;
 								}
 							}
-							X11_INFO("X11 event : " << event.type << " = \"KeyPress/KeyRelease\" ");
+							X11_INFO("X11 event : " << event.type << " = 'KeyPress/KeyRelease' ");
 							{
 								X11_DEBUG("eventKey : " << event.xkey.keycode << " state : " << event.xkey.state);
 								if (event.xkey.state & (1<<0) ) {
@@ -622,7 +623,7 @@ class X11Interface : public gale::Context {
 									case 118:
 										keyInput = gale::key::keyboard_insert;
 										if(event.type == KeyRelease) {
-											if (true == m_guiKeyBoardMode.getInsert()) {
+											if (m_guiKeyBoardMode.getInsert() == true) {
 												m_guiKeyBoardMode.setInsert(false);
 											} else {
 												m_guiKeyBoardMode.setInsert(true);
@@ -661,7 +662,7 @@ class X11Interface : public gale::Context {
 											               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
 											               thisIsAReapeateKey,
 											               '.');
-											if (true == thisIsAReapeateKey) {
+											if (thisIsAReapeateKey == true) {
 												OS_setKeyboard(m_guiKeyBoardMode,
 												               gale::key::keyboard_char,
 												               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
@@ -674,7 +675,7 @@ class X11Interface : public gale::Context {
 											               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
 											               thisIsAReapeateKey,
 											               0x7F);
-											if (true == thisIsAReapeateKey) {
+											if (thisIsAReapeateKey == true) {
 												OS_setKeyboard(m_guiKeyBoardMode,
 												               gale::key::keyboard_char,
 												               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
@@ -690,7 +691,7 @@ class X11Interface : public gale::Context {
 										               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
 										               thisIsAReapeateKey,
 										               0x09);
-										if (true == thisIsAReapeateKey) {
+										if (thisIsAReapeateKey == true) {
 											OS_setKeyboard(m_guiKeyBoardMode,
 											               gale::key::keyboard_char,
 											               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
@@ -722,7 +723,7 @@ class X11Interface : public gale::Context {
 											}
 											if (count >= 0) {
 												// repeated kay from previous element :
-												if (count>0) {
+												if (count > 0) {
 													// transform it in unicode
 													m_lastKeyPressed = utf8::convertChar32(buf);
 												}
@@ -732,7 +733,7 @@ class X11Interface : public gale::Context {
 												               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
 												               thisIsAReapeateKey,
 												               m_lastKeyPressed);
-												if (true == thisIsAReapeateKey) {
+												if (thisIsAReapeateKey == true) {
 													OS_setKeyboard(m_guiKeyBoardMode,
 													               gale::key::keyboard_char,
 													               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
@@ -745,13 +746,13 @@ class X11Interface : public gale::Context {
 										}
 										break;
 								}
-								if (true == find) {
+								if (find == true) {
 									//GALE_DEBUG("eventKey Move type : " << getCharTypeMoveEvent(keyInput) );
 									OS_setKeyboard(m_guiKeyBoardMode,
 									               keyInput,
 									               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
 									               thisIsAReapeateKey);
-									if (true == thisIsAReapeateKey) {
+									if (thisIsAReapeateKey == true) {
 										OS_setKeyboard(m_guiKeyBoardMode,
 										               keyInput,
 										               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
@@ -778,7 +779,7 @@ class X11Interface : public gale::Context {
 							break;
 					}
 				}
-				if(true == m_run) {
+				if(m_run == true) {
 					if (m_doubleBuffered && hasDisplay) {
 						glXSwapBuffers(m_display, m_WindowHandle);
 						XSync(m_display,0);
@@ -912,7 +913,7 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		void grabPointerEvents(bool _isGrabbed, const vec2& _forcedPosition) {
-			if (true == _isGrabbed) {
+			if (_isGrabbed == true) {
 				X11_DEBUG("X11-API: Grab Events");
 				int32_t test = XGrabPointer(m_display,RootWindow(m_display, DefaultScreen(m_display)), True,
 				                            ButtonPressMask |
@@ -926,12 +927,9 @@ class X11Interface : public gale::Context {
 				                            RootWindow(m_display, DefaultScreen(m_display)),
 				                            None,
 				                            CurrentTime);
-				
-				if (GrabSuccess != test)
-				{
+				if (GrabSuccess != test) {
 					GALE_CRITICAL("Display error " << test);
-					switch (test)
-					{
+					switch (test) {
 						case BadCursor:
 							GALE_CRITICAL(" BadCursor");
 							break;
@@ -973,7 +971,7 @@ class X11Interface : public gale::Context {
 			
 			// Connect to the X server
 			m_display = XOpenDisplay(nullptr);
-			if(nullptr == m_display) {
+			if(m_display == nullptr) {
 				GALE_CRITICAL("Could not open display X.");
 				exit(-1);
 			} else {
@@ -986,7 +984,7 @@ class X11Interface : public gale::Context {
 			                               gale::Dimension::Millimeter);
 			// get an appropriate visual
 			m_visual = glXChooseVisual(m_display, Xscreen, attrListDbl);
-			if (nullptr == m_visual) {
+			if (m_visual == nullptr) {
 				m_visual = glXChooseVisual(m_display, Xscreen, attrListSgl);
 				m_doubleBuffered = false;
 				GALE_INFO("GL-X singlebuffered rendering will be used, no doublebuffering available");
@@ -1034,15 +1032,15 @@ class X11Interface : public gale::Context {
 			GALE_INFO("X11 request creating windows at pos=(" << m_originX << "," << m_originY << ") size=(" << tmp_width << "," << tmp_height << ")" );
 			// Real create of the window
 			m_WindowHandle = XCreateWindow(m_display,
-			                             Xroot,
-			                             x, y, tmp_width, tmp_height,
-			                             1,
-			                             m_visual->depth,
-			                             InputOutput,
-			                             m_visual->visual,
-			                             attr_mask, &attr);
+			                               Xroot,
+			                               x, y, tmp_width, tmp_height,
+			                               1,
+			                               m_visual->depth,
+			                               InputOutput,
+			                               m_visual->visual,
+			                               attr_mask, &attr);
 			
-			if( !m_WindowHandle ) {
+			if(!m_WindowHandle) {
 				GALE_CRITICAL("Couldn't create the window");
 				exit(-1);
 			}
@@ -1064,10 +1062,10 @@ class X11Interface : public gale::Context {
 			StartupState->flags = StateHint;
 			
 			XSetWMProperties(m_display, m_WindowHandle,&textprop, &textprop,/* Window title/icon title*/
-				nullptr, 0,/* Argv[], argc for program*/
-				&hints, /* Start position/size*/
-				StartupState,/* Iconised/not flag   */
-				nullptr);
+			                 nullptr, 0,/* Argv[], argc for program*/
+			                 &hints, /* Start position/size*/
+			                 StartupState,/* Iconised/not flag   */
+			                 nullptr);
 			
 			XFree(StartupState);
 			
@@ -1181,17 +1179,21 @@ class X11Interface : public gale::Context {
 				}
 				
 				XImage* myImage = XCreateImage(m_display,
-				                              m_visual->visual,
-				                              depth,
-				                              ZPixmap,
-				                              0,
-				                              (char*)tmpVal,
-				                              dataImage.getWidth(),
-				                              dataImage.getHeight(),
-				                              32,
-				                              0);
+				                               m_visual->visual,
+				                               depth,
+				                               ZPixmap,
+				                               0,
+				                               (char*)tmpVal,
+				                               dataImage.getWidth(),
+				                               dataImage.getHeight(),
+				                               32,
+				                               0);
 				
-				Pixmap tmpPixmap = XCreatePixmap(m_display, m_WindowHandle, dataImage.getWidth(), dataImage.getHeight(), depth);
+				Pixmap tmpPixmap = XCreatePixmap(m_display,
+				                                 m_WindowHandle,
+				                                 dataImage.getWidth(),
+				                                 dataImage.getHeight(),
+				                                 depth);
 				switch(tmpPixmap) {
 					case BadAlloc:
 						GALE_ERROR("X11: BadAlloc");
@@ -1207,7 +1209,13 @@ class X11Interface : public gale::Context {
 						break;
 				}
 				GC tmpGC = DefaultGC(m_display, DefaultScreen(m_display) );
-				int error = XPutImage(m_display, tmpPixmap, tmpGC, myImage, 0, 0, 0, 0, dataImage.getWidth(), dataImage.getHeight());
+				int error = XPutImage(m_display,
+				                      tmpPixmap,
+				                      tmpGC,
+				                      myImage,
+				                      0, 0, 0, 0,
+				                      dataImage.getWidth(),
+				                      dataImage.getHeight());
 				switch(error) {
 					case BadDrawable:
 						GALE_ERROR("X11: BadDrawable");
@@ -1227,7 +1235,7 @@ class X11Interface : public gale::Context {
 				}
 				// allocate a WM hints structure.
 				XWMHints* win_hints = XAllocWMHints();
-				if (!win_hints) {
+				if (win_hints == nullptr) {
 					GALE_ERROR("XAllocWMHints - out of memory");
 					return;
 				}
@@ -1255,7 +1263,7 @@ class X11Interface : public gale::Context {
 			typedef int32_t (APIENTRY *PFNWGLSWAPINTERVALPROC)( int );
 			PFNWGLSWAPINTERVALPROC wglSwapIntervalEXT = 0;
 			const char *extensions = (char*)glGetString( GL_EXTENSIONS );
-			if( strstr( extensions, "WGL_EXT_swap_control" ) == 0 ) {
+			if (strstr( extensions, "WGL_EXT_swap_control" ) == 0) {
 				GALE_ERROR("Can not set the vertical synchronisation status" << _sync << "   (1)");
 				return;
 			} else {
@@ -1279,10 +1287,8 @@ class X11Interface : public gale::Context {
 			} else {
 				GALE_INFO("XF86 DRI NOT available\n");
 			}
-			
 			// enable vertical synchronisation : (some computer has synchronisation disable)
 			setVSync(true);
-			
 			return true;
 		}
 		/****************************************************************************************/
@@ -1299,7 +1305,6 @@ class X11Interface : public gale::Context {
 			XSetWMIconName(m_display, m_WindowHandle, &tp);
 			X11_INFO("X11: set Title (END)");
 		}
-		
 		void openURL(const std::string& _url) {
 			std::string req = "xdg-open ";
 			req += _url;
@@ -1310,7 +1315,7 @@ class X11Interface : public gale::Context {
 		void clipBoardGet(enum gale::context::clipBoard::clipboardListe _clipboardID) {
 			switch (_clipboardID) {
 				case gale::context::clipBoard::clipboardSelection:
-					if (false == m_clipBoardOwnerPrimary) {
+					if (m_clipBoardOwnerPrimary == false) {
 						m_clipBoardRequestPrimary = true;
 						// generate a request on X11
 						XConvertSelection(m_display,
@@ -1325,7 +1330,7 @@ class X11Interface : public gale::Context {
 					}
 					break;
 				case gale::context::clipBoard::clipboardStd:
-					if (false == m_clipBoardOwnerStd) {
+					if (m_clipBoardOwnerStd == false) {
 						m_clipBoardRequestPrimary = false;
 						// generate a request on X11
 						XConvertSelection(m_display,
@@ -1349,14 +1354,14 @@ class X11Interface : public gale::Context {
 			switch (_clipboardID) {
 				case gale::context::clipBoard::clipboardSelection:
 					// Request the selection :
-					if (false == m_clipBoardOwnerPrimary) {
+					if (m_clipBoardOwnerPrimary == false) {
 						XSetSelectionOwner(m_display, XAtomeSelection, m_WindowHandle, CurrentTime);
 						m_clipBoardOwnerPrimary = true;
 					}
 					break;
 				case gale::context::clipBoard::clipboardStd:
 					// Request the clipBoard :
-					if (false == m_clipBoardOwnerStd) {
+					if (m_clipBoardOwnerStd == false) {
 						XSetSelectionOwner(m_display, XAtomeClipBoard, m_WindowHandle, CurrentTime);
 						m_clipBoardOwnerStd = true;
 					}
