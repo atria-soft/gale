@@ -135,6 +135,8 @@ def create(target, module_name):
 		'gale/resource/VirtualBufferObject.h'
 		])
 	my_module.add_module_depend(['etk'])
+	my_module.add_optionnal_module_depend('esignal', ["c++", "-DGALE_BUILD_ESIGNAL"])
+	my_module.add_optionnal_module_depend('eproperty', ["c++", "-DGALE_BUILD_EPROPERTY"])
 	my_module.add_path(tools.get_current_path(__file__))
 	
 	my_module.compile_flags('c++', [

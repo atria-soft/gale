@@ -314,3 +314,17 @@ namespace etk {
 		return from_string(_variableRet, etk::to_string(_value));
 	}
 };
+
+#ifdef GALE_BUILD_ESIGNAL
+	#include <esignal/details/Signal.hxx>
+	#include <esignal/details/ISignal.hxx>
+	template class esignal::Signal<gale::Dimension>;
+	template class esignal::ISignal<gale::Dimension>;
+#endif
+
+#ifdef GALE_BUILD_EPROPERTY
+	//#include <eproperty/details/Range.hxx>
+	#include <eproperty/details/Value.hxx>
+	//template class eproperty::Range<gale::Dimension>;
+	template class eproperty::Value<gale::Dimension>;
+#endif
