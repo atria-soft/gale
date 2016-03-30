@@ -1,4 +1,4 @@
-/**
+/** @file
  * @author Edouard DUPIN, Kevin BILLONNEAU
  * 
  * @copyright 2011, Edouard DUPIN, all right reserved
