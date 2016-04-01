@@ -11,7 +11,7 @@ namespace gale {
 	namespace context {
 		/**
 		 * @brief This class is designed to count the number of frame per second in the main renderer system
-		 * @not-in-doc
+		 * @not_in_doc
 		 */
 		class Fps {
 			// display every second ...

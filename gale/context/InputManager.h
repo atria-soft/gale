@@ -14,7 +14,7 @@ namespace gale {
 	namespace context {
 		/**
 		 * @brief internal structure
-		 * @not-in-doc
+		 * @not_in_doc
 		 */
 		class InputPoperty {
 			public:
@@ -33,7 +33,7 @@ namespace gale {
 		
 		/**
 		 * @brief internal structure
-		 * @not-in-doc
+		 * @not_in_doc
 		 */
 		class InputLimit {
 			public:

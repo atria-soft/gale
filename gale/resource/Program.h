@@ -21,7 +21,7 @@ namespace gale {
 		 * @brief In a openGL program we need some data to communicate with them, we register all the name requested by the user in this structure:
 		 * @note Register all requested element permit to abstract the fact that some element does not exist and remove control of existance from upper code.
 		 *       This is important to note when the Program is reloaded the elements availlable can change.
-		 * @not-in-doc
+		 * @not_in_doc
 		 */
 		class progAttributeElement {
 			public :
@@ -30,9 +30,9 @@ namespace gale {
 				bool m_isAttribute; //!< true if it was an attribute element, otherwite it was an uniform
 				bool m_isLinked; //!< if this element does not exist this is false
 		};
-		//! @not-in-doc
+		//! @not_in_doc
 		std::ostream& operator <<(std::ostream& _os, const gale::resource::progAttributeElement& _obj);
-		//! @not-in-doc
+		//! @not_in_doc
 		std::ostream& operator <<(std::ostream& _os, const std::vector<gale::resource::progAttributeElement>& _obj);
 		/**
 		 * @brief Program is a compilation of some fragment Shader and vertex Shader. This construct automaticly this assiciation
