@@ -5,6 +5,7 @@
  * 
  * @license GPL v3 (see license file)
  */
+//! [gale_sample_all]
 
 
 #include <etk/types.h>
@@ -82,6 +83,8 @@ class MainApplication : public gale::Application {
 			gale::openGL::pop();
 		}
 };
+
+//! [gale_declare_main]
 /**
  * @brief Main of the program (This can be set in every case, but it is not used in Andoid...).
  * @param std IO
@@ -90,5 +93,8 @@ class MainApplication : public gale::Application {
 int main(int _argc, const char *_argv[]) {
 	return gale::run(new MainApplication(), _argc, _argv);
 }
+//! [gale_declare_main]
 
 
+
+//! [gale_sample_all]
