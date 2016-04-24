@@ -12,9 +12,6 @@
 #include <gale/resource/VirtualBufferObject.h>
 #include <gale/renderer/openGL/openGL-include.h>
 
-#undef __class__
-#define __class__ "resource::VirtualBufferObject"
-
 void gale::resource::VirtualBufferObject::init(int32_t _number) {
 	gale::Resource::init();
 	m_vbo.resize(_number, 0);
@@ -39,6 +36,7 @@ void gale::resource::VirtualBufferObject::retreiveData() {
 }
 
 bool gale::resource::VirtualBufferObject::updateContext() {
+	GALE_ERROR(" Start");
 	std::unique_lock<std::recursive_mutex> lock(m_mutex, std::defer_lock);
 	if (lock.try_lock() == false) {
 		//Lock error ==> try later ...
@@ -59,14 +57,15 @@ bool gale::resource::VirtualBufferObject::updateContext() {
 			}
 		}
 	}
-	// un-bind it to permet to have no erreor in the next display ...
+	// un-bind it to permet to have no error in the next display ...
 	gale::openGL::unbindBuffer();
+	GALE_ERROR(" Stop");
 	return true;
 }
 
 void gale::resource::VirtualBufferObject::removeContext() {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
-	if (true == m_exist) {
+	if (m_exist == true) {
 		gale::openGL::deleteBuffers(m_vbo);
 		m_exist = false;
 	}

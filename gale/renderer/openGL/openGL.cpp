@@ -551,6 +551,10 @@ void gale::openGL::activeTexture(uint32_t _flagID) {
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			}
 		#endif
+	} else {
+		#if DEBUG
+			GALE_ERROR("try to bind texture with no program set");
+		#endif
 	}
 }
 
@@ -927,7 +931,7 @@ bool gale::openGL::program::compile(int64_t _prog) {
 		glGetProgramInfoLog(GLuint(_prog), LOG_OGL_INTERNAL_BUFFER_LEN, &bufLength, l_bufferDisplayError);
 		char tmpLog[256];
 		int32_t idOut=0;
-		GALE_ERROR("Could not compile \"PROGRAM\":");
+		GALE_ERROR("Could not compile 'PROGRAM':");
 		for (size_t iii=0; iii<LOG_OGL_INTERNAL_BUFFER_LEN ; iii++) {
 			tmpLog[idOut] = l_bufferDisplayError[iii];
 			if (    tmpLog[idOut] == '\n'
