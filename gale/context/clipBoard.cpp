@@ -35,9 +35,9 @@ static const char* clipboardDescriptionString[gale::context::clipBoard::clipboar
 	"clipboardCount"
 };
 
-std::ostream& gale::operator <<(std::ostream& _os, const enum gale::context::clipBoard::clipboardListe _obj) {
+std::ostream& gale::operator <<(std::ostream& _os, enum gale::context::clipBoard::clipboardListe _obj) {
 	if (_obj >= 0 && _obj <gale::context::clipBoard::clipboardCount) {
-		_os << clipboardDescriptionString[_obj];
+		_os << clipboardDescriptionString[int32_t(_obj)];
 	} else {
 		_os << "[ERROR]";
 	}
@@ -46,14 +46,14 @@ std::ostream& gale::operator <<(std::ostream& _os, const enum gale::context::cli
 
 namespace etk {
 	template<> std::string to_string<enum gale::context::clipBoard::clipboardListe>(const enum gale::context::clipBoard::clipboardListe& _obj) {
-		return clipboardDescriptionString[_obj];
+		return clipboardDescriptionString[int32_t(_obj)];
 	}
 }
 
 void gale::context::clipBoard::init() {
 	GALE_INFO("Initialyse ClipBoards");
-	for(int32_t i=0; i<gale::context::clipBoard::clipboardCount; i++) {
-		myCopy[i].clear();
+	for(int32_t iii=0; iii<gale::context::clipBoard::clipboardCount; ++iii) {
+		myCopy[iii].clear();
 	}
 }
 

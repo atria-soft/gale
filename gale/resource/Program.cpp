@@ -254,14 +254,14 @@ bool gale::resource::Program::updateContext() {
 		// first attach vertex shader, and after fragment shader
 		for (size_t iii=0; iii<m_shaderList.size(); iii++) {
 			if (nullptr != m_shaderList[iii]) {
-				if (m_shaderList[iii]->getShaderType() == gale::openGL::shader::type_vertex) {
+				if (m_shaderList[iii]->getShaderType() == gale::openGL::shader::type::vertex) {
 					gale::openGL::program::attach(m_program, m_shaderList[iii]->getGL_ID());
 				}
 			}
 		}
 		for (size_t iii=0; iii<m_shaderList.size(); iii++) {
 			if (nullptr != m_shaderList[iii]) {
-				if (m_shaderList[iii]->getShaderType() == gale::openGL::shader::type_fragment) {
+				if (m_shaderList[iii]->getShaderType() == gale::openGL::shader::type::fragment) {
 					gale::openGL::program::attach(m_program, m_shaderList[iii]->getGL_ID());
 				}
 			}

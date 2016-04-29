@@ -20,7 +20,7 @@
 
 
 gale::Thread::Thread() :
-  m_state(state_stop),
+  m_state(state::stop),
   #if !defined(__TARGET_OS__Android)
   	m_thread(nullptr),
   #endif
@@ -35,9 +35,9 @@ gale::Thread::~Thread() {
 }
 
 void gale::Thread::start() {
-	if (m_state == state_stop) {
+	if (m_state == state::stop) {
 		GALE_DEBUG("Allocate std::thread [START]");
-		m_state = state_starting;
+		m_state = state::starting;
 		m_context = &gale::getContext();
 		#if defined(__TARGET_OS__Android)
 			pthread_create(&m_thread, nullptr, &gale::Thread::threadCallback, this);
@@ -57,17 +57,17 @@ void gale::Thread::start() {
 		//gale::contextRegisterThread(m_thread);
 		
 		GALE_DEBUG("Allocate std::thread [set State]");
-		m_state = state_running;
+		m_state = state::running;
 		GALE_DEBUG("Allocate std::thread [STOP]");
 	}
 }
 
 void gale::Thread::stop() {
-	if (m_state == state_stop) {
+	if (m_state == state::stop) {
 		return;
 	}
-	while (    m_state == state_running
-	        || m_state == state_starting) {
+	while (    m_state == state::running
+	        || m_state == state::starting) {
 		// requesting a stop ...
 		GALE_INFO("wait Thread stopping");
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -87,25 +87,25 @@ void gale::Thread::stop() {
 		m_thread.reset();
 	#endif
 	GALE_DEBUG("stop std::thread [set state]");
-	m_state = state_stop;
+	m_state = state::stop;
 	GALE_DEBUG("stop std::thread [STOP]");
 }
 
 void gale::Thread::threadCall() {
 	GALE_DEBUG("THREAD MAIN [START]");
 	gale::setContext(m_context);
-	while (m_state != state_stopping) {
-		if (m_state == state_starting) {
+	while (m_state != state::stopping) {
+		if (m_state == state::starting) {
 			GALE_DEBUG("run std::thread [NOTHING to do]");
 			usleep(1000);
 			continue;
 		}
 		if (onThreadCall() == true) {
 			GALE_DEBUG("run std::thread [AUTO STOP]");
-			m_state = state_stopping;
+			m_state = state::stopping;
 			return;
 		}
 	}
 	GALE_DEBUG("THREAD MAIN [STOP]");
-	m_state = state_stopping;
+	m_state = state::stopping;
 }

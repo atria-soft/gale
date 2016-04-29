@@ -163,7 +163,7 @@ class X11Interface : public gale::Context {
 		  XAtomeTargetTarget(0),
 		  XAtomeGALE(0),
 		  XAtomeDeleteWindows(0),
-		  m_currentCursor(gale::context::cursor_arrow),
+		  m_currentCursor(gale::context::cursor::arrow),
 		  m_lastKeyPressed(0) {
 			X11_INFO("X11:INIT");
 			for (int32_t iii=0; iii<MAX_MANAGE_INPUT; iii++) {
@@ -265,7 +265,7 @@ class X11Interface : public gale::Context {
 								                   (~0L), // length
 								                   False, // delete
 								                   AnyPropertyType, // reg_type
-								                   &type,// *actual_type_return,
+								                   &type,// *actual_type::return,
 								                   &format,// *actual_format_return
 								                   &nitems,// *nitems_return
 								                   &bytes, // *bytes_after_return
@@ -429,8 +429,8 @@ class X11Interface : public gale::Context {
 							if (event.xbutton.button < MAX_MANAGE_INPUT) {
 								m_inputIsPressed[event.xbutton.button] = true;
 							}
-							OS_SetInput(gale::key::type_mouse,
-							            gale::key::status_down,
+							OS_SetInput(gale::key::type::mouse,
+							            gale::key::status::down,
 							            event.xbutton.button,
 							            vec2(event.xbutton.x, m_cursorEventY));
 							break;
@@ -441,8 +441,8 @@ class X11Interface : public gale::Context {
 							if (event.xbutton.button < MAX_MANAGE_INPUT) {
 								m_inputIsPressed[event.xbutton.button] = false;
 							}
-							OS_SetInput(gale::key::type_mouse,
-							            gale::key::status_up,
+							OS_SetInput(gale::key::type::mouse,
+							            gale::key::status::up,
 							            event.xbutton.button,
 							            vec2(event.xbutton.x, m_cursorEventY));
 							break;
@@ -490,8 +490,8 @@ class X11Interface : public gale::Context {
 								for (int32_t iii=0; iii<MAX_MANAGE_INPUT ; iii++) {
 									if (m_inputIsPressed[iii] == true) {
 										X11_DEBUG("X11 event: bt=" << iii << " " << event.type << " = \"MotionNotify\" (" << m_cursorEventX << "," << m_cursorEventY << ")");
-										OS_SetInput(gale::key::type_mouse,
-										            gale::key::status_move,
+										OS_SetInput(gale::key::type::mouse,
+										            gale::key::status::move,
 										            iii,
 										            vec2(m_cursorEventX, m_cursorEventY));
 										findOne = true;
@@ -499,8 +499,8 @@ class X11Interface : public gale::Context {
 								}
 								if (findOne == false) {
 									X11_DEBUG("X11 event: bt=" << 0 << " " << event.type << " = \"MotionNotify\" (" << m_cursorEventX << "," << m_cursorEventY << ")");
-										OS_SetInput(gale::key::type_mouse,
-										            gale::key::status_move,
+										OS_SetInput(gale::key::type::mouse,
+										            gale::key::status::move,
 										            0,
 										            vec2(m_cursorEventX, m_cursorEventY));
 								}
@@ -595,26 +595,26 @@ class X11Interface : public gale::Context {
 								enum gale::key::keyboard keyInput;
 								switch (event.xkey.keycode) {
 									//case 80: // keypad
-									case 111:	keyInput = gale::key::keyboard_up;            break;
+									case 111:	keyInput = gale::key::keyboard::up;            break;
 									//case 83: // keypad
-									case 113:	keyInput = gale::key::keyboard_left;          break;
+									case 113:	keyInput = gale::key::keyboard::left;          break;
 									//case 85: // keypad
-									case 114:	keyInput = gale::key::keyboard_right;         break;
+									case 114:	keyInput = gale::key::keyboard::right;         break;
 									//case 88: // keypad
-									case 116:	keyInput = gale::key::keyboard_down;          break;
+									case 116:	keyInput = gale::key::keyboard::down;          break;
 									//case 81: // keypad
-									case 112:	keyInput = gale::key::keyboard_pageUp;        break;
+									case 112:	keyInput = gale::key::keyboard::pageUp;        break;
 									//case 89: // keypad
-									case 117:	keyInput = gale::key::keyboard_pageDown;      break;
+									case 117:	keyInput = gale::key::keyboard::pageDown;      break;
 									//case 79: // keypad
-									case 110:	keyInput = gale::key::keyboard_start;         break;
+									case 110:	keyInput = gale::key::keyboard::start;         break;
 									//case 87: // keypad
-									case 115:	keyInput = gale::key::keyboard_end;           break;
-									case 78:	keyInput = gale::key::keyboard_stopDefil;     break;
-									case 127:	keyInput = gale::key::keyboard_wait;          break;
+									case 115:	keyInput = gale::key::keyboard::end;           break;
+									case 78:	keyInput = gale::key::keyboard::stopDefil;     break;
+									case 127:	keyInput = gale::key::keyboard::wait;          break;
 									//case 90: // keypad
 									case 118:
-										keyInput = gale::key::keyboard_insert;
+										keyInput = gale::key::keyboard::insert;
 										if(event.type == KeyRelease) {
 											if (m_guiKeyBoardMode.getInsert() == true) {
 												m_guiKeyBoardMode.setInsert(false);
@@ -624,54 +624,54 @@ class X11Interface : public gale::Context {
 										}
 										break;
 									//case 84:  keyInput = gale::key::keyboardCenter; break; // Keypad
-									case 67:    keyInput = gale::key::keyboard_f1; break;
-									case 68:    keyInput = gale::key::keyboard_f2; break;
-									case 69:    keyInput = gale::key::keyboard_f3; break;
-									case 70:    keyInput = gale::key::keyboard_f4; break;
-									case 71:    keyInput = gale::key::keyboard_f5; break;
-									case 72:    keyInput = gale::key::keyboard_f6; break;
-									case 73:    keyInput = gale::key::keyboard_f7; break;
-									case 74:    keyInput = gale::key::keyboard_f8; break;
-									case 75:    keyInput = gale::key::keyboard_f9; break;
-									case 76:    keyInput = gale::key::keyboard_f10; break;
-									case 95:    keyInput = gale::key::keyboard_f11; break;
-									case 96:    keyInput = gale::key::keyboard_f12; break;
-									case 66:    keyInput = gale::key::keyboard_capLock;     m_guiKeyBoardMode.setCapsLock( (event.type == KeyPress) ? true : false); break;
-									case 50:    keyInput = gale::key::keyboard_shiftLeft;   m_guiKeyBoardMode.setShift   ( (event.type == KeyPress) ? true : false); break;
-									case 62:    keyInput = gale::key::keyboard_shiftRight;  m_guiKeyBoardMode.setShift   ( (event.type == KeyPress) ? true : false); break;
-									case 37:    keyInput = gale::key::keyboard_ctrlLeft;    m_guiKeyBoardMode.setCtrl    ( (event.type == KeyPress) ? true : false); break;
-									case 105:   keyInput = gale::key::keyboard_ctrlRight;   m_guiKeyBoardMode.setCtrl    ( (event.type == KeyPress) ? true : false); break;
-									case 133:   keyInput = gale::key::keyboard_metaLeft;    m_guiKeyBoardMode.setMeta    ( (event.type == KeyPress) ? true : false); break;
-									case 134:   keyInput = gale::key::keyboard_metaRight;   m_guiKeyBoardMode.setMeta    ( (event.type == KeyPress) ? true : false); break;
-									case 64:    keyInput = gale::key::keyboard_alt;         m_guiKeyBoardMode.setAlt     ( (event.type == KeyPress) ? true : false); break;
-									case 108:   keyInput = gale::key::keyboard_altGr;       m_guiKeyBoardMode.setAltGr   ( (event.type == KeyPress) ? true : false); break;
-									case 135:   keyInput = gale::key::keyboard_contextMenu; break;
-									case 77:    keyInput = gale::key::keyboard_numLock;     m_guiKeyBoardMode.setNumLock ( (event.type == KeyPress) ? true : false); break;
+									case 67:    keyInput = gale::key::keyboard::f1; break;
+									case 68:    keyInput = gale::key::keyboard::f2; break;
+									case 69:    keyInput = gale::key::keyboard::f3; break;
+									case 70:    keyInput = gale::key::keyboard::f4; break;
+									case 71:    keyInput = gale::key::keyboard::f5; break;
+									case 72:    keyInput = gale::key::keyboard::f6; break;
+									case 73:    keyInput = gale::key::keyboard::f7; break;
+									case 74:    keyInput = gale::key::keyboard::f8; break;
+									case 75:    keyInput = gale::key::keyboard::f9; break;
+									case 76:    keyInput = gale::key::keyboard::f10; break;
+									case 95:    keyInput = gale::key::keyboard::f11; break;
+									case 96:    keyInput = gale::key::keyboard::f12; break;
+									case 66:    keyInput = gale::key::keyboard::capLock;     m_guiKeyBoardMode.setCapsLock( (event.type == KeyPress) ? true : false); break;
+									case 50:    keyInput = gale::key::keyboard::shiftLeft;   m_guiKeyBoardMode.setShift   ( (event.type == KeyPress) ? true : false); break;
+									case 62:    keyInput = gale::key::keyboard::shiftRight;  m_guiKeyBoardMode.setShift   ( (event.type == KeyPress) ? true : false); break;
+									case 37:    keyInput = gale::key::keyboard::ctrlLeft;    m_guiKeyBoardMode.setCtrl    ( (event.type == KeyPress) ? true : false); break;
+									case 105:   keyInput = gale::key::keyboard::ctrlRight;   m_guiKeyBoardMode.setCtrl    ( (event.type == KeyPress) ? true : false); break;
+									case 133:   keyInput = gale::key::keyboard::metaLeft;    m_guiKeyBoardMode.setMeta    ( (event.type == KeyPress) ? true : false); break;
+									case 134:   keyInput = gale::key::keyboard::metaRight;   m_guiKeyBoardMode.setMeta    ( (event.type == KeyPress) ? true : false); break;
+									case 64:    keyInput = gale::key::keyboard::alt;         m_guiKeyBoardMode.setAlt     ( (event.type == KeyPress) ? true : false); break;
+									case 108:   keyInput = gale::key::keyboard::altGr;       m_guiKeyBoardMode.setAltGr   ( (event.type == KeyPress) ? true : false); break;
+									case 135:   keyInput = gale::key::keyboard::contextMenu; break;
+									case 77:    keyInput = gale::key::keyboard::numLock;     m_guiKeyBoardMode.setNumLock ( (event.type == KeyPress) ? true : false); break;
 									case 91: // Suppr on keypad
 										find = false;
 										if(m_guiKeyBoardMode.getNumLock() == true){
 											OS_setKeyboard(m_guiKeyBoardMode,
-											               gale::key::keyboard_char,
-											               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
+											               gale::key::keyboard::character,
+											               (event.type==KeyPress?gale::key::status::down:gale::key::status::up),
 											               thisIsAReapeateKey,
 											               '.');
 											if (thisIsAReapeateKey == true) {
 												OS_setKeyboard(m_guiKeyBoardMode,
-												               gale::key::keyboard_char,
-												               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
+												               gale::key::keyboard::character,
+												               (event.type!=KeyPress?gale::key::status::down:gale::key::status::up),
 												               thisIsAReapeateKey,
 												               '.');
 											}
 										} else {
 											OS_setKeyboard(m_guiKeyBoardMode,
-											               gale::key::keyboard_char,
-											               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
+											               gale::key::keyboard::character,
+											               (event.type==KeyPress?gale::key::status::down:gale::key::status::up),
 											               thisIsAReapeateKey,
 											               0x7F);
 											if (thisIsAReapeateKey == true) {
 												OS_setKeyboard(m_guiKeyBoardMode,
-												               gale::key::keyboard_char,
-												               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
+												               gale::key::keyboard::character,
+												               (event.type!=KeyPress?gale::key::status::down:gale::key::status::up),
 												               thisIsAReapeateKey,
 												               0x7F);
 											}
@@ -680,14 +680,14 @@ class X11Interface : public gale::Context {
 									case 23: // special case for TAB
 										find = false;
 										OS_setKeyboard(m_guiKeyBoardMode,
-										               gale::key::keyboard_char,
-										               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
+										               gale::key::keyboard::character,
+										               (event.type==KeyPress?gale::key::status::down:gale::key::status::up),
 										               thisIsAReapeateKey,
 										               0x09);
 										if (thisIsAReapeateKey == true) {
 											OS_setKeyboard(m_guiKeyBoardMode,
-											               gale::key::keyboard_char,
-											               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
+											               gale::key::keyboard::character,
+											               (event.type!=KeyPress?gale::key::status::down:gale::key::status::up),
 											               thisIsAReapeateKey,
 											               0x09);
 										}
@@ -722,14 +722,14 @@ class X11Interface : public gale::Context {
 												}
 												X11_INFO("event Key : " << event.xkey.keycode << " char=\"" << buf << "\"'len=" << strlen(buf) << " unicode=" << m_lastKeyPressed);
 												OS_setKeyboard(m_guiKeyBoardMode,
-												               gale::key::keyboard_char,
-												               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
+												               gale::key::keyboard::character,
+												               (event.type==KeyPress?gale::key::status::down:gale::key::status::up),
 												               thisIsAReapeateKey,
 												               m_lastKeyPressed);
 												if (thisIsAReapeateKey == true) {
 													OS_setKeyboard(m_guiKeyBoardMode,
-													               gale::key::keyboard_char,
-													               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
+													               gale::key::keyboard::character,
+													               (event.type!=KeyPress?gale::key::status::down:gale::key::status::up),
 													               thisIsAReapeateKey,
 													               m_lastKeyPressed);
 												}
@@ -743,12 +743,12 @@ class X11Interface : public gale::Context {
 									//GALE_DEBUG("eventKey Move type : " << getCharTypeMoveEvent(keyInput) );
 									OS_setKeyboard(m_guiKeyBoardMode,
 									               keyInput,
-									               (event.type==KeyPress?gale::key::status_down:gale::key::status_up),
+									               (event.type==KeyPress?gale::key::status::down:gale::key::status::up),
 									               thisIsAReapeateKey);
 									if (thisIsAReapeateKey == true) {
 										OS_setKeyboard(m_guiKeyBoardMode,
 										               keyInput,
-										               (event.type!=KeyPress?gale::key::status_down:gale::key::status_up),
+										               (event.type!=KeyPress?gale::key::status::down:gale::key::status::up),
 										               thisIsAReapeateKey);
 									}
 								}
@@ -824,7 +824,7 @@ class X11Interface : public gale::Context {
 				m_currentCursor = _newCursor;
 				Cursor myCursor = None;
 				switch (m_currentCursor) {
-					case gale::context::cursor_none:
+					case gale::context::cursor::none:
 						{
 							Pixmap bitmapNoData;
 							XColor black;
@@ -837,61 +837,61 @@ class X11Interface : public gale::Context {
 							                               &black, &black, 0, 0);
 						}
 						break;
-					case gale::context::cursor_leftArrow:
+					case gale::context::cursor::leftArrow:
 						myCursor = XCreateFontCursor(m_display, XC_top_left_arrow);
 						break;
-					case gale::context::cursor_info:
+					case gale::context::cursor::info:
 						myCursor = XCreateFontCursor(m_display, XC_hand1);
 						break;
-					case gale::context::cursor_destroy:
+					case gale::context::cursor::destroy:
 						myCursor = XCreateFontCursor(m_display, XC_pirate);
 						break;
-					case gale::context::cursor_help:
+					case gale::context::cursor::help:
 						myCursor = XCreateFontCursor(m_display, XC_question_arrow);
 						break;
-					case gale::context::cursor_cycle:
+					case gale::context::cursor::cycle:
 						myCursor = XCreateFontCursor(m_display, XC_exchange);
 						break;
-					case gale::context::cursor_spray:
+					case gale::context::cursor::spray:
 						myCursor = XCreateFontCursor(m_display, XC_spraycan);
 						break;
-					case gale::context::cursor_wait:
+					case gale::context::cursor::wait:
 						myCursor = XCreateFontCursor(m_display, XC_watch);
 						break;
-					case gale::context::cursor_text:
+					case gale::context::cursor::text:
 						myCursor = XCreateFontCursor(m_display, XC_xterm);
 						break;
-					case gale::context::cursor_crossHair:
+					case gale::context::cursor::crossHair:
 						myCursor = XCreateFontCursor(m_display, XC_crosshair);
 						break;
-					case gale::context::cursor_slideUpDown:
+					case gale::context::cursor::slideUpDown:
 						myCursor = XCreateFontCursor(m_display, XC_sb_v_double_arrow);
 						break;
-					case gale::context::cursor_slideLeftRight:
+					case gale::context::cursor::slideLeftRight:
 						myCursor = XCreateFontCursor(m_display, XC_sb_h_double_arrow);
 						break;
-					case gale::context::cursor_resizeUp:
+					case gale::context::cursor::resizeUp:
 						myCursor = XCreateFontCursor(m_display, XC_top_side);
 						break;
-					case gale::context::cursor_resizeDown:
+					case gale::context::cursor::resizeDown:
 						myCursor = XCreateFontCursor(m_display, XC_bottom_side);
 						break;
-					case gale::context::cursor_resizeLeft:
+					case gale::context::cursor::resizeLeft:
 						myCursor = XCreateFontCursor(m_display, XC_left_side);
 						break;
-					case gale::context::cursor_resizeRight:
+					case gale::context::cursor::resizeRight:
 						myCursor = XCreateFontCursor(m_display, XC_right_side);
 						break;
-					case gale::context::cursor_cornerTopLeft:
+					case gale::context::cursor::cornerTopLeft:
 						myCursor = XCreateFontCursor(m_display, XC_top_left_corner);
 						break;
-					case gale::context::cursor_cornerTopRight:
+					case gale::context::cursor::cornerTopRight:
 						myCursor = XCreateFontCursor(m_display, XC_top_right_corner);
 						break;
-					case gale::context::cursor_cornerButtomLeft:
+					case gale::context::cursor::cornerButtomLeft:
 						myCursor = XCreateFontCursor(m_display, XC_bottom_right_corner);
 						break;
-					case gale::context::cursor_cornerButtomRight:
+					case gale::context::cursor::cornerButtomRight:
 						myCursor = XCreateFontCursor(m_display, XC_bottom_left_corner);
 						break;
 					default :
@@ -974,7 +974,7 @@ class X11Interface : public gale::Context {
 			// set the DPI for the current screen :
 			gale::Dimension::setPixelRatio(vec2((float)DisplayWidth(m_display, Xscreen)/(float)DisplayWidthMM(m_display, Xscreen),
 			                                    (float)DisplayHeight(m_display, Xscreen)/(float)DisplayHeightMM(m_display, Xscreen)),
-			                               gale::Dimension::Millimeter);
+			                               gale::distance::millimeter);
 			// get an appropriate visual
 			m_visual = glXChooseVisual(m_display, Xscreen, attrListDbl);
 			if (m_visual == nullptr) {

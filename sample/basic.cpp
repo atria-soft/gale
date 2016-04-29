@@ -75,7 +75,7 @@ class MainApplication : public gale::Application {
 			// color :
 			m_GLprogram->sendAttribute(m_GLColor, 4/*r,g,b,a*/, color, 4*sizeof(float));
 			// Request the draw od the elements : 
-			gale::openGL::drawArrays(gale::openGL::render_triangle, 0, 3 /*number of points*/);
+			gale::openGL::drawArrays(gale::openGL::renderMode::triangle, 0, 3 /*number of points*/);
 			m_GLprogram->unUse();
 			// Restore context of matrix
 			gale::openGL::pop();

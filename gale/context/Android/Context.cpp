@@ -441,8 +441,8 @@ class AndroidContext : public gale::Context {
 		void ANDROID_SetKeyboard(char32_t _myChar, bool _isDown, bool _isARepeateKey=false) {
 			GALE_VERBOSE("ANDROID_SetKeyboard [BEGIN]");
 			OS_setKeyboard(m_guiKeyBoardSpecialKeyMode,
-			               gale::key::keyboard_char,
-			               (_isDown==true?gale::key::status_down:gale::key::status_up),
+			               gale::key::keyboard::character,
+			               (_isDown==true?gale::key::status::down:gale::key::status_up),
 			               _isARepeateKey,
 			               _myChar);
 			GALE_VERBOSE("ANDROID_SetKeyboard [END]");
@@ -452,7 +452,7 @@ class AndroidContext : public gale::Context {
 			GALE_VERBOSE("ANDROID_systemKeyboradEvent [BEGIN]");
 			OS_setKeyboard(m_guiKeyBoardSpecialKeyMode,
 			               _key,
-			               (_isDown==true?gale::key::status_down:gale::key::status_up));
+			               (_isDown==true?gale::key::status::down:gale::key::status_up));
 			GALE_VERBOSE("ANDROID_systemKeyboradEvent [END]");
 			return false;
 		}
@@ -464,7 +464,7 @@ class AndroidContext : public gale::Context {
 			m_guiKeyBoardSpecialKeyMode.update(move, _isDown);
 			OS_setKeyboard(m_guiKeyBoardSpecialKeyMode,
 			               move,
-			               (_isDown==true?gale::key::status_down:gale::key::status_up),
+			               (_isDown==true?gale::key::status::down:gale::key::status_up),
 			               _isARepeateKey);
 			GALE_VERBOSE("ANDROID_SetKeyboardMove [END]");
 		}
@@ -701,8 +701,8 @@ extern "C" {
 			// TODO : generate error in java to stop the current instance
 			return;
 		}
-		s_listInstance[_id]->OS_SetInput(gale::key::type_finger,
-		                                 gale::key::status_move,
+		s_listInstance[_id]->OS_SetInput(gale::key::type::finger,
+		                                 gale::key::status::move,
 		                                 _pointerID+1,
 		                                 vec2(_x,_y));
 	}
@@ -722,8 +722,8 @@ extern "C" {
 			// TODO : generate error in java to stop the current instance
 			return;
 		}
-		s_listInstance[_id]->OS_SetInput(gale::key::type_finger,
-		                                 (_isDown==true?gale::key::status_down:gale::key::status_up),
+		s_listInstance[_id]->OS_SetInput(gale::key::type::finger,
+		                                 (_isDown==true?gale::key::status::down:gale::key::status_up),
 		                                 _pointerID+1,
 		                                 vec2(_x,_y));
 	}
@@ -742,8 +742,8 @@ extern "C" {
 			// TODO : generate error in java to stop the current instance
 			return;
 		}
-		s_listInstance[_id]->OS_SetInput(gale::key::type_mouse,
-		                                 gale::key::status_move,
+		s_listInstance[_id]->OS_SetInput(gale::key::type::mouse,
+		                                 gale::key::status::move,
 		                                 _pointerID+1,
 		                                 vec2(_x,_y));
 	}
@@ -763,8 +763,8 @@ extern "C" {
 			// TODO : generate error in java to stop the current instance
 			return;
 		}
-		s_listInstance[_id]->OS_SetInput(gale::key::type_mouse,
-		                                 (_isDown==true?gale::key::status_down:gale::key::status_up),
+		s_listInstance[_id]->OS_SetInput(gale::key::type::mouse,
+		                                 (_isDown==true?gale::key::status::down:gale::key::status_up),
 		                                 _pointerID+1,
 		                                 vec2(_x,_y));
 	}
@@ -832,7 +832,7 @@ extern "C" {
 			return;
 		}
 		// set the internal system ratio properties ...
-		gale::Dimension::setPixelRatio(vec2(_ratioX,_ratioY), gale::Dimension::Inch);
+		gale::Dimension::setPixelRatio(vec2(_ratioX,_ratioY), gale::distance::inch);
 	}
 	
 	// TODO : set a return true or false if we want to grep this event ...
@@ -852,25 +852,25 @@ extern "C" {
 		switch (_keyVal) {
 			case org_gale_GaleConstants_GALE_SYSTEM_KEY_VOLUME_UP:
 				GALE_VERBOSE("IO keyboard Key system \"VOLUME_UP\" is down=" << _isdown);
-				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard_volumeUp, _isdown);
+				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard::volumeUp, _isdown);
 			case org_gale_GaleConstants_GALE_SYSTEM_KEY_VOLUME_DOWN:
 				GALE_DEBUG("IO keyboard Key system \"VOLUME_DOWN\" is down=" << _isdown);
-				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard_volumeDown, _isdown);
+				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard::volumeDown, _isdown);
 			case org_gale_GaleConstants_GALE_SYSTEM_KEY_MENU:
 				GALE_DEBUG("IO keyboard Key system \"MENU\" is down=" << _isdown);
-				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard_menu, _isdown);
+				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard::menu, _isdown);
 			case org_gale_GaleConstants_GALE_SYSTEM_KEY_CAMERA:
 				GALE_DEBUG("IO keyboard Key system \"CAMERA\" is down=" << _isdown);
-				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard_camera, _isdown);
+				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard::camera, _isdown);
 			case org_gale_GaleConstants_GALE_SYSTEM_KEY_HOME:
 				GALE_DEBUG("IO keyboard Key system \"HOME\" is down=" << _isdown);
-				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard_home, _isdown);
+				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard::home, _isdown);
 			case org_gale_GaleConstants_GALE_SYSTEM_KEY_POWER:
 				GALE_DEBUG("IO keyboard Key system \"POWER\" is down=" << _isdown);
-				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard_power, _isdown);
+				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard::power, _isdown);
 			case org_gale_GaleConstants_GALE_SYSTEM_KEY_BACK:
 				GALE_DEBUG("IO keyboard Key system \"BACK\" is down=" << _isdown);
-				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard_back, _isdown);
+				return s_listInstance[_id]->ANDROID_systemKeyboradEvent(gale::key::keyboard::back, _isdown);
 			default:
 				GALE_ERROR("IO keyboard Key system event : \"" << _keyVal << "\" is down=" << _isdown);
 				break;

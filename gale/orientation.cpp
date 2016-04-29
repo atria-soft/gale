@@ -8,13 +8,13 @@
 #include <gale/orientation.h>
 
 static const char* listValues[] = {
-	"orientation_screenAuto",
-	"orientation_screenLandscape",
-	"orientation_screenPortrait"
+	"orientation::screenAuto",
+	"orientation::screenLandscape",
+	"orientation::screenPortrait"
 };
 
 std::ostream& gale::operator <<(std::ostream& _os, const enum gale::orientation _obj) {
-	_os << listValues[_obj];
+	_os << listValues[int32_t(_obj)];
 	return _os;
 }
 

@@ -91,7 +91,7 @@ namespace gale {
 			 * @brief Get keyborad value input.
 			 * @param[in] _special Current special key status (ctrl/alt/shift ...).
 			 * @param[in] _type Type of the event.
-			 * @param[in] _value Unicode value of the char pushed (viable only if _type==gale::key::keyboard_char).
+			 * @param[in] _value Unicode value of the char pushed (viable only if _type==gale::key::keyboard::character).
 			 * @param[in] _state State of the key (up/down/upRepeate/downRepeate)
 			 */
 			virtual void onKeyboard(const gale::key::Special& _special,

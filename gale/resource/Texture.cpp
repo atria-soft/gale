@@ -41,8 +41,8 @@ gale::resource::Texture::Texture() :
   m_endPointSize(1,1),
   m_loaded(false),
   m_size(0,0),
-  m_dataType(gale::resource::Texture::dataType_int16),
-  m_dataColorSpace(gale::resource::Texture::color_mono) {
+  m_dataType(gale::resource::Texture::dataType::int16),
+  m_dataColorSpace(gale::resource::Texture::color::mono) {
 	addResourceType("gale::compositing::Texture");
 }
 

@@ -6,10 +6,10 @@
 #pragma once
 
 namespace gale {
-	enum orientation {
-		orientation_screenAuto = 0,
-		orientation_screenLandscape,
-		orientation_screenPortrait
+	enum class orientation {
+		screenAuto = 0,
+		screenLandscape,
+		screenPortrait
 	};
 	std::ostream& operator <<(std::ostream& _os, enum gale::orientation _obj);
 }

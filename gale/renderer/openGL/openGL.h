@@ -151,17 +151,17 @@ namespace gale {
 			flag_alphaTest = 1<<27, //!< 
 			flag_fog = 1<<28, //!< 
 		};
-		enum renderMode {
-			render_point,
-			render_line,
-			render_lineStrip, //!< Not supported in GALE (TODO : Later)
-			render_lineLoop,
-			render_triangle,
-			render_triangleStrip, //!< Not supported in GALE (TODO : Later)
-			render_triangleFan, //!< Not supported in GALE (TODO : Later)
-			render_quad, //!< Not supported in OpenGL-ES2
-			render_quadStrip, //!< Not supported in OpenGL-ES2
-			render_polygon //!< Not supported in OpenGL-ES2
+		enum class renderMode {
+			point,
+			line,
+			lineStrip, //!< Not supported in GALE (TODO : Later)
+			lineLoop,
+			triangle,
+			triangleStrip, //!< Not supported in GALE (TODO : Later)
+			triangleFan, //!< Not supported in GALE (TODO : Later)
+			quad, //!< Not supported in OpenGL-ES2
+			quadStrip, //!< Not supported in OpenGL-ES2
+			polygon //!< Not supported in OpenGL-ES2
 		};
 		
 		/**
@@ -207,18 +207,18 @@ namespace gale {
 		bool genBuffers(std::vector<uint32_t>& _buffers);
 		bool deleteBuffers(std::vector<uint32_t>& _buffers);
 		bool bindBuffer(uint32_t _bufferId);
-		enum usage {
-			usage_streamDraw,
-			usage_staticDraw,
-			usage_dynamicDraw
+		enum class usage {
+			streamDraw,
+			staticDraw,
+			dynamicDraw
 		};
 		bool bufferData(size_t _size, const void* _data, enum gale::openGL::usage _usage);
 		bool unbindBuffer();
 		/* Shader wrapping : */
 		namespace shader {
-			enum type {
-				type_vertex,
-				type_fragment
+			enum class type {
+				vertex,
+				fragment
 			};
 			int64_t create(enum gale::openGL::shader::type _type);
 			void remove(int64_t& _shader);
@@ -232,8 +232,8 @@ namespace gale {
 			int32_t getAttributeLocation(int64_t _prog, const std::string& _name);
 			int32_t getUniformLocation(int64_t _prog, const std::string& _name);
 		};
-	};
-	std::ostream& operator <<(std::ostream& _os, const enum openGL::flag& _obj);
-	std::ostream& operator <<(std::ostream& _os, const enum openGL::renderMode& _obj);
+		std::ostream& operator <<(std::ostream& _os, enum openGL::flag _obj);
+		std::ostream& operator <<(std::ostream& _os, enum openGL::renderMode _obj);
+	}
 }
 

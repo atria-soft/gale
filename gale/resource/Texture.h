@@ -14,14 +14,14 @@ namespace gale {
 	namespace resource {
 		class Texture : public gale::Resource {
 			public:
-				enum color {
-					color_mono = 0, //!< Monochrome color
-					color_rgb, //!< red/green/blue data
-					color_rgba //!< red/green/blue/alpha data
+				enum class color {
+					mono = 0, //!< Monochrome color
+					rgb, //!< red/green/blue data
+					rgba //!< red/green/blue/alpha data
 				};
 				enum dataType {
-					dataType_int16 = 0, //!< Image data are stored on integer 16 bit for each element
-					dataType_float, //!< Image data are stored on flaoting point value on 32 bit for each element
+					int16 = 0, //!< Image data are stored on integer 16 bit for each element
+					float32, //!< Image data are stored on flaoting point value on 32 bit for each element
 				};
 			protected:
 				uint32_t m_texId; //!< openGl textureID.

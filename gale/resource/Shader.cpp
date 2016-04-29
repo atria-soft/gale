@@ -17,7 +17,7 @@ gale::resource::Shader::Shader() :
   m_exist(false),
   m_fileData(""),
   m_shader(-1),
-  m_type(gale::openGL::shader::type_vertex) {
+  m_type(gale::openGL::shader::type::vertex) {
 	addResourceType("gale::Shader");
 	m_resourceLevel = 0;
 }
@@ -29,9 +29,9 @@ void gale::resource::Shader::init(const std::string& _filename) {
 	// load data from file "all the time ..."
 	
 	if (etk::end_with(m_name, ".frag") == true) {
-		m_type = gale::openGL::shader::type_fragment;
+		m_type = gale::openGL::shader::type::fragment;
 	} else if (etk::end_with(m_name, ".vert") == true) {
-		m_type = gale::openGL::shader::type_vertex;
+		m_type = gale::openGL::shader::type::vertex;
 	} else {
 		GALE_ERROR("File does not have extention \".vert\" for Vertex Shader or \".frag\" for Fragment Shader. but : \"" << m_name << "\"");
 		return;
@@ -70,7 +70,7 @@ bool gale::resource::Shader::updateContext() {
 			bool ret = gale::openGL::shader::compile(m_shader, m_fileData);
 			if (ret == false) {
 				const char * tmpShaderType = "FRAGMENT SHADER";
-				if (m_type == gale::openGL::shader::type_vertex){
+				if (m_type == gale::openGL::shader::type::vertex){
 					tmpShaderType = "VERTEX SHADER";
 				}
 				GALE_CRITICAL("Could not compile \"" << tmpShaderType << "\" name='" << m_name << "'");

@@ -10,22 +10,22 @@
 #include <etk/math/Vector2D.h>
 
 namespace gale {
+	enum class distance {
+		pourcent=0,
+		pixel,
+		meter,
+		centimeter,
+		millimeter,
+		kilometer,
+		inch,
+		foot,
+	};
 	/**
 	 * @brief in the dimention class we store the data as the more usefull unit (pixel) 
 	 * but one case need to be dynamic the %, then when requested in % the register the % value
 	 */
 	class Dimension {
 		public:
-			enum distance {
-				Pourcent=0,
-				Pixel,
-				Meter,
-				Centimeter,
-				Millimeter,
-				Kilometer,
-				Inch,
-				foot,
-			};
 		private:
 			vec2 m_data;
 			enum distance m_type;
@@ -39,14 +39,14 @@ namespace gale {
 			 * @param[in] _size Requested dimention
 			 * @param[in] _type Unit of the Dimention
 			 */
-			Dimension(const vec2& _size, enum gale::Dimension::distance _type=gale::Dimension::Pixel);
+			Dimension(const vec2& _size, enum gale::distance _type=gale::distance::pixel);
 			/**
 			 * @brief Constructor
 			 * @param[in] _config dimension configuration.
 			 */
 			Dimension(const std::string& _config) :
 			  m_data(0,0),
-			  m_type(gale::Dimension::Pixel) {
+			  m_type(gale::distance::pixel) {
 				set(_config);
 			};
 			/**
@@ -55,7 +55,7 @@ namespace gale {
 			 */
 			Dimension(const char* _config) :
 			  m_data(0,0),
-			  m_type(gale::Dimension::Pixel) {
+			  m_type(gale::distance::pixel) {
 				set(_config);
 			};
 			/**
@@ -180,7 +180,7 @@ namespace gale {
 		 * @param[in] type Unit type requested.
 		 * @note: same as @ref setPixelPerInch (internal manage convertion)
 		 */
-		static void setPixelRatio(const vec2& _ratio, enum gale::Dimension::distance _type);
+		static void setPixelRatio(const vec2& _ratio, enum gale::distance _type);
 		/**
 		 * @brief set the current Windows size
 		 * @param[in] size size of the current windows in pixel.
@@ -191,16 +191,16 @@ namespace gale {
 		 * @param[in] type Unit type requested.
 		 * @return the requested size
 		 */
-		static vec2 getWindowsSize(enum gale::Dimension::distance _type);
+		static vec2 getWindowsSize(enum gale::distance _type);
 		/**
 		 * @brief get the Windows diagonal size in the request unit
 		 * @param[in] type Unit type requested.
 		 * @return the requested size
 		 */
-		static float getWindowsDiag(enum gale::Dimension::distance _type);
+		static float getWindowsDiag(enum gale::distance _type);
 		
 	};
-	std::ostream& operator <<(std::ostream& _os, enum gale::Dimension::distance _obj);
+	std::ostream& operator <<(std::ostream& _os, enum gale::distance _obj);
 	std::ostream& operator <<(std::ostream& _os, const gale::Dimension& _obj);
 }
 

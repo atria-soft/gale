@@ -287,11 +287,11 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	// force a recalculation
 	requestUpdateSize();
 	#if defined(__GALE_ANDROID_ORIENTATION_LANDSCAPE__)
-		forceOrientation(gale::orientation_screenLandscape);
+		forceOrientation(gale::orientation::screenLandscape);
 	#elif defined(__GALE_ANDROID_ORIENTATION_PORTRAIT__)
-		forceOrientation(gale::orientation_screenPortrait);
+		forceOrientation(gale::orientation::screenPortrait);
 	#else
-		forceOrientation(gale::orientation_screenAuto);
+		forceOrientation(gale::orientation::screenAuto);
 	#endif
 	if (m_imulationActive == true) {
 		// in simulation case:
@@ -406,10 +406,10 @@ void gale::Context::OS_setKeyboard(const gale::key::Special& _special,
                                    bool _isARepeateKey,
                                    char32_t _char) {
 	if (_isARepeateKey == true) {
-		if (_state == gale::key::status_down) {
-			_state = gale::key::status_downRepeate;
+		if (_state == gale::key::status::down) {
+			_state = gale::key::status::downRepeate;
 		} else {
-			_state = gale::key::status_upRepeate;
+			_state = gale::key::status::upRepeate;
 		}
 	}
 	if (m_imulationActive == true) {

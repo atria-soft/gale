@@ -24,31 +24,31 @@ gale::key::Special::Special() :
 }
 void gale::key::Special::update(enum gale::key::keyboard _move, bool _isDown) {
 	switch (_move) {
-		case keyboard_insert:
+		case keyboard::insert:
 			setInsert(_isDown);
 			break;
-		case keyboard_capLock:
+		case keyboard::capLock:
 			setCapsLock(_isDown);
 			break;
-		case keyboard_shiftLeft:
-		case keyboard_shiftRight:
+		case keyboard::shiftLeft:
+		case keyboard::shiftRight:
 			setShift(_isDown);
 			break;
-		case keyboard_ctrlLeft:
-		case keyboard_ctrlRight:
+		case keyboard::ctrlLeft:
+		case keyboard::ctrlRight:
 			setCtrl(_isDown);
 			break;
-		case keyboard_metaLeft:
-		case keyboard_metaRight:
+		case keyboard::metaLeft:
+		case keyboard::metaRight:
 			setMeta(_isDown);
 			break;
-		case keyboard_alt:
+		case keyboard::alt:
 			setAlt(_isDown);
 			break;
-		case keyboard_altGr:
+		case keyboard::altGr:
 			setAltGr(_isDown);
 			break;
-		case keyboard_numLock:
+		case keyboard::numLock:
 			setNumLock(_isDown);
 			break;
 		default:

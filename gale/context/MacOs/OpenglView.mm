@@ -27,7 +27,7 @@
 	
 	gale::Dimension::setPixelRatio(vec2((float)displayPixelSize.width/(float)displayPhysicalSize.width,
 	                                    (float)displayPixelSize.height/(float)displayPhysicalSize.height),
-	                                    gale::Dimension::Millimeter);
+	                                    gale::distance::millimeter);
 	_refreshTimer=[ [ NSTimer scheduledTimerWithTimeInterval:0.017 target:self selector:@selector(animationTimerFired:) userInfo:nil repeats:YES ] retain ] ;
 	_redraw = true;
 	

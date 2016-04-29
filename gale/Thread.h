@@ -22,11 +22,11 @@ namespace gale {
 	 */
 	class Thread {
 		private:
-			enum state {
-				state_stop,
-				state_starting,
-				state_running,
-				state_stopping
+			enum class state {
+				stop,
+				starting,
+				running,
+				stopping
 			};
 			enum state m_state;
 			#if defined(__TARGET_OS__Android)

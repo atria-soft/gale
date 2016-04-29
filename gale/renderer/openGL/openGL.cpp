@@ -286,7 +286,7 @@ void gale::openGL::clear(uint32_t _flags) {
 	#endif
 }
 
-std::ostream& gale::operator <<(std::ostream& _os, const enum openGL::flag& _obj) {
+std::ostream& gale::openGL::operator <<(std::ostream& _os, enum gale::openGL::flag _obj) {
 	static std::vector<std::pair<enum openGL::flag, const char*>> list = {
 		std::make_pair(openGL::flag_blend, "FLAG_BLEND"),
 		std::make_pair(openGL::flag_clipDistanceI, "FLAG_CLIP_DISTANCE_I"),
@@ -336,16 +336,16 @@ std::ostream& gale::operator <<(std::ostream& _os, const enum openGL::flag& _obj
 
 std::vector<std::pair<enum gale::openGL::renderMode, std::string>>& getListRenderMode() {
 	static std::vector<std::pair<enum gale::openGL::renderMode, std::string>> list = {
-		std::make_pair(gale::openGL::render_point, "POINTS"),
-		std::make_pair(gale::openGL::render_line, "LINES"),
-		std::make_pair(gale::openGL::render_lineStrip, "LINES_STRIP"),
-		std::make_pair(gale::openGL::render_lineLoop, "LINE_LOOP"),
-		std::make_pair(gale::openGL::render_triangle, "TRIANGLE"),
-		std::make_pair(gale::openGL::render_triangleStrip, "TRIANGLE_STRIP"),
-		std::make_pair(gale::openGL::render_triangleFan, "TRIANGLE_FAN"),
-		std::make_pair(gale::openGL::render_quad, "QUAD"),
-		std::make_pair(gale::openGL::render_quadStrip, "QUAD_STRIP"),
-		std::make_pair(gale::openGL::render_polygon, "POLYGON"),
+		std::make_pair(gale::openGL::renderMode::point, "POINTS"),
+		std::make_pair(gale::openGL::renderMode::line, "LINES"),
+		std::make_pair(gale::openGL::renderMode::lineStrip, "LINES_STRIP"),
+		std::make_pair(gale::openGL::renderMode::lineLoop, "LINE_LOOP"),
+		std::make_pair(gale::openGL::renderMode::triangle, "TRIANGLE"),
+		std::make_pair(gale::openGL::renderMode::triangleStrip, "TRIANGLE_STRIP"),
+		std::make_pair(gale::openGL::renderMode::triangleFan, "TRIANGLE_FAN"),
+		std::make_pair(gale::openGL::renderMode::quad, "QUAD"),
+		std::make_pair(gale::openGL::renderMode::quadStrip, "QUAD_STRIP"),
+		std::make_pair(gale::openGL::renderMode::polygon, "POLYGON"),
 	};
 	return list;
 }
@@ -372,7 +372,7 @@ namespace etk {
 			}
 		}
 		GALE_WARNING("Can not parse : '" << _value << "' set Triangle default value");
-		_variableRet = gale::openGL::render_triangle;
+		_variableRet = gale::openGL::renderMode::triangle;
 		return false;
 	}
 	template<> bool from_string<gale::openGL::renderMode>(gale::openGL::renderMode& _variableRet, const std::u32string& _value) {
@@ -380,7 +380,7 @@ namespace etk {
 	}
 };
 
-std::ostream& gale::operator <<(std::ostream& _os, const enum openGL::renderMode& _obj) {
+std::ostream& gale::openGL::operator <<(std::ostream& _os, enum gale::openGL::renderMode _obj) {
 	_os << etk::to_string(_obj);
 	return _os;
 }
@@ -587,7 +587,7 @@ void gale::openGL::drawArrays(enum gale::openGL::renderMode _mode, int32_t _firs
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			if (s_simulationMode == false) {
 		#endif
-		glDrawArrays(convertRenderMode[_mode], _first, _count);
+		glDrawArrays(convertRenderMode[uint32_t(_mode)], _first, _count);
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			}
 		#endif
@@ -601,7 +601,7 @@ void gale::openGL::drawElements(enum renderMode _mode, const std::vector<uint32_
 			if (s_simulationMode == false) {
 		#endif
 		//GALE_DEBUG("Request draw of " << indices.size() << "elements");
-		glDrawElements(convertRenderMode[_mode], _indices.size(), GL_UNSIGNED_INT, &_indices[0]);
+		glDrawElements(convertRenderMode[uint32_t(_mode)], _indices.size(), GL_UNSIGNED_INT, &_indices[0]);
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			}
 		#endif
@@ -614,7 +614,7 @@ void gale::openGL::drawElements16(enum renderMode _mode, const std::vector<uint1
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			if (s_simulationMode == false) {
 		#endif
-		glDrawElements(convertRenderMode[_mode], _indices.size(), GL_UNSIGNED_SHORT, &_indices[0]);
+		glDrawElements(convertRenderMode[uint32_t(_mode)], _indices.size(), GL_UNSIGNED_SHORT, &_indices[0]);
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			}
 		#endif
@@ -627,7 +627,7 @@ void gale::openGL::drawElements8(enum renderMode _mode, const std::vector<uint8_
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			if (s_simulationMode == false) {
 		#endif
-		glDrawElements(convertRenderMode[_mode], _indices.size(), GL_UNSIGNED_BYTE, &_indices[0]);
+		glDrawElements(convertRenderMode[uint32_t(_mode)], _indices.size(), GL_UNSIGNED_BYTE, &_indices[0]);
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			}
 		#endif
@@ -744,7 +744,7 @@ bool gale::openGL::bufferData(size_t _size, const void* _data, enum gale::openGL
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		if (s_simulationMode == false) {
 	#endif
-	glBufferData(GL_ARRAY_BUFFER, _size, _data, convertUsage[_usage]);
+	glBufferData(GL_ARRAY_BUFFER, _size, _data, convertUsage[uint32_t(_usage)]);
 	checkGlError("glBufferData", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
@@ -774,7 +774,7 @@ static char l_bufferDisplayError[LOG_OGL_INTERNAL_BUFFER_LEN] = "";
 
 int64_t gale::openGL::shader::create(enum gale::openGL::shader::type _type) {
 	GLuint shader = 0;
-	if (_type == gale::openGL::shader::type_vertex) {
+	if (_type == gale::openGL::shader::type::vertex) {
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			if (s_simulationMode == false) {
 		#endif
@@ -785,7 +785,7 @@ int64_t gale::openGL::shader::create(enum gale::openGL::shader::type _type) {
 				shader = count++;
 			}
 		#endif
-	} else if (_type == gale::openGL::shader::type_fragment) {
+	} else if (_type == gale::openGL::shader::type::fragment) {
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			if (s_simulationMode == false) {
 		#endif

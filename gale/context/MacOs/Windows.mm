@@ -92,21 +92,21 @@ static gale::key::Special guiKeyBoardMode;
 	bool find = true;
 	enum gale::key::keyboard keyInput;
 	switch (c) {
-		case 63232:	keyInput = gale::key::keyboard_up;            break;
-		case 63233:	keyInput = gale::key::keyboard_down;          break;
-		case 63234:	keyInput = gale::key::keyboard_left;          break;
-		case 63235:	keyInput = gale::key::keyboard_right;         break;
-		case 63276:	keyInput = gale::key::keyboard_pageUp;        break;
-		case 63277:	keyInput = gale::key::keyboard_pageDown;      break;
-		case 63273:	keyInput = gale::key::keyboard_start;         break;
-		case 63275:	keyInput = gale::key::keyboard_end;           break;
+		case 63232:	keyInput = gale::key::keyboard::up;            break;
+		case 63233:	keyInput = gale::key::keyboard::down;          break;
+		case 63234:	keyInput = gale::key::keyboard::left;          break;
+		case 63235:	keyInput = gale::key::keyboard::right;         break;
+		case 63276:	keyInput = gale::key::keyboard::pageUp;        break;
+		case 63277:	keyInput = gale::key::keyboard::pageDown;      break;
+		case 63273:	keyInput = gale::key::keyboard::start;         break;
+		case 63275:	keyInput = gale::key::keyboard::end;           break;
 		/*
-		case 78:	keyInput = gale::key::keyboard_stopDefil;     break;
-		case 127:	keyInput = gale::key::keyboard_wait;          break;
+		case 78:	keyInput = gale::key::keyboard::stopDefil;     break;
+		case 127:	keyInput = gale::key::keyboard::wait;          break;
 		*/
 		case 63302:
 			find = false;
-			keyInput = gale::key::keyboard_insert;
+			keyInput = gale::key::keyboard::insert;
 			if(_isDown == false) {
 				if (true == guiKeyBoardMode.getInsert()) {
 					guiKeyBoardMode.setInsert(false);
@@ -120,18 +120,18 @@ static gale::key::Special guiKeyBoardMode;
 			MacOs::setKeyboardMove(guiKeyBoardMode, keyInput, false, thisIsAReapeateKey);
 			break;
 			//case 84:  keyInput = gale::key::keyboardCenter; break; // Keypad
-		case 63236:    keyInput = gale::key::keyboard_f1; break;
-		case 63237:    keyInput = gale::key::keyboard_f2; break;
-		case 63238:    keyInput = gale::key::keyboard_f3; break;
-		case 63239:    keyInput = gale::key::keyboard_f4; break;
-		case 63240:    keyInput = gale::key::keyboard_f5; break;
-		case 63241:    keyInput = gale::key::keyboard_f6; break;
-		case 63242:    keyInput = gale::key::keyboard_f7; break;
-		case 63243:    keyInput = gale::key::keyboard_f8; break;
-		case 63244:    keyInput = gale::key::keyboard_f9; break;
-		case 63245:    keyInput = gale::key::keyboard_f10; break;
-		case 63246:    keyInput = gale::key::keyboard_f11; break;
-		case 63247:    keyInput = gale::key::keyboard_f12; break;
+		case 63236:    keyInput = gale::key::keyboard::f1; break;
+		case 63237:    keyInput = gale::key::keyboard::f2; break;
+		case 63238:    keyInput = gale::key::keyboard::f3; break;
+		case 63239:    keyInput = gale::key::keyboard::f4; break;
+		case 63240:    keyInput = gale::key::keyboard::f5; break;
+		case 63241:    keyInput = gale::key::keyboard::f6; break;
+		case 63242:    keyInput = gale::key::keyboard::f7; break;
+		case 63243:    keyInput = gale::key::keyboard::f8; break;
+		case 63244:    keyInput = gale::key::keyboard::f9; break;
+		case 63245:    keyInput = gale::key::keyboard::f10; break;
+		case 63246:    keyInput = gale::key::keyboard::f11; break;
+		case 63247:    keyInput = gale::key::keyboard::f12; break;
 		case 63272: // Suppress
 			find = false;
 			MacOs::setKeyboard(guiKeyBoardMode, u32char::Delete, _isDown, thisIsAReapeateKey);
@@ -178,12 +178,12 @@ static gale::key::Special guiKeyBoardMode;
 		GALE_VERBOSE("NSAlphaShiftKeyMask");
 		if (guiKeyBoardMode.getCapsLock() == false) {
 			guiKeyBoardMode.setCapsLock(true);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard_capLock, true, false);
+			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::capLock, true, false);
 		}
 	} else {
 		if (guiKeyBoardMode.getCapsLock() == true) {
 			guiKeyBoardMode.setCapsLock(false);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard_capLock, false, false);
+			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::capLock, false, false);
 		}
 	}
 	
@@ -191,12 +191,12 @@ static gale::key::Special guiKeyBoardMode;
 		GALE_VERBOSE("NSShiftKeyMask");
 		if (guiKeyBoardMode.getShift() == false) {
 			guiKeyBoardMode.setShift(true);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard_shiftLeft, true, false);
+			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::shiftLeft, true, false);
 		}
 	} else {
 		if (guiKeyBoardMode.getShift() == true) {
 			guiKeyBoardMode.setShift(false);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard_shiftLeft, false, false);
+			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::shiftLeft, false, false);
 		}
 	}
 	
@@ -205,13 +205,13 @@ static gale::key::Special guiKeyBoardMode;
 		if (guiKeyBoardMode.getCtrl() == false) {
 			GALE_VERBOSE("NSControlKeyMask DOWN");
 			guiKeyBoardMode.setCtrl(true);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard_ctrlLeft, true, false);
+			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::ctrlLeft, true, false);
 		}
 	} else {
 		if (guiKeyBoardMode.getCtrl() == true) {
 			GALE_VERBOSE("NSControlKeyMask UP");
 			guiKeyBoardMode.setCtrl(false);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard_ctrlLeft, false, false);
+			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::ctrlLeft, false, false);
 		}
 	}
 	
@@ -219,12 +219,12 @@ static gale::key::Special guiKeyBoardMode;
 		GALE_VERBOSE("NSAlternateKeyMask");
 		if (guiKeyBoardMode.getAlt() == false) {
 			guiKeyBoardMode.setAlt(true);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard_alt, true, false);
+			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::alt, true, false);
 		}
 	} else {
 		if (guiKeyBoardMode.getAlt() == true) {
 			guiKeyBoardMode.setAlt(false);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard_alt, false, false);
+			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::alt, false, false);
 		}
 	}
 	
@@ -232,12 +232,12 @@ static gale::key::Special guiKeyBoardMode;
 		GALE_VERBOSE("NSCommandKeyMask");
 		if (guiKeyBoardMode.getMeta() == false) {
 			guiKeyBoardMode.setMeta(true);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard_metaLeft, true, false);
+			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::metaLeft, true, false);
 		}
 	} else {
 		if (guiKeyBoardMode.getMeta() == true) {
 			guiKeyBoardMode.setMeta(false);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard_metaLeft, false, false);
+			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::metaLeft, false, false);
 		}
 	}
 	
@@ -245,12 +245,12 @@ static gale::key::Special guiKeyBoardMode;
 		GALE_VERBOSE("NSNumericPadKeyMask");
 		if (guiKeyBoardMode.getNumLock() == false) {
 			guiKeyBoardMode.setNumLock(true);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard_numLock, true, false);
+			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::numLock, true, false);
 		}
 	} else {
 		if (guiKeyBoardMode.getNumLock() == true) {
 			guiKeyBoardMode.setNumLock(false);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard_numLock, false, false);
+			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::numLock, false, false);
 		}
 	}
 	if (([theEvent modifierFlags] & NSHelpKeyMask) != 0) {
@@ -258,8 +258,8 @@ static gale::key::Special guiKeyBoardMode;
 	}
 	if (([theEvent modifierFlags] & NSFunctionKeyMask) != 0) {
 		GALE_VERBOSE("NSFunctionKeyMask");
-		MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard_contextMenu, true, false);
-		MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard_contextMenu, false, false);
+		MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::contextMenu, true, false);
+		MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::contextMenu, false, false);
 	}
 	GALE_VERBOSE("EVENT : " << int32_t([theEvent modifierFlags]));
 }

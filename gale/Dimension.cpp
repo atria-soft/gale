@@ -12,7 +12,7 @@
 static bool isInit = false;
 static vec2 ratio(9999999,888888);
 static vec2 invRatio(1,1);
-static gale::Dimension windowsSize(vec2(9999999,888888), gale::Dimension::Pixel);
+static gale::Dimension windowsSize(vec2(9999999,888888), gale::distance::pixel);
 
 static const float       inchToMillimeter = 1.0f/25.4f;
 static const float       footToMillimeter = 1.0f/304.8f;
@@ -30,10 +30,10 @@ void gale::Dimension::init() {
 	if (true == isInit) {
 		return;
 	}
-	gale::Dimension conversion(vec2(72,72), gale::Dimension::Inch);
+	gale::Dimension conversion(vec2(72,72), gale::distance::inch);
 	ratio = conversion.getMillimeter();
 	invRatio.setValue(1.0f/ratio.x(),1.0f/ratio.y());
-	windowsSize.set(vec2(200,200), gale::Dimension::Pixel);
+	windowsSize.set(vec2(200,200), gale::distance::pixel);
 	isInit = true;
 }
 
@@ -41,10 +41,10 @@ void gale::Dimension::unInit() {
 	isInit = false;
 	ratio.setValue(9999999,888888);
 	invRatio.setValue(1.0f/ratio.x(),1.0f/ratio.y());
-	windowsSize.set(vec2(9999999,88888), gale::Dimension::Pixel);
+	windowsSize.set(vec2(9999999,88888), gale::distance::pixel);
 }
 
-void gale::Dimension::setPixelRatio(const vec2& _ratio, enum gale::Dimension::distance _type) {
+void gale::Dimension::setPixelRatio(const vec2& _ratio, enum gale::distance _type) {
 	gale::Dimension::init();
 	GALE_INFO("Set a new screen ratio for the screen : ratio=" << _ratio << " type=" << _type);
 	gale::Dimension conversion(_ratio, _type);
@@ -59,54 +59,54 @@ void gale::Dimension::setPixelWindowsSize(const vec2& _size) {
 	GALE_VERBOSE("Set a new Windows property size " << windowsSize << "px");
 }
 
-vec2 gale::Dimension::getWindowsSize(enum gale::Dimension::distance _type) {
+vec2 gale::Dimension::getWindowsSize(enum gale::distance _type) {
 	return windowsSize.get(_type);
 }
 
-float gale::Dimension::getWindowsDiag(enum gale::Dimension::distance _type) {
+float gale::Dimension::getWindowsDiag(enum gale::distance _type) {
 	vec2 size = gale::Dimension::getWindowsSize(_type);
 	return size.length();
 }
 
 gale::Dimension::Dimension() :
   m_data(0,0),
-  m_type(gale::Dimension::Pixel) {
+  m_type(gale::distance::pixel) {
 	// notinh to do ...
 }
 
-gale::Dimension::Dimension(const vec2& _size, enum gale::Dimension::distance _type) :
+gale::Dimension::Dimension(const vec2& _size, enum gale::distance _type) :
   m_data(0,0),
-  m_type(gale::Dimension::Pixel) {
+  m_type(gale::distance::pixel) {
 	set(_size, _type);
 }
 
 void gale::Dimension::set(std::string _config) {
 	m_data.setValue(0,0);
-	m_type = gale::Dimension::Pixel;
-	enum distance type = gale::Dimension::Pixel;
+	m_type = gale::distance::pixel;
+	enum distance type = gale::distance::pixel;
 	if (etk::end_with(_config, "%", false) == true) {
-		type = gale::Dimension::Pourcent;
+		type = gale::distance::pourcent;
 		_config.erase(_config.size()-1, 1);
 	} else if (etk::end_with(_config, "px",false) == true) {
-		type = gale::Dimension::Pixel;
+		type = gale::distance::pixel;
 		_config.erase(_config.size()-2, 2);
 	} else if (etk::end_with(_config, "ft",false) == true) {
-		type = gale::Dimension::foot;
+		type = gale::distance::foot;
 		_config.erase(_config.size()-2, 2);
 	} else if (etk::end_with(_config, "in",false) == true) {
-		type = gale::Dimension::Inch;
+		type = gale::distance::inch;
 		_config.erase(_config.size()-2, 2);
 	} else if (etk::end_with(_config, "km",false) == true) {
-		type = gale::Dimension::Kilometer;
+		type = gale::distance::kilometer;
 		_config.erase(_config.size()-2, 2);
 	} else if (etk::end_with(_config, "mm",false) == true) {
-		type = gale::Dimension::Millimeter;
+		type = gale::distance::millimeter;
 		_config.erase(_config.size()-2, 2);
 	} else if (etk::end_with(_config, "cm",false) == true) {
-		type = gale::Dimension::Centimeter;
+		type = gale::distance::centimeter;
 		_config.erase(_config.size()-2, 2);
 	} else if (etk::end_with(_config, "m",false) == true) {
-		type = gale::Dimension::Meter;
+		type = gale::distance::meter;
 		_config.erase(_config.size()-1, 1);
 	} else {
 		GALE_CRITICAL("Can not parse dimention : \"" << _config << "\"");
@@ -126,87 +126,87 @@ gale::Dimension::operator std::string() const {
 	str = get(getType());
 	
 	switch(getType()) {
-		case gale::Dimension::Pourcent:
+		case gale::distance::pourcent:
 			str += "%";
 			break;
-		case gale::Dimension::Pixel:
+		case gale::distance::pixel:
 			str += "px";
 			break;
-		case gale::Dimension::Meter:
+		case gale::distance::meter:
 			str += "m";
 			break;
-		case gale::Dimension::Centimeter:
+		case gale::distance::centimeter:
 			str += "cm";
 			break;
-		case gale::Dimension::Millimeter:
+		case gale::distance::millimeter:
 			str += "mm";
 			break;
-		case gale::Dimension::Kilometer:
+		case gale::distance::kilometer:
 			str += "km";
 			break;
-		case gale::Dimension::Inch:
+		case gale::distance::inch:
 			str += "in";
 			break;
-		case gale::Dimension::foot:
+		case gale::distance::foot:
 			str += "ft";
 			break;
 	}
 	return str;
 }
 
-vec2 gale::Dimension::get(enum gale::Dimension::distance _type) const {
+vec2 gale::Dimension::get(enum gale::distance _type) const {
 	switch(_type) {
-		case gale::Dimension::Pourcent:
+		case gale::distance::pourcent:
 			return getPourcent();
-		case gale::Dimension::Pixel:
+		case gale::distance::pixel:
 			return getPixel();
-		case gale::Dimension::Meter:
+		case gale::distance::meter:
 			return getMeter();
-		case gale::Dimension::Centimeter:
+		case gale::distance::centimeter:
 			return getCentimeter();
-		case gale::Dimension::Millimeter:
+		case gale::distance::millimeter:
 			return getMillimeter();
-		case gale::Dimension::Kilometer:
+		case gale::distance::kilometer:
 			return getKilometer();
-		case gale::Dimension::Inch:
+		case gale::distance::inch:
 			return getInch();
-		case gale::Dimension::foot:
+		case gale::distance::foot:
 			return getFoot();
 	}
 	return vec2(0,0);
 }
 
-void gale::Dimension::set(const vec2& _size, enum gale::Dimension::distance _type) {
+void gale::Dimension::set(const vec2& _size, enum gale::distance _type) {
 	// set min max on input to limit error : 
 	vec2 size(std::avg(0.0f,_size.x(),9999999.0f),
 	          std::avg(0.0f,_size.y(),9999999.0f));
 	switch(_type) {
-		case gale::Dimension::Pourcent: {
+		case gale::distance::pourcent: {
 			vec2 size2(std::avg(0.0f,_size.x(),100.0f),
 			           std::avg(0.0f,_size.y(),100.0f));
 			m_data = vec2(size2.x()*0.01f, size2.y()*0.01f);
 			//GALE_VERBOSE("Set % : " << size2 << "  == > " << m_data);
 			break;
 		}
-		case gale::Dimension::Pixel:
+		case gale::distance::pixel:
 			m_data = size;
 			break;
-		case gale::Dimension::Meter:
+		case gale::distance::meter:
 			m_data = vec2(size.x()*meterToMillimeter*ratio.x(), size.y()*meterToMillimeter*ratio.y());
 			break;
-		case gale::Dimension::Centimeter:
+		case gale::distance::centimeter:
 			m_data = vec2(size.x()*centimeterToMillimeter*ratio.x(), size.y()*centimeterToMillimeter*ratio.y());
 			break;
-		case gale::Dimension::Millimeter:
+		case gale::distance::millimeter:
 			m_data = vec2(size.x()*ratio.x(), size.y()*ratio.y());
 			break;
-		case gale::Dimension::Kilometer:
+		case gale::distance::kilometer:
 			m_data = vec2(size.x()*kilometerToMillimeter*ratio.x(), size.y()*kilometerToMillimeter*ratio.y());
 			break;
-		case gale::Dimension::Inch:
+		case gale::distance::inch:
 			m_data = vec2(size.x()*inchToMillimeter*ratio.x(), size.y()*inchToMillimeter*ratio.y());
 			break;
-		case gale::Dimension::foot:
+		case gale::distance::foot:
 			m_data = vec2(size.x()*footToMillimeter*ratio.x(), size.y()*footToMillimeter*ratio.y());
 			break;
 	}
@@ -214,7 +214,7 @@ void gale::Dimension::set(const vec2& _size, enum gale::Dimension::distance _typ
 }
 
 vec2 gale::Dimension::getPixel() const {
-	if (m_type!=gale::Dimension::Pourcent) {
+	if (m_type!=gale::distance::pourcent) {
 		return m_data;
 	} else {
 		vec2 windDim = windowsSize.getPixel();
@@ -225,7 +225,7 @@ vec2 gale::Dimension::getPixel() const {
 }
 
 vec2 gale::Dimension::getPourcent() const {
-	if (m_type!=gale::Dimension::Pourcent) {
+	if (m_type!=gale::distance::pourcent) {
 		vec2 windDim = windowsSize.getPixel();
 		//GALE_DEBUG(" windows dimention : " /*<< windowsSize*/ << "  == > " << windDim << "px"); // ==> infinite loop ...
 		//printf(" windows dimention : %f,%f", windDim.x(),windDim.y());
@@ -259,30 +259,30 @@ vec2 gale::Dimension::getFoot() const {
 	return gale::Dimension::getMillimeter()*millimeterToFoot;
 }
 
-std::ostream& gale::operator <<(std::ostream& _os, enum gale::Dimension::distance _obj) {
+std::ostream& gale::operator <<(std::ostream& _os, enum gale::distance _obj) {
 	switch(_obj) {
-		case gale::Dimension::Pourcent:
+		case gale::distance::pourcent:
 			_os << "%";
 			break;
-		case gale::Dimension::Pixel:
+		case gale::distance::pixel:
 			_os << "px";
 			break;
-		case gale::Dimension::Meter:
+		case gale::distance::meter:
 			_os << "m";
 			break;
-		case gale::Dimension::Centimeter:
+		case gale::distance::centimeter:
 			_os << "cm";
 			break;
-		case gale::Dimension::Millimeter:
+		case gale::distance::millimeter:
 			_os << "mm";
 			break;
-		case gale::Dimension::Kilometer:
+		case gale::distance::kilometer:
 			_os << "km";
 			break;
-		case gale::Dimension::Inch:
+		case gale::distance::inch:
 			_os << "in";
 			break;
-		case gale::Dimension::foot:
+		case gale::distance::foot:
 			_os << "ft";
 			break;
 	}

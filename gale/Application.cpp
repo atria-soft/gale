@@ -13,8 +13,8 @@ gale::Application::Application() :
   m_needRedraw(true),
   m_title("gale"),
   m_iconName(""),
-  m_cursor(gale::context::cursor_arrow),
-  m_orientation(gale::orientation_screenAuto) {
+  m_cursor(gale::context::cursor::arrow),
+  m_orientation(gale::orientation::screenAuto) {
 	GALE_VERBOSE("Constructor Gale Application");
 }
 

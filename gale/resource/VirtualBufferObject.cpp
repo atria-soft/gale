@@ -51,7 +51,7 @@ bool gale::resource::VirtualBufferObject::updateContext() {
 			// select the buffer to set data inside it ...
 			if (m_buffer[iii].size()>0) {
 				gale::openGL::bindBuffer(m_vbo[iii]);
-				gale::openGL::bufferData(sizeof(float)*m_buffer[iii].size(), &((m_buffer[iii])[0]), gale::openGL::usage_staticDraw);
+				gale::openGL::bufferData(sizeof(float)*m_buffer[iii].size(), &((m_buffer[iii])[0]), gale::openGL::usage::staticDraw);
 			}
 		}
 	}

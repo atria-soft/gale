@@ -66,14 +66,14 @@ class MacOSInterface : public gale::Context {
 			OS_Resize(vec2(_x,_y));
 		}
 		void MAC_SetMouseState(int32_t _id, bool _isDown, float _x, float _y) {
-			OS_SetInput(gale::key::type_mouse,
-			            (_isDown==true?gale::key::status_down:gale::key::status_up),
+			OS_SetInput(gale::key::type::mouse,
+			            (_isDown==true?gale::key::status::down:gale::key::status_up),
 			            _id,
 			            vec2(_x, _y));
 		}
 		void MAC_SetMouseMotion(int32_t _id, float _x, float _y) {
-			OS_SetInput(gale::key::type_mouse,
-			            gale::key::status_move,
+			OS_SetInput(gale::key::type::mouse,
+			            gale::key::status::move,
 			            _id,
 			            vec2(_x, _y));
 		}
@@ -91,28 +91,28 @@ class MacOSInterface : public gale::Context {
 				enum gale::key::keyboard move;
 				switch(_unichar) {
 					case 0:
-						move = gale::key::keyboard_up;
+						move = gale::key::keyboard::up;
 						break;
 					case 1:
-						move = gale::key::keyboard_down;
+						move = gale::key::keyboard::down;
 						break;
 					case 2:
-						move = gale::key::keyboard_left;
+						move = gale::key::keyboard::left;
 						break;
 					case 3:
-						move = gale::key::keyboard_right;
+						move = gale::key::keyboard::right;
 						break;
 				}
-				OS_setKeyboard(_special, move, (_isDown==false?gale::key::status_down:gale::key::status_up), _isAReapeateKey);
+				OS_setKeyboard(_special, move, (_isDown==false?gale::key::status::down:gale::key::status_up), _isAReapeateKey);
 			} else {
-				OS_setKeyboard(_special, gale::key::keyboard_char, (_isDown==false?gale::key::status_down:gale::key::status_up), _isAReapeateKey, _unichar);
+				OS_setKeyboard(_special, gale::key::keyboard::character, (_isDown==false?gale::key::status::down:gale::key::status_up), _isAReapeateKey, _unichar);
 			}
 		}
 		void MAC_SetKeyboardMove(gale::key::Special& _special,
 								enum gale::key::keyboard _move,
 								bool _isDown,
 								bool _isAReapeateKey) {
-			OS_setKeyboard(_special, _move, (_isDown==true?gale::key::status_down:gale::key::status_up), _isAReapeateKey);
+			OS_setKeyboard(_special, _move, (_isDown==true?gale::key::status::down:gale::key::status_up), _isAReapeateKey);
 		}
 		void openURL(const std::string& _url) {
 			std::string req = "open " + _url;

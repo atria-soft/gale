@@ -9,19 +9,19 @@
 
 
 static const char* typeDescriptionString[] = {
-	"type_unknow",
-	"type_mouse",
-	"type_finger",
-	"type_stylet"
+	"type::unknow",
+	"type::mouse",
+	"type::finger",
+	"type::stylet"
 };
 
-std::ostream& gale::operator <<(std::ostream& _os, const enum gale::key::type _obj) {
-	_os << typeDescriptionString[_obj];
+std::ostream& gale::key::operator <<(std::ostream& _os, const enum gale::key::type _obj) {
+	_os << typeDescriptionString[int32_t(_obj)];
 	return _os;
 }
 
 namespace etk {
 	template<> std::string to_string<enum gale::key::type>(const enum gale::key::type& _obj) {
-		return typeDescriptionString[_obj];
+		return typeDescriptionString[int32_t(_obj)];
 	}
 }

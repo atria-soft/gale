@@ -136,7 +136,7 @@
 	GALE_INFO("**** screen size:" << vec2(m_currentSize.width, m_currentSize.height));
 	float ratio = [self getScreenPPP];
 	GALE_INFO("**** pixel ratio: " << ratio);
-	gale::Dimension::setPixelRatio(vec2(1.0f/ratio, 1.0f/ratio), gale::Dimension::Inch);
+	gale::Dimension::setPixelRatio(vec2(1.0f/ratio, 1.0f/ratio), gale::distance::inch);
 	IOs::resize(m_currentSize.width, m_currentSize.height);
 	CGRect localBounds = [self bounds];
 	GALE_INFO("**** localBounds:" << vec2(localBounds.size.width, localBounds.size.height));
