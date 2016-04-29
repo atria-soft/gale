@@ -1,12 +1,8 @@
 /** @file
  * @author Edouard DUPIN
- * 
  * @copyright 2011, Edouard DUPIN, all right reserved
- * 
  * @license APACHE v2.0 (see license file)
  */
-
-
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -101,9 +97,6 @@ extern "C" {
 #endif
 
 #include <X11/cursorfont.h>
-
-#undef __class__
-#define __class__ "x11Interface"
 
 class X11Interface : public gale::Context {
 	private:

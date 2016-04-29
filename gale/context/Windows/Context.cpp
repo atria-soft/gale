@@ -1,12 +1,8 @@
 /** @file
  * @author Edouard DUPIN
- * 
  * @copyright 2011, Edouard DUPIN, all right reserved
- * 
  * @license APACHE v2.0 (see license file)
  */
-
-
 #include <gale/debug.h>
 #include <gale/gale.h>
 #include <etk/types.h>
@@ -26,18 +22,12 @@
 #include <windowsx.h>
 #include <etk/etk.h>
 
-
-
 int64_t gale::getTime() {
     struct timeval now;
     gettimeofday(&now, nullptr);
     //GALE_VERBOSE("current time : " << now.tv_sec << "s " << now.tv_usec << "us");
     return (int64_t)((int64_t)now.tv_sec*(int64_t)1000000 + (int64_t)now.tv_usec);
 }
-
-
-#undef __class__
-#define __class__ "ContextWindows"
 
 
 class WindowsContext : public gale::Context {

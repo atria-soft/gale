@@ -1,8 +1,6 @@
 /** @file
  * @author Edouard DUPIN
- *
  * @copyright 2011, Edouard DUPIN, all right reserved
- *
  * @license APACHE v2.0 (see license file)
  */
 
@@ -43,11 +41,6 @@ int64_t gale::getTime() {
 	//GALE_VERBOSE("current time : " << now.tv_sec << "s " << now.tv_usec << "us");
 	return (int64_t)((int64_t)now.tv_sec*(int64_t)1000000 + (int64_t)now.tv_nsec/(int64_t)1000);
 }
-
-#undef __class__
-#define __class__	"MacOSInterface"
-
-
 
 class MacOSInterface : public gale::Context {
 private:

@@ -1,8 +1,6 @@
 /** @file
  * @author Edouard DUPIN
- * 
  * @copyright 2011, Edouard DUPIN, all right reserved
- * 
  * @license APACHE v2.0 (see license file)
  */
 
@@ -13,9 +11,6 @@
 #include <gale/resource/Manager.h>
 
 #include <gale/renderer/openGL/openGL-include.h>
-
-#undef __class__
-#define __class__ "resource::Shader"
 
 gale::resource::Shader::Shader() :
   gale::Resource(),

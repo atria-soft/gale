@@ -1,8 +1,6 @@
 /** @file
  * @author Edouard DUPIN
- * 
  * @copyright 2011, Edouard DUPIN, all right reserved
- * 
  * @license APACHE v2.0 (see license file)
  */
 
@@ -11,10 +9,6 @@
 #include <gale/debug.h>
 #include <gale/context/clipBoard.h>
 #include <gale/context/Context.h>
-
-#undef __class__
-#define __class__ "ClipBoard"
-
 
 /*
 note: copy id data :

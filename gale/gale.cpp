@@ -1,8 +1,6 @@
 /** @file
  * @author Edouard DUPIN
- * 
  * @copyright 2011, Edouard DUPIN, all right reserved
- * 
  * @license APACHE v2.0 (see license file)
  */
 
@@ -13,8 +11,6 @@
 #include <etk/os/FSNode.h>
 #include <gale/Dimension.h>
 
-#undef __class__
-#define __class__ "gale"
 #ifndef GALE_VERSION
 #define GALE_VERSION "0.0.0"
 #endif
