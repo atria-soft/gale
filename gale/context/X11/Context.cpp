@@ -1104,9 +1104,9 @@ class X11Interface : public gale::Context {
 		/****************************************************************************************/
 		void setIcon(const std::string& _inputFile) {
 			#ifdef GALE_BUILD_EGAMI
-				egami::Image dataImage;
+				egami::Image dataImage = egami::load(_inputFile);
 				// load data
-				if (false == egami::load(dataImage, _inputFile)) {
+				if (dataImage.exist() == false) {
 					GALE_ERROR("Error when loading Icon");
 					return;
 				}
