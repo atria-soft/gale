@@ -86,7 +86,7 @@ void gale::resource::VirtualBufferObject::reload() {
 void gale::resource::VirtualBufferObject::flush() {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	// request to the manager to be call at the next update ...
-	getManager().update(std::dynamic_pointer_cast<gale::Resource>(shared_from_this()));
+	getManager().update(ememory::dynamicPointerCast<gale::Resource>(sharedFromThis()));
 }
 
 void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const vec3& _data) {
@@ -103,7 +103,7 @@ void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const vec3& 
 	m_buffer[_id].push_back(_data.z());
 }
 
-vec3 gale::resource::VirtualBufferObject::getOnBufferVec3(int32_t _id, int32_t _elementID) {
+vec3 gale::resource::VirtualBufferObject::getOnBufferVec3(int32_t _id, int32_t _elementID) const {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	if ((size_t)_elementID*3 > m_buffer[_id].size()) {
 		return vec3(0,0,0);
@@ -113,11 +113,11 @@ vec3 gale::resource::VirtualBufferObject::getOnBufferVec3(int32_t _id, int32_t _
 	            m_buffer[_id][3*_elementID+2]);
 }
 
-int32_t gale::resource::VirtualBufferObject::bufferSize(int32_t _id) {
+int32_t gale::resource::VirtualBufferObject::bufferSize(int32_t _id) const {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	return m_buffer[_id].size()/m_vboSizeDataOffset[_id];
 }
-int32_t gale::resource::VirtualBufferObject::getElementSize(int32_t _id) {
+int32_t gale::resource::VirtualBufferObject::getElementSize(int32_t _id) const {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	return m_vboSizeDataOffset[_id];
 }
@@ -135,7 +135,7 @@ void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const vec2& 
 	m_buffer[_id].push_back(_data.y());
 }
 
-vec2 gale::resource::VirtualBufferObject::getOnBufferVec2(int32_t _id, int32_t _elementID) {
+vec2 gale::resource::VirtualBufferObject::getOnBufferVec2(int32_t _id, int32_t _elementID) const {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	if ((size_t)_elementID*2 > m_buffer[_id].size()) {
 		return vec2(0,0);

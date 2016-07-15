@@ -49,7 +49,7 @@ namespace gale {
 			private :
 				bool m_exist; //!< the file existed
 				int64_t m_program; //!< openGL id of the current program
-				std::vector<std::shared_ptr<gale::resource::Shader>> m_shaderList; //!< List of all the shader loaded
+				std::vector<ememory::SharedPtr<gale::resource::Shader>> m_shaderList; //!< List of all the shader loaded
 				std::vector<gale::resource::progAttributeElement> m_elementList; //!< List of all the attribute requested by the user
 				bool m_hasTexture; //!< A texture has been set to the current shader
 				bool m_hasTexture1; //!< A texture has been set to the current shader
@@ -92,7 +92,7 @@ namespace gale {
 				                   const void* _pointer,
 				                   int32_t _jumpBetweenSample=0);
 				void sendAttributePointer(int32_t _idElem,
-				                          const std::shared_ptr<gale::resource::VirtualBufferObject>& _vbo,
+				                          const ememory::SharedPtr<gale::resource::VirtualBufferObject>& _vbo,
 				                          int32_t _index,
 				                          int32_t _jumpBetweenSample=0,
 				                          int32_t _offset=0);

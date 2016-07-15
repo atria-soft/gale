@@ -128,13 +128,13 @@ void gale::Context::unLockContext() {
 }
 
 #if 0
-void gale::Context::inputEventTransfertWidget(std::shared_ptr<gale::Widget> _source,
-                                              std::shared_ptr<gale::Widget> _destination) {
+void gale::Context::inputEventTransfertWidget(ememory::SharedPtr<gale::Widget> _source,
+                                              ememory::SharedPtr<gale::Widget> _destination) {
 	m_input.transfertEvent(_source, _destination);
 }
 
 
-void gale::Context::inputEventGrabPointer(std::shared_ptr<gale::Widget> _widget) {
+void gale::Context::inputEventGrabPointer(ememory::SharedPtr<gale::Widget> _widget) {
 	m_input.grabPointer(_widget);
 }
 
@@ -275,7 +275,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 		m_simulationFile.filePuts("\n");
 	}
 	m_msgSystem.post([](gale::Context& _context){
-		std::shared_ptr<gale::Application> appl = _context.getApplication();
+		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
 		if (appl == nullptr) {
 			return;
 		}
@@ -389,7 +389,7 @@ void gale::Context::OS_SetInput(enum gale::key::type _type,
 		m_simulationFile.filePuts("\n");
 	}
 	m_msgSystem.post([_type, _status, _pointerID, _pos](gale::Context& _context){
-		std::shared_ptr<gale::Application> appl = _context.getApplication();
+		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
 		if (appl == nullptr) {
 			return;
 		}
@@ -425,7 +425,7 @@ void gale::Context::OS_setKeyboard(const gale::key::Special& _special,
 		m_simulationFile.filePuts("\n");
 	}
 	m_msgSystem.post([_special, _type, _state, _char](gale::Context& _context){
-		std::shared_ptr<gale::Application> appl = _context.getApplication();
+		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
 		if (appl == nullptr) {
 			return;
 		}
@@ -443,7 +443,7 @@ void gale::Context::OS_Hide() {
 	}
 	m_msgSystem.post([](gale::Context& _context){
 		/*
-		std::shared_ptr<gale::Application> appl = _context.getApplication();
+		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
 		if (appl == nullptr) {
 			return;
 		}
@@ -463,7 +463,7 @@ void gale::Context::OS_Show() {
 	}
 	m_msgSystem.post([](gale::Context& _context){
 		/*
-		std::shared_ptr<gale::Application> appl = _context.getApplication();
+		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
 		if (appl == nullptr) {
 			return;
 		}
@@ -485,7 +485,7 @@ void gale::Context::OS_ClipBoardArrive(enum gale::context::clipBoard::clipboardL
 		m_simulationFile.filePuts("\n");
 	}
 	m_msgSystem.post([_clipboardID](gale::Context& _context){
-		std::shared_ptr<gale::Application> appl = _context.getApplication();
+		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
 		if (appl != nullptr) {
 			appl->onClipboardEvent(_clipboardID);
 		}

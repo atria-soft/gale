@@ -15,8 +15,8 @@ namespace gale {
 	namespace resource {
 		class Manager{
 			private:
-				std::list<std::weak_ptr<gale::Resource>> m_resourceList;
-				std::vector<std::shared_ptr<gale::Resource>> m_resourceListToUpdate;
+				std::list<ememory::WeakPtr<gale::Resource>> m_resourceList;
+				std::vector<ememory::SharedPtr<gale::Resource>> m_resourceListToUpdate;
 				bool m_contextHasBeenRemoved;
 				std::recursive_mutex m_mutex;
 			public:
@@ -46,7 +46,7 @@ namespace gale {
 				 * @brief Call by the system to send all the needed data on the graphic card chen they change ...
 				 * @param[in] _object The resources that might be updated
 				 */
-				void update(const std::shared_ptr<gale::Resource>& _object);
+				void update(const ememory::SharedPtr<gale::Resource>& _object);
 				/**
 				 * @brief Call by the system chen the openGL Context has been unexpectially removed  == > This reload all the texture, VBO and other ....
 				 */
@@ -57,8 +57,8 @@ namespace gale {
 				void contextHasBeenDestroyed();
 			public:
 				// internal API to extent eResources in extern Soft
-				std::shared_ptr<gale::Resource> localKeep(const std::string& _filename);
-				void localAdd(const std::shared_ptr<gale::Resource>& _object);
+				ememory::SharedPtr<gale::Resource> localKeep(const std::string& _filename);
+				void localAdd(const ememory::SharedPtr<gale::Resource>& _object);
 				virtual void cleanInternalRemoved();
 		};
 	}

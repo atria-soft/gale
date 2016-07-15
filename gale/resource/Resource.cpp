@@ -67,20 +67,20 @@ bool gale::Resource::isTypeCompatible(const std::string& _type) {
 
 
 bool gale::Resource::updateContext() {
-	GALE_DEBUG("Not set for : [" << getId() << "]" << getName() << " loaded " << shared_from_this().use_count() << " time(s)");
+	GALE_DEBUG("Not set for : [" << getId() << "]" << getName() << " loaded " << sharedFromThis().useCount() << " time(s)");
 	return true;
 }
 
 void gale::Resource::removeContext() {
-	GALE_DEBUG("Not set for : [" << getId() << "]" << getName() << " loaded " << shared_from_this().use_count() << " time(s)");
+	GALE_DEBUG("Not set for : [" << getId() << "]" << getName() << " loaded " << sharedFromThis().useCount() << " time(s)");
 }
 
 void gale::Resource::removeContextToLate() {
-	GALE_DEBUG("Not set for : [" << getId() << "]" << getName() << " loaded " << shared_from_this().use_count() << " time(s)");
+	GALE_DEBUG("Not set for : [" << getId() << "]" << getName() << " loaded " << sharedFromThis().useCount() << " time(s)");
 }
 
 void gale::Resource::reload() {
-	GALE_DEBUG("Not set for : [" << getId() << "]" << getName() << " loaded " << shared_from_this().use_count() << " time(s)");
+	GALE_DEBUG("Not set for : [" << getId() << "]" << getName() << " loaded " << sharedFromThis().useCount() << " time(s)");
 }
 
 gale::resource::Manager& gale::Resource::getManager() {

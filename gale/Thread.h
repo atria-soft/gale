@@ -32,7 +32,7 @@ namespace gale {
 			#if defined(__TARGET_OS__Android)
 				pthread_t m_thread;
 			#else
-				std::shared_ptr<std::thread> m_thread;
+				ememory::SharedPtr<std::thread> m_thread;
 			#endif
 			gale::Context* m_context;
 		public:

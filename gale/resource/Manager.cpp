@@ -42,11 +42,11 @@ void gale::resource::Manager::unInit() {
 	// remove all resources ...
 	auto it(m_resourceList.begin());
 	while(it != m_resourceList.end()) {
-		std::shared_ptr<gale::Resource> tmpRessource = (*it).lock();
+		ememory::SharedPtr<gale::Resource> tmpRessource = (*it).lock();
 		if (tmpRessource != nullptr) {
 			GALE_WARNING("Find a resource that is not removed : [" << tmpRessource->getId() << "]"
 			             << "=\"" << tmpRessource->getName() << "\" "
-			             << tmpRessource.use_count() << " elements");
+			             << tmpRessource.useCount() << " elements");
 		}
 		m_resourceList.erase(it);
 		it = m_resourceList.begin();
@@ -59,12 +59,12 @@ void gale::resource::Manager::display() {
 	// remove all resources ...
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	for (auto &it : m_resourceList) {
-		std::shared_ptr<gale::Resource> tmpRessource = it.lock();
+		ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
 		if (tmpRessource != nullptr) {
 			GALE_INFO("    [" << tmpRessource->getId() << "]"
 			          << tmpRessource->getType()
 			          << "=\"" << tmpRessource->getName() << "\" "
-			          << tmpRessource.use_count() << " elements");
+			          << tmpRessource.useCount() << " elements");
 		}
 	}
 	GALE_INFO("Resources ---");
@@ -78,7 +78,7 @@ void gale::resource::Manager::reLoadResources() {
 		for (size_t jjj=0; jjj<MAX_RESOURCE_LEVEL; jjj++) {
 			GALE_INFO("    Reload level : " << jjj << "/" << (MAX_RESOURCE_LEVEL-1));
 			for (auto &it : m_resourceList) {
-				std::shared_ptr<gale::Resource> tmpRessource = it.lock();
+				ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
 				if(tmpRessource != nullptr) {
 					if (jjj == tmpRessource->getResourceLevel()) {
 						tmpRessource->reload();
@@ -93,7 +93,7 @@ void gale::resource::Manager::reLoadResources() {
 	GALE_INFO("-------------  Resources  -------------");
 }
 
-void gale::resource::Manager::update(const std::shared_ptr<gale::Resource>& _object) {
+void gale::resource::Manager::update(const ememory::SharedPtr<gale::Resource>& _object) {
 	// chek if not added before
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	for (auto &it : m_resourceListToUpdate) {
@@ -113,7 +113,7 @@ void gale::resource::Manager::updateContext() {
 	if (m_contextHasBeenRemoved == true) {
 		// need to update all ...
 		m_contextHasBeenRemoved = false;
-		std::list<std::weak_ptr<gale::Resource>> resourceList;
+		std::list<ememory::WeakPtr<gale::Resource>> resourceList;
 		{
 			std::unique_lock<std::recursive_mutex> lock(m_mutex);
 			// Clean the update list
@@ -124,7 +124,7 @@ void gale::resource::Manager::updateContext() {
 			for (size_t jjj=0; jjj<MAX_RESOURCE_LEVEL; jjj++) {
 				GALE_INFO("    updateContext level (D) : " << jjj << "/" << (MAX_RESOURCE_LEVEL-1));
 				for (auto &it : resourceList) {
-					std::shared_ptr<gale::Resource> tmpRessource = it.lock();
+					ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
 					if(    tmpRessource != nullptr
 					    && jjj == tmpRessource->getResourceLevel()) {
 						//GALE_DEBUG("Update context named : " << l_resourceList[iii]->getName());
@@ -138,7 +138,7 @@ void gale::resource::Manager::updateContext() {
 			}
 		}
 	} else {
-		std::vector<std::shared_ptr<gale::Resource>> resourceListToUpdate;
+		std::vector<ememory::SharedPtr<gale::Resource>> resourceListToUpdate;
 		{
 			std::unique_lock<std::recursive_mutex> lock(m_mutex);
 			resourceListToUpdate = m_resourceListToUpdate;
@@ -167,7 +167,7 @@ void gale::resource::Manager::updateContext() {
 void gale::resource::Manager::contextHasBeenDestroyed() {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	for (auto &it : m_resourceList) {
-		std::shared_ptr<gale::Resource> tmpRessource = it.lock();
+		ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
 		if (tmpRessource != nullptr) {
 			tmpRessource->removeContextToLate();
 		}
@@ -177,11 +177,11 @@ void gale::resource::Manager::contextHasBeenDestroyed() {
 }
 
 // internal generic keeper ...
-std::shared_ptr<gale::Resource> gale::resource::Manager::localKeep(const std::string& _filename) {
+ememory::SharedPtr<gale::Resource> gale::resource::Manager::localKeep(const std::string& _filename) {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	GALE_VERBOSE("KEEP (DEFAULT) : file : '" << _filename << "' in " << m_resourceList.size() << " resources");
 	for (auto &it : m_resourceList) {
-		std::shared_ptr<gale::Resource> tmpRessource = it.lock();
+		ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
 		if (tmpRessource != nullptr) {
 			if (tmpRessource->getName() == _filename) {
 				return tmpRessource;
@@ -192,11 +192,11 @@ std::shared_ptr<gale::Resource> gale::resource::Manager::localKeep(const std::st
 }
 
 // internal generic keeper ...
-void gale::resource::Manager::localAdd(const std::shared_ptr<gale::Resource>& _object) {
+void gale::resource::Manager::localAdd(const ememory::SharedPtr<gale::Resource>& _object) {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	//Add ... find empty slot
 	for (auto &it : m_resourceList) {
-		std::shared_ptr<gale::Resource> tmpRessource = it.lock();
+		ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
 		if (tmpRessource == nullptr) {
 			it = _object;
 			return;

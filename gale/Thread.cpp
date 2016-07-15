@@ -42,7 +42,7 @@ void gale::Thread::start() {
 		#if defined(__TARGET_OS__Android)
 			pthread_create(&m_thread, nullptr, &gale::Thread::threadCallback, this);
 		#else
-			m_thread = std::make_shared<std::thread>(&gale::Thread::threadCall, this);
+			m_thread = ememory::makeShared<std::thread>(&gale::Thread::threadCall, this);
 			if (m_thread == nullptr) {
 				GALE_ERROR("Can not create thread ...");
 				return;

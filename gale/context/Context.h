@@ -16,7 +16,7 @@
 #include <gale/context/commandLine.h>
 // TODO : #include <gale/context/InputManager.h>
 #include <gale/context/Fps.h>
-#include <memory>
+#include <ememory/memory.h>
 #include <gale/orientation.h>
 #include <gale/context/clipBoard.h>
 #include <ethread/tools.h>
@@ -26,9 +26,9 @@
 namespace gale {
 	class Context/* : private gale::object::RemoveEvent */{
 		private:
-			std::shared_ptr<gale::Application> m_application; //!< Application handle
+			ememory::SharedPtr<gale::Application> m_application; //!< Application handle
 		public:
-			std::shared_ptr<gale::Application> getApplication() {
+			ememory::SharedPtr<gale::Application> getApplication() {
 				return m_application;
 			}
 		private:
@@ -184,12 +184,12 @@ namespace gale {
 			 * @param source the widget where the event came from
 			 * @param destination the widget where the event mitgh be generated now
 			 */
-			void inputEventTransfertWidget(std::shared_ptr<gale::Widget> _source, std::shared_ptr<gale::Widget> _destination);
+			void inputEventTransfertWidget(ememory::SharedPtr<gale::Widget> _source, ememory::SharedPtr<gale::Widget> _destination);
 			/**
 			 * @brief This fonction lock the pointer properties to move in relative instead of absolute
 			 * @param[in] widget The widget that lock the pointer events
 			 */
-			void inputEventGrabPointer(std::shared_ptr<gale::Widget> _widget);
+			void inputEventGrabPointer(ememory::SharedPtr<gale::Widget> _widget);
 			/**
 			 * @brief This fonction un-lock the pointer properties to move in relative instead of absolute
 			 */

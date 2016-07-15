@@ -32,13 +32,13 @@ void gale::resource::Program::init(const std::string& _filename) {
 	// load data from file "all the time ..."
 	
 	etk::FSNode file(m_name);
-	if (false == file.exist()) {
+	if (file.exist() == false) {
 		GALE_INFO("File does not Exist : \"" << file << "\"  == > automatic load of framment and shader with same names... ");
 		std::string tmpFilename = m_name;
 		// remove extention ...
 		tmpFilename.erase(tmpFilename.size()-4, 4);
-		std::shared_ptr<gale::resource::Shader> tmpShader = gale::resource::Shader::create(tmpFilename+"vert");
-		if (nullptr == tmpShader) {
+		ememory::SharedPtr<gale::resource::Shader> tmpShader = gale::resource::Shader::create(tmpFilename+"vert");
+		if (tmpShader == nullptr) {
 			GALE_ERROR("Error while getting a specific shader filename : " << tmpFilename);
 			return;
 		} else {
@@ -46,7 +46,7 @@ void gale::resource::Program::init(const std::string& _filename) {
 			m_shaderList.push_back(tmpShader);
 		}
 		tmpShader = gale::resource::Shader::create(tmpFilename+"frag");
-		if (nullptr == tmpShader) {
+		if (tmpShader == nullptr) {
 			GALE_ERROR("Error while getting a specific shader filename : " << tmpFilename);
 			return;
 		} else {
@@ -59,7 +59,7 @@ void gale::resource::Program::init(const std::string& _filename) {
 			GALE_ERROR("File does not have extention \".prog\" for program but : \"" << fileExtention << "\"");
 			return;
 		}
-		if (false == file.fileOpenRead()) {
+		if (file.fileOpenRead() == false) {
 			GALE_ERROR("Can not open the file : \"" << file << "\"");
 			return;
 		}
@@ -81,8 +81,8 @@ void gale::resource::Program::init(const std::string& _filename) {
 			}
 			// get it with relative position :
 			std::string tmpFilename = file.getRelativeFolder() + tmpData;
-			std::shared_ptr<gale::resource::Shader> tmpShader = gale::resource::Shader::create(tmpFilename);
-			if (nullptr == tmpShader) {
+			ememory::SharedPtr<gale::resource::Shader> tmpShader = gale::resource::Shader::create(tmpFilename);
+			if (tmpShader == nullptr) {
 				GALE_ERROR("Error while getting a specific shader filename : " << tmpFilename);
 			} else {
 				GALE_DEBUG("Add shader on program : "<< tmpFilename);
@@ -96,7 +96,7 @@ void gale::resource::Program::init(const std::string& _filename) {
 	if (gale::openGL::hasContext() == true) {
 		updateContext();
 	} else {
-		getManager().update(std::dynamic_pointer_cast<gale::Resource>(shared_from_this()));
+		getManager().update(ememory::dynamicPointerCast<gale::Resource>(sharedFromThis()));
 	}
 }
 
@@ -182,7 +182,7 @@ int32_t gale::resource::Program::getAttribute(std::string _elementName) {
 	tmp.m_name = _elementName;
 	tmp.m_isAttribute = true;
 	if (gale::openGL::hasContext() == false) {
-		getManager().update(std::dynamic_pointer_cast<gale::Resource>(shared_from_this()));
+		getManager().update(ememory::dynamicPointerCast<gale::Resource>(sharedFromThis()));
 		tmp.m_elementId = -1;
 		tmp.m_isLinked = false;
 	} else if (m_exist == true) {
@@ -215,7 +215,7 @@ int32_t gale::resource::Program::getUniform(std::string _elementName) {
 	tmp.m_name = _elementName;
 	tmp.m_isAttribute = false;
 	if (gale::openGL::hasContext() == false) {
-		getManager().update(std::dynamic_pointer_cast<gale::Resource>(shared_from_this()));
+		getManager().update(ememory::dynamicPointerCast<gale::Resource>(sharedFromThis()));
 		tmp.m_elementId = -1;
 		tmp.m_isLinked = false;
 	} else if (m_exist == true) {
@@ -253,14 +253,14 @@ bool gale::resource::Program::updateContext() {
 		}
 		// first attach vertex shader, and after fragment shader
 		for (size_t iii=0; iii<m_shaderList.size(); iii++) {
-			if (nullptr != m_shaderList[iii]) {
+			if (m_shaderList[iii] != nullptr) {
 				if (m_shaderList[iii]->getShaderType() == gale::openGL::shader::type::vertex) {
 					gale::openGL::program::attach(m_program, m_shaderList[iii]->getGL_ID());
 				}
 			}
 		}
 		for (size_t iii=0; iii<m_shaderList.size(); iii++) {
-			if (nullptr != m_shaderList[iii]) {
+			if (m_shaderList[iii] != nullptr) {
 				if (m_shaderList[iii]->getShaderType() == gale::openGL::shader::type::fragment) {
 					gale::openGL::program::attach(m_program, m_shaderList[iii]->getGL_ID());
 				}
@@ -323,28 +323,28 @@ void gale::resource::Program::removeContextToLate() {
 void gale::resource::Program::reload() {
 /* TODO : ...
 	etk::file file(m_name, etk::FILE_TYPE_DATA);
-	if (false == file.Exist()) {
+	if (file.Exist() == false) {
 		GALE_ERROR("File does not Exist : \"" << file << "\"");
 		return;
 	}
 	
 	int32_t fileSize = file.size();
-	if (0 == fileSize) {
+	if (fileSize == 0) {
 		GALE_ERROR("This file is empty : " << file);
 		return;
 	}
-	if (false == file.fOpenRead()) {
+	if (file.fOpenRead() == false) {
 		GALE_ERROR("Can not open the file : " << file);
 		return;
 	}
 	// remove previous data ...
-	if (nullptr != m_fileData) {
+	if (m_fileData != nullptr) {
 		delete[] m_fileData;
 		m_fileData = 0;
 	}
 	// allocate data
 	m_fileData = new char[fileSize+5];
-	if (nullptr == m_fileData) {
+	if (m_fileData == nullptr) {
 		GALE_ERROR("Error Memory allocation size=" << fileSize);
 		return;
 	}
@@ -390,7 +390,7 @@ void gale::resource::Program::sendAttribute(int32_t _idElem,
 }
 
 void gale::resource::Program::sendAttributePointer(int32_t _idElem,
-                                                   const std::shared_ptr<gale::resource::VirtualBufferObject>& _vbo,
+                                                   const ememory::SharedPtr<gale::resource::VirtualBufferObject>& _vbo,
                                                    int32_t _index,
                                                    int32_t _jumpBetweenSample,
                                                    int32_t _offset) {
@@ -589,18 +589,19 @@ void gale::resource::Program::uniform1fv(int32_t _idElem, int32_t _nbElement, co
 	if (m_exist == false) {
 		return;
 	}
-	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
+	if (    _idElem < 0
+	     || (size_t)_idElem > m_elementList.size()) {
 		GALE_ERROR("idElem = " << _idElem << " not in [0.." << (m_elementList.size()-1) << "]");
 		return;
 	}
-	if (false == m_elementList[_idElem].m_isLinked) {
+	if (m_elementList[_idElem].m_isLinked == false) {
 		return;
 	}
-	if (0 == _nbElement) {
+	if (_nbElement == 0) {
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (nullptr == _value) {
+	if (_value == nullptr) {
 		GALE_ERROR("nullptr Input pointer to send at open GL ...");
 		return;
 	}
@@ -612,18 +613,19 @@ void gale::resource::Program::uniform2fv(int32_t _idElem, int32_t _nbElement, co
 	if (m_exist == false) {
 		return;
 	}
-	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
+	if (    _idElem < 0
+	     || (size_t)_idElem > m_elementList.size()) {
 		GALE_ERROR("idElem = " << _idElem << " not in [0.." << (m_elementList.size()-1) << "]");
 		return;
 	}
-	if (false == m_elementList[_idElem].m_isLinked) {
+	if (m_elementList[_idElem].m_isLinked == false) {
 		return;
 	}
-	if (0 == _nbElement) {
+	if (_nbElement == 0) {
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (nullptr == _value) {
+	if (_value == nullptr) {
 		GALE_ERROR("nullptr Input pointer to send at open GL ...");
 		return;
 	}
@@ -635,18 +637,19 @@ void gale::resource::Program::uniform3fv(int32_t _idElem, int32_t _nbElement, co
 	if (m_exist == false) {
 		return;
 	}
-	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
+	if (    _idElem < 0
+	     || (size_t)_idElem > m_elementList.size()) {
 		GALE_ERROR("idElem = " << _idElem << " not in [0.." << (m_elementList.size()-1) << "]");
 		return;
 	}
-	if (false == m_elementList[_idElem].m_isLinked) {
+	if (m_elementList[_idElem].m_isLinked == false) {
 		return;
 	}
-	if (0 == _nbElement) {
+	if (_nbElement == 0) {
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (nullptr == _value) {
+	if (_value == nullptr) {
 		GALE_ERROR("nullptr Input pointer to send at open GL ...");
 		return;
 	}
@@ -659,18 +662,19 @@ void gale::resource::Program::uniform4fv(int32_t _idElem, int32_t _nbElement, co
 	if (m_exist == false) {
 		return;
 	}
-	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
+	if (    _idElem < 0
+	     || (size_t)_idElem > m_elementList.size()) {
 		GALE_ERROR("idElem = " << _idElem << " not in [0.." << (m_elementList.size()-1) << "]");
 		return;
 	}
-	if (false == m_elementList[_idElem].m_isLinked) {
+	if (m_elementList[_idElem].m_isLinked == false) {
 		return;
 	}
-	if (0 == _nbElement) {
+	if (_nbElement == 0) {
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (nullptr == _value) {
+	if (_value == nullptr) {
 		GALE_ERROR("nullptr Input pointer to send at open GL ...");
 		return;
 	}
@@ -686,18 +690,19 @@ void gale::resource::Program::uniform1iv(int32_t _idElem, int32_t _nbElement, co
 	if (m_exist == false) {
 		return;
 	}
-	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
+	if (    _idElem < 0
+	     || (size_t)_idElem > m_elementList.size()) {
 		GALE_ERROR("idElem = " << _idElem << " not in [0.." << (m_elementList.size()-1) << "]");
 		return;
 	}
-	if (false == m_elementList[_idElem].m_isLinked) {
+	if (m_elementList[_idElem].m_isLinked == false) {
 		return;
 	}
-	if (0 == _nbElement) {
+	if (_nbElement == 0) {
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (nullptr == _value) {
+	if (_value == nullptr) {
 		GALE_ERROR("nullptr Input pointer to send at open GL ...");
 		return;
 	}
@@ -709,18 +714,19 @@ void gale::resource::Program::uniform2iv(int32_t _idElem, int32_t _nbElement, co
 	if (m_exist == false) {
 		return;
 	}
-	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
+	if (    _idElem < 0
+	     || (size_t)_idElem > m_elementList.size()) {
 		GALE_ERROR("idElem = " << _idElem << " not in [0.." << (m_elementList.size()-1) << "]");
 		return;
 	}
-	if (false == m_elementList[_idElem].m_isLinked) {
+	if (m_elementList[_idElem].m_isLinked == false) {
 		return;
 	}
-	if (0 == _nbElement) {
+	if (_nbElement == 0) {
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (nullptr == _value) {
+	if (_value == nullptr) {
 		GALE_ERROR("nullptr Input pointer to send at open GL ...");
 		return;
 	}
@@ -732,18 +738,19 @@ void gale::resource::Program::uniform3iv(int32_t _idElem, int32_t _nbElement, co
 	if (m_exist == false) {
 		return;
 	}
-	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
+	if (    _idElem < 0
+	     || (size_t)_idElem > m_elementList.size()) {
 		GALE_ERROR("idElem = " << _idElem << " not in [0.." << (m_elementList.size()-1) << "]");
 		return;
 	}
-	if (false == m_elementList[_idElem].m_isLinked) {
+	if (m_elementList[_idElem].m_isLinked == false) {
 		return;
 	}
-	if (0 == _nbElement) {
+	if (_nbElement == 0) {
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (nullptr == _value) {
+	if (_value == nullptr) {
 		GALE_ERROR("nullptr Input pointer to send at open GL ...");
 		return;
 	}
@@ -755,18 +762,19 @@ void gale::resource::Program::uniform4iv(int32_t _idElem, int32_t _nbElement, co
 	if (m_exist == false) {
 		return;
 	}
-	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
+	if (    _idElem < 0
+	     || (size_t)_idElem > m_elementList.size()) {
 		GALE_ERROR("idElem = " << _idElem << " not in [0.." << (m_elementList.size()-1) << "]");
 		return;
 	}
-	if (false == m_elementList[_idElem].m_isLinked) {
+	if (m_elementList[_idElem].m_isLinked == false) {
 		return;
 	}
-	if (0 == _nbElement) {
+	if (_nbElement == 0) {
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (nullptr == _value) {
+	if (_value == nullptr) {
 		GALE_ERROR("nullptr Input pointer to send at open GL ...");
 		return;
 	}
@@ -797,10 +805,11 @@ void gale::resource::Program::setTexture0(int32_t _idElem, int64_t _textureOpenG
 	if (m_exist == false) {
 		return;
 	}
-	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
+	if (    _idElem < 0
+	     || (size_t)_idElem > m_elementList.size()) {
 		return;
 	}
-	if (false == m_elementList[_idElem].m_isLinked) {
+	if (m_elementList[_idElem].m_isLinked == false) {
 		return;
 	}
 	#if 0
@@ -823,10 +832,11 @@ void gale::resource::Program::setTexture1(int32_t _idElem, int64_t _textureOpenG
 	if (m_exist == false) {
 		return;
 	}
-	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
+	if (    _idElem < 0
+	     || (size_t)_idElem > m_elementList.size()) {
 		return;
 	}
-	if (false == m_elementList[_idElem].m_isLinked) {
+	if (m_elementList[_idElem].m_isLinked == false) {
 		return;
 	}
 	#if 0
@@ -852,7 +862,7 @@ void gale::resource::Program::unUse() {
 		return;
 	}
 	#if 0
-	if (true == m_hasTexture) {
+	if (m_hasTexture == true) {
 		gale::openGL::disable(GL_TEXTURE_2D);
 		//checkGlError("glDisable", __LINE__);
 		m_hasTexture = false;

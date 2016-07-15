@@ -42,7 +42,7 @@ namespace gale {
 				 * @brief get the real openGL ID.
 				 * @return the Ogl id reference of this VBO.
 				 */
-				int64_t getGL_ID(int32_t _id) {
+				int64_t getGL_ID(int32_t _id) const {
 					return m_vbo[_id];
 				};
 				/**
@@ -59,27 +59,27 @@ namespace gale {
 				 * @param[in] _id VBO Element
 				 * @return Number of Float in the buffer.
 				 */
-				int32_t bufferSize(int32_t _id);
+				int32_t bufferSize(int32_t _id) const;
 				/**
 				 * @brief Get the offset between element.
 				 * @param[in] _id VBO Element
 				 * @return Number of Float to jump between target.
 				 */
-				int32_t getElementSize(int32_t _id);
+				int32_t getElementSize(int32_t _id) const;
 				/**
 				 * @brief push data on a buffer with a custum type :
 				 * @param[in] _id Id of the buffer requested.
 				 * @param[in] _data Direct data that might be set.
 				 */
 				void pushOnBuffer(int32_t _id, const vec3& _data);
-				vec3 getOnBufferVec3(int32_t _id, int32_t _elementID);
+				vec3 getOnBufferVec3(int32_t _id, int32_t _elementID) const;
 				/**
 				 * @brief push data on a buffer with a custum type :
 				 * @param[in] _id Id of the buffer requested.
 				 * @param[in] _data Direct data that might be set.
 				 */
 				void pushOnBuffer(int32_t _id, const vec2& _data);
-				vec2 getOnBufferVec2(int32_t _id, int32_t _elementID);
+				vec2 getOnBufferVec2(int32_t _id, int32_t _elementID) const;
 				/**
 				 * @brief push data on a buffer with a custum type :
 				 * @param[in] _id Id of the buffer requested.

@@ -106,10 +106,10 @@ void gale::resource::Texture::removeContextToLate() {
 void gale::resource::Texture::flush() {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	// request to the manager to be call at the next update ...
-	getManager().update(std::dynamic_pointer_cast<gale::Resource>(shared_from_this()));
+	getManager().update(ememory::dynamicPointerCast<gale::Resource>(sharedFromThis()));
 }
 
-void gale::resource::Texture::setTexture(const std::shared_ptr<std::vector<char>>& _data,
+void gale::resource::Texture::setTexture(const ememory::SharedPtr<std::vector<char>>& _data,
                                          const ivec2& _size,
                                          enum gale::resource::Texture::dataType _dataType,
                                          enum gale::resource::Texture::color _dataColorSpace) {

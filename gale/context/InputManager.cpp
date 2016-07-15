@@ -34,7 +34,7 @@ void gale::context::InputManager::setDpi(int32_t newDPI) {
 }
 
 bool gale::context::InputManager::localEventInput(enum gale::key::type _type,
-                                                  std::shared_ptr<gale::Application> _destApplication,
+                                                  ememory::SharedPtr<gale::Application> _destApplication,
                                                   int32_t _IdInput,
                                                   enum gale::key::status _status,
                                                   vec2 _pos) {
@@ -104,13 +104,13 @@ gale::context::InputManager::~InputManager() {
 }
 
 int32_t gale::context::InputManager::localGetDestinationId(enum gale::key::type _type,
-                                                           std::shared_ptr<gale::Application> _destApplication,
+                                                           ememory::SharedPtr<gale::Application> _destApplication,
                                                            int32_t _realInputId) {
 	if (_type == gale::key::typeFinger) {
 		int32_t lastMinimum = 0;
 		for(int32_t iii=0; iii<MAX_MANAGE_INPUT; iii++) {
 			if (true == m_eventInputSaved[iii].isUsed) {
-				std::shared_ptr<gale::Application> tmpApplication = m_eventInputSaved[iii].curentApplicationEvent.lock();
+				ememory::SharedPtr<gale::Application> tmpApplication = m_eventInputSaved[iii].curentApplicationEvent.lock();
 				if (tmpApplication == _destApplication) {
 					if (iii != _realInputId) {
 						lastMinimum = std::max(lastMinimum, m_eventInputSaved[iii].destinationInputId);
@@ -146,12 +146,12 @@ void gale::context::InputManager::motion(enum gale::key::type _type,
 		// not manage input
 		return;
 	}
-	std::shared_ptr<gale::Application::Windows> tmpWindows = m_context.getWindows();
+	ememory::SharedPtr<gale::Application::Windows> tmpWindows = m_context.getWindows();
 	// special case for the mouse event 0 that represent the hover event of the system :
 	if (_type == gale::key::typeMouse && _pointerID == 0) {
 		// this event is all time on the good Application ... and manage the enter and leave ...
 		// NOTE : the "layer Application" force us to get the Application at the specific position all the time :
-		std::shared_ptr<gale::Application> tmpApplication;
+		ememory::SharedPtr<gale::Application> tmpApplication;
 		if (m_grabApplication.lock() != nullptr) {
 			// grab all events ...
 			tmpApplication = m_grabApplication.lock();
@@ -282,7 +282,7 @@ void gale::context::InputManager::state(enum gale::key::type _type,
 	}
 	// get the curent time ...
 	int64_t currentTime = gale::getTime();
-	std::shared_ptr<gale::Application::Windows> tmpWindows = m_context.getWindows();
+	ememory::SharedPtr<gale::Application::Windows> tmpWindows = m_context.getWindows();
 	
 	if (true == _isDown) {
 		EVENT_DEBUG("GUI : Input ID=" << _pointerID
@@ -319,7 +319,7 @@ void gale::context::InputManager::state(enum gale::key::type _type,
 			eventTable[_pointerID].lastTimeEvent = currentTime;
 			// set the element inside ...
 			eventTable[_pointerID].isInside = true;
-			std::shared_ptr<gale::Application> tmpApplication = m_grabApplication.lock();
+			ememory::SharedPtr<gale::Application> tmpApplication = m_grabApplication.lock();
 			// get destination Application :
 			if(nullptr != tmpWindows) {
 				if (    tmpApplication != nullptr
@@ -362,7 +362,7 @@ void gale::context::InputManager::state(enum gale::key::type _type,
 			// revove the Application ...
 			eventTable[_pointerID].curentApplicationEvent.reset();
 		} else {
-			std::shared_ptr<gale::Application> tmpApplication = eventTable[_pointerID].curentApplicationEvent.lock();
+			ememory::SharedPtr<gale::Application> tmpApplication = eventTable[_pointerID].curentApplicationEvent.lock();
 			// generate UP Event
 			EVENT_DEBUG("GUI : Input ID=" << _pointerID
 			            << " == >" << eventTable[_pointerID].destinationInputId

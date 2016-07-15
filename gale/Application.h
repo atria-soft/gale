@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <memory>
+#include <ememory/memory.h>
 #include <etk/types.h>
 #include <etk/math/Vector2D.h>
 #include <gale/orientation.h>
@@ -17,7 +17,7 @@
 
 namespace gale {
 	class Context;
-	class Application : public std::enable_shared_from_this<gale::Application> {
+	class Application : public ememory::EnableSharedFromThis<gale::Application> {
 		public:
 			Application();
 			virtual ~Application();

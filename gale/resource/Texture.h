@@ -57,12 +57,12 @@ namespace gale {
 			
 			private:
 				// Image propoerties:
-				std::shared_ptr<std::vector<char>> m_data; //!< pointer on the image data.
+				ememory::SharedPtr<std::vector<char>> m_data; //!< pointer on the image data.
 				ivec2 m_size; //!< size of the image data.
 				enum dataType m_dataType; //!< Type of the image.
 				enum color m_dataColorSpace; //!< Color space of the image.
 			public:
-				void setTexture(const std::shared_ptr<std::vector<char>>& _data,
+				void setTexture(const ememory::SharedPtr<std::vector<char>>& _data,
 				                const ivec2& _size,
 				                enum gale::resource::Texture::dataType _dataType,
 				                enum gale::resource::Texture::color _dataColorSpace);

@@ -128,7 +128,7 @@ void gale::resource::Shader::reload() {
 		// TODO : Check this, this is a leek ==> in the GPU ... really bad ...
 			m_exist = false;
 			m_shader = 0;
-		getManager().update(std::dynamic_pointer_cast<gale::Resource>(shared_from_this()));
+		getManager().update(ememory::dynamicPointerCast<gale::Resource>(sharedFromThis()));
 	}
 }
 

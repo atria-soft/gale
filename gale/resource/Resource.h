@@ -6,15 +6,15 @@
 #pragma once
 
 #include <mutex>
-#include <memory>
+#include <ememory/memory.h>
 #include <etk/types.h>
 #include <gale/debug.h>
 
 #define MAX_RESOURCE_LEVEL (5)
 
 #define DECLARE_RESOURCE_FACTORY(className) \
-	template<typename ... T> static std::shared_ptr<className> create( T&& ... all ) { \
-		std::shared_ptr<className> resource(new className()); \
+	template<typename ... T> static ememory::SharedPtr<className> create( T&& ... all ) { \
+		ememory::SharedPtr<className> resource(new className()); \
 		if (resource == nullptr) { \
 			GALE_ERROR("Factory resource error"); \
 			return nullptr; \
@@ -28,14 +28,14 @@
 	}
 
 #define DECLARE_RESOURCE_NAMED_FACTORY(className) \
-	template<typename ... T> static std::shared_ptr<className> create(const std::string& _name, T&& ... all ) { \
-		std::shared_ptr<className> resource; \
-		std::shared_ptr<gale::Resource> resource2; \
+	template<typename ... T> static ememory::SharedPtr<className> create(const std::string& _name, T&& ... all ) { \
+		ememory::SharedPtr<className> resource; \
+		ememory::SharedPtr<gale::Resource> resource2; \
 		if (_name != "" && _name != "---") { \
 			resource2 = getManager().localKeep(_name); \
 		} \
 		if (resource2 != nullptr) { \
-			resource = std::dynamic_pointer_cast<className>(resource2); \
+			resource = ememory::dynamicPointerCast<className>(resource2); \
 			if (resource == nullptr) { \
 				GALE_CRITICAL("Request resource file : '" << _name << "' With the wrong type (dynamic cast error)"); \
 				return nullptr; \
@@ -44,7 +44,7 @@
 		if (resource != nullptr) { \
 			return resource; \
 		} \
-		resource = std::shared_ptr<className>(new className()); \
+		resource = ememory::SharedPtr<className>(new className()); \
 		if (resource == nullptr) { \
 			GALE_ERROR("allocation error of a resource : " << _name); \
 			return nullptr; \
@@ -58,11 +58,11 @@
 	}
 
 #define DECLARE_RESOURCE_SINGLE_FACTORY(className,uniqueName) \
-	template<typename ... T> static std::shared_ptr<className> create(T&& ... all ) { \
-		std::shared_ptr<className> resource; \
-		std::shared_ptr<gale::Resource> resource2 = getManager().localKeep(uniqueName); \
+	template<typename ... T> static ememory::SharedPtr<className> create(T&& ... all ) { \
+		ememory::SharedPtr<className> resource; \
+		ememory::SharedPtr<gale::Resource> resource2 = getManager().localKeep(uniqueName); \
 		if (resource2 != nullptr) { \
-			resource = std::dynamic_pointer_cast<className>(resource2); \
+			resource = ememory::dynamicPointerCast<className>(resource2); \
 			if (resource == nullptr) { \
 				GALE_CRITICAL("Request resource file : '" << uniqueName << "' With the wrong type (dynamic cast error)"); \
 				return nullptr; \
@@ -71,7 +71,7 @@
 		if (resource != nullptr) { \
 			return resource; \
 		} \
-		resource = std::shared_ptr<className>(new className()); \
+		resource = ememory::SharedPtr<className>(new className()); \
 		if (resource == nullptr) { \
 			GALE_ERROR("allocation error of a resource : " << uniqueName); \
 			return nullptr; \
@@ -97,9 +97,9 @@ namespace gale {
 	 * :** ConfigFile: simple widget configuration files
 	 * :** ...
 	 */
-	class Resource : public std::enable_shared_from_this<gale::Resource> {
+	class Resource : public ememory::EnableSharedFromThis<gale::Resource> {
 		protected:
-			std::recursive_mutex m_mutex;
+			mutable std::recursive_mutex m_mutex;
 		protected:
 			/**
 			 * @brief generic protected contructor (use factory to create this class)

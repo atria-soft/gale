@@ -19,7 +19,7 @@ namespace gale {
 				bool isUsed;
 				int32_t destinationInputId;
 				int64_t lastTimeEvent;
-				std::weak_ptr<gale::Application> curentApplicationEvent;
+				ememory::WeakPtr<gale::Application> curentApplicationEvent;
 				vec2 origin;
 				vec2 size;
 				vec2 downStart;
@@ -42,7 +42,7 @@ namespace gale {
 		class InputManager {
 			// special grab pointer mode : 
 			private:
-				std::weak_ptr<gale::Application> m_grabApplication; //!< Application that grab the curent pointer.
+				ememory::WeakPtr<gale::Application> m_grabApplication; //!< Application that grab the curent pointer.
 			private:
 				int32_t m_dpi;
 				InputLimit m_eventInputLimit;
@@ -62,7 +62,7 @@ namespace gale {
 				 * @return true if event has been greped
 				 */
 				bool localEventInput(enum gale::key::type _type,
-				                     std::shared_ptr<gale::Application> _destApplication,
+				                     ememory::SharedPtr<gale::Application> _destApplication,
 				                     int32_t _IdInput,
 				                     enum gale::key::status _typeEvent,
 				                     vec2 _pos);
@@ -76,7 +76,7 @@ namespace gale {
 				 * @return the gale input id
 				 */
 				int32_t localGetDestinationId(enum gale::key::type _type,
-				                              std::shared_ptr<gale::Application> _destApplication,
+				                              ememory::SharedPtr<gale::Application> _destApplication,
 				                              int32_t _realInputId);
 			private:
 				gale::Context& m_context;
