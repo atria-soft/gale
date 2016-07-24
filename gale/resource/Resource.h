@@ -13,13 +13,13 @@
 #define MAX_RESOURCE_LEVEL (5)
 
 #define DECLARE_RESOURCE_FACTORY(className) \
-	template<typename ... T> static ememory::SharedPtr<className> create( T&& ... all ) { \
+	template<typename ... GALE_TYPE> static ememory::SharedPtr<className> create( GALE_TYPE&& ... _all ) { \
 		ememory::SharedPtr<className> resource(new className()); \
 		if (resource == nullptr) { \
 			GALE_ERROR("Factory resource error"); \
 			return nullptr; \
 		} \
-		resource->init(std::forward<T>(all)... ); \
+		resource->init(std::forward<GALE_TYPE>(_all)... ); \
 		if (resource->resourceHasBeenCorectlyInit() == false) { \
 			GALE_CRITICAL("resource Is not correctly init : " << #className ); \
 		} \
@@ -28,7 +28,7 @@
 	}
 
 #define DECLARE_RESOURCE_NAMED_FACTORY(className) \
-	template<typename ... T> static ememory::SharedPtr<className> create(const std::string& _name, T&& ... all ) { \
+	template<typename ... GALE_TYPE> static ememory::SharedPtr<className> create(const std::string& _name, GALE_TYPE&& ... _all ) { \
 		ememory::SharedPtr<className> resource; \
 		ememory::SharedPtr<gale::Resource> resource2; \
 		if (_name != "" && _name != "---") { \
@@ -40,8 +40,6 @@
 				GALE_CRITICAL("Request resource file : '" << _name << "' With the wrong type (dynamic cast error)"); \
 				return nullptr; \
 			} \
-		} \
-		if (resource != nullptr) { \
 			return resource; \
 		} \
 		resource = ememory::SharedPtr<className>(new className()); \
@@ -49,7 +47,7 @@
 			GALE_ERROR("allocation error of a resource : " << _name); \
 			return nullptr; \
 		} \
-		resource->init(_name, std::forward<T>(all)... ); \
+		resource->init(_name, std::forward<GALE_TYPE>(_all)... ); \
 		if (resource->resourceHasBeenCorectlyInit() == false) { \
 			GALE_CRITICAL("resource Is not correctly init : " << #className ); \
 		} \
@@ -58,7 +56,7 @@
 	}
 
 #define DECLARE_RESOURCE_SINGLE_FACTORY(className,uniqueName) \
-	template<typename ... T> static ememory::SharedPtr<className> create(T&& ... all ) { \
+	template<typename ... GALE_TYPE> static ememory::SharedPtr<className> create(GALE_TYPE&& ... _all ) { \
 		ememory::SharedPtr<className> resource; \
 		ememory::SharedPtr<gale::Resource> resource2 = getManager().localKeep(uniqueName); \
 		if (resource2 != nullptr) { \
@@ -76,7 +74,7 @@
 			GALE_ERROR("allocation error of a resource : " << uniqueName); \
 			return nullptr; \
 		} \
-		resource->init(uniqueName, std::forward<T>(all)... ); \
+		resource->init(uniqueName, std::forward<GALE_TYPE>(_all)... ); \
 		if (resource->resourceHasBeenCorectlyInit() == false) { \
 			GALE_CRITICAL("resource Is not correctly init : " << #className ); \
 		} \
