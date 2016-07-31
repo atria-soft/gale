@@ -442,7 +442,7 @@ class AndroidContext : public gale::Context {
 			GALE_VERBOSE("ANDROID_SetKeyboard [BEGIN]");
 			OS_setKeyboard(m_guiKeyBoardSpecialKeyMode,
 			               gale::key::keyboard::character,
-			               (_isDown==true?gale::key::status::down:gale::key::status_up),
+			               (_isDown==true?gale::key::status::down:gale::key::status::up),
 			               _isARepeateKey,
 			               _myChar);
 			GALE_VERBOSE("ANDROID_SetKeyboard [END]");
@@ -452,7 +452,7 @@ class AndroidContext : public gale::Context {
 			GALE_VERBOSE("ANDROID_systemKeyboradEvent [BEGIN]");
 			OS_setKeyboard(m_guiKeyBoardSpecialKeyMode,
 			               _key,
-			               (_isDown==true?gale::key::status::down:gale::key::status_up));
+			               (_isDown==true?gale::key::status::down:gale::key::status::up));
 			GALE_VERBOSE("ANDROID_systemKeyboradEvent [END]");
 			return false;
 		}
@@ -464,7 +464,7 @@ class AndroidContext : public gale::Context {
 			m_guiKeyBoardSpecialKeyMode.update(move, _isDown);
 			OS_setKeyboard(m_guiKeyBoardSpecialKeyMode,
 			               move,
-			               (_isDown==true?gale::key::status::down:gale::key::status_up),
+			               (_isDown==true?gale::key::status::down:gale::key::status::up),
 			               _isARepeateKey);
 			GALE_VERBOSE("ANDROID_SetKeyboardMove [END]");
 		}
@@ -723,7 +723,7 @@ extern "C" {
 			return;
 		}
 		s_listInstance[_id]->OS_SetInput(gale::key::type::finger,
-		                                 (_isDown==true?gale::key::status::down:gale::key::status_up),
+		                                 (_isDown==true?gale::key::status::down:gale::key::status::up),
 		                                 _pointerID+1,
 		                                 vec2(_x,_y));
 	}
@@ -764,7 +764,7 @@ extern "C" {
 			return;
 		}
 		s_listInstance[_id]->OS_SetInput(gale::key::type::mouse,
-		                                 (_isDown==true?gale::key::status::down:gale::key::status_up),
+		                                 (_isDown==true?gale::key::status::down:gale::key::status::up),
 		                                 _pointerID+1,
 		                                 vec2(_x,_y));
 	}
