@@ -312,9 +312,7 @@ namespace etk {
 
 #ifdef GALE_BUILD_ESIGNAL
 	#include <esignal/details/Signal.hxx>
-	#include <esignal/details/ISignal.hxx>
-	template class esignal::Signal<gale::Dimension>;
-	template class esignal::ISignal<gale::Dimension>;
+	ESIGNAL_DECLARE_SIGNAL(gale::Dimension);
 #endif
 
 #ifdef GALE_BUILD_EPROPERTY
