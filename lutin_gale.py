@@ -32,35 +32,35 @@ def create(target, module_name):
 	my_module.add_extra_compile_flags()
 	# add the file to compile:
 	my_module.add_src_file([
-		'gale/gale.cpp',
-		'gale/debug.cpp',
-		'gale/Dimension.cpp',
-		'gale/orientation.cpp',
-		'gale/Application.cpp',
-		'gale/Thread.cpp',
-		])
+	    'gale/gale.cpp',
+	    'gale/debug.cpp',
+	    'gale/Dimension.cpp',
+	    'gale/orientation.cpp',
+	    'gale/Application.cpp',
+	    'gale/Thread.cpp',
+	    ])
 	my_module.add_header_file([
-		'gale/debug.h',
-		'gale/gale.h',
-		'gale/Dimension.h',
-		'gale/orientation.h',
-		'gale/Application.h',
-		'gale/Thread.h',
-		])
+	    'gale/debug.h',
+	    'gale/gale.h',
+	    'gale/Dimension.h',
+	    'gale/orientation.h',
+	    'gale/Application.h',
+	    'gale/Thread.h',
+	    ])
 	# context:
 	my_module.add_src_file([
-		'gale/context/clipBoard.cpp',
-		'gale/context/commandLine.cpp',
-		'gale/context/Context.cpp',
-		'gale/context/cursor.cpp',
-		])
+	    'gale/context/clipBoard.cpp',
+	    'gale/context/commandLine.cpp',
+	    'gale/context/Context.cpp',
+	    'gale/context/cursor.cpp',
+	    ])
 	my_module.add_header_file([
-		'gale/context/clipBoard.h',
-		'gale/context/commandLine.h',
-		'gale/context/Context.h',
-		'gale/context/cursor.h',
-		'gale/context/Fps.h'
-		])
+	    'gale/context/clipBoard.h',
+	    'gale/context/commandLine.h',
+	    'gale/context/Context.h',
+	    'gale/context/cursor.h',
+	    'gale/context/Fps.h'
+	    ])
 	if target.name=="Linux":
 		my_module.add_src_file('gale/context/X11/Context.cpp')
 		# check if egami is present in the worktree: this is for the icon parsing ...
@@ -70,111 +70,108 @@ def create(target, module_name):
 	elif target.name=="Android":
 		my_module.add_src_file('gale/context/Android/Context.cpp')
 		my_module.add_src_file([
-			'android/src/org/gale/GaleCallback.java',
-			'android/src/org/gale/GaleConstants.java',
-			'android/src/org/gale/Gale.java',
-			'android/src/org/gale/GaleRendererGL.java',
-			'android/src/org/gale/GaleSurfaceViewGL.java',
-			'android/src/org/gale/GaleActivity.java',
-			'android/src/org/gale/GaleWallpaper.java',
-			'org.gale.GaleConstants.javah'
-			])
+		    'android/src/org/gale/GaleCallback.java',
+		    'android/src/org/gale/GaleConstants.java',
+		    'android/src/org/gale/Gale.java',
+		    'android/src/org/gale/GaleRendererGL.java',
+		    'android/src/org/gale/GaleSurfaceViewGL.java',
+		    'android/src/org/gale/GaleActivity.java',
+		    'android/src/org/gale/GaleWallpaper.java',
+		    'org.gale.GaleConstants.javah'
+		    ])
 		my_module.add_path(tools.get_current_path(__file__) + '/android/src/', type='java')
 	elif target.name=="MacOs":
 		my_module.add_src_file([
-			'gale/context/MacOs/Context.mm',
-			'gale/context/MacOs/Interface.mm',
-			'gale/context/MacOs/Windows.mm',
-			'gale/context/MacOs/OpenglView.mm',
-			'gale/context/MacOs/AppDelegate.mm'])
+		    'gale/context/MacOs/Context.mm',
+		    'gale/context/MacOs/Interface.mm',
+		    'gale/context/MacOs/Windows.mm',
+		    'gale/context/MacOs/OpenglView.mm',
+		    'gale/context/MacOs/AppDelegate.mm'
+		    ])
 	elif target.name=="IOs":
 		my_module.add_src_file([
-			'gale/context/IOs/Context.cpp',
-			'gale/context/IOs/Interface.m',
-			'gale/context/IOs/OpenglView.mm',
-			'gale/context/IOs/AppDelegate.mm'])
+		    'gale/context/IOs/Context.cpp',
+		    'gale/context/IOs/Interface.m',
+		    'gale/context/IOs/OpenglView.mm',
+		    'gale/context/IOs/AppDelegate.mm'
+		    ])
 	else:
 		debug.error("unknow mode...")
 	# Key properties:
 	my_module.add_src_file([
-		'gale/key/keyboard.cpp',
-		'gale/key/Special.cpp',
-		'gale/key/status.cpp',
-		'gale/key/type.cpp'
-		])
+	    'gale/key/keyboard.cpp',
+	    'gale/key/Special.cpp',
+	    'gale/key/status.cpp',
+	    'gale/key/type.cpp'
+	    ])
 	my_module.add_header_file([
-		'gale/key/keyboard.h',
-		'gale/key/Special.h',
-		'gale/key/status.h',
-		'gale/key/type.h',
-		'gale/key/key.h'
-		])
+	    'gale/key/keyboard.h',
+	    'gale/key/Special.h',
+	    'gale/key/status.h',
+	    'gale/key/type.h',
+	    'gale/key/key.h'
+	    ])
 	# OpenGL interface:
 	my_module.add_src_file([
-		'gale/renderer/openGL/openGL.cpp'
-		])
+	    'gale/renderer/openGL/openGL.cpp'
+	    ])
 	my_module.add_header_file([
-		'gale/renderer/openGL/openGL.h',
-		'gale/renderer/openGL/openGL-include.h'
-		])
+	    'gale/renderer/openGL/openGL.h',
+	    'gale/renderer/openGL/openGL-include.h'
+	    ])
 	# resources:
 	my_module.add_src_file([
-		'gale/resource/Manager.cpp',
-		'gale/resource/Program.cpp',
-		'gale/resource/Resource.cpp',
-		'gale/resource/Shader.cpp',
-		'gale/resource/Texture.cpp',
-		'gale/resource/VirtualBufferObject.cpp'
-		])
+	    'gale/resource/Manager.cpp',
+	    'gale/resource/Program.cpp',
+	    'gale/resource/Resource.cpp',
+	    'gale/resource/Shader.cpp',
+	    'gale/resource/Texture.cpp',
+	    'gale/resource/VirtualBufferObject.cpp'
+	    ])
 	my_module.add_header_file([
-		'gale/resource/Manager.h',
-		'gale/resource/Program.h',
-		'gale/resource/Resource.h',
-		'gale/resource/Shader.h',
-		'gale/resource/Texture.h',
-		'gale/resource/VirtualBufferObject.h'
-		])
-	my_module.add_module_depend(['etk'])
+	    'gale/resource/Manager.h',
+	    'gale/resource/Program.h',
+	    'gale/resource/Resource.h',
+	    'gale/resource/Shader.h',
+	    'gale/resource/Texture.h',
+	    'gale/resource/VirtualBufferObject.h'
+	    ])
+	my_module.add_module_depend([
+	    'etk',
+	    'opengl'
+	    ])
 	my_module.add_optionnal_module_depend('esignal', ["c++", "-DGALE_BUILD_ESIGNAL"])
 	my_module.add_optionnal_module_depend('eproperty', ["c++", "-DGALE_BUILD_EPROPERTY"])
 	my_module.add_path(tools.get_current_path(__file__))
 	
 	my_module.compile_flags('c++', [
-		"-DGALE_VERSION=\"\\\"" + tools.version_to_string(get_version()) + "\\\"\""
-		])
+	    "-DGALE_VERSION=\"\\\"" + tools.version_to_string(get_version()) + "\\\"\""
+	    ])
 	
 	if target.name=="Linux":
-		# todo : my_module.add_module_depend(['egami'])
-		my_module.add_export_flag('link-lib', 'GL')
-		#`pkg-config --cflags directfb` `pkg-config --libs directfb`
-		#ifeq ("$(CONFIG___GALE_LINUX_GUI_MODE_X11__)","y")
-		my_module.add_export_flag('link-lib', 'X11')
-		#endif
-		#ifeq ("$(CONFIG___GALE_LINUX_GUI_MODE_DIRECT_FB__)","y")
-		#my_module.add_export_flag('link', ['-L/usr/local/lib', '-ldirectfb', '-lfusion', '-ldirect'])
-		#endif
+		pass
 	elif target.name=="Android":
 		my_module.add_module_depend(["SDK", "jvm-basics"])
-		my_module.add_export_flag('link-lib', "GLESv2")
 		# add tre creator of the basic java class ...
 		target.add_action("BINARY", 50, "gale-auto-wrapper", tool_generate_main_java_class)
 		# TODO : Add the same for BINARY to create a console interface ?
 	elif target.name=="Windows":
-		my_module.add_module_depend("glew")
+		#my_module.add_module_depend("glew")
+		pass
 	elif target.name=="MacOs":
 		my_module.add_export_flag('link', [
-			"-framework Cocoa",
-			"-framework OpenGL",
-			"-framework QuartzCore",
-			"-framework AppKit"])
+		    "-framework Cocoa",
+		    "-framework QuartzCore",
+		    "-framework AppKit"
+		    ])
 	elif target.name=="IOs":
 		my_module.add_export_flag('link', [
-			"-framework OpenGLES",
-			"-framework CoreGraphics",
-			"-framework UIKit",
-			"-framework GLKit",
-			"-framework Foundation",
-			"-framework QuartzCore"])
+		    "-framework CoreGraphics",
+		    "-framework UIKit",
+		    "-framework GLKit",
+		    "-framework Foundation",
+		    "-framework QuartzCore"
+		    ])
 	
 	return my_module
 
