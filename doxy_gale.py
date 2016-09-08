@@ -17,7 +17,7 @@ def create(target, module_name):
 	my_module.add_sample_path([
 	    "sample"
 	    ])
-	my_module.add_module_depend([
+	my_module.add_depend([
 	    'elog',
 	    'etk'
 	    ])

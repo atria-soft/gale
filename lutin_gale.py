@@ -29,7 +29,7 @@ def get_version():
 
 def create(target, module_name):
 	my_module = module.Module(__file__, module_name, get_type())
-	my_module.add_extra_compile_flags()
+	my_module.add_extra_flags()
 	# add the file to compile:
 	my_module.add_src_file([
 	    'gale/gale.cpp',
@@ -61,13 +61,13 @@ def create(target, module_name):
 	    'gale/context/cursor.h',
 	    'gale/context/Fps.h'
 	    ])
-	if target.name=="Linux":
+	if "Linux" in target.get_type():
 		my_module.add_src_file('gale/context/X11/Context.cpp')
 		# check if egami is present in the worktree: this is for the icon parsing ...
-		my_module.add_optionnal_module_depend('egami', ["c++", "-DGALE_BUILD_EGAMI"])
-	elif target.name=="Windows":
+		my_module.add_optionnal_depend('egami', ["c++", "-DGALE_BUILD_EGAMI"])
+	elif "Windows" in target.get_type():
 		my_module.add_src_file('gale/context/Windows/Context.cpp')
-	elif target.name=="Android":
+	elif "Android" in target.get_type():
 		my_module.add_src_file('gale/context/Android/Context.cpp')
 		my_module.add_src_file([
 		    'android/src/org/gale/GaleCallback.java',
@@ -80,7 +80,7 @@ def create(target, module_name):
 		    'org.gale.GaleConstants.javah'
 		    ])
 		my_module.add_path(tools.get_current_path(__file__) + '/android/src/', type='java')
-	elif target.name=="MacOs":
+	elif "MacOs" in target.get_type():
 		my_module.add_src_file([
 		    'gale/context/MacOs/Context.mm',
 		    'gale/context/MacOs/Interface.mm',
@@ -88,7 +88,7 @@ def create(target, module_name):
 		    'gale/context/MacOs/OpenglView.mm',
 		    'gale/context/MacOs/AppDelegate.mm'
 		    ])
-	elif target.name=="IOs":
+	elif "IOs" in target.get_type():
 		my_module.add_src_file([
 		    'gale/context/IOs/Context.cpp',
 		    'gale/context/IOs/Interface.m',
@@ -136,35 +136,35 @@ def create(target, module_name):
 	    'gale/resource/Texture.h',
 	    'gale/resource/VirtualBufferObject.h'
 	    ])
-	my_module.add_module_depend([
+	my_module.add_depend([
 	    'etk',
 	    'opengl'
 	    ])
-	my_module.add_optionnal_module_depend('esignal', ["c++", "-DGALE_BUILD_ESIGNAL"])
-	my_module.add_optionnal_module_depend('eproperty', ["c++", "-DGALE_BUILD_EPROPERTY"])
+	my_module.add_optionnal_depend('esignal', ["c++", "-DGALE_BUILD_ESIGNAL"])
+	my_module.add_optionnal_depend('eproperty', ["c++", "-DGALE_BUILD_EPROPERTY"])
 	my_module.add_path(tools.get_current_path(__file__))
 	
-	my_module.compile_flags('c++', [
+	my_module.add_flag('c++', [
 	    "-DGALE_VERSION=\"\\\"" + tools.version_to_string(get_version()) + "\\\"\""
 	    ])
 	
-	if target.name=="Linux":
+	if "Linux" in target.get_type():
 		pass
-	elif target.name=="Android":
-		my_module.add_module_depend(["SDK", "jvm-basics"])
+	elif "Android" in target.get_type():
+		my_module.add_depend(["SDK", "jvm-basics"])
 		# add tre creator of the basic java class ...
 		target.add_action("BINARY", 50, "gale-auto-wrapper", tool_generate_main_java_class)
 		# TODO : Add the same for BINARY to create a console interface ?
-	elif target.name=="Windows":
-		#my_module.add_module_depend("glew")
+	elif "Windows" in target.get_type():
+		#my_module.add_depend("glew")
 		pass
-	elif target.name=="MacOs":
+	elif "MacOs" in target.get_type():
 		my_module.add_export_flag('link', [
 		    "-framework Cocoa",
 		    "-framework QuartzCore",
 		    "-framework AppKit"
 		    ])
-	elif target.name=="IOs":
+	elif "IOs" in target.get_type():
 		my_module.add_export_flag('link', [
 		    "-framework CoreGraphics",
 		    "-framework UIKit",
@@ -189,17 +189,17 @@ def tool_generate_main_java_class(target, module, package_name):
 	debug.debug("Generate android wrapping for '" + package_name + "' ==> '" + target.convert_name_application(package_name) + "'" )
 	debug.debug("------------------------------------------------------------------------")
 	application_name = target.convert_name_application(package_name)
-	if target.config["mode"] == "debug":
+	if target.get_mode() == "debug":
 		application_name += "debug"
 	target.path_java_project=   target.get_build_path(package_name) \
 	                            + "/src/" \
-	                            + module.package_prop["COMPAGNY_TYPE"] \
-	                            + "/" + module.package_prop["COMPAGNY_NAME2"] \
+	                            + module.get_pkg("COMPAGNY_TYPE") \
+	                            + "/" + module.get_pkg("COMPAGNY_NAME2") \
 	                            + "/" + application_name + "/"
 	
 	java_file_wrapper = target.path_java_project + "/" + application_name + ".java"
 	
-	android_package_name = module.package_prop["COMPAGNY_TYPE"]+"."+module.package_prop["COMPAGNY_NAME2"]+"." + application_name
+	android_package_name = module.get_pkg("COMPAGNY_TYPE")+"."+module.get_pkg("COMPAGNY_NAME2")+"." + application_name
 	
 	debug.print_element("pkg", "absractionFile", "<==", "dynamic file")
 	# Create path :
@@ -216,24 +216,24 @@ def tool_generate_main_java_class(target, module, package_name):
 	tmpFile.write( " */\n")
 	tmpFile.write( "package "+ android_package_name + ";\n")
 	tmpFile.write( "import android.util.Log;\n")
-	if module.package_prop["ANDROID_APPL_TYPE"]=="APPL":
+	if module.get_pkg("ANDROID_APPL_TYPE")=="APPL":
 		tmpFile.write( "import org.gale.GaleActivity;\n")
 	else:
 		tmpFile.write( "import org.gale.GaleWallpaper;\n")
 	tmpFile.write( "\n")
 	
-	if "GENERATE_SECTION__IMPORT" in module.package_prop:
-		for elem in module.package_prop["GENERATE_SECTION__IMPORT"]:
+	if module.get_pkg("GENERATE_SECTION__IMPORT") != None:
+		for elem in module.get_pkg("GENERATE_SECTION__IMPORT"):
 			for line in elem:
 				tmpFile.write( line + "\n")
-	if module.package_prop["ANDROID_APPL_TYPE"]=="APPL":
+	if module.get_pkg("ANDROID_APPL_TYPE")=="APPL":
 		tmpFile.write( "public class " + application_name + " extends GaleActivity {\n")
 	else:
 		tmpFile.write( "public class " + application_name + " extends GaleWallpaper {\n")
 		tmpFile.write( "	public static final String SHARED_PREFS_NAME = \"" + application_name + "settings\";\n")
 	
-	if "GENERATE_SECTION__DECLARE" in module.package_prop:
-		for elem in module.package_prop["GENERATE_SECTION__DECLARE"]:
+	if module.get_pkg("GENERATE_SECTION__DECLARE") != None:
+		for elem in module.get_pkg("GENERATE_SECTION__DECLARE"):
 			for line in elem:
 				tmpFile.write( "	" + line + "\n")
 	
@@ -246,74 +246,74 @@ def tool_generate_main_java_class(target, module, package_name):
 	tmpFile.write( "		}\n")
 	tmpFile.write( "	}\n")
 	tmpFile.write( "	\n")
-	if module.package_prop["ANDROID_APPL_TYPE"]!="APPL":
+	if module.get_pkg("ANDROID_APPL_TYPE")!="APPL":
 		tmpFile.write( "	public Engine onCreateEngine() {\n")
 		tmpFile.write( "		Engine tmpEngine = super.onCreateEngine();\n")
-		tmpFile.write( "		initApkPath(\"" + module.package_prop["COMPAGNY_TYPE"]+"\", \""+module.package_prop["COMPAGNY_NAME2"]+"\", \"" + application_name + "\", \"" + package_name + "\");\n")
+		tmpFile.write( "		initApkPath(\"" + module.get_pkg("COMPAGNY_TYPE")+"\", \""+module.get_pkg("COMPAGNY_NAME2")+"\", \"" + application_name + "\", \"" + package_name + "\");\n")
 		tmpFile.write( "		return tmpEngine;\n")
 		tmpFile.write( "	}\n")
 	
-	if "GENERATE_SECTION__CONSTRUCTOR" in module.package_prop:
+	if module.get_pkg("GENERATE_SECTION__CONSTRUCTOR") != None:
 		tmpFile.write( "	public " + application_name + "() {\n")
-		for elem in module.package_prop["GENERATE_SECTION__CONSTRUCTOR"]:
+		for elem in module.get_pkg("GENERATE_SECTION__CONSTRUCTOR"):
 			for line in elem:
 				tmpFile.write( "		" + line + "\n")
 		tmpFile.write( "	}\n")
 	
 	tmpFile.write( "	public void onCreate(android.os.Bundle savedInstanceState) {\n")
 	tmpFile.write( "		super.onCreate(savedInstanceState);\n")
-	tmpFile.write( "		initApkPath(\"" + module.package_prop["COMPAGNY_TYPE"]+"\", \""+module.package_prop["COMPAGNY_NAME2"]+"\", \"" + application_name + "\", \"" + package_name + "\");\n")
+	tmpFile.write( "		initApkPath(\"" + module.get_pkg("COMPAGNY_TYPE")+"\", \""+module.get_pkg("COMPAGNY_NAME2")+"\", \"" + application_name + "\", \"" + package_name + "\");\n")
 	
-	if "GENERATE_SECTION__ON_CREATE" in module.package_prop:
-		for elem in module.package_prop["GENERATE_SECTION__ON_CREATE"]:
+	if module.get_pkg("GENERATE_SECTION__ON_CREATE") != None:
+		for elem in module.get_pkg("GENERATE_SECTION__ON_CREATE"):
 			for line in elem:
 				tmpFile.write( "		" + line + "\n")
 	tmpFile.write( "	}\n")
 	
 	
-	if "GENERATE_SECTION__ON_START" in module.package_prop:
+	if module.get_pkg("GENERATE_SECTION__ON_START") != None:
 		tmpFile.write( "	@Override protected void onStart() {\n")
-		for elem in module.package_prop["GENERATE_SECTION__ON_START"]:
+		for elem in module.get_pkg("GENERATE_SECTION__ON_START"):
 			for line in elem:
 				tmpFile.write( "		" + line + "\n")
 		tmpFile.write( "		super.onStart();\n")
 		tmpFile.write( "	}\n")
 	
-	if "GENERATE_SECTION__ON_RESTART" in module.package_prop:
+	if module.get_pkg("GENERATE_SECTION__ON_RESTART") != None:
 		tmpFile.write( "	@Override protected void onRestart() {\n")
-		for elem in module.package_prop["GENERATE_SECTION__ON_RESTART"]:
+		for elem in module.get_pkg("GENERATE_SECTION__ON_RESTART"):
 			for line in elem:
 				tmpFile.write( "		" + line + "\n")
 		tmpFile.write( "		super.onRestart();\n")
 		tmpFile.write( "	}\n")
 	
-	if "GENERATE_SECTION__ON_RESUME" in module.package_prop:
+	if module.get_pkg("GENERATE_SECTION__ON_RESUME") != None:
 		tmpFile.write( "	@Override protected void onResume() {\n")
 		tmpFile.write( "		super.onResume();\n")
-		for elem in module.package_prop["GENERATE_SECTION__ON_RESUME"]:
+		for elem in module.get_pkg("GENERATE_SECTION__ON_RESUME"):
 			for line in elem:
 				tmpFile.write( "		" + line + "\n")
 		tmpFile.write( "	}\n")
 	
-	if "GENERATE_SECTION__ON_PAUSE" in module.package_prop:
+	if module.get_pkg("GENERATE_SECTION__ON_PAUSE") != None:
 		tmpFile.write( "	@Override protected void onPause() {\n")
-		for elem in module.package_prop["GENERATE_SECTION__ON_PAUSE"]:
+		for elem in module.get_pkg("GENERATE_SECTION__ON_PAUSE"):
 			for line in elem:
 				tmpFile.write( "		" + line + "\n")
 		tmpFile.write( "		super.onPause();\n")
 		tmpFile.write( "	}\n")
 	
-	if "GENERATE_SECTION__ON_STOP" in module.package_prop:
+	if module.get_pkg("GENERATE_SECTION__ON_STOP") != None:
 		tmpFile.write( "	@Override protected void onStop() {\n")
-		for elem in module.package_prop["GENERATE_SECTION__ON_STOP"]:
+		for elem in module.get_pkg("GENERATE_SECTION__ON_STOP"):
 			for line in elem:
 				tmpFile.write( "		" + line + "\n")
 		tmpFile.write( "		super.onStop();\n")
 		tmpFile.write( "	}\n")
 	
-	if "GENERATE_SECTION__ON_DESTROY" in module.package_prop:
+	if module.get_pkg("GENERATE_SECTION__ON_DESTROY") != None:
 		tmpFile.write( "	@Override protected void onDestroy() {\n")
-		for elem in module.package_prop["GENERATE_SECTION__ON_DESTROY"]:
+		for elem in module.get_pkg("GENERATE_SECTION__ON_DESTROY"):
 			for line in elem:
 				tmpFile.write( "		" + line + "\n")
 		tmpFile.write( "		super.onDestroy();\n")
@@ -329,9 +329,9 @@ def tool_generate_main_java_class(target, module, package_name):
 	"""
 	    ## todo:
 	tools.create_directory_of_file(target.get_staging_path(package_name) + "/res/drawable/icon.png");
-	if     "ICON" in module.package_prop.keys() \
-	   and module.package_prop["ICON"] != "":
-		image.resize(module.package_prop["ICON"], target.get_staging_path(package_name) + "/res/drawable/icon.png", 256, 256)
+	if     module.get_pkg("ICON") != None \
+	   and module.get_pkg("ICON") != "":
+		image.resize(module.get_pkg("ICON"), target.get_staging_path(package_name) + "/res/drawable/icon.png", 256, 256)
 	else:
 		# to be sure that we have all time a resource ...
 		tmpFile = open(target.get_staging_path(package_name) + "/res/drawable/plop.txt", 'w')
@@ -340,44 +340,44 @@ def tool_generate_main_java_class(target, module, package_name):
 		tmpFile.close()
 	
 	"""
-	if module.package_prop["ANDROID_MANIFEST"] == "":
+	if module.get_pkg("ANDROID_MANIFEST") == "":
 		# force manifest file:
-		module.package_prop["ANDROID_MANIFEST"] = target.get_build_path(package_name) + "/AndroidManifest.xml";
-		debug.debug(" create file: '" + module.package_prop["ANDROID_MANIFEST"] + "'")
-		if "VERSION_CODE" not in module.package_prop:
-			module.package_prop["VERSION_CODE"] = "1"
+		module.set_pkg("ANDROID_MANIFEST", target.get_build_path(package_name) + "/AndroidManifest.xml");
+		debug.debug(" create file: '" + module.get_pkg("ANDROID_MANIFEST") + "'")
+		if module.get_pkg("VERSION_CODE") == None:
+			module.set_pkg("VERSION_CODE", "1")
 		debug.print_element("pkg", "AndroidManifest.xml", "<==", "package configurations")
-		tools.create_directory_of_file(module.package_prop["ANDROID_MANIFEST"])
-		tmpFile = open(module.package_prop["ANDROID_MANIFEST"], 'w')
+		tools.create_directory_of_file(module.get_pkg("ANDROID_MANIFEST"))
+		tmpFile = open(module.get_pkg("ANDROID_MANIFEST"), 'w')
 		tmpFile.write( '<?xml version="1.0" encoding="utf-8"?>\n')
 		tmpFile.write( '<!-- Manifest is autoGenerated with Gale ... do not patch it-->\n')
 		tmpFile.write( '<manifest xmlns:android="http://schemas.android.com/apk/res/android" \n')
 		tmpFile.write( '          package="' + android_package_name + '" \n')
-		if module.package_prop["VERSION_CODE"] == '':
+		if module.get_pkg("VERSION_CODE") == '':
 			debug.warning("Missing application 'VERSION_CODE' ==> set it at '0' (this can creata an NON update on android play store)")
-			module.package_prop["VERSION_CODE"] = "0"
-		tmpFile.write( '          android:versionCode="' + str(module.package_prop["VERSION_CODE"]) + '" \n')
-		tmpFile.write( '          android:versionName="'+tools.version_to_string(module.package_prop["VERSION"])+'"> \n')
+			module.set_pkg("VERSION_CODE", "0")
+		tmpFile.write( '          android:versionCode="' + str(module.get_pkg("VERSION_CODE")) + '" \n')
+		tmpFile.write( '          android:versionName="'+tools.version_to_string(module.get_pkg("VERSION"))+'"> \n')
 		tmpFile.write( '	<uses-feature android:glEsVersion="0x00020000" android:required="true" />\n')
 		tmpFile.write( '	<uses-sdk android:minSdkVersion="' + str(target.board_id) + '" \n')
 		tmpFile.write( '	          android:targetSdkVersion="' + str(target.board_id) + '" /> \n')
-		if module.package_prop["ANDROID_APPL_TYPE"]=="APPL":
+		if module.get_pkg("ANDROID_APPL_TYPE")=="APPL":
 			tmpFile.write( '	<application android:label="' + application_name + '" \n')
-			if "ICON" in module.package_prop.keys():
+			if module.get_pkg("ICON") != None:
 				tmpFile.write( '	             android:icon="@drawable/icon" \n')
-			if target.config["mode"] == "debug":
+			if target.get_mode() == "debug":
 				tmpFile.write( '	             android:debuggable="true" \n')
 			tmpFile.write( '	             >\n')
-			if "ADMOD_ID" in module.package_prop:
+			if module.get_pkg("ADMOD_ID") != None:
 				tmpFile.write( '		<meta-data android:name="com.google.android.gms.version" \n')
 				tmpFile.write( '		           android:value="@integer/google_play_services_version"/>\n')
 			
 			tmpFile.write( '		<activity android:name=".' + application_name + '" \n')
-			tmpFile.write( '		          android:label="' + module.package_prop['NAME'])
-			if target.config["mode"] == "debug":
+			tmpFile.write( '		          android:label="' + module.get_pkg('NAME'))
+			if target.get_mode() == "debug":
 				tmpFile.write("-debug")
 			tmpFile.write( '"\n')
-			if "ICON" in module.package_prop.keys():
+			if module.get_pkg("ICON") != None:
 				tmpFile.write( '		          android:icon="@drawable/icon" \n')
 			tmpFile.write( '		          android:hardwareAccelerated="true" \n')
 			tmpFile.write( '		          android:configChanges="keyboard|keyboardHidden|orientation|screenSize"> \n')
@@ -386,7 +386,7 @@ def tool_generate_main_java_class(target, module, package_name):
 			tmpFile.write( '				<category android:name="android.intent.category.LAUNCHER" /> \n')
 			tmpFile.write( '			</intent-filter> \n')
 			tmpFile.write( '		</activity> \n')
-			if "ADMOD_ID" in module.package_prop:
+			if module.get_pkg("ADMOD_ID") != None:
 				tmpFile.write( '		<activity android:name="com.google.android.gms.ads.AdActivity"\n')
 				tmpFile.write( '		          android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>\n')
 			
@@ -394,15 +394,15 @@ def tool_generate_main_java_class(target, module, package_name):
 		else:
 			tmpFile.write( '	<application android:label="' + application_name + '" \n')
 			tmpFile.write( '	             android:permission="android.permission.BIND_WALLPAPER" \n')
-			if "ICON" in module.package_prop.keys():
+			if module.get_pkg("ICON") != None:
 				tmpFile.write( '	             android:icon="@drawable/icon"\n')
 			tmpFile.write( '	             >\n')
 			tmpFile.write( '		<service android:name=".' + application_name + '" \n')
-			tmpFile.write( '		         android:label="' + module.package_prop['NAME'])
-			if target.config["mode"] == "debug":
+			tmpFile.write( '		         android:label="' + module.get_pkg('NAME'))
+			if target.get_mode() == "debug":
 				tmpFile.write("-debug")
 			tmpFile.write( '"\n')
-			if "ICON" in module.package_prop.keys():
+			if module.get_pkg("ICON") != None:
 				tmpFile.write( '		         android:icon="@drawable/icon"\n')
 			tmpFile.write( '		         >\n')
 			tmpFile.write( '			<intent-filter>\n')
@@ -411,57 +411,57 @@ def tool_generate_main_java_class(target, module, package_name):
 			tmpFile.write( '			<meta-data android:name="android.service.wallpaper"\n')
 			tmpFile.write( '			           android:resource="@xml/' + application_name + '_resource" />\n')
 			tmpFile.write( '		</service>\n')
-			if len(module.package_prop["ANDROID_WALLPAPER_PROPERTIES"])!=0:
+			if len(module.get_pkg("ANDROID_WALLPAPER_PROPERTIES"))!=0:
 				tmpFile.write( '		<activity android:label="Setting"\n')
 				tmpFile.write( '		          android:name=".' + application_name + 'Settings"\n')
 				tmpFile.write( '		          android:theme="@android:style/Theme.Light.WallpaperSettings"\n')
 				tmpFile.write( '		          android:exported="true"\n')
-				if "ICON" in module.package_prop.keys():
+				if module.get_pkg("ICON") != None:
 					tmpFile.write( '		          android:icon="@drawable/icon"\n')
 				tmpFile.write( '		          >\n')
 				tmpFile.write( '		</activity>\n')
 			tmpFile.write( '	</application>\n')
 		# write package autorisations :
-		if True==target.check_right_package(module.package_prop, "WRITE_EXTERNAL_STORAGE"):
+		if "WRITE_EXTERNAL_STORAGE" in module.get_pkg("RIGHT"):
 			tmpFile.write( '	<permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> \n')
 			tmpFile.write( '	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> \n')
-		if True==target.check_right_package(module.package_prop, "CAMERA"):
+		if "CAMERA" in module.get_pkg("RIGHT"):
 			tmpFile.write( '	<permission android:name="android.permission.CAMERA" /> \n')
 			tmpFile.write( '	<uses-permission android:name="android.permission.CAMERA" /> \n')
-		if True==target.check_right_package(module.package_prop, "INTERNET"):
+		if "INTERNET" in module.get_pkg("RIGHT"):
 			tmpFile.write( '	<permission android:name="android.permission.INTERNET" /> \n')
 			tmpFile.write( '	<uses-permission android:name="android.permission.INTERNET" /> \n')
-		if True==target.check_right_package(module.package_prop, "ACCESS_NETWORK_STATE"):
+		if "ACCESS_NETWORK_STATE" in module.get_pkg("RIGHT"):
 			tmpFile.write( '	<permission android:name="android.permission.ACCESS_NETWORK_STATE" /> \n')
 			tmpFile.write( '	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> \n')
-		if True==target.check_right_package(module.package_prop, "MODIFY_AUDIO_SETTINGS"):
+		if "MODIFY_AUDIO_SETTINGS" in module.get_pkg("RIGHT"):
 			tmpFile.write( '	<permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" /> \n')
 			tmpFile.write( '	<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" /> \n')
-		if True==target.check_right_package(module.package_prop, "READ_CALENDAR"):
+		if "READ_CALENDAR" in module.get_pkg("RIGHT"):
 			tmpFile.write( '	<permission android:name="android.permission.READ_CALENDAR" /> \n')
 			tmpFile.write( '	<uses-permission android:name="android.permission.READ_CALENDAR" /> \n')
-		if True==target.check_right_package(module.package_prop, "READ_CONTACTS"):
+		if "READ_CONTACTS" in module.get_pkg("RIGHT"):
 			tmpFile.write( '	<permission android:name="android.permission.READ_CONTACTS" /> \n')
 			tmpFile.write( '	<uses-permission android:name="android.permission.READ_CONTACTS" /> \n')
-		if True==target.check_right_package(module.package_prop, "READ_FRAME_BUFFER"):
+		if "READ_FRAME_BUFFER" in module.get_pkg("RIGHT"):
 			tmpFile.write( '	<permission android:name="android.permission.READ_FRAME_BUFFER" /> \n')
 			tmpFile.write( '	<uses-permission android:name="android.permission.READ_FRAME_BUFFER" /> \n')
-		if True==target.check_right_package(module.package_prop, "READ_PROFILE"):
+		if "READ_PROFILE" in module.get_pkg("RIGHT"):
 			tmpFile.write( '	<permission android:name="android.permission.READ_PROFILE" /> \n')
 			tmpFile.write( '	<uses-permission android:name="android.permission.READ_PROFILE" /> \n')
-		if True==target.check_right_package(module.package_prop, "RECORD_AUDIO"):
+		if "RECORD_AUDIO" in module.get_pkg("RIGHT"):
 			tmpFile.write( '	<permission android:name="android.permission.RECORD_AUDIO" /> \n')
 			tmpFile.write( '	<uses-permission android:name="android.permission.RECORD_AUDIO" /> \n')
-		if True==target.check_right_package(module.package_prop, "SET_ORIENTATION"):
+		if "SET_ORIENTATION" in module.get_pkg("RIGHT"):
 			tmpFile.write( '	<permission android:name="android.permission.SET_ORIENTATION" /> \n')
 			tmpFile.write( '	<uses-permission android:name="android.permission.SET_ORIENTATION" /> \n')
-		if True==target.check_right_package(module.package_prop, "VIBRATE"):
+		if "VIBRATE" in module.get_pkg("RIGHT"):
 			tmpFile.write( '	<permission android:name="android.permission.VIBRATE" /> \n')
 			tmpFile.write( '	<uses-permission android:name="android.permission.VIBRATE" /> \n')
-		if True==target.check_right_package(module.package_prop, "ACCESS_COARSE_LOCATION"):
+		if "ACCESS_COARSE_LOCATION" in module.get_pkg("RIGHT"):
 			tmpFile.write( '	<permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> \n')
 			tmpFile.write( '	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> \n')
-		if True==target.check_right_package(module.package_prop, "ACCESS_FINE_LOCATION"):
+		if "ACCESS_FINE_LOCATION" in module.get_pkg("RIGHT"):
 			tmpFile.write( '	<permission android:name="android.permission.ACCESS_FINE_LOCATION" /> \n')
 			tmpFile.write( '	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> \n')
 		tmpFile.write( '</manifest>\n\n')
@@ -469,22 +469,22 @@ def tool_generate_main_java_class(target, module, package_name):
 		tmpFile.close()
 		# end generating android manifest
 		
-		if module.package_prop["ANDROID_APPL_TYPE"]!="APPL":
+		if module.get_pkg("ANDROID_APPL_TYPE") != "APPL":
 			#create the Wallpaper sub files : (main element for the application
 			debug.print_element("pkg", application_name + "_resource.xml", "<==", "package configurations")
 			tools.create_directory_of_file(target.get_build_path(package_name) + "/res/xml/" + application_name + "_resource.xml")
 			tmpFile = open(target.get_build_path(package_name) + "/res/xml/" + application_name + "_resource.xml", 'w')
 			tmpFile.write( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 			tmpFile.write( "<wallpaper xmlns:android=\"http://schemas.android.com/apk/res/android\"\n")
-			if len(module.package_prop["ANDROID_WALLPAPER_PROPERTIES"])!=0:
+			if len(module.get_pkg("ANDROID_WALLPAPER_PROPERTIES"))!=0:
 				tmpFile.write( "           android:settingsActivity=\""+android_package_name + "."+ application_name + "Settings\"\n")
-			if "ICON" in module.package_prop.keys():
+			if module.get_pkg("ICON") != None:
 				tmpFile.write( "           android:thumbnail=\"@drawable/icon\"\n")
 			tmpFile.write( "           />\n")
 			tmpFile.flush()
 			tmpFile.close()
 			# create wallpaper setting if needed (class and config file)
-			if len(module.package_prop["ANDROID_WALLPAPER_PROPERTIES"])!=0:
+			if len(module.get_pkg("ANDROID_WALLPAPER_PROPERTIES"))!=0:
 				tools.create_directory_of_file(target.path_java_project + application_name + "Settings.java")
 				debug.print_element("pkg", target.path_java_project + application_name + "Settings.java", "<==", "package configurations")
 				tmpFile = open(target.path_java_project + application_name + "Settings.java", 'w');
@@ -524,7 +524,7 @@ def tool_generate_main_java_class(target, module, package_name):
 				tmpFile.write( "                  android:title=\"Settings\"\n")
 				tmpFile.write( "                  android:key=\"" + application_name  + "_settings\">\n")
 				WALL_haveArray = False
-				for WALL_type, WALL_key, WALL_title, WALL_summary, WALL_other in module.package_prop["ANDROID_WALLPAPER_PROPERTIES"]:
+				for WALL_type, WALL_key, WALL_title, WALL_summary, WALL_other in module.get_pkg("ANDROID_WALLPAPER_PROPERTIES"):
 					debug.info("find : '" + WALL_type + "'");
 					if WALL_type == "list":
 						debug.info("    create : LIST");
@@ -545,7 +545,7 @@ def tool_generate_main_java_class(target, module, package_name):
 				tmpFile.flush()
 				tmpFile.close()
 				if WALL_haveArray==True:
-					for WALL_type, WALL_key, WALL_title, WALL_summary, WALL_other in module.package_prop["ANDROID_WALLPAPER_PROPERTIES"]:
+					for WALL_type, WALL_key, WALL_title, WALL_summary, WALL_other in module.get_pkg("ANDROID_WALLPAPER_PROPERTIES"):
 						if WALL_type == "list":
 							debug.print_element("pkg", target.get_build_path(package_name) + "/res/values/" + WALL_key + ".xml", "<==", "package configurations")
 							tools.create_directory_of_file(target.get_build_path(package_name) + "/res/values/" + WALL_key + ".xml")
@@ -572,7 +572,7 @@ def tool_generate_main_java_class(target, module, package_name):
 	# my_module.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["bool", key, title, summary, ["enable string", "disable String"])
 	# my_module.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["bool", "movement", "Motion", "Apply movement to test pattern", ["Moving test pattern", "Still test pattern"]
 	#copy needed resources :
-	for res_source, res_dest in module.package_prop["ANDROID_RESOURCES"]:
+	for res_source, res_dest in module.get_pkg("ANDROID_RESOURCES"):
 		if res_source == "":
 			continue
 		tools.copy_file(res_source , target.get_staging_path(package_name) + "/res/" + res_dest + "/" + os.path.basename(res_source), force=True)
@@ -590,7 +590,7 @@ def tool_generate_main_java_class(target, module, package_name):
 	androidToolPath += dirnames[0] + "/"
 	
 	adModResoucepath = ""
-	if "ADMOD_ID" in module.package_prop:
+	if module.get_pkg("ADMOD_ID") != None:
 		adModResoucepath = " -S " + target.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/res/ "
 	cmdLine = androidToolPath + "aapt p -f " \
 	          + "-M " + target.get_staging_path(package_name) + "/AndroidManifest.xml " \
@@ -610,7 +610,7 @@ def tool_generate_main_java_class(target, module, package_name):
 	
 	#generate android java files:
 	filesString=""
-	for element in module.package_prop["ANDROID_JAVA_FILES"]:
+	for element in module.get_pkg("ANDROID_JAVA_FILES"):
 		if element=="DEFAULT":
 			filesString += target.path_gale + "/android/src/org/gale/GaleAudioTask.java "
 			filesString += target.path_gale + "/android/src/org/gale/GaleCallback.java "
@@ -623,14 +623,14 @@ def tool_generate_main_java_class(target, module, package_name):
 		else:
 			filesString += element + " "
 	
-	if "ADMOD_ID" in module.package_prop:
+	if in module.get_pkg("ADMOD_ID") != None:
 		filesString += target.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/src/android/UnusedStub.java "
 		
-	if len(module.package_prop["ANDROID_WALLPAPER_PROPERTIES"])!=0:
+	if len(module.get_pkg("ANDROID_WALLPAPER_PROPERTIES"))!=0:
 		filesString += target.path_java_project + application_name + "Settings.java "
 	
 	adModJarFile = ""
-	if "ADMOD_ID" in module.package_prop:
+	if module.get_pkg("ADMOD_ID") != None:
 		adModJarFile = ":" + target.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar"
 	
 	cmdLine = "javac " \
@@ -648,7 +648,7 @@ def tool_generate_main_java_class(target, module, package_name):
 	          + "--output=" + target.get_staging_path(package_name) + "/build/" + application_name + ".dex " \
 	          + target.get_staging_path(package_name) + "/build/classes/ "
 	
-	if "ADMOD_ID" in module.package_prop:
+	if module.get_pkg("ADMOD_ID") != None:
 		cmdLine += target.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar "
 	multiprocess.run_command(cmdLine)
 	"""
