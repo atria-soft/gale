@@ -390,11 +390,11 @@ class WindowsContext : public gale::Context {
 						//GALE_DEBUG("eventKey Move type : " << getCharTypeMoveEvent(keyInput) );
 						OS_setKeyboard(m_guiKeyBoardMode,
 						               keyInput,
-						               (buttonIsDown==true?gale::key::status::down:gale::key::status_up));
+						               (buttonIsDown==true?gale::key::status::down:gale::key::status::up));
 					} else {
 						OS_setKeyboard(m_guiKeyBoardMode,
 						               gale::key::keyboard::character,
-						               (buttonIsDown==true?gale::key::status::down:gale::key::status_up),
+						               (buttonIsDown==true?gale::key::status::down:gale::key::status::up),
 						               false,
 						               tmpChar);
 					}
@@ -411,7 +411,7 @@ class WindowsContext : public gale::Context {
 					             m_currentHeight-GET_Y_LPARAM(_lParam));
 					m_inputIsPressed[mouseButtonId] = buttonIsDown;
 					OS_SetInput(gale::key::type::mouse,
-					            (buttonIsDown==true?gale::key::status::down:gale::key::status_up),
+					            (buttonIsDown==true?gale::key::status::down:gale::key::status::up),
 					            mouseButtonId,
 					             vec2(pos.x(),pos.y()));
 					return 0;
@@ -424,7 +424,7 @@ class WindowsContext : public gale::Context {
 					             m_currentHeight-GET_Y_LPARAM(_lParam));
 					m_inputIsPressed[mouseButtonId] = buttonIsDown;
 					OS_SetInput(gale::key::type::mouse,
-					            (buttonIsDown==true?gale::key::status::down:gale::key::status_up),
+					            (buttonIsDown==true?gale::key::status::down:gale::key::status::up),
 					            mouseButtonId,
 					            vec2(pos.x(),pos.y()));
 					return 0;
@@ -437,7 +437,7 @@ class WindowsContext : public gale::Context {
 					             m_currentHeight-GET_Y_LPARAM(_lParam));
 					m_inputIsPressed[mouseButtonId] = buttonIsDown;
 					OS_SetInput(gale::key::type::mouse,
-					            (buttonIsDown==true?gale::key::status::down:gale::key::status_up),
+					            (buttonIsDown==true?gale::key::status::down:gale::key::status::up),
 					            mouseButtonId,
 					            vec2(pos.x(),pos.y()));
 					return 0;
