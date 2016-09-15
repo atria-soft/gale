@@ -29,7 +29,10 @@ def create(target, module_name):
 	my_module.add_src_file([
 		'sample/basic.cpp'
 		])
-	my_module.add_depend(['gale'])
+	my_module.add_depend([
+	    'gale',
+	    'test-debug'
+	    ])
 	my_module.copy_file('sample/basic.frag')
 	my_module.copy_file('sample/basic.vert')
 	return my_module

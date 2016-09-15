@@ -86,7 +86,10 @@ namespace gale {
 			 * @param[in] _pos Position of the event (can be <0 if out of window).
 			 * @param[in] _state Key state (up/down/move)
 			 */
-			virtual void onPointer(enum gale::key::type _type, int32_t _pointerID, const vec2& _pos, gale::key::status _state);
+			virtual void onPointer(enum gale::key::type _type,
+			                       int32_t _pointerID,
+			                       const vec2& _pos,
+			                       gale::key::status _state);
 			/**
 			 * @brief Get keyborad value input.
 			 * @param[in] _special Current special key status (ctrl/alt/shift ...).

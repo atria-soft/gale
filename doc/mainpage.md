@@ -7,11 +7,17 @@ What is GALE?         {#gale_mainpage_what}
 =============
 
 GALE, or "Graphic Abstraction Layer for Ewol" is a simple Interface with the OS Gui interface (openGL) and basic interface.
-For example, on android we use java interface and on linux we use X11 or Wayland.
+For example, on android we use java interface, on linux we use X11, ....
 Gale abstract all of this and provide an inetrface in C++ on all of these platform.
-Gale abstact the Keybord, mouse and touche event on all of these platform (when availlable)
+Gale abstact the Keybord, mouse and touch event on all of these platform (when availlable: no touch on linux X11)
 
-For audio interface You can see [audio-orchastra](https://musicdsp.github.io/audio-orchestra) That is the dual of gale but for audio.
+Gale is a low level abstraction interface. you can user upper interface:
+  - [EWOL](http://atria-soft.github.io/ewol) It provide some basic widgets and gui management
+
+With Gale you have the Graphyc abstraction. We provide some abstraction for the audio interface:
+  - [audio-orchastra](https://musicdsp.github.io/audio-orchestra) That is the dual of gale but for audio.
+  - [audio-river](https://musicdsp.github.io/audio-river) That is the dual of ewol but for audio.
+
 
 Where can I use it?         {#gale_mainpage_where}
 -------------------
@@ -51,4 +57,12 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+
+Other pages                                      {#gale_mainpage_sub_page}
+===========
+
+  - @ref gale_build
+  - @ref gale_tutorial
+  - [**ewol coding style**](http://atria-soft.github.io/ewol/ewol_coding_style.html)
 

@@ -9,6 +9,7 @@
 #include <etk/types.h>
 #include <gale/gale.h>
 #include <gale/context/commandLine.h>
+#include <test-debug/debug.h>
 
 #include <gale/Application.h>
 #include <gale/context/Context.h>
@@ -22,7 +23,7 @@ class MainApplication : public gale::Application {
 		int32_t m_GLMatrix;
 		int32_t m_GLColor;
 	public:
-		void onCreate(gale::Context& _context) {
+		void onCreate(gale::Context& _context) override {
 			setSize(vec2(800, 600));
 			m_GLprogram = gale::resource::Program::create("DATA:basic.prog");
 			if (m_GLprogram != nullptr) {
@@ -30,9 +31,9 @@ class MainApplication : public gale::Application {
 				m_GLColor    = m_GLprogram->getAttribute("EW_color");
 				m_GLMatrix   = m_GLprogram->getUniform("EW_MatrixTransformation");
 			}
-			std::cout << "==> Init APPL (END)" << std::endl;
+			TEST_INFO("==> Init APPL (END)");
 		}
-		void onDraw(gale::Context& _context) {
+		void onDraw(gale::Context& _context) override {
 			ivec2 size = getSize();
 			// set the basic openGL view port: (position drawed in the windows)
 			gale::openGL::setViewPort(ivec2(0,0),size);
@@ -60,7 +61,7 @@ class MainApplication : public gale::Application {
 			                               etk::color::blue
 			                             };
 			if (m_GLprogram == nullptr) {
-				std::cout << "No shader ..." << std::endl;
+				TEST_INFO("No shader ...");
 				return;
 			}
 			//EWOL_DEBUG("    display " << m_coord.size() << " elements" );
@@ -79,6 +80,24 @@ class MainApplication : public gale::Application {
 			m_GLprogram->unUse();
 			// Restore context of matrix
 			gale::openGL::pop();
+		}
+		void onPointer(enum gale::key::type _type,
+		               int32_t _pointerID,
+		               const vec2& _pos,
+		               gale::key::status _state) override {
+			TEST_INFO("input event: type=" << _type);
+			TEST_INFO("               id=" << _pointerID);
+			TEST_INFO("              pos=" << _pos);
+			TEST_INFO("            state=" << _state);
+		}
+		void onKeyboard(const gale::key::Special& _special,
+		                enum gale::key::keyboard _type,
+		                char32_t _value,
+		                gale::key::status _state) override {
+			TEST_INFO("Keyboard event: special=" << _special);
+			TEST_INFO("                   type=" << _type);
+			TEST_INFO("                  value=" << uint32_t(_value));
+			TEST_INFO("                  state=" << _state);
 		}
 };
 
