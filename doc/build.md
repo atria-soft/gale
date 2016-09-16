@@ -6,7 +6,7 @@ Build lib & build sample                           {#gale_build}
 Download:                                          {#gale_build_download}
 =========
 
-ege use some tools to manage source and build it:
+gale use some tools to manage source and build it:
 
 need google repo:                                  {#gale_build_download_repo}
 -----------------
@@ -58,7 +58,7 @@ sources:                                           {#gale_build_download_sources
 They are already download in the repo manifest in:
 
 ```{.sh}
-	cd WORKING_DIRECTORY/framework/atria-soft/audio-river
+	cd WORKING_DIRECTORY/framework/atria-soft/gale
 ```
 
 Build:                                             {#gale_build_build}
