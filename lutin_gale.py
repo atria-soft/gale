@@ -145,7 +145,7 @@ def create(target, module_name):
 	my_module.add_path(tools.get_current_path(__file__))
 	
 	my_module.add_flag('c++', [
-	    "-DGALE_VERSION=\"\\\"" + tools.version_to_string(get_version()) + "\\\"\""
+	    "-DGALE_VERSION=\"\\\"" + tools.version_to_string(my_module.get_pkg("VERSION")) + "\\\"\""
 	    ])
 	
 	if "Linux" in target.get_type():
@@ -156,22 +156,24 @@ def create(target, module_name):
 		target.add_action("BINARY", 50, "gale-auto-wrapper", tool_generate_main_java_class)
 		# TODO : Add the same for BINARY to create a console interface ?
 	elif "Windows" in target.get_type():
-		#my_module.add_depend("glew")
+		my_module.add_depend("glew")
 		pass
 	elif "MacOs" in target.get_type():
-		my_module.add_export_flag('link', [
+		my_module.add_flag('link', [
 		    "-framework Cocoa",
 		    "-framework QuartzCore",
 		    "-framework AppKit"
-		    ])
+		    ],
+		    export=True)
 	elif "IOs" in target.get_type():
-		my_module.add_export_flag('link', [
+		my_module.add_flag('link', [
 		    "-framework CoreGraphics",
 		    "-framework UIKit",
 		    "-framework GLKit",
 		    "-framework Foundation",
 		    "-framework QuartzCore"
-		    ])
+		    ],
+		    export=True)
 	
 	return my_module
 

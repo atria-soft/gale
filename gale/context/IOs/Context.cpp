@@ -69,7 +69,7 @@ public:
 	}
 	void MAC_SetMouseState(int32_t _id, bool _isDown, float _x, float _y) {
 		OS_SetInput(gale::key::type::mouse,
-		            (_isDown==true?gale::key::status::down:gale::key::status_up),
+		            (_isDown==true?gale::key::status::down:gale::key::status::up),
 		            _id,
 		            vec2(_x, _y));
 	}
@@ -81,7 +81,7 @@ public:
 	}
 	void MAC_SetInputState(int32_t _id, bool _isDown, float _x, float _y) {
 		OS_SetInput(gale::key::type::finger,
-		            (_isDown==true?gale::key::status::down:gale::key::status_up),
+		            (_isDown==true?gale::key::status::down:gale::key::status::up),
 		            _id,
 		            vec2(_x, _y));
 	}
@@ -119,12 +119,12 @@ public:
 			}
 			OS_setKeyboard(_special,
 			               move,
-			               (_isDown==false?gale::key::status::down:gale::key::status_up),
+			               (_isDown==false?gale::key::status::down:gale::key::status::up),
 			               _isARepeateKey);
 		} else {
 			OS_setKeyboard(_special,
 			               gale::key::keyboard::character,
-			               (_isDown==false?gale::key::status::down:gale::key::status_up),
+			               (_isDown==false?gale::key::status::down:gale::key::status::up),
 			               _isARepeateKey,
 			               _unichar);
 		}
@@ -134,7 +134,7 @@ public:
 							 bool _isDown) {
 		OS_setKeyboard(_special,
 		               _move,
-		               (_isDown==true?gale::key::status::down:gale::key::status_up));
+		               (_isDown==true?gale::key::status::down:gale::key::status::up));
 	}
 	void openURL(const std::string& _url) {
 		mm_openURL(_url.c_str());

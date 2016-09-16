@@ -67,7 +67,7 @@ class MacOSInterface : public gale::Context {
 		}
 		void MAC_SetMouseState(int32_t _id, bool _isDown, float _x, float _y) {
 			OS_SetInput(gale::key::type::mouse,
-			            (_isDown==true?gale::key::status::down:gale::key::status_up),
+			            (_isDown==true?gale::key::status::down:gale::key::status::up),
 			            _id,
 			            vec2(_x, _y));
 		}
@@ -103,16 +103,16 @@ class MacOSInterface : public gale::Context {
 						move = gale::key::keyboard::right;
 						break;
 				}
-				OS_setKeyboard(_special, move, (_isDown==false?gale::key::status::down:gale::key::status_up), _isAReapeateKey);
+				OS_setKeyboard(_special, move, (_isDown==false?gale::key::status::down:gale::key::status::up), _isAReapeateKey);
 			} else {
-				OS_setKeyboard(_special, gale::key::keyboard::character, (_isDown==false?gale::key::status::down:gale::key::status_up), _isAReapeateKey, _unichar);
+				OS_setKeyboard(_special, gale::key::keyboard::character, (_isDown==false?gale::key::status::down:gale::key::status::up), _isAReapeateKey, _unichar);
 			}
 		}
 		void MAC_SetKeyboardMove(gale::key::Special& _special,
 								enum gale::key::keyboard _move,
 								bool _isDown,
 								bool _isAReapeateKey) {
-			OS_setKeyboard(_special, _move, (_isDown==true?gale::key::status::down:gale::key::status_up), _isAReapeateKey);
+			OS_setKeyboard(_special, _move, (_isDown==true?gale::key::status::down:gale::key::status::up), _isAReapeateKey);
 		}
 		void openURL(const std::string& _url) {
 			std::string req = "open " + _url;

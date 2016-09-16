@@ -10,6 +10,7 @@
 #include <gale/key/key.h>
 
 #include <gale/debug.h>
+#include <etk/stdTools.h>
 
 @implementation GaleMainWindows
 
