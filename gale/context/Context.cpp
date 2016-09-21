@@ -149,7 +149,10 @@ void gale::Context::processEvents() {
 	while (m_msgSystem.count()>0) {
 		nbEvent++;
 		std::function<void(gale::Context& _context)> func;
-		m_msgSystem.wait(func);
+		{
+			std::unique_lock<std::recursive_mutex> lock(m_mutex);
+			m_msgSystem.wait(func);
+		}
 		if (func == nullptr) {
 			continue;
 		}
@@ -302,6 +305,11 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	GALE_INFO(" == > Gale system init (END)");
 }
 
+void gale::Context::postAction(std::function<void(gale::Context& _context)> _action) {
+	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	m_msgSystem.post(_action);
+}
+
 gale::Context::~Context() {
 	GALE_INFO(" == > Gale system Un-Init (BEGIN)");
 	// TODO : Clean the message list ...
@@ -340,6 +348,7 @@ void gale::Context::requestUpdateSize() {
 		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
 		m_simulationFile.filePuts(":RECALCULATE_SIZE\n");
 	}
+	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	m_msgSystem.post([](gale::Context& _context){
 		//GALE_DEBUG("Receive MSG : THREAD_RESIZE");
 		_context.forceRedrawAll();
@@ -355,6 +364,7 @@ void gale::Context::OS_Resize(const vec2& _size) {
 		m_simulationFile.filePuts(etk::to_string(_size));
 		m_simulationFile.filePuts("\n");
 	}
+	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	m_msgSystem.post([_size](gale::Context& _context){
 		//GALE_DEBUG("Receive MSG : THREAD_RESIZE");
 		_context.m_windowsSize = _size;
@@ -368,6 +378,7 @@ void gale::Context::OS_Move(const vec2& _pos) {
 	data->TypeMessage = eSystemMessage::msgResize;
 	data->resize.w = w;
 	data->resize.h = h;
+	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	m_msgSystem.Post(data);
 	*/
 }
@@ -388,6 +399,7 @@ void gale::Context::OS_SetInput(enum gale::key::type _type,
 		m_simulationFile.filePuts(etk::to_string(_pos));
 		m_simulationFile.filePuts("\n");
 	}
+	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	m_msgSystem.post([_type, _status, _pointerID, _pos](gale::Context& _context){
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
 		if (appl == nullptr) {
@@ -424,6 +436,7 @@ void gale::Context::OS_setKeyboard(const gale::key::Special& _special,
 		m_simulationFile.filePuts(etk::to_string(uint64_t(_char)));
 		m_simulationFile.filePuts("\n");
 	}
+	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	m_msgSystem.post([_special, _type, _state, _char](gale::Context& _context){
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
 		if (appl == nullptr) {
@@ -441,6 +454,7 @@ void gale::Context::OS_Hide() {
 		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
 		m_simulationFile.filePuts(":VIEW:false\n");
 	}
+	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	m_msgSystem.post([](gale::Context& _context){
 		/*
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
@@ -484,6 +498,7 @@ void gale::Context::OS_ClipBoardArrive(enum gale::context::clipBoard::clipboardL
 		m_simulationFile.filePuts(etk::to_string(_clipboardID));
 		m_simulationFile.filePuts("\n");
 	}
+	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	m_msgSystem.post([_clipboardID](gale::Context& _context){
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
 		if (appl != nullptr) {

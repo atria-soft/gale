@@ -25,6 +25,8 @@
 
 namespace gale {
 	class Context/* : private gale::object::RemoveEvent */{
+		protected:
+			std::recursive_mutex m_mutex;
 		private:
 			ememory::SharedPtr<gale::Application> m_application; //!< Application handle
 		public:
@@ -74,6 +76,8 @@ namespace gale {
 			 * @brief Processing all the event arrived ... (commoly called in draw function)
 			 */
 			void processEvents();
+		public:
+			void postAction(std::function<void(gale::Context& _context)> _action);
 		public:
 			
 			virtual void setArchiveDir(int _mode, const char* _str, const char* _applName=nullptr);
