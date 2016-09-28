@@ -67,6 +67,7 @@ def create(target, module_name):
 		my_module.add_optionnal_depend('egami', ["c++", "-DGALE_BUILD_EGAMI"])
 	elif "Windows" in target.get_type():
 		my_module.add_src_file('gale/context/Windows/Context.cpp')
+		my_module.add_depend('start-mode-gui')
 	elif "Android" in target.get_type():
 		my_module.add_src_file('gale/context/Android/Context.cpp')
 		my_module.add_src_file([
@@ -157,7 +158,6 @@ def create(target, module_name):
 		# TODO : Add the same for BINARY to create a console interface ?
 	elif "Windows" in target.get_type():
 		my_module.add_depend("glew")
-		pass
 	elif "MacOs" in target.get_type():
 		my_module.add_depend([
 		    "Cocoa",
