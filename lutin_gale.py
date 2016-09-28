@@ -159,21 +159,19 @@ def create(target, module_name):
 		my_module.add_depend("glew")
 		pass
 	elif "MacOs" in target.get_type():
-		my_module.add_flag('link', [
-		    "-framework Cocoa",
-		    "-framework QuartzCore",
-		    "-framework AppKit"
-		    ],
-		    export=True)
+		my_module.add_depend([
+		    "Cocoa",
+		    "QuartzCore",
+		    "AppKit",
+		    ])
 	elif "IOs" in target.get_type():
-		my_module.add_flag('link', [
-		    "-framework CoreGraphics",
-		    "-framework UIKit",
-		    "-framework GLKit",
-		    "-framework Foundation",
-		    "-framework QuartzCore"
-		    ],
-		    export=True)
+		my_module.add_depend([
+		    "CoreGraphics",
+		    "UIKit",
+		    "GLKit",
+		    "Foundation",
+		    "QuartzCore",
+		    ])
 	
 	return my_module
 
