@@ -635,7 +635,7 @@ void gale::openGL::drawElements8(enum renderMode _mode, const std::vector<uint8_
 }
 
 void gale::openGL::useProgram(int32_t _id) {
-	//GALE_DEBUG("USE prog : " << id);
+	//GALE_DEBUG("USE prog : " << _id);
 	#if 1
 		// note : In normal openGL case, the system might call with the program ID and at the end with 0, 
 		//        here, we wrap this use to prevent over call of glUseProgram  == > then we set -1 when the 
@@ -673,6 +673,15 @@ void gale::openGL::useProgram(int32_t _id) {
 				}
 			#endif
 		}
+	#endif
+	#if 0
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			if (s_simulationMode == false) {
+		#endif
+		checkGlError("glUseProgram", __LINE__);
+		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
+			}
+		#endif
 	#endif
 }
 

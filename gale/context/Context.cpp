@@ -366,7 +366,7 @@ void gale::Context::OS_Resize(const vec2& _size) {
 	}
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	m_msgSystem.post([_size](gale::Context& _context){
-		//GALE_DEBUG("Receive MSG : THREAD_RESIZE");
+		GALE_DEBUG("Receive MSG : THREAD_RESIZE : " << _context.m_windowsSize << " ==> " << _size);
 		_context.m_windowsSize = _size;
 		gale::Dimension::setPixelWindowsSize(_context.m_windowsSize);
 		_context.forceRedrawAll();
@@ -711,7 +711,7 @@ void gale::Context::OS_Background() {
 
 
 void gale::Context::stop() {
-	
+	GALE_WARNING("stop: NOT implemented for this platform...");
 }
 
 void gale::Context::setSize(const vec2& _size) {

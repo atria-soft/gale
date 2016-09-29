@@ -29,6 +29,27 @@ int64_t gale::getTime() {
     return (int64_t)((int64_t)now.tv_sec*(int64_t)1000000 + (int64_t)now.tv_usec);
 }
 
+static std::string GetLastErrorAsString() {
+	//Get the error message, if any.
+	DWORD errorMessageID = ::GetLastError();
+	if(errorMessageID == 0) {
+		return std::string(); //No error message has been recorded
+	}
+	LPSTR messageBuffer = nullptr;
+	size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+	                             NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+	std::string message(messageBuffer, size);
+	//Free the buffer.
+	LocalFree(messageBuffer);
+	return message;
+}
+
+class WindowsContext;
+// This is a bad hook to get the wurrent windows pointer (it is unique ...):
+static WindowsContext * galeWindowsContext = nullptr;
+
+// Window Procedure
+static LRESULT CALLBACK WndProc(HWND _hWnd, UINT _message, WPARAM _wParam, LPARAM _lParam);
 
 class WindowsContext : public gale::Context {
 	private:
@@ -40,25 +61,26 @@ class WindowsContext : public gale::Context {
 	public:
 		WindowsContext(gale::Application* _application, int32_t _argc, const char* _argv[]) :
 		  gale::Context(_application, _argc, _argv) {
+			galeWindowsContext = this;
 			for (int32_t iii=0; iii<MAX_MANAGE_INPUT; ++iii) {
 				m_inputIsPressed[iii] = false;
 			}
 		}
 		
 		~WindowsContext() {
-			
+			galeWindowsContext = nullptr;
 		}
 		
 		int32_t run() {
-			HINSTANCE hInstance = GetModuleHandle(nullptr);
-			HWND hWnd;
-			HDC hDC;
-			HGLRC hRC;
+			HINSTANCE hInstance = 0;//GetModuleHandle(nullptr);
+			HWND hWnd = 0;
+			HDC hDC = 0;
+			HGLRC hRC = 0;
 			
 			// register a new windows class (need it to define external callback)
 			WNDCLASSEX windowClass;
 			windowClass.cbSize = sizeof(WNDCLASSEX);
-			windowClass.style = CS_HREDRAW | CS_VREDRAW;//CS_OWNDC;
+			windowClass.style = CS_OWNDC;//CS_HREDRAW | CS_VREDRAW;//CS_OWNDC;
 			windowClass.lpfnWndProc = WndProc;
 			windowClass.cbClsExtra = 0;
 			windowClass.cbWndExtra = 0;
@@ -66,27 +88,29 @@ class WindowsContext : public gale::Context {
 			windowClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 			windowClass.hIconSm = LoadIcon(NULL, IDI_WINLOGO);
 			windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-			windowClass.hbrBackground = NULL; // (HBRUSH)GetStockObject(BLACK_BRUSH);
+			windowClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 			windowClass.lpszMenuName = NULL;
 			windowClass.lpszClassName = "GaleMainWindows";
 			//Register window class
-			if (!RegisterClassEx(&windowClass)) {
-				GALE_ERROR("Can not register windows class");
+			if (RegisterClassEx(&windowClass) == 0) {
+				GALE_ERROR("Can not register windows class: '" << GetLastErrorAsString() << "'" );
 				MessageBox(hWnd, "Error creating window class\n(gale internal error #65231)", "Error", MB_ICONEXCLAMATION);
 				PostQuitMessage(0);
 			}
 			// Now we use the created windows class "GaleMainWindows" to create the wew windows with callback ... ==> use "STATIC" to not use generic callback ...
-			hWnd = CreateWindowEx(WS_EX_APPWINDOW,       // The extended window style of the window being created.
-			                      "STATIC",     // A null-terminated string or a class atom created by a previous call to the RegisterClass or RegisterClassEx function.
+			hWnd = CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,       // The extended window style of the window being created.
+			                      "GaleMainWindows",     // A null-terminated string or a class atom created by a previous call to the RegisterClass or RegisterClassEx function.
 			                      "Gale ... TODO Title", // The window name.
-			                        WS_CAPTION       // Enable title bar
-			                      // | WS_DISABLED    // Disable receive Windows event !! need to active EnableWindow
-			                      | WS_POPUPWINDOW   // The window is a pop-up window
-			                      //| WS_POPUP         // The windows is a pop-up window
-			                      //| WS_VISIBLE       // Start in visible mode
-			                      //| WS_CLIPSIBLINGS  // 
-			                      //| WS_CLIPCHILDREN  // 
-			                      | WS_SIZEBOX       // 
+			                      0
+			                      //| WS_OVERLAPPEDWINDOW // 
+			                      | WS_CAPTION         // Enable title bar
+			                      //| WS_DISABLED      // Disable receive Windows event !! need to active EnableWindow
+			                      | WS_POPUPWINDOW     // The window is a pop-up window
+			                      //| WS_POPUP           // The windows is a pop-up window
+			                      //| WS_VISIBLE         // Start in visible mode
+			                      //| WS_CLIPSIBLINGS    // 
+			                      //| WS_CLIPCHILDREN    // 
+			                      | WS_SIZEBOX         // 
 			                      ,                      // The style of the window being created.
 			                      10, 10,                // start position
 			                      800, 600,              // start size
@@ -96,7 +120,7 @@ class WindowsContext : public gale::Context {
 			                      nullptr                //A pointer to a value to be passed to the window through the CREATESTRUCT structure
 			                      );
 			if(hWnd == nullptr) {
-				GALE_ERROR("Can not create windows");
+				GALE_ERROR("Can not create windows '" << GetLastErrorAsString() << "'" );
 				MessageBox(hWnd, "Error creating window\n(gale internal error #45211)", "Error", MB_ICONEXCLAMATION);
 				PostQuitMessage(0);
 			}
@@ -110,12 +134,12 @@ class WindowsContext : public gale::Context {
 			GLenum err = glewInit();
 			if (GLEW_OK != err) {
 				// Problem: glewInit failed, something is seriously wrong.
-				GALE_CRITICAL("Error:" << glewGetErrorString(err));
+				GALE_CRITICAL("Error: '" << glewGetErrorString(err) << "'" );
 				MessageBox(hWnd, "Error initilizing open GL\n(gale internal error #8421)", "Error", MB_ICONEXCLAMATION);
 				PostQuitMessage(0);
 			}
 			if (!glewIsSupported("GL_VERSION_2_0")) {
-				GALE_ERROR("OpenGL 2.0 not available");
+				GALE_ERROR("OpenGL 2.0 not available '" << glewGetErrorString(err) << "'" );
 				MessageBox(hWnd, "Error initilizing open GL\n OPENGL 2.0 not availlable ...\n(gale internal error #75124)", "Error", MB_ICONEXCLAMATION);
 				PostQuitMessage(0);
 			}
@@ -123,6 +147,8 @@ class WindowsContext : public gale::Context {
 			ShowWindow(hWnd, SW_SHOW);
 			//EnableWindow(hWnd, TRUE);
 			ShowCursor(TRUE);
+			// Force update of the windows
+			UpdateWindow(hWnd);
 			MSG msg;
 			// program main loop
 			while(m_run == true) {
@@ -136,10 +162,15 @@ class WindowsContext : public gale::Context {
 						DispatchMessage(&msg);
 					}
 				} else {
+					glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+					glLoadIdentity();
 					OS_Draw(true);
 					SwapBuffers(hDC);
 				}
 			}
+			// TODO : We destroy the OpenGL context before cleaning GALE : Do it Better ...
+			getResourcesManager().contextHasBeenDestroyed();
 			// shutdown openGL
 			disableOpenGL(hWnd, hDC, hRC);
 			// destroy the window explicitly
@@ -147,7 +178,7 @@ class WindowsContext : public gale::Context {
 			return msg.wParam;
 		}
 		
-		void Stop() {
+		void stop() {
 			m_run = false;
 			// To exit program ...
 			PostQuitMessage(0);
@@ -215,7 +246,7 @@ class WindowsContext : public gale::Context {
 			ZeroMemory(&pfd, sizeof(PIXELFORMATDESCRIPTOR));
 			pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
 			pfd.nVersion = 1;
-			pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+			pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_TYPE_RGBA;
 			pfd.iPixelType = PFD_TYPE_RGBA;
 			pfd.cColorBits = 32;
 			pfd.cDepthBits = 16;
@@ -230,6 +261,8 @@ class WindowsContext : public gale::Context {
 				MessageBox(_hWnd, "Error initilizing open GL\n openGL context creation error...\n(gale internal error #3526)", "Error", MB_ICONEXCLAMATION);
 				PostQuitMessage(0);
 			}
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);// | GL_STENCIL_BUFFER_BIT);
+			//glUseProgram(0);
 		}
 		
 		// disable openGL (fisnish application ...
@@ -237,14 +270,6 @@ class WindowsContext : public gale::Context {
 			wglMakeCurrent(nullptr, nullptr);
 			wglDeleteContext(_hRC);
 			ReleaseDC(_hWnd, _hDC);
-		}
-		
-		// Window Procedure
-		static LRESULT CALLBACK WndProc(HWND _hWnd, UINT _message, WPARAM _wParam, LPARAM _lParam) {
-			// TODO : set this function really work...
-			GALE_ERROR("get event ...");
-			// TODO : return classPointer->WndProcReal(_hWnd, _message, _wParam, _lParam);
-			return 0;
 		}
 		
 		LRESULT CALLBACK WndProcReal(HWND _hWnd, UINT _message, WPARAM _wParam, LPARAM _lParam) {
@@ -258,20 +283,21 @@ class WindowsContext : public gale::Context {
 				 * **************************************************************************/
 				case WM_CREATE:
 					GALE_DEBUG("WM_CREATE");
-					return 0;
+					break;
 				case WM_CLOSE:
 					GALE_DEBUG("WM_CLOSE");
-					PostQuitMessage( 0 );
+					OS_Stop();
 					return 0;
 				case WM_DESTROY:
 					GALE_DEBUG("WM_DESTROY");
-					return 0;
+					m_run = false;
+					break;
 				case WM_MOVE:
 					GALE_DEBUG("WM_MOVE");
-					return 0;
+					break;
 				case WM_SIZE:
 					GALE_DEBUG("WM_SIZE");
-					return 0;
+					break;
 				/*
 				case WM_GETMINMAXINFO:
 					{
@@ -282,24 +308,31 @@ class WindowsContext : public gale::Context {
 						GALE_DEBUG("    ptMinTrackSize : " << tmpVal->ptMinTrackSize.x << "," << tmpVal->ptMinTrackSize.y << ")");
 						GALE_DEBUG("    ptMaxTrackSize : " << tmpVal->ptMaxTrackSize.x << "," << tmpVal->ptMaxTrackSize.y << ")");
 					}
-					return 0;
+					break;
 				*/
 				case WM_WINDOWPOSCHANGING: {
 					WINDOWPOS* tmpVal = (WINDOWPOS*)_lParam;
-					if (nullptr != tmpVal) {
-						//GALE_DEBUG("WM_WINDOWPOSCHANGING : : (" << tmpVal->x << "," << tmpVal->y << ") ( " << tmpVal->cx << "," << tmpVal->cy << ")");
-						// in windows system, we need to remove the size of the border elements : 
-						int border_thickness = GetSystemMetrics(SM_CXSIZEFRAME);
-						int title_size = GetSystemMetrics(SM_CYCAPTION);
-						m_currentHeight = tmpVal->cy - 2*border_thickness - title_size;
-						OS_Resize(vec2(tmpVal->cx-2*border_thickness, m_currentHeight));
+					if (tmpVal == nullptr) {
+						break;
 					}
-					return 0;
+					GALE_DEBUG("WM_WINDOWPOSCHANGING : : (" << tmpVal->x << "," << tmpVal->y << ") ( " << tmpVal->cx << "," << tmpVal->cy << ")");
+					if (    tmpVal->cx == 0
+					     && tmpVal->cy == 0) {
+						// special case for start application and hide application
+						break;
+					}
+					// in windows system, we need to remove the size of the border elements:
+					int border_thickness = GetSystemMetrics(SM_CXSIZEFRAME);
+					int title_size = GetSystemMetrics(SM_CYCAPTION);
+					m_currentHeight = tmpVal->cy - 2*border_thickness - title_size;
+					float width = tmpVal->cx-2*border_thickness;
+					OS_Resize(vec2(width, m_currentHeight));
+					break;
 				}
 				// these message are not parse by us ...
 				case WM_SETCURSOR: // Call the windows if we want the mouse event :
 				case WM_NCHITTEST: // inform the application the position of the mouse is moving
-					return DefWindowProc( _hWnd, _message, _wParam, _lParam );
+					break;
 				
 				/* **************************************************************************
 				 *                             Keyboard management
@@ -426,7 +459,7 @@ class WindowsContext : public gale::Context {
 							}
 							break;
 					}
-					GALE_DEBUG("kjhkjhkjhkjhkj = " << _wParam);
+					GALE_DEBUG("Keyboard Value = " << _wParam << " '" << char(tmpChar) << "'");
 					if (tmpChar == 0) {
 						//GALE_DEBUG("eventKey Move type : " << getCharTypeMoveEvent(keyInput) );
 						OS_setKeyboard(m_guiKeyBoardMode,
@@ -439,7 +472,7 @@ class WindowsContext : public gale::Context {
 						               false,
 						               tmpChar);
 					}
-					return 0;
+					break;
 				}
 				/* **************************************************************************
 				 *                             Mouse management
@@ -455,7 +488,7 @@ class WindowsContext : public gale::Context {
 					            (buttonIsDown==true?gale::key::status::down:gale::key::status::up),
 					            mouseButtonId,
 					             vec2(pos.x(),pos.y()));
-					return 0;
+					break;
 				
 				case WM_MBUTTONUP:
 					buttonIsDown = false;
@@ -468,7 +501,7 @@ class WindowsContext : public gale::Context {
 					            (buttonIsDown==true?gale::key::status::down:gale::key::status::up),
 					            mouseButtonId,
 					            vec2(pos.x(),pos.y()));
-					return 0;
+					break;
 				
 				case WM_RBUTTONUP:
 					buttonIsDown = false;
@@ -481,7 +514,7 @@ class WindowsContext : public gale::Context {
 					            (buttonIsDown==true?gale::key::status::down:gale::key::status::up),
 					            mouseButtonId,
 					            vec2(pos.x(),pos.y()));
-					return 0;
+					break;
 				
 				case WM_MOUSEWHEEL:
 					if (_wParam & 0x200000) {
@@ -501,7 +534,7 @@ class WindowsContext : public gale::Context {
 					            gale::key::status::up,
 					            mouseButtonId,
 					            vec2(pos.x(),pos.y()));
-					return 0;
+					break;
 				
 				case WM_MOUSEHOVER:
 				case WM_MOUSEMOVE:
@@ -522,14 +555,23 @@ class WindowsContext : public gale::Context {
 					            gale::key::status::move,
 					            0,
 					            vec2(pos.x(),pos.y()));
-					return 0;
+					break;
 				
 				default:
 					GALE_DEBUG("event ..." << _message );
-					return DefWindowProc( _hWnd, _message, _wParam, _lParam );
+					break;
 			}
+			return DefWindowProc(_hWnd, _message, _wParam, _lParam);
 		}
 };
+
+static LRESULT CALLBACK WndProc(HWND _hWnd, UINT _message, WPARAM _wParam, LPARAM _lParam) {
+	// TODO : set this function really work...
+	if (galeWindowsContext == nullptr) {
+		return 0;
+	}
+	return galeWindowsContext->WndProcReal(_hWnd, _message, _wParam, _lParam);
+}
 
 /**
  * @brief Main of the program
@@ -547,6 +589,7 @@ int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 	int32_t retValue = localInterface->run();
 	delete(localInterface);
 	localInterface = nullptr;
+	GALE_INFO("END APPLICATION");
 	return retValue;
 }
 

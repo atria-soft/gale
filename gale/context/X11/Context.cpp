@@ -193,7 +193,7 @@ class X11Interface : public gale::Context {
 		int32_t run() {
 			bool specialEventThatNeedARedraw = false;
 			// main cycle
-			while(true == m_run) {
+			while(m_run == true) {
 				//GALE_ERROR("plop1");
 				XEvent event;
 				XEvent respond;
