@@ -60,7 +60,7 @@ bool gale::resource::Shader::updateContext() {
 			m_shader = -1;
 			return true;
 		}
-		GALE_INFO("Create Shader : '" << m_name << "'");
+		GALE_DEBUG("Create Shader : '" << m_name << "'");
 		m_shader = gale::openGL::shader::create(m_type);
 		if (m_shader < 0) {
 			GALE_CRITICAL(" can not load shader");
