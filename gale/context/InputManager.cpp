@@ -4,16 +4,12 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <etk/types.h>
-#include <etk/types.h>
-
-#include <gale/debug.h>
-
-#include <gale/gale.h>
-
-#include <gale/context/Context.h>
-#include <gale/context/InputManager.h>
-#include <gale/Application.h>
+#include <etk/types.hpp>
+#include <gale/debug.hpp>
+#include <gale/gale.hpp>
+#include <gale/context/Context.hpp>
+#include <gale/context/InputManager.hpp>
+#include <gale/Application.hpp>
 
 
 

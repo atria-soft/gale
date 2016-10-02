@@ -9,17 +9,17 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <etk/types.h>
-#include <etk/os/FSNode.h>
+#include <etk/types.hpp>
+#include <etk/os/FSNode.hpp>
 
-#include <gale/debug.h>
-#include <gale/gale.h>
-#include <gale/key/key.h>
-#include <gale/context/commandLine.h>
-#include <gale/resource/Manager.h>
-#include <gale/context/Context.h>
-#include <gale/Dimension.h>
-#include <etk/etk.h>
+#include <gale/debug.hpp>
+#include <gale/gale.hpp>
+#include <gale/key/key.hpp>
+#include <gale/context/commandLine.hpp>
+#include <gale/resource/Manager.hpp>
+#include <gale/context/Context.hpp>
+#include <gale/Dimension.hpp>
+#include <etk/etk.hpp>
 
 
 #if defined(__TARGET_OS__Linux)

@@ -3,24 +3,24 @@
  * @copyright 2011, Edouard DUPIN, all right reserved
  * @license APACHE v2.0 (see license file)
  */
-#include <gale/debug.h>
-#include <gale/gale.h>
-#include <etk/types.h>
-#include <etk/os/FSNode.h>
+#include <gale/debug.hpp>
+#include <gale/gale.hpp>
+#include <etk/types.hpp>
+#include <etk/os/FSNode.hpp>
 
-#include <etk/math/Vector2D.h>
-#include <etk/math/Vector3D.h>
+#include <etk/math/Vector2D.hpp>
+#include <etk/math/Vector3D.hpp>
 
-#include <gale/key/key.h>
-#include <gale/resource/Texture.h>
-#include <gale/context/Context.h>
-#include <gale/renderer/openGL/openGL.h>
-#include <gale/renderer/openGL/openGL-include.h>
+#include <gale/key/key.hpp>
+#include <gale/resource/Texture.hpp>
+#include <gale/context/Context.hpp>
+#include <gale/renderer/openGL/openGL.hpp>
+#include <gale/renderer/openGL/openGL-include.hpp>
 
 #include <sys/time.h>
 #include <windows.h>
 #include <windowsx.h>
-#include <etk/etk.h>
+#include <etk/etk.hpp>
 
 int64_t gale::getTime() {
     struct timeval now;

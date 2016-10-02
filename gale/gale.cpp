@@ -4,12 +4,12 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <gale/gale.h>
-#include <gale/context/Context.h>
+#include <gale/gale.hpp>
+#include <gale/context/Context.hpp>
 
-#include <gale/context/commandLine.h>
-#include <etk/os/FSNode.h>
-#include <gale/Dimension.h>
+#include <gale/context/commandLine.hpp>
+#include <etk/os/FSNode.hpp>
+#include <gale/Dimension.hpp>
 
 #ifndef GALE_VERSION
 #define GALE_VERSION "0.0.0"

@@ -4,7 +4,7 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <gale/context/cursor.h>
+#include <gale/context/cursor.hpp>
 
 static const char* cursorDescriptionString[] = {
 	"cursor::arrow",

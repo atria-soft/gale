@@ -5,21 +5,21 @@
  */
 #pragma once
 
-#include <etk/os/Fifo.h>
-#include <etk/os/FSNode.h>
-#include <gale/debug.h>
-#include <gale/gale.h>
-#include <gale/key/key.h>
-#include <gale/resource/Manager.h>
-#include <gale/Application.h>
-#include <gale/context/clipBoard.h>
-#include <gale/context/commandLine.h>
-// TODO : #include <gale/context/InputManager.h>
-#include <gale/context/Fps.h>
-#include <ememory/memory.h>
-#include <gale/orientation.h>
-#include <gale/context/clipBoard.h>
-#include <ethread/tools.h>
+#include <etk/os/Fifo.hpp>
+#include <etk/os/FSNode.hpp>
+#include <gale/debug.hpp>
+#include <gale/gale.hpp>
+#include <gale/key/key.hpp>
+#include <gale/resource/Manager.hpp>
+#include <gale/Application.hpp>
+#include <gale/context/clipBoard.hpp>
+#include <gale/context/commandLine.hpp>
+// TODO : #include <gale/context/InputManager.hpp>
+#include <gale/context/Fps.hpp>
+#include <ememory/memory.hpp>
+#include <gale/orientation.hpp>
+#include <gale/context/clipBoard.hpp>
+#include <ethread/tools.hpp>
 
 #define MAX_MANAGE_INPUT (15)
 

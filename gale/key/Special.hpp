@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include <gale/debug.h>
-#include <gale/key/keyboard.h>
+#include <gale/debug.hpp>
+#include <gale/key/keyboard.hpp>
 
 namespace gale {
 	namespace key {

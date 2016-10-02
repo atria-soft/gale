@@ -4,8 +4,8 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <gale/key/keyboard.h>
-#include <etk/stdTools.h>
+#include <gale/key/keyboard.hpp>
+#include <etk/stdTools.hpp>
 
 static const char* keyboardDescriptionString[] = {
 	"keyboard::unknow",

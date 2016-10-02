@@ -40,12 +40,12 @@ def create(target, module_name):
 	    'gale/Thread.cpp',
 	    ])
 	my_module.add_header_file([
-	    'gale/debug.h',
-	    'gale/gale.h',
-	    'gale/Dimension.h',
-	    'gale/orientation.h',
-	    'gale/Application.h',
-	    'gale/Thread.h',
+	    'gale/debug.hpp',
+	    'gale/gale.hpp',
+	    'gale/Dimension.hpp',
+	    'gale/orientation.hpp',
+	    'gale/Application.hpp',
+	    'gale/Thread.hpp',
 	    ])
 	# context:
 	my_module.add_src_file([
@@ -55,11 +55,11 @@ def create(target, module_name):
 	    'gale/context/cursor.cpp',
 	    ])
 	my_module.add_header_file([
-	    'gale/context/clipBoard.h',
-	    'gale/context/commandLine.h',
-	    'gale/context/Context.h',
-	    'gale/context/cursor.h',
-	    'gale/context/Fps.h'
+	    'gale/context/clipBoard.hpp',
+	    'gale/context/commandLine.hpp',
+	    'gale/context/Context.hpp',
+	    'gale/context/cursor.hpp',
+	    'gale/context/Fps.hpp'
 	    ])
 	if "Linux" in target.get_type():
 		my_module.add_src_file('gale/context/X11/Context.cpp')
@@ -106,19 +106,19 @@ def create(target, module_name):
 	    'gale/key/type.cpp'
 	    ])
 	my_module.add_header_file([
-	    'gale/key/keyboard.h',
-	    'gale/key/Special.h',
-	    'gale/key/status.h',
-	    'gale/key/type.h',
-	    'gale/key/key.h'
+	    'gale/key/keyboard.hpp',
+	    'gale/key/Special.hpp',
+	    'gale/key/status.hpp',
+	    'gale/key/type.hpp',
+	    'gale/key/key.hpp'
 	    ])
 	# OpenGL interface:
 	my_module.add_src_file([
 	    'gale/renderer/openGL/openGL.cpp'
 	    ])
 	my_module.add_header_file([
-	    'gale/renderer/openGL/openGL.h',
-	    'gale/renderer/openGL/openGL-include.h'
+	    'gale/renderer/openGL/openGL.hpp',
+	    'gale/renderer/openGL/openGL-include.hpp'
 	    ])
 	# resources:
 	my_module.add_src_file([
@@ -130,12 +130,12 @@ def create(target, module_name):
 	    'gale/resource/VirtualBufferObject.cpp'
 	    ])
 	my_module.add_header_file([
-	    'gale/resource/Manager.h',
-	    'gale/resource/Program.h',
-	    'gale/resource/Resource.h',
-	    'gale/resource/Shader.h',
-	    'gale/resource/Texture.h',
-	    'gale/resource/VirtualBufferObject.h'
+	    'gale/resource/Manager.hpp',
+	    'gale/resource/Program.hpp',
+	    'gale/resource/Resource.hpp',
+	    'gale/resource/Shader.hpp',
+	    'gale/resource/Texture.hpp',
+	    'gale/resource/VirtualBufferObject.hpp'
 	    ])
 	my_module.add_depend([
 	    'etk',

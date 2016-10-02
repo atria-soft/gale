@@ -4,8 +4,8 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <gale/Dimension.h>
-#include <gale/debug.h>
+#include <gale/Dimension.hpp>
+#include <gale/debug.hpp>
 
 // TODO : set this in a super class acced in a statin fuction...
 // ratio in milimeter :

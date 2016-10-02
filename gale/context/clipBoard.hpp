@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <gale/debug.h>
+#include <gale/debug.hpp>
 
 // TODO : Remove this ... ==> set it in the context ....
 namespace gale {

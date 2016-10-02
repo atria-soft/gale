@@ -4,12 +4,12 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <etk/types.h>
-#include <gale/debug.h>
-#include <gale/resource/Resource.h>
-#include <gale/resource/Manager.h>
-#include <gale/gale.h>
-#include <gale/context/Context.h>
+#include <etk/types.hpp>
+#include <gale/debug.hpp>
+#include <gale/resource/Resource.hpp>
+#include <gale/resource/Manager.hpp>
+#include <gale/gale.hpp>
+#include <gale/context/Context.hpp>
 
 
 gale::Resource::Resource() :

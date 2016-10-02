@@ -5,18 +5,18 @@
  */
 
 
-#include <gale/debug.h>
-#include <gale/gale.h>
-#include <gale/key/key.h>
-#include <gale/context/commandLine.h>
-#include <etk/types.h>
-#include <etk/os/FSNode.h>
+#include <gale/debug.hpp>
+#include <gale/gale.hpp>
+#include <gale/key/key.hpp>
+#include <gale/context/commandLine.hpp>
+#include <etk/types.hpp>
+#include <etk/os/FSNode.hpp>
 
-#include <gale/resource/Manager.h>
-#include <gale/context/Context.h>
+#include <gale/resource/Manager.hpp>
+#include <gale/context/Context.hpp>
 
 #include <gale/context/IOs/Interface.h>
-#include <gale/context/IOs/Context.h>
+#include <gale/context/IOs/Context.hpp>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>

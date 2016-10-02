@@ -10,12 +10,12 @@
 #include <stdint.h>
 #include <pthread.h>
 #include <mutex>
-#include <gale/debug.h>
-#include <gale/context/Context.h>
-#include <gale/Dimension.h>
+#include <gale/debug.hpp>
+#include <gale/context/Context.hpp>
+#include <gale/Dimension.hpp>
 /* include auto generated file */
 #include <org_gale_GaleConstants.h>
-#include <jvm-basics/jvm-basics.h>
+#include <jvm-basics/jvm-basics.hpp>
 
 
 int64_t gale::getTime() {

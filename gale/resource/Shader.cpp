@@ -4,13 +4,13 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <etk/types.h>
-#include <etk/os/FSNode.h>
-#include <gale/debug.h>
-#include <gale/resource/Shader.h>
-#include <gale/resource/Manager.h>
+#include <etk/types.hpp>
+#include <etk/os/FSNode.hpp>
+#include <gale/debug.hpp>
+#include <gale/resource/Shader.hpp>
+#include <gale/resource/Manager.hpp>
 
-#include <gale/renderer/openGL/openGL-include.h>
+#include <gale/renderer/openGL/openGL-include.hpp>
 
 gale::resource::Shader::Shader() :
   gale::Resource(),
@@ -25,7 +25,7 @@ gale::resource::Shader::Shader() :
 void gale::resource::Shader::init(const std::string& _filename) {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	gale::Resource::init(_filename);
-	GALE_DEBUG("OGL : load SHADER \"" << _filename << "\"");
+	GALE_DEBUG("OGL : load SHADER '" << _filename << "'");
 	// load data from file "all the time ..."
 	
 	if (etk::end_with(m_name, ".frag") == true) {

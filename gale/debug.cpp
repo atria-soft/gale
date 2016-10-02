@@ -4,7 +4,7 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <gale/debug.h>
+#include <gale/debug.hpp>
 
 int32_t gale::getLogId() {
 	static int32_t g_val = elog::registerInstance("gale");

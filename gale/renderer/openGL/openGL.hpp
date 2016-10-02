@@ -5,11 +5,11 @@
  */
 #pragma once
 
-#include <etk/types.h>
+#include <etk/types.hpp>
 #include <vector>
-#include <etk/math/Matrix4.h>
-#include <etk/math/Vector2D.h>
-#include <etk/Color.h>
+#include <etk/math/Matrix4.hpp>
+#include <etk/math/Vector2D.hpp>
+#include <etk/Color.hpp>
 
 namespace gale {
 	namespace openGL {

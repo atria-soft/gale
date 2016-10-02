@@ -5,15 +5,15 @@
  */
 #pragma once
 
-#include <ememory/memory.h>
-#include <etk/types.h>
-#include <etk/math/Vector2D.h>
-#include <gale/orientation.h>
-#include <gale/key/status.h>
-#include <gale/key/type.h>
-#include <gale/key/Special.h>
-#include <gale/context/cursor.h>
-#include <gale/context/clipBoard.h>
+#include <ememory/memory.hpp>
+#include <etk/types.hpp>
+#include <etk/math/Vector2D.hpp>
+#include <gale/orientation.hpp>
+#include <gale/key/status.hpp>
+#include <gale/key/type.hpp>
+#include <gale/key/Special.hpp>
+#include <gale/context/cursor.hpp>
+#include <gale/context/clipBoard.hpp>
 
 namespace gale {
 	class Context;

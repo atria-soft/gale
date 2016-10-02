@@ -3,10 +3,10 @@
  * @copyright 2011, Edouard DUPIN, all right reserved
  * @license APACHE v2.0 (see license file)
  */
-#include <gale/Thread.h>
-#include <gale/debug.h>
+#include <gale/Thread.hpp>
+#include <gale/debug.hpp>
 #include <unistd.h>
-#include <gale/context/Context.h>
+#include <gale/context/Context.hpp>
 
 #if defined(__TARGET_OS__Android)
 	void* gale::Thread::threadCallback(void* _userData) {

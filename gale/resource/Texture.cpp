@@ -4,12 +4,12 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <etk/types.h>
-#include <gale/gale.h>
-#include <gale/renderer/openGL/openGL.h>
-#include <gale/resource/Manager.h>
-#include <gale/resource/Texture.h>
-#include <gale/renderer/openGL/openGL-include.h>
+#include <etk/types.hpp>
+#include <gale/gale.hpp>
+#include <gale/renderer/openGL/openGL.hpp>
+#include <gale/resource/Manager.hpp>
+#include <gale/resource/Texture.hpp>
+#include <gale/renderer/openGL/openGL-include.hpp>
 
 /**
  * @brief get the next power 2 if the input

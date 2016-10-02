@@ -5,10 +5,10 @@
  */
 #pragma once
 
-#include <etk/types.h>
-#include <gale/debug.h>
-#include <gale/renderer/openGL/openGL.h>
-#include <gale/resource/Resource.h>
+#include <etk/types.hpp>
+#include <gale/debug.hpp>
+#include <gale/renderer/openGL/openGL.hpp>
+#include <gale/resource/Resource.hpp>
 
 namespace gale {
 	namespace resource {

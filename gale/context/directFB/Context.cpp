@@ -23,18 +23,18 @@
 		force-windowed
 */
 
-#include <gale/debug.h>
-#include <gale/gale.h>
-#include <gale/key.h>
-#include <gale/config.h>
-#include <gale/commandLine.h>
-#include <etk/types.h>
-#include <etk/unicode.h>
-#include <gale/widget/Manager.h>
+#include <gale/debug.hpp>
+#include <gale/gale.hpp>
+#include <gale/key.hpp>
+#include <gale/config.hpp>
+#include <gale/commandLine.hpp>
+#include <etk/types.hpp>
+#include <etk/unicode.hpp>
+#include <gale/widget/Manager.hpp>
 
-#include <gale/renderer/ResourceManager.h>
-#include <gale/renderer/eSystem.h>
-#include <gale/openGL/openGL.h>
+#include <gale/renderer/ResourceManager.hpp>
+#include <gale/renderer/eSystem.hpp>
+#include <gale/openGL/openGL.hpp>
 
 #include <unistd.h>
 #include <stdlib.h>

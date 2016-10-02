@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <gale/Application.h>
+#include <gale/Application.hpp>
 
 
 namespace gale {

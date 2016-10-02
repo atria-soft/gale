@@ -5,9 +5,9 @@
  */
 #pragma once
 
-#include <etk/types.h>
-#include <ethread/tools.h>
-#include <gale/context/Context.h>
+#include <etk/types.hpp>
+#include <ethread/tools.hpp>
+#include <gale/context/Context.hpp>
 
 #if defined(__TARGET_OS__Android)
 	#include <pthread.h>

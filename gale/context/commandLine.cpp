@@ -4,8 +4,8 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <gale/debug.h>
-#include <gale/context/commandLine.h>
+#include <gale/debug.hpp>
+#include <gale/context/commandLine.hpp>
 #include <vector>
 
 void gale::context::CommandLine::parse(int32_t _argc, const char* _argv[]) {

@@ -6,9 +6,9 @@
 #pragma once
 
 #include <mutex>
-#include <ememory/memory.h>
-#include <etk/types.h>
-#include <gale/debug.h>
+#include <ememory/memory.hpp>
+#include <etk/types.hpp>
+#include <gale/debug.hpp>
 
 #define MAX_RESOURCE_LEVEL (5)
 
@@ -207,5 +207,5 @@ namespace gale {
 	};
 }
 
-#include <gale/resource/Manager.h>
+#include <gale/resource/Manager.hpp>
 

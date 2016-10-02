@@ -4,11 +4,11 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <etk/types.h>
-#include <gale/debug.h>
-#include <gale/resource/Manager.h>
-#include <gale/resource/VirtualBufferObject.h>
-#include <gale/renderer/openGL/openGL-include.h>
+#include <etk/types.hpp>
+#include <gale/debug.hpp>
+#include <gale/resource/Manager.hpp>
+#include <gale/resource/VirtualBufferObject.hpp>
+#include <gale/renderer/openGL/openGL-include.hpp>
 
 void gale::resource::VirtualBufferObject::init(int32_t _number) {
 	gale::Resource::init();

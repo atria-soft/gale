@@ -4,8 +4,8 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <gale/key/Special.h>
-#include <etk/stdTools.h>
+#include <gale/key/Special.hpp>
+#include <etk/stdTools.hpp>
 
 #define GALE_FLAG_KEY_CAPS_LOCK 0x00000001
 #define GALE_FLAG_KEY_SHIFT     0x00000002

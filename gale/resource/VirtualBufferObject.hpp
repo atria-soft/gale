@@ -5,12 +5,12 @@
  */
 #pragma once
 
-#include <etk/types.h>
-#include <etk/math/Vector2D.h>
-#include <gale/debug.h>
-#include <gale/resource/Resource.h>
-#include <gale/renderer/openGL/openGL.h>
-#include <etk/Color.h>
+#include <etk/types.hpp>
+#include <etk/math/Vector2D.hpp>
+#include <gale/debug.hpp>
+#include <gale/resource/Resource.hpp>
+#include <gale/renderer/openGL/openGL.hpp>
+#include <etk/Color.hpp>
 
 namespace gale {
 	namespace resource {

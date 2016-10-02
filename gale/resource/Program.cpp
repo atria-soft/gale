@@ -4,13 +4,13 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <etk/types.h>
-#include <gale/debug.h>
-#include <gale/resource/Program.h>
-#include <gale/resource/Manager.h>
-#include <etk/os/FSNode.h>
-#include <gale/gale.h>
-#include <gale/renderer/openGL/openGL-include.h>
+#include <etk/types.hpp>
+#include <gale/debug.hpp>
+#include <gale/resource/Program.hpp>
+#include <gale/resource/Manager.hpp>
+#include <etk/os/FSNode.hpp>
+#include <gale/gale.hpp>
+#include <gale/renderer/openGL/openGL-include.hpp>
 
 //#define LOCAL_DEBUG  GALE_VERBOSE
 #define LOCAL_DEBUG  GALE_DEBUG

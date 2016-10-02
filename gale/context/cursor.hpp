@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <gale/debug.h>
+#include <gale/debug.hpp>
 
 namespace gale {
 	namespace context {

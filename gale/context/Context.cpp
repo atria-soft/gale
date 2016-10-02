@@ -6,21 +6,21 @@
 
 #include <unistd.h>
 
-#include <etk/types.h>
-#include <etk/etk.h>
+#include <etk/types.hpp>
+#include <etk/etk.hpp>
 
-#include <etk/tool.h>
-#include <etk/os/FSNode.h>
-#include <ethread/tools.h>
+#include <etk/tool.hpp>
+#include <etk/os/FSNode.hpp>
+#include <ethread/tools.hpp>
 #include <mutex>
 
-#include <gale/gale.h>
-#include <gale/Dimension.h>
-#include <gale/debug.h>
+#include <gale/gale.hpp>
+#include <gale/Dimension.hpp>
+#include <gale/debug.hpp>
 
-#include <gale/renderer/openGL/openGL.h>
-#include <gale/context/Context.h>
-#include <gale/resource/Manager.h>
+#include <gale/renderer/openGL/openGL.hpp>
+#include <gale/context/Context.hpp>
+#include <gale/resource/Manager.hpp>
 #include <map>
 
 

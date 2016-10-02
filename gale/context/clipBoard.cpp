@@ -4,11 +4,11 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <etk/types.h>
+#include <etk/types.hpp>
 
-#include <gale/debug.h>
-#include <gale/context/clipBoard.h>
-#include <gale/context/Context.h>
+#include <gale/debug.hpp>
+#include <gale/context/clipBoard.hpp>
+#include <gale/context/Context.hpp>
 
 /*
 note: copy id data :

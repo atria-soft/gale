@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include <etk/types.h>
-#include <gale/Application.h>
+#include <etk/types.hpp>
+#include <gale/Application.hpp>
 
 namespace gale {
 	/**

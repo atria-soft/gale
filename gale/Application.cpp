@@ -4,9 +4,9 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <etk/types.h>
-#include <gale/Application.h>
-#include <gale/context/Context.h>
+#include <etk/types.hpp>
+#include <gale/Application.hpp>
+#include <gale/context/Context.hpp>
 
 
 gale::Application::Application() :

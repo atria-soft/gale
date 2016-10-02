@@ -6,14 +6,14 @@
 //! [gale_sample_all]
 
 
-#include <etk/types.h>
-#include <gale/gale.h>
-#include <gale/context/commandLine.h>
-#include <test-debug/debug.h>
+#include <etk/types.hpp>
+#include <gale/gale.hpp>
+#include <gale/context/commandLine.hpp>
+#include <test-debug/debug.hpp>
 
-#include <gale/Application.h>
-#include <gale/context/Context.h>
-#include <gale/resource/Program.h>
+#include <gale/Application.hpp>
+#include <gale/context/Context.hpp>
+#include <gale/resource/Program.hpp>
 
 
 class MainApplication : public gale::Application {

@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <gale/key/keyboard.h>
-#include <gale/key/Special.h>
-#include <gale/key/status.h>
-#include <gale/key/type.h>
+#include <gale/key/keyboard.hpp>
+#include <gale/key/Special.hpp>
+#include <gale/key/status.hpp>
+#include <gale/key/type.hpp>

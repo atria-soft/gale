@@ -4,8 +4,8 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <gale/key/status.h>
-#include <etk/stdTools.h>
+#include <gale/key/status.hpp>
+#include <etk/stdTools.hpp>
 
 static const char* statusDescriptionString[] = {
 	"status::unknow",

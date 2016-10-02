@@ -5,13 +5,13 @@
  */
 
 #include <vector>
-#include <gale/debug.h>
-#include <gale/renderer/openGL/openGL.h>
-#include <etk/stdTools.h>
+#include <gale/debug.hpp>
+#include <gale/renderer/openGL/openGL.hpp>
+#include <etk/stdTools.hpp>
 #include <mutex>
 //#define DIRECT_MODE
-#include <gale/renderer/openGL/openGL-include.h>
-#include <ethread/tools.h>
+#include <gale/renderer/openGL/openGL-include.hpp>
+#include <ethread/tools.hpp>
 
 #define CHECK_ERROR_OPENGL
 
@@ -784,6 +784,7 @@ static char l_bufferDisplayError[LOG_OGL_INTERNAL_BUFFER_LEN] = "";
 int64_t gale::openGL::shader::create(enum gale::openGL::shader::type _type) {
 	GLuint shader = 0;
 	if (_type == gale::openGL::shader::type::vertex) {
+		GALE_ERROR("create shader: VERTEX");
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			if (s_simulationMode == false) {
 		#endif
@@ -795,6 +796,7 @@ int64_t gale::openGL::shader::create(enum gale::openGL::shader::type _type) {
 			}
 		#endif
 	} else if (_type == gale::openGL::shader::type::fragment) {
+		GALE_ERROR("create shader: FRAGMENT");
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			if (s_simulationMode == false) {
 		#endif
@@ -809,6 +811,7 @@ int64_t gale::openGL::shader::create(enum gale::openGL::shader::type _type) {
 		GALE_ERROR("create shader with wrong type ...");
 		return -1;
 	}
+	GALE_ERROR("create shader: ... (done)");
 	if (shader == 0) {
 		GALE_ERROR("glCreateShader return error ...");
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
