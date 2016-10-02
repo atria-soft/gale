@@ -7,7 +7,7 @@
 #include <jni.h>
 #include <sys/time.h>
 #include <time.h>
-#include <stdint.h>
+#include <cstdint>
 #include <pthread.h>
 #include <mutex>
 #include <gale/debug.hpp>

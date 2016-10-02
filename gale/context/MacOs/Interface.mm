@@ -3,14 +3,14 @@
  * @copyright 2011, Edouard DUPIN, all right reserved
  * @license APACHE v2.0 (see license file)
  */
-#include "Context.h"
+#include "Context.hpp"
 #import <Cocoa/Cocoa.h>
-#include "gale/context/MacOs/Interface.h"
+#include "gale/context/MacOs/Interface.hpp"
 
-#import <gale/context/MacOs/OpenglView.h>
-#import <gale/context/MacOs/Windows.h>
-#import <gale/context/MacOs/AppDelegate.h>
-#import <gale/debug.h>
+#import <gale/context/MacOs/OpenglView.hpp>
+#import <gale/context/MacOs/Windows.hpp>
+#import <gale/context/MacOs/AppDelegate.hpp>
+#import <gale/debug.hpp>
 
 id window = nil;
 

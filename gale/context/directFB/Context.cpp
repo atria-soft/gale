@@ -37,9 +37,9 @@
 #include <gale/openGL/openGL.hpp>
 
 #include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 
 #include <directfb.h>
 #include <directfbgl.h>

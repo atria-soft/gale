@@ -18,9 +18,9 @@
 #include <gale/context/IOs/Interface.h>
 #include <gale/context/IOs/Context.hpp>
 #include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 
 
 #include <sys/times.h>

@@ -5,12 +5,12 @@
  */
 
 
-#import <gale/context/MacOs/Windows.h>
-#include <gale/context/MacOS/Context.h>
-#include <gale/key/key.h>
+#import <gale/context/MacOs/Windows.hpp>
+#include <gale/context/MacOS/Context.hpp>
+#include <gale/key/key.hpp>
 
-#include <gale/debug.h>
-#include <etk/stdTools.h>
+#include <gale/debug.hpp>
+#include <etk/stdTools.hpp>
 
 @implementation GaleMainWindows
 

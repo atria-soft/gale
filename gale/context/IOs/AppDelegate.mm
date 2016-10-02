@@ -5,12 +5,12 @@
  */
 
 #import <UIKit/UIKit.h>
-#include "gale/context/IOs/Interface.h"
+#include "gale/context/IOs/Interface.hpp"
 
-#import <gale/context/IOs/OpenglView.h>
-#import <gale/context/IOs/AppDelegate.h>
-#include <gale/context/IOs/Context.h>
-#include <gale/debug.h>
+#import <gale/context/IOs/OpenglView.hpp>
+#import <gale/context/IOs/AppDelegate.hpp>
+#include <gale/context/IOs/Context.hpp>
+#include <gale/debug.hpp>
 
 @implementation AppDelegate
 

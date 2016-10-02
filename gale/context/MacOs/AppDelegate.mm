@@ -5,10 +5,10 @@
  */
 
 
-#import <gale/context/MacOs/AppDelegate.h>
-#import <gale/context/MacOs/OpenglView.h>
+#import <gale/context/MacOs/AppDelegate.hpp>
+#import <gale/context/MacOs/OpenglView.hpp>
 
-#include <gale/debug.h>
+#include <gale/debug.hpp>
 
 @implementation MacOsAppDelegate
 @synthesize window=_window;

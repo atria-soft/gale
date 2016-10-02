@@ -5,9 +5,9 @@
  */
 
 #include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 
 #include <etk/types.hpp>
 #include <etk/os/FSNode.hpp>
@@ -93,7 +93,7 @@ extern "C" {
 }
 
 #ifdef GALE_BUILD_EGAMI
-	#include <egami/egami.h>
+	#include <egami/egami.hpp>
 #endif
 
 #include <X11/cursorfont.h>

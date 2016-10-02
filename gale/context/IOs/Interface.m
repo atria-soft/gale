@@ -7,7 +7,7 @@
  */
 
 #import <UIKit/UIKit.h>
-#import <gale/context/IOs/AppDelegate.h>
+#import <gale/context/IOs/AppDelegate.hpp>
 //#import "AppDelegate.h"
 
 

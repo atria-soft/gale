@@ -7,15 +7,15 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import <OpenGLES/EAGLDrawable.h>
-#include <gale/context/IOs/Context.h>
-#include <gale/Dimension.h>
+#include <gale/context/IOs/Context.hpp>
+#include <gale/Dimension.hpp>
 
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
 
-#import "OpenglView.h"
-#include <gale/debug.h>
+#import "OpenglView.hpp"
+#include <gale/debug.hpp>
 
 
 @interface OpenglView ()
