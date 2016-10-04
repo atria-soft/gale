@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import lutin.module as module
+import lutin.debug as debug
 import lutin.tools as tools
 import lutin.debug as debug
 import os
@@ -27,8 +27,7 @@ def get_maintainer():
 def get_version():
 	return "version.txt"
 
-def create(target, module_name):
-	my_module = module.Module(__file__, module_name, get_type())
+def configure(target, my_module):
 	my_module.add_extra_flags()
 	# add the file to compile:
 	my_module.add_src_file([
@@ -80,7 +79,7 @@ def create(target, module_name):
 		    'android/src/org/gale/GaleWallpaper.java',
 		    'org.gale.GaleConstants.javah'
 		    ])
-		my_module.add_path(tools.get_current_path(__file__) + '/android/src/', type='java')
+		my_module.add_path('android/src/', type='java')
 	elif "MacOs" in target.get_type():
 		my_module.add_src_file([
 		    'gale/context/MacOs/Context.mm',
@@ -143,7 +142,7 @@ def create(target, module_name):
 	    ])
 	my_module.add_optionnal_depend('esignal', ["c++", "-DGALE_BUILD_ESIGNAL"])
 	my_module.add_optionnal_depend('eproperty', ["c++", "-DGALE_BUILD_EPROPERTY"])
-	my_module.add_path(tools.get_current_path(__file__))
+	my_module.add_path(".")
 	
 	my_module.add_flag('c++', [
 	    "-DGALE_VERSION=\"\\\"" + tools.version_to_string(my_module.get_pkg("VERSION")) + "\\\"\""
@@ -173,7 +172,7 @@ def create(target, module_name):
 		    "QuartzCore",
 		    ])
 	
-	return my_module
+	return True
 
 
 
