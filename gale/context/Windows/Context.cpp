@@ -57,27 +57,35 @@ class WindowsContext : public gale::Context {
 		int32_t m_currentHeight = 0;
 		bool m_inputIsPressed[MAX_MANAGE_INPUT];
 		gale::key::Special m_guiKeyBoardMode;
-		bool m_run = true;
-		bool m_clipBoardOwnerStd = false;
+		bool m_run;
+		bool m_clipBoardOwnerStd;
+		// windows specific instance ....
+		HINSTANCE m_hInstance;
+		HWND m_hWnd;
+		HDC m_hDC;
+		HGLRC m_hRC;
 	public:
 		WindowsContext(gale::Application* _application, int32_t _argc, const char* _argv[]) :
-		  gale::Context(_application, _argc, _argv) {
+		  gale::Context(_application, _argc, _argv),
+		  m_run(true),
+		  m_clipBoardOwnerStd(false),
+		  m_hInstance(GetModuleHandle(nullptr)),
+		  m_hWnd(0),
+		  m_hDC(0),
+		  m_hRC(0) {
 			galeWindowsContext = this;
 			for (int32_t iii=0; iii<MAX_MANAGE_INPUT; ++iii) {
 				m_inputIsPressed[iii] = false;
 			}
+			configure();
 		}
 		
 		~WindowsContext() {
 			galeWindowsContext = nullptr;
+			release();
 		}
 		
-		int32_t run() {
-			HINSTANCE hInstance = 0;//GetModuleHandle(nullptr);
-			HWND hWnd = 0;
-			HDC hDC = 0;
-			HGLRC hRC = 0;
-			
+		void configure() {
 			// register a new windows class (need it to define external callback)
 			WNDCLASSEX windowClass;
 			windowClass.cbSize = sizeof(WNDCLASSEX);
@@ -85,7 +93,7 @@ class WindowsContext : public gale::Context {
 			windowClass.lpfnWndProc = WndProc;
 			windowClass.cbClsExtra = 0;
 			windowClass.cbWndExtra = 0;
-			windowClass.hInstance = hInstance;
+			windowClass.hInstance = m_hInstance;
 			windowClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 			windowClass.hIconSm = LoadIcon(NULL, IDI_WINLOGO);
 			windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
@@ -95,34 +103,35 @@ class WindowsContext : public gale::Context {
 			//Register window class
 			if (RegisterClassEx(&windowClass) == 0) {
 				GALE_ERROR("Can not register windows class: '" << GetLastErrorAsString() << "'" );
-				MessageBox(hWnd, "Error creating window class\n(gale internal error #65231)", "Error", MB_ICONEXCLAMATION);
+				MessageBox(m_hWnd, "Error creating window class\n(gale internal error #65231)", "Error", MB_ICONEXCLAMATION);
 				PostQuitMessage(0);
+				return;
 			}
 			// Now we use the created windows class "GaleMainWindows" to create the wew windows with callback ... ==> use "STATIC" to not use generic callback ...
-			hWnd = CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,       // The extended window style of the window being created.
-			                      "GaleMainWindows",     // A null-terminated string or a class atom created by a previous call to the RegisterClass or RegisterClassEx function.
-			                      "Gale ... TODO Title", // The window name.
-			                      0
-			                      //| WS_OVERLAPPEDWINDOW // 
-			                      | WS_CAPTION         // Enable title bar
-			                      //| WS_DISABLED      // Disable receive Windows event !! need to active EnableWindow
-			                      | WS_POPUPWINDOW     // The window is a pop-up window
-			                      //| WS_POPUP           // The windows is a pop-up window
-			                      //| WS_VISIBLE         // Start in visible mode
-			                      //| WS_CLIPSIBLINGS    // 
-			                      //| WS_CLIPCHILDREN    // 
-			                      | WS_SIZEBOX         // 
-			                      ,                      // The style of the window being created.
-			                      10, 10,                // start position
-			                      800, 600,              // start size
-			                      nullptr,               // A handle to the parent or owner window of the window being created
-			                      nullptr,               // A handle to a menu, or specifies a child-window identifier, depending on the window style
-			                      hInstance,             // A handle to the instance of the module to be associated with the window.
-			                      nullptr                //A pointer to a value to be passed to the window through the CREATESTRUCT structure
-			                      );
-			if(hWnd == nullptr) {
+			m_hWnd = CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,       // The extended window style of the window being created.
+			                        "GaleMainWindows",     // A null-terminated string or a class atom created by a previous call to the RegisterClass or RegisterClassEx function.
+			                        "Gale ... TODO Title", // The window name.
+			                        0
+			                        //| WS_OVERLAPPEDWINDOW // 
+			                        | WS_CAPTION         // Enable title bar
+			                        //| WS_DISABLED      // Disable receive Windows event !! need to active EnableWindow
+			                        | WS_POPUPWINDOW     // The window is a pop-up window
+			                        //| WS_POPUP           // The windows is a pop-up window
+			                        //| WS_VISIBLE         // Start in visible mode
+			                        //| WS_CLIPSIBLINGS    // 
+			                        //| WS_CLIPCHILDREN    // 
+			                        | WS_SIZEBOX         // 
+			                        ,                      // The style of the window being created.
+			                        10, 10,                // start position
+			                        800, 600,              // start size
+			                        nullptr,               // A handle to the parent or owner window of the window being created
+			                        nullptr,               // A handle to a menu, or specifies a child-window identifier, depending on the window style
+			                        m_hInstance,             // A handle to the instance of the module to be associated with the window.
+			                        nullptr                //A pointer to a value to be passed to the window through the CREATESTRUCT structure
+			                        );
+			if(m_hWnd == nullptr) {
 				GALE_ERROR("Can not create windows '" << GetLastErrorAsString() << "'" );
-				MessageBox(hWnd, "Error creating window\n(gale internal error #45211)", "Error", MB_ICONEXCLAMATION);
+				MessageBox(m_hWnd, "Error creating window\n(gale internal error #45211)", "Error", MB_ICONEXCLAMATION);
 				PostQuitMessage(0);
 			}
 			int border_thickness = GetSystemMetrics(SM_CXSIZEFRAME);
@@ -131,30 +140,30 @@ class WindowsContext : public gale::Context {
 			OS_Resize(vec2(800-2*border_thickness, m_currentHeight));
 			
 			// enable openGL for the window
-			enableOpenGL(hWnd, &hDC, &hRC);
+			enableOpenGL(m_hWnd, &m_hDC, &m_hRC);
 			GLenum err = glewInit();
 			if (GLEW_OK != err) {
 				// Problem: glewInit failed, something is seriously wrong.
 				GALE_CRITICAL("Error: '" << glewGetErrorString(err) << "'" );
-				MessageBox(hWnd, "Error initilizing open GL\n(gale internal error #8421)", "Error", MB_ICONEXCLAMATION);
+				MessageBox(m_hWnd, "Error initilizing open GL\n(gale internal error #8421)", "Error", MB_ICONEXCLAMATION);
 				PostQuitMessage(0);
 			}
 			if (!glewIsSupported("GL_VERSION_2_0")) {
 				GALE_ERROR("OpenGL 2.0 not available '" << glewGetErrorString(err) << "'" );
-				MessageBox(hWnd, "Error initilizing open GL\n OPENGL 2.0 not availlable ...\n(gale internal error #75124)", "Error", MB_ICONEXCLAMATION);
+				MessageBox(m_hWnd, "Error initilizing open GL\n OPENGL 2.0 not availlable ...\n(gale internal error #75124)", "Error", MB_ICONEXCLAMATION);
 				PostQuitMessage(0);
 			}
 			// Configure the DPI of the screen:
 			{
 				vec2 dpi(0,0);
-				dpi.setX(GetDeviceCaps(hDC, LOGPIXELSX));
-				dpi.setY(GetDeviceCaps(hDC, LOGPIXELSY));
+				dpi.setX(GetDeviceCaps(m_hDC, LOGPIXELSX));
+				dpi.setY(GetDeviceCaps(m_hDC, LOGPIXELSY));
 				gale::Dimension::setPixelRatio(dpi, gale::distance::inch);
 				GALE_INFO("monitor property : dpi=" << dpi << " px/inch");
 			}
 			// Get monitor Size
 			{
-				HMONITOR monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+				HMONITOR monitor = MonitorFromWindow(m_hWnd, MONITOR_DEFAULTTONEAREST);
 				MONITORINFO info;
 				info.cbSize = sizeof(MONITORINFO);
 				GetMonitorInfo(monitor, &info);
@@ -162,13 +171,14 @@ class WindowsContext : public gale::Context {
 				int monitor_height = info.rcMonitor.bottom - info.rcMonitor.top;
 				GALE_INFO("monitor property: size=" << ivec2(monitor_width, monitor_height) << " px");
 			}
-			
-			// Now we can show it ...
-			ShowWindow(hWnd, SW_SHOW);
-			//EnableWindow(hWnd, TRUE);
 			ShowCursor(TRUE);
+		}
+		int32_t run() {
+			// Now we can show it ...
+			ShowWindow(m_hWnd, SW_SHOW);
+			//EnableWindow(m_hWnd, TRUE);
 			// Force update of the windows
-			UpdateWindow(hWnd);
+			UpdateWindow(m_hWnd);
 			MSG msg;
 			// program main loop
 			while(m_run == true) {
@@ -186,24 +196,27 @@ class WindowsContext : public gale::Context {
 					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 					glLoadIdentity();
 					OS_Draw(true);
-					SwapBuffers(hDC);
+					SwapBuffers(m_hDC);
 				}
 			}
+			return msg.wParam;
+		}
+		void release() {
 			// TODO : We destroy the OpenGL context before cleaning GALE : Do it Better ...
 			getResourcesManager().contextHasBeenDestroyed();
 			// shutdown openGL
-			disableOpenGL(hWnd, hDC, hRC);
+			disableOpenGL(m_hWnd, m_hDC, m_hRC);
 			// destroy the window explicitly
-			DestroyWindow(hWnd);
-			return msg.wParam;
+			DestroyWindow(m_hWnd);
 		}
 		
+		/****************************************************************************************/
 		void stop() {
 			m_run = false;
 			// To exit program ...
 			PostQuitMessage(0);
 		}
-		
+		/****************************************************************************************/
 		void setSize(const vec2& _size) {
 			float border_thickness = GetSystemMetrics(SM_CXSIZEFRAME);
 			float title_size = GetSystemMetrics(SM_CYCAPTION);
@@ -212,7 +225,7 @@ class WindowsContext : public gale::Context {
 			//m_currentHeight = size.y;
 			// TODO : Later
 		}
-		
+		/****************************************************************************************/
 		void ClipBoardGet(enum gale::context::clipBoard::clipboardListe _clipboardID) {
 			// this is to force the local system to think we have the buffer
 			// TODO : remove this 2 line when code will be writen
@@ -224,9 +237,18 @@ class WindowsContext : public gale::Context {
 					OS_ClipBoardArrive(gale::context::clipBoard::clipboardSelection);
 					break;
 				case gale::context::clipBoard::clipboardStd:
+					// TODO : never done reset at false ...
 					if (m_clipBoardOwnerStd == false) {
-						// generate a request TO the OS
-						// TODO : Send the message to the OS "We disire to receive the copy buffer ...
+						char* buffer = nullptr;
+						if(OpenClipboard(m_hWnd)) {
+							buffer = (char*)GetClipboardData(CF_TEXT);
+							std::string tmpppp((char*)buffer);
+							// TODO : Check if we need to free buffer ...
+							gale::context::clipBoard::setSystem(gale::context::clipBoard::clipboardSelection, tmpppp);
+							// just transmit an event , we have the data in the system
+							OS_ClipBoardArrive(gale::context::clipBoard::clipboardStd);
+						}
+						CloseClipboard();
 					} else {
 						// just transmit an event , we have the data in the system
 						OS_ClipBoardArrive(gale::context::clipBoard::clipboardStd);
@@ -237,7 +259,7 @@ class WindowsContext : public gale::Context {
 					break;
 			}
 		}
-		
+		/****************************************************************************************/
 		void ClipBoardSet(enum gale::context::clipBoard::clipboardListe _clipboardID) {
 			switch (_clipboardID) {
 				case gale::context::clipBoard::clipboardSelection:
@@ -246,7 +268,19 @@ class WindowsContext : public gale::Context {
 				case gale::context::clipBoard::clipboardStd:
 					// Request the clipBoard :
 					if (m_clipBoardOwnerStd == false) {
-						// TODO : Inform the OS that we have the current buffer of copy ...
+						std::string tmpData = gale::context::clipBoard::get(_clipboardID);
+						//put your text in source
+						if(OpenClipboard(m_hWnd)) {
+							HGLOBAL clipbuffer;
+							char * buffer;
+							EmptyClipboard();
+							clipbuffer = GlobalAlloc(GMEM_DDESHARE, tmpData.size()+1);
+							buffer = (char*)GlobalLock(clipbuffer);
+							strcpy(buffer, tmpData.c_str());
+							GlobalUnlock(clipbuffer);
+							SetClipboardData(CF_TEXT, clipbuffer);
+							CloseClipboard();
+						}
 						m_clipBoardOwnerStd = true;
 					}
 					break;
@@ -282,7 +316,6 @@ class WindowsContext : public gale::Context {
 				PostQuitMessage(0);
 			}
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);// | GL_STENCIL_BUFFER_BIT);
-			//glUseProgram(0);
 		}
 		
 		// disable openGL (fisnish application ...
@@ -335,7 +368,7 @@ class WindowsContext : public gale::Context {
 					if (tmpVal == nullptr) {
 						break;
 					}
-					GALE_DEBUG("WM_WINDOWPOSCHANGING : : (" << tmpVal->x << "," << tmpVal->y << ") ( " << tmpVal->cx << "," << tmpVal->cy << ")");
+					GALE_VERBOSE("WM_WINDOWPOSCHANGING : : (" << tmpVal->x << "," << tmpVal->y << ") ( " << tmpVal->cx << "," << tmpVal->cy << ")");
 					if (    tmpVal->cx == 0
 					     && tmpVal->cy == 0) {
 						// special case for start application and hide application
@@ -479,7 +512,7 @@ class WindowsContext : public gale::Context {
 							}
 							break;
 					}
-					GALE_DEBUG("Keyboard Value = " << _wParam << " '" << char(tmpChar) << "'");
+					GALE_VERBOSE("Keyboard Value = " << _wParam << " '" << char(tmpChar) << "'");
 					if (tmpChar == 0) {
 						//GALE_DEBUG("eventKey Move type : " << getCharTypeMoveEvent(keyInput) );
 						OS_setKeyboard(m_guiKeyBoardMode,
@@ -582,6 +615,12 @@ class WindowsContext : public gale::Context {
 					break;
 			}
 			return DefWindowProc(_hWnd, _message, _wParam, _lParam);
+		}
+		/****************************************************************************************/
+		void setTitle(const std::string& _title) {
+			GALE_VERBOSE("Windows: set Title (START)");
+			SetWindowText(m_hWnd, _title.c_str());
+			GALE_VERBOSE("Windows: set Title (END)");
 		}
 };
 

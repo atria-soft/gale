@@ -18,6 +18,7 @@ namespace gale {
 				std::list<ememory::WeakPtr<gale::Resource>> m_resourceList;
 				std::vector<ememory::SharedPtr<gale::Resource>> m_resourceListToUpdate;
 				bool m_contextHasBeenRemoved;
+				bool m_exiting;
 				std::recursive_mutex m_mutex;
 			public:
 				/**
@@ -55,6 +56,10 @@ namespace gale {
 				 * @brief This is to inform the resources manager that we have no more openGl context ...
 				 */
 				void contextHasBeenDestroyed();
+				/**
+				 * @brief special end of application
+				 */
+				void applicationExiting();
 			public:
 				// internal API to extent eResources in extern Soft
 				ememory::SharedPtr<gale::Resource> localKeep(const std::string& _filename);

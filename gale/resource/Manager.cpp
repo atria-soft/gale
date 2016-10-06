@@ -14,7 +14,8 @@
 
 
 gale::resource::Manager::Manager() :
-  m_contextHasBeenRemoved(true) {
+  m_contextHasBeenRemoved(true),
+  m_exiting(false) {
 	// nothing to do ...
 }
 
@@ -109,6 +110,10 @@ void gale::resource::Manager::update(const ememory::SharedPtr<gale::Resource>& _
 
 // Specific to load or update the data in the openGl context  == > system use only
 void gale::resource::Manager::updateContext() {
+	if (m_exiting == true) {
+		GALE_ERROR("Request update after application EXIT ...");
+		return;
+	}
 	// TODO : Check the number of call this ... GALE_INFO("update open-gl context ... ");
 	if (m_contextHasBeenRemoved == true) {
 		// need to update all ...
@@ -174,6 +179,11 @@ void gale::resource::Manager::contextHasBeenDestroyed() {
 	}
 	// no context preent ...
 	m_contextHasBeenRemoved = true;
+}
+
+void gale::resource::Manager::applicationExiting() {
+	contextHasBeenDestroyed();
+	m_exiting = true;
 }
 
 // internal generic keeper ...

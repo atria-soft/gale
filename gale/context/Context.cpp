@@ -310,6 +310,7 @@ void gale::Context::postAction(std::function<void(gale::Context& _context)> _act
 
 gale::Context::~Context() {
 	GALE_INFO(" == > Gale system Un-Init (BEGIN)");
+	getResourcesManager().applicationExiting();
 	// TODO : Clean the message list ...
 	// set the curent interface :
 	lockContext();
