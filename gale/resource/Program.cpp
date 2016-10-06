@@ -33,7 +33,7 @@ void gale::resource::Program::init(const std::string& _filename) {
 	
 	etk::FSNode file(m_name);
 	if (file.exist() == false) {
-		GALE_INFO("File does not Exist : \"" << file << "\"  == > automatic load of framment and shader with same names... ");
+		GALE_DEBUG("File does not Exist : \"" << file << "\"  == > automatic load of framment and shader with same names... ");
 		std::string tmpFilename = m_name;
 		// remove extention ...
 		tmpFilename.erase(tmpFilename.size()-4, 4);
@@ -192,7 +192,7 @@ int32_t gale::resource::Program::getAttribute(std::string _elementName) {
 			GALE_WARNING("    {" << m_program << "}[" << m_elementList.size() << "] glGetAttribLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
 			tmp.m_isLinked = false;
 		} else {
-			GALE_INFO("    {" << m_program << "}[" << m_elementList.size() << "] glGetAttribLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
+			GALE_DEBUG("    {" << m_program << "}[" << m_elementList.size() << "] glGetAttribLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
 		}
 	} else {
 		// program is not loaded ==> just local reister ...
@@ -225,7 +225,7 @@ int32_t gale::resource::Program::getUniform(std::string _elementName) {
 			GALE_WARNING("    {" << m_program << "}[" << m_elementList.size() << "] glGetUniformLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
 			tmp.m_isLinked = false;
 		} else {
-			GALE_INFO("    {" << m_program << "}[" << m_elementList.size() << "] glGetUniformLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
+			GALE_DEBUG("    {" << m_program << "}[" << m_elementList.size() << "] glGetUniformLocation(\"" << tmp.m_name << "\") = " << tmp.m_elementId);
 		}
 	} else {
 		// program is not loaded ==> just local reister ...
@@ -246,7 +246,7 @@ bool gale::resource::Program::updateContext() {
 		// Do nothing  == > too dangerous ...
 	} else {
 		// create the Shader
-		GALE_INFO("Create the Program ... \"" << m_name << "\"");
+		GALE_DEBUG("Create the Program ... \"" << m_name << "\"");
 		m_program = gale::openGL::program::create();
 		if (m_program < 0) {
 			return true;

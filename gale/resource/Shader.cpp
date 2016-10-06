@@ -66,14 +66,14 @@ bool gale::resource::Shader::updateContext() {
 			GALE_CRITICAL(" can not load shader");
 			return true;
 		} else {
-			GALE_INFO("Compile shader with GLID=" << m_shader);
+			GALE_DEBUG("Compile shader with GLID=" << m_shader);
 			bool ret = gale::openGL::shader::compile(m_shader, m_fileData);
 			if (ret == false) {
 				const char * tmpShaderType = "FRAGMENT SHADER";
 				if (m_type == gale::openGL::shader::type::vertex){
 					tmpShaderType = "VERTEX SHADER";
 				}
-				GALE_CRITICAL("Could not compile \"" << tmpShaderType << "\" name='" << m_name << "'");
+				GALE_CRITICAL("Could not compile '" << tmpShaderType << "' name='" << m_name << "'");
 				return true;
 			}
 		}
@@ -120,11 +120,11 @@ void gale::resource::Shader::reload() {
 	// now change the OGL context ...
 	
 	if (gale::openGL::hasContext() == true) {
-		GALE_DEBUG("OGL : load SHADER \"" << m_name << "\" ==> call update context (direct)");
+		GALE_DEBUG("OGL : load SHADER '" << m_name << "' ==> call update context (direct)");
 		removeContext();
 		updateContext();
 	} else {
-		GALE_DEBUG("OGL : load SHADER \"" << m_name << "\" ==> tagged has update context needed");
+		GALE_DEBUG("OGL : load SHADER '" << m_name << "' ==> tagged has update context needed");
 		// TODO : Check this, this is a leek ==> in the GPU ... really bad ...
 			m_exist = false;
 			m_shader = 0;

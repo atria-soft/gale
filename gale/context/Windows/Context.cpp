@@ -5,6 +5,7 @@
  */
 #include <gale/debug.hpp>
 #include <gale/gale.hpp>
+#include <gale/Dimension.hpp>
 #include <etk/types.hpp>
 #include <etk/os/FSNode.hpp>
 
@@ -143,6 +144,25 @@ class WindowsContext : public gale::Context {
 				MessageBox(hWnd, "Error initilizing open GL\n OPENGL 2.0 not availlable ...\n(gale internal error #75124)", "Error", MB_ICONEXCLAMATION);
 				PostQuitMessage(0);
 			}
+			// Configure the DPI of the screen:
+			{
+				vec2 dpi(0,0);
+				dpi.setX(GetDeviceCaps(hDC, LOGPIXELSX));
+				dpi.setY(GetDeviceCaps(hDC, LOGPIXELSY));
+				gale::Dimension::setPixelRatio(dpi, gale::distance::inch);
+				GALE_INFO("monitor property : dpi=" << dpi << " px/inch");
+			}
+			// Get monitor Size
+			{
+				HMONITOR monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+				MONITORINFO info;
+				info.cbSize = sizeof(MONITORINFO);
+				GetMonitorInfo(monitor, &info);
+				int monitor_width = info.rcMonitor.right - info.rcMonitor.left;
+				int monitor_height = info.rcMonitor.bottom - info.rcMonitor.top;
+				GALE_INFO("monitor property: size=" << ivec2(monitor_width, monitor_height) << " px");
+			}
+			
 			// Now we can show it ...
 			ShowWindow(hWnd, SW_SHOW);
 			//EnableWindow(hWnd, TRUE);
