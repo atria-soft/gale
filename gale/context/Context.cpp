@@ -355,6 +355,9 @@ void gale::Context::requestUpdateSize() {
 }
 
 void gale::Context::OS_Resize(const vec2& _size) {
+	if (m_windowsSize == _size) {
+		return;
+	}
 	// TODO : Better in the thread ...  ==> but generate some init error ...
 	gale::Dimension::setPixelWindowsSize(_size);
 	if (m_imulationActive == true) {
@@ -368,24 +371,48 @@ void gale::Context::OS_Resize(const vec2& _size) {
 		GALE_DEBUG("Receive MSG : THREAD_RESIZE : " << _context.m_windowsSize << " ==> " << _size);
 		_context.m_windowsSize = _size;
 		gale::Dimension::setPixelWindowsSize(_context.m_windowsSize);
+		// call application inside ..
 		_context.forceRedrawAll();
 	});
 }
+
+void gale::Context::setSize(const vec2& _size) {
+	GALE_INFO("setSize: NOT implemented ...");
+};
+
+void gale::Context::setFullScreen(bool _status) {
+	GALE_INFO("setFullScreen: NOT implemented ...");
+};
+
 void gale::Context::OS_Move(const vec2& _pos) {
-	/*
-	gale::eSystemMessage *data = new gale::eSystemMessage();
-	data->TypeMessage = eSystemMessage::msgResize;
-	data->resize.w = w;
-	data->resize.h = h;
+	if (m_windowsPos == _pos) {
+		return;
+	}
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
-	m_msgSystem.Post(data);
-	*/
+	m_msgSystem.post([_pos](gale::Context& _context){
+		GALE_DEBUG("Receive MSG : THREAD_MOVE : " << _context.m_windowsPos << " ==> " << _pos);
+		_context.m_windowsPos = _pos;
+		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
+		if (appl == nullptr) {
+			return;
+		}
+		appl->onMovePosition(_context.m_windowsPos);
+	});
 }
+
+void gale::Context::setPos(const vec2& _pos) {
+	GALE_INFO("setPos: NOT implemented ...");
+}
+
+vec2 gale::Context::getPos() {
+	return m_windowsPos;
+}
+
 
 void gale::Context::OS_SetInput(enum gale::key::type _type,
                                 enum gale::key::status _status,
                                 int32_t _pointerID,
-                                const vec2& _pos ) {
+                                const vec2& _pos) {
 	if (m_imulationActive == true) {
 		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
 		m_simulationFile.filePuts(":INPUT:");
@@ -711,14 +738,6 @@ void gale::Context::OS_Background() {
 
 void gale::Context::stop() {
 	GALE_WARNING("stop: NOT implemented for this platform...");
-}
-
-void gale::Context::setSize(const vec2& _size) {
-	GALE_INFO("setSize: NOT implemented ...");
-};
-
-void gale::Context::setPos(const vec2& _pos) {
-	GALE_INFO("setPos: NOT implemented ...");
 }
 
 void gale::Context::hide() {

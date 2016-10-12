@@ -216,49 +216,49 @@ namespace etk {
 	template<> std::string to_string<gale::key::Special>(const gale::key::Special& _obj) {
 		std::string out;
 		if (_obj.getCapsLock() == true) {
-			out = "CAPS";
+			out += "CAPS";
 		}
 		if (_obj.getShift() == true) {
 			if (out.size() > 0) {
 				out += "|";
 			}
-			out = "SHIFT";
+			out += "SHIFT";
 		}
 		if (_obj.getCtrl() == true) {
 			if (out.size() > 0) {
 				out += "|";
 			}
-			out = "CTRL";
+			out += "CTRL";
 		}
 		if (_obj.getMeta() == true) {
 			if (out.size() > 0) {
 				out += "|";
 			}
-			out = "META";
+			out += "META";
 		}
 		if (_obj.getAlt() == true) {
 			if (out.size() > 0) {
 				out += "|";
 			}
-			out = "ALT";
+			out += "ALT";
 		}
 		if (_obj.getAltGr() == true) {
 			if (out.size() > 0) {
 				out += "|";
 			}
-			out = "ALTGR";
+			out += "ALTGR";
 		}
 		if (_obj.getNumLock() == true) {
 			if (out.size() > 0) {
 				out += "|";
 			}
-			out = "NUM_LOCK";
+			out += "NUM_LOCK";
 		}
 		if (_obj.getInsert() == true) {
 			if (out.size() > 0) {
 				out += "|";
 			}
-			out = "INSERT";
+			out += "INSERT";
 		}
 		return out;
 	}

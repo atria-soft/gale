@@ -415,6 +415,7 @@ class X11Interface : public gale::Context {
 								//GALE_INFO("X11 event ConfigureNotify event=" << (int32_t)event.xconfigure.event << "  Window=" << (int32_t)event.xconfigure.window << "  above=" << (int32_t)event.xconfigure.above << "  border_width=" << (int32_t)event.xconfigure.border_width );
 								m_originX = event.xconfigure.x;
 								m_originY = event.xconfigure.y;
+								OS_Move(vec2(event.xconfigure.x,event.xconfigure.y));
 								X11_INFO("X11 configure windows position : (" << m_originX << "," << m_originY << ")");
 								m_currentHeight = event.xconfigure.height;
 								m_currentWidth = event.xconfigure.width;
@@ -798,8 +799,14 @@ class X11Interface : public gale::Context {
 			XResizeWindow(m_display, m_WindowHandle, _size.x(), _size.y());
 		}
 		/****************************************************************************************/
+		void gale::Context::setFullScreen(bool _status) {
+			X11_INFO("X11-API: changeFullscreen=" << _status);
+			
+		};
+		/****************************************************************************************/
 		virtual void setPos(const vec2& _pos) {
 			X11_INFO("X11-API: changePos=" << _pos);
+			m_windowsPos = _pos;
 			XMoveWindow(m_display, m_WindowHandle, _pos.x(), _pos.y());
 			m_originX = _pos.x();
 			m_originY = _pos.y();

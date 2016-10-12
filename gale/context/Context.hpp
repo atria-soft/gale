@@ -24,7 +24,7 @@
 #define MAX_MANAGE_INPUT (15)
 
 namespace gale {
-	class Context/* : private gale::object::RemoveEvent */{
+	class Context {
 		protected:
 			std::recursive_mutex m_mutex;
 		private:
@@ -130,7 +130,7 @@ namespace gale {
 			 * @brief The application request that the Window will be killed
 			 */
 			virtual void stop();
-		private:
+		protected:
 			ivec2 m_windowsSize; //!< current size of the system
 		public:
 			/**
@@ -151,6 +151,14 @@ namespace gale {
 			 */
 			virtual void setSize(const vec2& _size);
 			/**
+			 * @brief The application request a change of his current size force the fullscreen mode.
+			 * @param[in] _status status of the fullscreen mode.
+			 */
+			virtual void setFullScreen(bool _status);
+		protected:
+			ivec2 m_windowsPos; //!< current size of the system
+		public:
+			/**
 			 * @brief The OS inform that the current windows has change his position.
 			 * @param[in] _pos New position of the Windows.
 			 */
@@ -160,6 +168,11 @@ namespace gale {
 			 * @param[in] _pos New position of the Windows requested.
 			 */
 			virtual void setPos(const vec2& _pos);
+			/**
+			 * @brief The Application request the current position of the windows.
+			 * @return Turrent position of the Windows.
+			 */
+			virtual vec2 getPos();
 			/**
 			 * @brief The OS inform that the Windows is now Hidden.
 			 */
