@@ -11,6 +11,7 @@
 
 #include <etk/types.hpp>
 #include <etk/os/FSNode.hpp>
+#include <etk/tool.hpp>
 
 #include <gale/debug.hpp>
 #include <gale/gale.hpp>
@@ -127,13 +128,14 @@ class X11Interface : public gale::Context {
 		bool m_clipBoardOwnerPrimary; //!< we are the owner of the current selection
 		bool m_clipBoardOwnerStd; //!< we are the owner of the current copy buffer
 		// Atom access...
-		Atom XAtomeSelection;
-		Atom XAtomeClipBoard;
-		Atom XAtomeTargetString;
-		Atom XAtomeTargetStringUTF8;
-		Atom XAtomeTargetTarget;
-		Atom XAtomeGALE;
-		Atom XAtomeDeleteWindows;
+		Atom XAtomSelection;
+		Atom XAtomClipBoard;
+		Atom XAtomTargetString;
+		Atom XAtomTargetStringUTF8;
+		Atom XAtomTargetTarget;
+		Atom XAtomGALE;
+		Atom XAtomDeleteWindows;
+		std::string m_uniqueWindowsName;
 		enum gale::context::cursor m_currentCursor; //!< select the current cursor to display :
 		char32_t m_lastKeyPressed; //!< The last element key presed...
 	public:
@@ -156,13 +158,13 @@ class X11Interface : public gale::Context {
 		  m_clipBoardRequestPrimary(false),
 		  m_clipBoardOwnerPrimary(false),
 		  m_clipBoardOwnerStd(false),
-		  XAtomeSelection(0),
-		  XAtomeClipBoard(0),
-		  XAtomeTargetString(0),
-		  XAtomeTargetStringUTF8(0),
-		  XAtomeTargetTarget(0),
-		  XAtomeGALE(0),
-		  XAtomeDeleteWindows(0),
+		  XAtomSelection(0),
+		  XAtomClipBoard(0),
+		  XAtomTargetString(0),
+		  XAtomTargetStringUTF8(0),
+		  XAtomTargetTarget(0),
+		  XAtomGALE(0),
+		  XAtomDeleteWindows(0),
 		  m_currentCursor(gale::context::cursor::arrow),
 		  m_lastKeyPressed(0) {
 			X11_INFO("X11:INIT");
@@ -176,13 +178,14 @@ class X11Interface : public gale::Context {
 			createX11Context();
 			createOGlContext();
 			// reset the Atom properties ...
-			XAtomeSelection        = XInternAtom(m_display, "PRIMARY", 0);
-			XAtomeClipBoard        = XInternAtom(m_display, "CLIPBOARD", 0);
-			XAtomeTargetString     = XInternAtom(m_display, "STRING", 0);
-			XAtomeTargetStringUTF8 = XInternAtom(m_display, "UTF8_STRING", 0);
-			XAtomeTargetTarget     = XInternAtom(m_display, "TARGETS", 0);
-			XAtomeGALE             = XInternAtom(m_display, "GALE", 0);
-			XAtomeDeleteWindows    = XInternAtom(m_display, "WM_DELETE_WINDOW", 0);
+			XAtomSelection        = XInternAtom(m_display, "PRIMARY", 0);
+			XAtomClipBoard        = XInternAtom(m_display, "CLIPBOARD", 0);
+			XAtomTargetString     = XInternAtom(m_display, "STRING", 0);
+			XAtomTargetStringUTF8 = XInternAtom(m_display, "UTF8_STRING", 0);
+			XAtomTargetTarget     = XInternAtom(m_display, "TARGETS", 0);
+			m_uniqueWindowsName   = "GALE_" + etk::to_string(etk::tool::irand(0, 1999999999));
+			XAtomGALE             = XInternAtom(m_display, m_uniqueWindowsName.c_str(), 0);
+			XAtomDeleteWindows    = XInternAtom(m_display, "WM_DELETE_WINDOW", 0);
 			m_run = true;
 		}
 		
@@ -203,7 +206,7 @@ class X11Interface : public gale::Context {
 					switch (event.type) {
 						case ClientMessage: {
 							X11_INFO("Receive : ClientMessage");
-							if(XAtomeDeleteWindows == (uint64_t)event.xclient.data.l[0]) {
+							if(XAtomDeleteWindows == (uint64_t)event.xclient.data.l[0]) {
 								GALE_INFO("     == > Kill Requested ...");
 								OS_Stop();
 								// We do not close here but in the application only:
@@ -312,21 +315,21 @@ class X11Interface : public gale::Context {
 							#endif
 							
 							std::string tmpData = "";
-							if (req->selection == XAtomeSelection) {
+							if (req->selection == XAtomSelection) {
 								tmpData = gale::context::clipBoard::get(gale::context::clipBoard::clipboardSelection);
-							} else if (req->selection == XAtomeClipBoard) {
+							} else if (req->selection == XAtomClipBoard) {
 								tmpData = gale::context::clipBoard::get(gale::context::clipBoard::clipboardStd);
 							}
 							const char * magatTextToSend = tmpData.c_str();
 							Atom listOfAtom[4];
 							if(strlen(magatTextToSend) == 0 ) {
 								respond.xselection.property= None;
-							} else if(XAtomeTargetTarget == req->target) {
+							} else if(XAtomTargetTarget == req->target) {
 								// We need to generate the list of the possibles target element of atom
 								int32_t nbAtomSupported = 0;
-								listOfAtom[nbAtomSupported++] = XAtomeTargetTarget;
-								listOfAtom[nbAtomSupported++] = XAtomeTargetString;
-								listOfAtom[nbAtomSupported++] = XAtomeTargetStringUTF8;
+								listOfAtom[nbAtomSupported++] = XAtomTargetTarget;
+								listOfAtom[nbAtomSupported++] = XAtomTargetString;
+								listOfAtom[nbAtomSupported++] = XAtomTargetStringUTF8;
 								listOfAtom[nbAtomSupported++] = None;
 								XChangeProperty( m_display,
 								                 req->requestor,
@@ -338,7 +341,7 @@ class X11Interface : public gale::Context {
 								                 nbAtomSupported );
 								respond.xselection.property=req->property;
 								GALE_INFO("             == > Respond ... (test)");
-							} else if(XAtomeTargetString == req->target) {
+							} else if(XAtomTargetString == req->target) {
 								XChangeProperty( m_display,
 								                 req->requestor,
 								                 req->property,
@@ -349,7 +352,7 @@ class X11Interface : public gale::Context {
 								                 strlen(magatTextToSend));
 								respond.xselection.property=req->property;
 								GALE_INFO("             == > Respond ...");
-							} else if (XAtomeTargetStringUTF8 == req->target) {
+							} else if (XAtomTargetStringUTF8 == req->target) {
 								XChangeProperty( m_display,
 								                 req->requestor,
 								                 req->property,
@@ -799,9 +802,69 @@ class X11Interface : public gale::Context {
 			XResizeWindow(m_display, m_WindowHandle, _size.x(), _size.y());
 		}
 		/****************************************************************************************/
-		void gale::Context::setFullScreen(bool _status) {
+		void setFullScreen(bool _status) {
 			X11_INFO("X11-API: changeFullscreen=" << _status);
+			XEvent event;
+			event.xclient.type = ClientMessage;
+			event.xclient.serial = 0;
+			event.xclient.send_event = True;
+			event.xclient.display = m_display;
+			event.xclient.window = m_WindowHandle;
+			event.xclient.message_type = XInternAtom(m_display, "_NET_WM_STATE", False);
+			event.xclient.format = 32;
+			if (_status == true) {
+				event.xclient.data.l[0] = 1;//XInternAtom(m_display, "_NET_WM_STATE_REMOVE", False);
+			} else {
+				event.xclient.data.l[0] = 0;//XInternAtom(m_display, "_NET_WM_STATE_ADD", False);
+			}
+			event.xclient.data.l[1] = XInternAtom(m_display, "_NET_WM_STATE_FULLSCREEN", False);
+			event.xclient.data.l[2] = 0;
+			event.xclient.data.l[3] = 0;
+			event.xclient.data.l[4] = 0;
 			
+			//long mask = SubstructureNotifyMask;
+			//long mask = StructureNotifyMask | ResizeRedirectMask;
+			//long mask = SubstructureRedirectMask;
+			long mask = PropertyChangeMask;
+			
+			XSendEvent(m_display,
+			           RootWindow(m_display, DefaultScreen(m_display)),
+			           False,
+			           mask,
+			           &event);
+			// associate the keyboard grabing (99% associated case)
+			grabKeyboardEvents(_status);
+		}
+		/****************************************************************************************/
+		virtual void grabKeyboardEvents(bool _status) {
+			if (_status == true) {
+				X11_INFO("X11-API: Grab Keyboard Events");
+				XGrabKeyboard(m_display, m_WindowHandle,
+				              False,
+				              GrabModeAsync,
+				              GrabModeAsync,
+				              CurrentTime);
+			} else {
+				X11_INFO("X11-API: Un-Grab Keyboard Events");
+				XUngrabKeyboard(m_display, CurrentTime);
+			}
+		}
+		/****************************************************************************************/
+		virtual void setWindowsDecoration(bool _status) {
+			X11_INFO("X11-API: setWindows Decoration :" << _status);
+			// Remove/set decoration
+			Hints hints;
+			hints.flags = 2;
+			if (_status == true) {
+				hints.decorations = 1;
+			} else {
+				hints.decorations = 0;
+			}
+			XChangeProperty(m_display, m_WindowHandle,
+			                XInternAtom(m_display, "_MOTIF_WM_HINTS", False),
+			                XInternAtom(m_display, "_MOTIF_WM_HINTS", False),
+			                32, PropModeReplace,
+			                (unsigned char *)&hints,5);
 		};
 		/****************************************************************************************/
 		virtual void setPos(const vec2& _pos) {
@@ -912,8 +975,8 @@ class X11Interface : public gale::Context {
 			}
 		}
 		/****************************************************************************************/
-		void grabPointerEvents(bool _isGrabbed, const vec2& _forcedPosition) {
-			if (_isGrabbed == true) {
+		void grabPointerEvents(bool _status, const vec2& _forcedPosition) {
+			if (_status == true) {
 				X11_DEBUG("X11-API: Grab Events");
 				int32_t test = XGrabPointer(m_display,RootWindow(m_display, DefaultScreen(m_display)), True,
 				                            ButtonPressMask |
@@ -1319,9 +1382,9 @@ class X11Interface : public gale::Context {
 						m_clipBoardRequestPrimary = true;
 						// generate a request on X11
 						XConvertSelection(m_display,
-						                  XAtomeSelection,
-						                  XAtomeTargetStringUTF8,
-						                  XAtomeGALE,
+						                  XAtomSelection,
+						                  XAtomTargetStringUTF8,
+						                  XAtomGALE,
 						                  m_WindowHandle,
 						                  CurrentTime);
 					} else {
@@ -1334,9 +1397,9 @@ class X11Interface : public gale::Context {
 						m_clipBoardRequestPrimary = false;
 						// generate a request on X11
 						XConvertSelection(m_display,
-						                  XAtomeClipBoard,
-						                  XAtomeTargetStringUTF8,
-						                  XAtomeGALE,
+						                  XAtomClipBoard,
+						                  XAtomTargetStringUTF8,
+						                  XAtomGALE,
 						                  m_WindowHandle,
 						                  CurrentTime);
 					} else {
@@ -1355,14 +1418,14 @@ class X11Interface : public gale::Context {
 				case gale::context::clipBoard::clipboardSelection:
 					// Request the selection :
 					if (m_clipBoardOwnerPrimary == false) {
-						XSetSelectionOwner(m_display, XAtomeSelection, m_WindowHandle, CurrentTime);
+						XSetSelectionOwner(m_display, XAtomSelection, m_WindowHandle, CurrentTime);
 						m_clipBoardOwnerPrimary = true;
 					}
 					break;
 				case gale::context::clipBoard::clipboardStd:
 					// Request the clipBoard :
 					if (m_clipBoardOwnerStd == false) {
-						XSetSelectionOwner(m_display, XAtomeClipBoard, m_WindowHandle, CurrentTime);
+						XSetSelectionOwner(m_display, XAtomClipBoard, m_WindowHandle, CurrentTime);
 						m_clipBoardOwnerStd = true;
 					}
 					break;

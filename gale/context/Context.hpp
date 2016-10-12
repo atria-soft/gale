@@ -253,11 +253,16 @@ namespace gale {
 			 */
 			virtual void forceOrientation(enum gale::orientation _orientation) { };
 			/**
-			 * @brief get all the event from the X system
-			 * @param[in] _isGrabbed "true" if all the event will be get, false if we want only ours.
+			 * @brief get all Keyboard event from the X system (like many time use of META)
+			 * @param[in] _status "true" if all the event will be get, false if we want only ours.
+			 */
+			virtual void grabKeyboardEvents(bool _status) {}
+			/**
+			 * @brief get all Mouse/Touch events from the X system
+			 * @param[in] _status "true" if all the event will be get, false if we want only ours.
 			 * @param[in] _forcedPosition the position where the mouse might be reset at  every events ...
 			 */
-			virtual void grabPointerEvents(bool _isGrabbed, const vec2& _forcedPosition) { };
+			virtual void grabPointerEvents(bool _status, const vec2& _forcedPosition) { };
 			/**
 			 * @brief set the cursor display type.
 			 * @param[in] _newCursor selected new cursor.
@@ -269,10 +274,16 @@ namespace gale {
 			 */
 			virtual void setIcon(const std::string& _inputFile) { };
 			/**
+			 * @brief Enable or Disable the decoration on the Windows (availlable only on Desktop)
+			 * @param[in] _status "true" to enable decoration / false otherwise
+			 */
+			virtual void setWindowsDecoration(bool _status) {};
+			/**
 			 * @brief get the curent time in micro-second
 			 * @note : must be implemented in all system OS implementation
 			 * @return The curent time of the process
 			 */
+			// TODO : REMOVE this ... deprecated since c++11
 			static int64_t getTime();
 		private:
 			// TODO : set user argument here ....
