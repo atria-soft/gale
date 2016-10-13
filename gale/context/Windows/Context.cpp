@@ -23,13 +23,6 @@
 #include <windowsx.h>
 #include <etk/etk.hpp>
 
-int64_t gale::getTime() {
-    struct timeval now;
-    gettimeofday(&now, nullptr);
-    //GALE_VERBOSE("current time : " << now.tv_sec << "s " << now.tv_usec << "us");
-    return (int64_t)((int64_t)now.tv_sec*(int64_t)1000000 + (int64_t)now.tv_usec);
-}
-
 static std::string GetLastErrorAsString() {
 	//Get the error message, if any.
 	DWORD errorMessageID = ::GetLastError();

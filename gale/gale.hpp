@@ -30,7 +30,7 @@ namespace gale {
 	/**
 	 * @brief get current time in us...
 	 * @return The current time
-	 * @note is implemented by the OS implementation cf renderer/X11/...
+	 * @deprecated use std::chrono
 	 */
 	int64_t getTime();
 	/**

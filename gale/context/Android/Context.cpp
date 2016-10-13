@@ -17,15 +17,6 @@
 #include <org_gale_GaleConstants.h>
 #include <jvm-basics/jvm-basics.hpp>
 
-
-int64_t gale::getTime() {
-	struct timeval	now;
-	gettimeofday(&now, nullptr);
-	//GALE_VERBOSE("current time : " << now.tv_sec << "s " << now.tv_usec << "us");
-	return (int64_t)((int64_t)now.tv_sec*(int64_t)1000000 + (int64_t)now.tv_usec);
-}
-
-
 // jni doc : /usr/lib/jvm/java-1.6.0-openjdk/include
 
 std::mutex g_interfaceMutex;

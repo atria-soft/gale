@@ -50,18 +50,6 @@ bool hasDisplay = false;
 	#define X11_CRITICAL   GALE_VERBOSE
 #endif
 
-int64_t gale::getTime() {
-	struct timespec now;
-	int ret = clock_gettime(CLOCK_REALTIME, &now);
-	if (ret != 0) {
-		// Error to get the time ...
-		now.tv_sec = time(nullptr);
-		now.tv_nsec = 0;
-	}
-	//GALE_VERBOSE("current time : " << now.tv_sec << "s " << now.tv_usec << "us");
-	return (int64_t)((int64_t)now.tv_sec*(int64_t)1000000 + (int64_t)now.tv_nsec/(int64_t)1000);
-}
-
 // attributes for a single buffered visual in RGBA format with at least 4 bits per color and a 16 bit depth buffer
 static int attrListSgl[] = {
 	GLX_RGBA,

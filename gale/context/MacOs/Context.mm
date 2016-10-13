@@ -31,19 +31,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-int64_t gale::getTime() {
-	struct timespec now;
-	clock_serv_t cclock;
-	mach_timespec_t mts;
-	host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
-	clock_get_time(cclock, &mts);
-	mach_port_deallocate(mach_task_self(), cclock);
-	now.tv_sec = mts.tv_sec;
-	now.tv_nsec = mts.tv_nsec;
-	//GALE_VERBOSE("current time : " << now.tv_sec << "s " << now.tv_usec << "us");
-	return (int64_t)((int64_t)now.tv_sec*(int64_t)1000000 + (int64_t)now.tv_nsec/(int64_t)1000);
-}
-
 class MacOSInterface : public gale::Context {
 	private:
 		gale::key::Special m_guiKeyBoardMode;
