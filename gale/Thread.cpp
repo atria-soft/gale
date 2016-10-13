@@ -5,7 +5,7 @@
  */
 #include <gale/Thread.hpp>
 #include <gale/debug.hpp>
-#include <unistd.h>
+
 #include <gale/context/Context.hpp>
 
 #if defined(__TARGET_OS__Android)
@@ -97,7 +97,7 @@ void gale::Thread::threadCall() {
 	while (m_state != state::stopping) {
 		if (m_state == state::starting) {
 			GALE_DEBUG("run std::thread [NOTHING to do]");
-			usleep(1000);
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			continue;
 		}
 		if (onThreadCall() == true) {

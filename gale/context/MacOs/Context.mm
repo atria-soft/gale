@@ -18,7 +18,7 @@
 
 #include <gale/context/MacOs/Interface.hpp>
 #include <gale/context/MacOs/Context.hpp>
-#include <unistd.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

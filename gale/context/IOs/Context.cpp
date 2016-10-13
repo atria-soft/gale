@@ -17,7 +17,7 @@
 
 #include <gale/context/IOs/Interface.h>
 #include <gale/context/IOs/Context.hpp>
-#include <unistd.h>
+
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>

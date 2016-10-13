@@ -4,7 +4,7 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <unistd.h>
+
 
 #include <etk/types.hpp>
 #include <etk/etk.hpp>
@@ -532,7 +532,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 	// this is to prevent the multiple display at the a high frequency ...
 	#if (!defined(__TARGET_OS__Android) && !defined(__TARGET_OS__Windows))
 	if(currentTime - m_previousDisplayTime < 1000000/120) {
-		usleep(1000);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		gale::openGL::threadHasNoMoreContext();
 		return false;
 	}
