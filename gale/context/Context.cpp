@@ -127,22 +127,6 @@ void gale::Context::unLockContext() {
 	mutexInterface().unlock();
 }
 
-#if 0
-void gale::Context::inputEventTransfertWidget(ememory::SharedPtr<gale::Widget> _source,
-                                              ememory::SharedPtr<gale::Widget> _destination) {
-	m_input.transfertEvent(_source, _destination);
-}
-
-
-void gale::Context::inputEventGrabPointer(ememory::SharedPtr<gale::Widget> _widget) {
-	m_input.grabPointer(_widget);
-}
-
-void gale::Context::inputEventUnGrabPointer() {
-	m_input.unGrabPointer();
-}
-#endif
-
 void gale::Context::processEvents() {
 	int32_t nbEvent = 0;
 	//GALE_DEBUG(" ********  Event");

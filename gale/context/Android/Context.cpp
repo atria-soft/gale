@@ -330,6 +330,7 @@ class AndroidContext : public gale::Context {
 		void sendJavaKeyboardUpdate(jboolean _showIt) {
 			int status;
 			if(!java_attach_current_thread(&status)) {
+				GALE_ERROR("Can not attach thread ...");
 				return;
 			}
 			//Call java ...
@@ -339,9 +340,11 @@ class AndroidContext : public gale::Context {
 			java_detach_current_thread(status);
 		}
 		void keyboardShow() {
+			GALE_VERBOSE("Call Keyboard SHOW");
 			sendJavaKeyboardUpdate(JNI_TRUE);
 		};
 		void keyboardHide() {
+			GALE_VERBOSE("Call Keyboard HIDE");
 			sendJavaKeyboardUpdate(JNI_FALSE);
 		};
 		

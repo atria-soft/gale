@@ -193,26 +193,6 @@ namespace gale {
 			 * @brief Redraw all the windows
 			 */
 			void forceRedrawAll();
-			
-			// TODO : Later ...
-			#if 0
-			/**
-			 * @brief This is to transfert the event from one widget to another one
-			 * @param source the widget where the event came from
-			 * @param destination the widget where the event mitgh be generated now
-			 */
-			void inputEventTransfertWidget(ememory::SharedPtr<gale::Widget> _source, ememory::SharedPtr<gale::Widget> _destination);
-			/**
-			 * @brief This fonction lock the pointer properties to move in relative instead of absolute
-			 * @param[in] widget The widget that lock the pointer events
-			 */
-			void inputEventGrabPointer(ememory::SharedPtr<gale::Widget> _widget);
-			/**
-			 * @brief This fonction un-lock the pointer properties to move in relative instead of absolute
-			 */
-			void inputEventUnGrabPointer();
-			#endif
-			
 			/**
 			 * @brief display the virtal keyboard (for touch system only)
 			 */
@@ -308,17 +288,6 @@ namespace gale {
 			 * @param[in] _fileName Name of the image to load
 			 */
 			void setInitImage(const std::string& _fileName);
-		protected:
-			#if 0
-				TODO : Rework this ==> but how ...
-			/**
-			 * @brief HARDWARE keyboard event from the system
-			 * @param[in] _key event type
-			 * @param[in] _status Up or down status
-			 * @return Keep the event or not
-			 */
-			virtual bool systemKeyboradEvent(enum gale::key::keyboard _key, bool _down);
-			#endif
 	};
 	/**
 	 * @brief From everyware in the program, we can get the context inteface.

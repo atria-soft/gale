@@ -70,7 +70,7 @@ void gale::Application::onKillDemand(gale::Context& _context) {
 }
 
 void gale::Application::exit(int32_t _value) {
-	GALE_VERBOSE("Exit Requested");
+	GALE_VERBOSE("Exit Requested " << _value);
 	gale::getContext().stop();
 }
 
@@ -86,11 +86,11 @@ void gale::Application::onKeyboard(const gale::key::Special& _special,
 }
 
 void gale::Application::keyboardShow() {
-	
+	gale::getContext().keyboardShow();
 }
 
 void gale::Application::keyboardHide() {
-	
+	gale::getContext().keyboardHide();
 }
 
 void gale::Application::onResize(const ivec2& _size) {
