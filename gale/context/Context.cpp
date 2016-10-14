@@ -22,6 +22,7 @@
 #include <gale/context/Context.hpp>
 #include <gale/resource/Manager.hpp>
 #include <map>
+#include <echrono/Steady.hpp>
 
 
 /**
@@ -174,7 +175,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
   m_imulationActive(false),
   m_simulationFile("gale.gsim"),
   //m_objectManager(*this),
-  m_previousDisplayTime(0),
+  m_previousDisplayTime(),
   // TODO : m_input(*this),
 #if (defined(__TARGET_OS__Android) || defined(__TARGET_OS__IOs))
   m_displayFps(true),
@@ -255,7 +256,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	GALE_INFO("GALE v:" << gale::getVersion());
 	// request the init of the application in the main context of openGL ...
 	if (m_imulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":INIT");
 		m_simulationFile.filePuts("\n");
 	}
@@ -328,7 +329,7 @@ gale::Context::~Context() {
 
 void gale::Context::requestUpdateSize() {
 	if (m_imulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":RECALCULATE_SIZE\n");
 	}
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
@@ -345,7 +346,7 @@ void gale::Context::OS_Resize(const vec2& _size) {
 	// TODO : Better in the thread ...  ==> but generate some init error ...
 	gale::Dimension::setPixelWindowsSize(_size);
 	if (m_imulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":RESIZE:");
 		m_simulationFile.filePuts(etk::to_string(_size));
 		m_simulationFile.filePuts("\n");
@@ -398,7 +399,7 @@ void gale::Context::OS_SetInput(enum gale::key::type _type,
                                 int32_t _pointerID,
                                 const vec2& _pos) {
 	if (m_imulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":INPUT:");
 		m_simulationFile.filePuts(etk::to_string(_type));
 		m_simulationFile.filePuts(":");
@@ -435,7 +436,7 @@ void gale::Context::OS_setKeyboard(const gale::key::Special& _special,
 		}
 	}
 	if (m_imulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":KEYBOARD:");
 		m_simulationFile.filePuts(etk::to_string(_special));
 		m_simulationFile.filePuts(":");
@@ -461,7 +462,7 @@ void gale::Context::OS_setKeyboard(const gale::key::Special& _special,
 
 void gale::Context::OS_Hide() {
 	if (m_imulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":VIEW:false\n");
 	}
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
@@ -482,7 +483,7 @@ void gale::Context::OS_Hide() {
 
 void gale::Context::OS_Show() {
 	if (m_imulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":VIEW:true\n");
 	}
 	m_msgSystem.post([](gale::Context& _context){
@@ -503,7 +504,7 @@ void gale::Context::OS_Show() {
 
 void gale::Context::OS_ClipBoardArrive(enum gale::context::clipBoard::clipboardListe _clipboardID) {
 	if (m_imulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(gale::getTime()));
+		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":CLIPBOARD_ARRIVE:");
 		m_simulationFile.filePuts(etk::to_string(_clipboardID));
 		m_simulationFile.filePuts("\n");
@@ -528,10 +529,10 @@ void gale::Context::clipBoardSet(enum gale::context::clipBoard::clipboardListe _
 
 bool gale::Context::OS_Draw(bool _displayEveryTime) {
 	gale::openGL::threadHasContext();
-	int64_t currentTime = gale::getTime();
+	echrono::Steady currentTime = echrono::Steady::now();
 	// this is to prevent the multiple display at the a high frequency ...
 	#if (!defined(__TARGET_OS__Android) && !defined(__TARGET_OS__Windows))
-	if(currentTime - m_previousDisplayTime < 1000000/120) {
+	if(currentTime - m_previousDisplayTime < echrono::seconds(10)) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		gale::openGL::threadHasNoMoreContext();
 		return false;
@@ -669,7 +670,7 @@ void gale::Context::OS_Suspend() {
 	// set the curent interface :
 	lockContext();
 	GALE_INFO("OS_Suspend...");
-	m_previousDisplayTime = -1;
+	m_previousDisplayTime = echrono::Steady();
 	#if 0
 	if (m_windowsCurrent != nullptr) {
 		m_windowsCurrent->onStateSuspend();
@@ -683,7 +684,7 @@ void gale::Context::OS_Resume() {
 	// set the curent interface :
 	lockContext();
 	GALE_INFO("OS_Resume...");
-	m_previousDisplayTime = gale::getTime();
+	m_previousDisplayTime = echrono::Steady::now();
 	// TODO : m_objectManager.timeCallResume(m_previousDisplayTime);
 	#if 0
 	if (m_windowsCurrent != nullptr) {

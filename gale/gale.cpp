@@ -44,10 +44,3 @@ std::string gale::getVersion() {
 	return GALE_VERSION;
 }
 
-// generic vertion of time: ==> DEPRECATED
-int64_t gale::getTime() {
-	std::chrono::high_resolution_clock::time_point globalTimePoint = std::chrono::high_resolution_clock::now();
-	std::chrono::microseconds timeSinceEpoch = std::chrono::duration_cast<std::chrono::microseconds>(globalTimePoint.time_since_epoch());
-	return timeSinceEpoch.count();
-}
-

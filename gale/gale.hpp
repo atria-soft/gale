@@ -21,18 +21,12 @@ namespace gale {
 	 * @param[in] _argv Standard argv
 	 * @return normal error int for the application error management
 	 */
-	int32_t run(gale::Application* _application, int32_t _argc = 0, const char* _argv[] = NULL);
+	int32_t run(gale::Application* _application, int32_t _argc = 0, const char* _argv[] = nullptr);
 	/**
 	 * @brief get GALE version
 	 * @return The string that describe gale version
 	 */
 	std::string getVersion();
-	/**
-	 * @brief get current time in us...
-	 * @return The current time
-	 * @deprecated use std::chrono
-	 */
-	int64_t getTime();
 	/**
 	 * @brief get compilation mode (release/debug)
 	 * @return the string of the mode of commpilation

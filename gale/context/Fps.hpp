@@ -4,6 +4,8 @@
  * @license APACHE v2.0 (see license file)
  */
 #pragma once
+#include <echrono/Steady.hpp>
+#include <echrono/Duration.hpp>
 
 namespace gale {
 	namespace context {
@@ -12,42 +14,39 @@ namespace gale {
 		 * @not_in_doc
 		 */
 		class Fps {
-			// display every second ...
-			#define DISPLAY_PERIODE_US       (1000000)
 			private:
-				int64_t startTime;
-				int64_t nbCallTime;
-				int64_t nbDisplayTime;
-				int64_t min;
-				int64_t avg;
-				int64_t max;
-				int64_t min_idle;
-				int64_t avg_idle;
-				int64_t max_idle;
-				int64_t ticTime;
-				bool display;
-				bool drwingDone;
+				echrono::Steady m_startTime;
+				int64_t m_nbCallTime;
+				int64_t m_nbDisplayTime;
+				echrono::Duration m_min;
+				echrono::Duration m_avg;
+				echrono::Duration m_max;
+				echrono::Duration m_min_idle;
+				echrono::Duration m_avg_idle;
+				echrono::Duration m_max_idle;
+				echrono::Steady m_ticTime;
+				bool m_display;
+				bool m_drawingDone;
 				const char * m_displayName;
 				bool m_displayFPS;
 			public:
 				/**
 				 * @brief Constructor
 				 */
-				Fps(const char * displayName, bool displayFPS) {
-					startTime = -1;
-					nbCallTime = 0;
-					nbDisplayTime = 0;
-					min = 99999999999999LL;
-					avg = 0;
-					max = 0;
-					min_idle = 99999999999999LL;
-					avg_idle = 0;
-					max_idle = 0;
-					ticTime = 0;
-					display = false;
-					drwingDone = false;
-					m_displayName = displayName;
-					m_displayFPS = displayFPS;
+				Fps(const char* _displayName, bool _displayFPS):
+				  m_nbCallTime(0),
+				  m_nbDisplayTime(0),
+				  m_min(99999999,0),
+				  m_avg(0,0),
+				  m_max(0,0),
+				  m_min_idle(99999999,0),
+				  m_avg_idle(0,0),
+				  m_max_idle(0,0),
+				  m_display(false),
+				  m_drawingDone(false),
+				  m_displayName(_displayName),
+				  m_displayFPS(_displayFPS) {
+					
 				}
 				/**
 				 * @brief Destructor
@@ -59,75 +58,75 @@ namespace gale {
 				 * @brief this might be call every time a diplay start
 				 */
 				void tic() {
-					int64_t currentTime = gale::getTime();
-					ticTime = currentTime;
-					nbCallTime++;
-					if (startTime<0) {
-						startTime = currentTime;
+					echrono::Steady currentTime = echrono::Steady::now();
+					m_ticTime = currentTime;
+					m_nbCallTime++;
+					if (m_startTime == echrono::Steady()) {
+						m_startTime = currentTime;
 					}
-					//GALE_DEBUG("current : " << currentTime << "time    diff : " << (currentTime - startTime));
-					if ( (currentTime - startTime) > DISPLAY_PERIODE_US) {
-						display = true;
+					//GALE_DEBUG("current : " << currentTime << "time    diff : " << (currentTime - m_startTime));
+					if ( (currentTime - m_startTime) > echrono::seconds(10)) {
+						m_display = true;
 					}
 				}
 				/**
 				 * @brief this might be call every time a diplay stop, it do the display every second
 				 * @param[in] displayTime display curent time of the frame.
 				 */
-				void toc(bool displayTime = false) {
-					int64_t currentTime = gale::getTime();
-					int64_t processTimeLocal = (currentTime - ticTime);
-					if (displayTime == true) {
-						GALE_PRINT(m_displayName << " : processTime : " << (float)((float)processTimeLocal / 1000.0) << "ms ");
+				void toc(bool _displayTime = false) {
+					echrono::Steady currentTime = echrono::Steady::now();
+					echrono::Duration processTimeLocal = (currentTime - m_ticTime);
+					if (_displayTime == true) {
+						GALE_PRINT(m_displayName << ": processTime: " << processTimeLocal);
 					}
-					if (drwingDone) {
-						min = std::min(min, processTimeLocal);
-						max = std::max(max, processTimeLocal);
-						avg += processTimeLocal;
-						drwingDone = false;
+					if (m_drawingDone == true) {
+						m_min = std::min(m_min, processTimeLocal);
+						m_max = std::max(m_max, processTimeLocal);
+						m_avg += processTimeLocal;
+						m_drawingDone = false;
 					} else {
-						min_idle = std::min(min_idle, processTimeLocal);
-						max_idle = std::max(max_idle, processTimeLocal);
-						avg_idle += processTimeLocal;
+						m_min_idle = std::min(m_min_idle, processTimeLocal);
+						m_max_idle = std::max(m_max_idle, processTimeLocal);
+						m_avg_idle += processTimeLocal;
 					}
 				}
 				/**
 				 * @brief this might be call when a display is really done
 				 */
 				void incrementCounter() {
-					nbDisplayTime++;
-					drwingDone = true;
+					m_nbDisplayTime++;
+					m_drawingDone = true;
 				}
 				/**
 				 * @brief draw debug display ...
 				 */
 				void draw() {
-					if (true == display) {
-						if (nbDisplayTime>0) {
+					if (m_display == true) {
+						if (m_nbDisplayTime > 0) {
 							GALE_PRINT(m_displayName << " : Active : "
-							                         << (float)((float)min / 1000.0) << "ms "
-							                         << (float)((float)avg / (float)nbDisplayTime / 1000.0) << "ms "
-							                         << (float)((float)max / 1000.0) << "ms ");
+							                         << m_min << " "
+							                         << m_avg / m_nbDisplayTime << "ms "
+							                         << m_max << " ");
 						}
-						if (nbCallTime-nbDisplayTime>0) {
+						if (m_nbCallTime-m_nbDisplayTime>0) {
 							GALE_PRINT(m_displayName << " : idle   : "
-							                         << (float)((float)min_idle / 1000.0) << "ms "
-							                         << (float)((float)avg_idle / (float)(nbCallTime-nbDisplayTime) / 1000.0) << "ms "
-							                         << (float)((float)max_idle / 1000.0) << "ms ");
+							                         << m_min_idle << " "
+							                         << m_avg_idle / (m_nbCallTime-m_nbDisplayTime) << "ms "
+							                         << m_max_idle << " ");
 						}
-						if (true == m_displayFPS) {
-							GALE_PRINT("FPS : " << nbDisplayTime << "/" << nbCallTime << "fps");
+						if (m_displayFPS == true) {
+							GALE_PRINT("FPS : " << m_nbDisplayTime << "/" << m_nbCallTime << "fps");
 						}
-						max = 0;
-						min = 99999999999999LL;
-						avg = 0;
-						max_idle = 0;
-						min_idle = 99999999999999LL;
-						avg_idle = 0;
-						nbCallTime = 0;
-						nbDisplayTime = 0;
-						startTime = -1;
-						display = false;
+						m_max = echrono::Duration(0);
+						m_min = echrono::Duration(99999999,0);
+						m_avg = echrono::Duration(0);
+						m_max_idle = echrono::Duration(0);
+						m_min_idle = echrono::Duration(99999999,0);
+						m_avg_idle = echrono::Duration(0);
+						m_nbCallTime = 0;
+						m_nbDisplayTime = 0;
+						m_startTime = echrono::Steady();
+						m_display = false;
 					}
 				}
 		};

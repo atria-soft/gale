@@ -20,6 +20,7 @@
 #include <gale/orientation.hpp>
 #include <gale/context/clipBoard.hpp>
 #include <ethread/tools.hpp>
+#include <echrono/Steady.hpp>
 
 #define MAX_MANAGE_INPUT (15)
 
@@ -64,7 +65,7 @@ namespace gale {
 			bool m_imulationActive;
 			etk::FSNode m_simulationFile;
 		private:
-			int64_t m_previousDisplayTime;  // this is to limit framerate ... in case...
+			echrono::Steady m_previousDisplayTime;  // this is to limit framerate ... in case...
 			// TODO : gale::context::InputManager m_input;
 			etk::Fifo<std::function<void(gale::Context& _context)> > m_msgSystem;
 			bool m_displayFps;

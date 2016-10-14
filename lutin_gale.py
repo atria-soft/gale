@@ -138,7 +138,8 @@ def configure(target, my_module):
 	    ])
 	my_module.add_depend([
 	    'etk',
-	    'opengl'
+	    'opengl',
+	    'echrono',
 	    ])
 	my_module.add_optionnal_depend('esignal', ["c++", "-DGALE_BUILD_ESIGNAL"])
 	my_module.add_optionnal_depend('eproperty', ["c++", "-DGALE_BUILD_EPROPERTY"])

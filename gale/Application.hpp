@@ -14,6 +14,7 @@
 #include <gale/key/Special.hpp>
 #include <gale/context/cursor.hpp>
 #include <gale/context/clipBoard.hpp>
+#include <echrono/Clock.hpp>
 
 namespace gale {
 	class Context;
@@ -211,6 +212,6 @@ namespace gale {
 			 * @brief Call every time a draw is called (not entirely periodic, but faster at we can ...
 			 * @param[in] _time Current time of the call;
 			 */
-			virtual void onPeriod(int64_t _time) {};
+			virtual void onPeriod(const echrono::Clock& _time) {};
 	};
 }
