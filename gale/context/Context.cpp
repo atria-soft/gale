@@ -532,7 +532,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 	echrono::Steady currentTime = echrono::Steady::now();
 	// this is to prevent the multiple display at the a high frequency ...
 	#if (!defined(__TARGET_OS__Android) && !defined(__TARGET_OS__Windows))
-	if(currentTime - m_previousDisplayTime < echrono::seconds(10)) {
+	if(currentTime - m_previousDisplayTime < echrono::milliseconds(8)) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		gale::openGL::threadHasNoMoreContext();
 		return false;
