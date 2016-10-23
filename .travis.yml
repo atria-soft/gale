@@ -1,0 +1,94 @@
+language: cpp
+
+sudo: false
+
+branches:
+  only:
+    - master
+    - dev
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.9
+      - expect
+      #- binutils-mingw-w64-x86-64 # 64bit MinGW
+      #- gcc-mingw-w64-x86-64
+      #- g++-mingw-w64-x86-64
+
+matrix:
+  include:
+    - os: linux
+      env: CONF=release BUILDER=gcc TARGET=Linux TAG=Linux COMPILATOR_OPTION="--compilator-version=4.9" GCOV=--gcov
+      compiler: gcc
+    - os: linux
+      env: CONF=debug BUILDER=clang TARGET=Linux
+      compiler: clang
+    #- os: linux
+    #  env: CONF=release BUILDER=gcc TARGET=Windows TAG=Mingw
+    #  compiler: x86_64-w64-mingw32-gcc
+    - os: linux
+      env: CONF=release BUILDER=gcc TARGET=Android TAG=Android DISABLE_PACKAGE=-p
+      compiler: gcc
+    - os: osx
+      env: CONF=release BUILDER=clang TARGET=MacOs TAG=MacOs
+      compiler: clang
+    - os: osx
+      env: CONF=release BUILDER=clang TARGET=IOs TAG=IOs
+      compiler: clang
+
+install:
+  - cd ..
+  - pip install --user lutin
+  - if [ "$TAG" == "Android" ]; then
+        git clone --depth 1 --branch master https://github.com/HeeroYui/android-download-tool;
+        ./android-download-tool/dl-android.sh;
+    fi
+  - git clone --depth 1 --branch master https://github.com/atria-soft/ci.git
+  - cd -
+  #- ls -l /usr/bin/x86_64*
+
+before_script:
+  - cd ..
+  - mkdir bin
+  - curl https://storage.googleapis.com/git-repo-downloads/repo > bin/repo
+  - chmod a+x bin/repo
+  - git config --global user.email "travis@travis.com"
+  - git config --global user.name "Travis"
+  - git config --global color.ui "auto"
+  - git config --global core.editor "vi"
+  - mkdir WORKING_DIRECTORY
+  - cd WORKING_DIRECTORY
+  - ../bin/repo init -u https://github.com/atria-soft/manifest.git
+  - ../bin/repo sync -j4
+  - ../bin/repo forall -c git checkout master
+  - ../bin/repo forall -c git checkout $TRAVIS_BRANCH; STATUS=$?
+  - rm -rf atria-soft/gale
+  - cd ..
+  - pwd
+  - ls -l
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+        export PATH=$PATH:/Users/travis/Library/Python/2.7/bin/;
+    fi
+  - ./ci/build_send.py --tag=$TAG --status=START;
+
+script:
+  - lutin -w -j4 -C -P -t$TARGET -c $BUILDER $COMPILATOR_OPTION $BUS -m $CONF $GCOV $DISABLE_PACKAGE gale gale-sample-basic; STATUS=$?
+  - ./ci/build_send.py --tag=$TAG --status="$STATUS";
+
+after_script:
+  - if [ "$GCOV" != "" ]; then
+        ./ci/warning_send.py --find-path ./out/Linux_x86_64/$CONF/build/$BUILDER/gale/;
+    fi
+  - ./out/Linux_x86_64/$CONF/staging/$BUILDER/gale-sample-basic/gale-sample-basic.app/bin/gale-sample-basic --etk-log-level=6 | tee out_test.txt
+  - if [ "$GCOV" != "" ]; then
+        ./ci/test_send.py --file=out_test.txt;
+        lutin -C -P -t $TARGET -c $BUILDER $COMPILATOR_OPTION $BUS -m $CONF -p gale?gcov;
+        ./ci/coverage_send.py --json=out/Linux_x86_64/$CONF/build/$BUILDER/gale/gale_coverage.json;
+    fi
+
+notifications:
+  email:
+    - yui.heero@gmail.com
