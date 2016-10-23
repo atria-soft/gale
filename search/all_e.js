@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['palegoldenrod',['paleGoldenRod',['http://atria-soft.github.io/etk/namespaceetk_1_1color.html#a4e77005ee52eb9d1b5a4ddb682374e0f',1,'etk::color']]],
+  ['palegreen',['paleGreen',['http://atria-soft.github.io/etk/namespaceetk_1_1color.html#a2cf19b14d8517bd39851f277029b0931',1,'etk::color']]],
+  ['paleturquoise',['paleTurquoise',['http://atria-soft.github.io/etk/namespaceetk_1_1color.html#a2652ecc2224179077270ffb4d13fef57',1,'etk::color']]],
+  ['palevioletred',['paleVioletRed',['http://atria-soft.github.io/etk/namespaceetk_1_1color.html#a40929240fd9c26bda27c2a80e5893db5',1,'etk::color']]],
+  ['papayawhip',['papayaWhip',['http://atria-soft.github.io/etk/namespaceetk_1_1color.html#a55430464cce8100e33385115a9468cf1',1,'etk::color']]],
+  ['parsestringcolornamed',['parseStringColorNamed',['http://atria-soft.github.io/etk/namespaceetk.html#a5c25932e9aa31944536c38f9011af6f0',1,'etk']]],
+  ['parsestringstartwithrgb',['parseStringStartWithRGB',['http://atria-soft.github.io/etk/namespaceetk.html#abd41387ac07b129579e47844b1bbaf12',1,'etk']]],
+  ['parsestringstartwithrgbgen',['parseStringStartWithRGBGen',['http://atria-soft.github.io/etk/namespaceetk.html#a6601ec7bef55d93c509c8a8feaf339eb',1,'etk']]],
+  ['parsestringstartwithrgbunsigned16',['parseStringStartWithRGBUnsigned16',['http://atria-soft.github.io/etk/namespaceetk.html#abaad365389dac5e3b8d2e43233934c40',1,'etk']]],
+  ['parsestringstartwithrgbunsigned32',['parseStringStartWithRGBUnsigned32',['http://atria-soft.github.io/etk/namespaceetk.html#afaa9cb1bec5f763cefc99c1d3f081d2c',1,'etk']]],
+  ['parsestringstartwithrgbunsigned8',['parseStringStartWithRGBUnsigned8',['http://atria-soft.github.io/etk/namespaceetk.html#a5199b1a2efd27589426dc74bcd37102f',1,'etk']]],
+  ['parsestringstartwithsharp',['parseStringStartWithSharp',['http://atria-soft.github.io/etk/namespaceetk.html#ab04b5eb953698805b801ce6b27caadad',1,'etk']]],
+  ['peachpuff',['peachPuff',['http://atria-soft.github.io/etk/namespaceetk_1_1color.html#ad30f26284e76fd398359bcd928143311',1,'etk::color']]],
+  ['peru',['peru',['http://atria-soft.github.io/etk/namespaceetk_1_1color.html#a83ed22c571e6ef53e406cc47c51f753f',1,'etk::color']]],
+  ['pink',['pink',['http://atria-soft.github.io/etk/namespaceetk_1_1color.html#ad2726cdc1f4064f8df7b77b7da3d4291',1,'etk::color']]],
+  ['plane',['Plane',['http://atria-soft.github.io/etk/classetk_1_1_plane.html',1,'etk']]],
+  ['plane',['Plane',['http://atria-soft.github.io/etk/classetk_1_1_plane.html#ac45e649cc99e2a64f93c4efd2f5cd3a0',1,'etk::Plane::Plane()'],['http://atria-soft.github.io/etk/classetk_1_1_plane.html#ad91eb9e5c7637f30869fd585c0b77f80',1,'etk::Plane::Plane(etk::Vector3D&lt; T &gt; _normal, T _intercept=0)'],['http://atria-soft.github.io/etk/classetk_1_1_plane.html#abd201fb9f3ea8d7a31d3590ce4ccbf66',1,'etk::Plane::Plane(const Plane &amp;_obj)']]],
+  ['plane_2ehpp',['Plane.hpp',['http://atria-soft.github.io/etk/__plane__8hpp.html',1,'']]],
+  ['plum',['plum',['http://atria-soft.github.io/etk/namespaceetk_1_1color.html#ab4d992f3996f638d234f936153bd7907',1,'etk::color']]],
+  ['post',['post',['http://atria-soft.github.io/etk/classetk_1_1_fifo.html#a844b4b22b7e6da8d88e301cb57555043',1,'etk::Fifo::post(MY_TYPE &amp;_data)'],['http://atria-soft.github.io/etk/classetk_1_1_fifo.html#aee87d87fed54bc307ea3cf3ea12250d9',1,'etk::Fifo::post(const MY_TYPE &amp;_data)']]],
+  ['powderblue',['powderBlue',['http://atria-soft.github.io/etk/namespaceetk_1_1color.html#afd0e078b144de932065e8a7f01685b6b',1,'etk::color']]],
+  ['purple',['purple',['http://atria-soft.github.io/etk/namespaceetk_1_1color.html#a1651c86712c0ebee50517f010a05b527',1,'etk::color']]]
+];
