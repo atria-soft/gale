@@ -5,7 +5,7 @@
  */
 
 #import <UIKit/UIKit.h>
-#include "gale/context/IOs/Interface.hpp"
+#include "gale/context/IOs/Interface.h"
 
 #import <gale/context/IOs/OpenglView.hpp>
 #import <gale/context/IOs/AppDelegate.hpp>

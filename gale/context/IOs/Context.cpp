@@ -26,7 +26,7 @@
 #include <sys/times.h>
 #include <mach/clock.h>
 #include <mach/mach.h>
-#include <etk/etk.h>
+#include <etk/etk.hpp>
 
 class MacOSInterface : public gale::Context {
 private:

@@ -55,16 +55,26 @@ int mm_main(int _argc, const char* _argv[]) {
 	// -- basic windows creation :
 	// ---------------------------------------------------------------
 	// create a windows of size 800/600
-	window = [ [ [GaleMainWindows alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
-	           styleMask:(NSTitledWindowMask|NSMiniaturizableWindowMask|NSClosableWindowMask) backing:NSBackingStoreBuffered defer:NO]
-	           autorelease];
+	#ifdef __MAC_10_12
+		window = [ [ [GaleMainWindows alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+		           styleMask:(NSWindowStyleMaskTitled|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskClosable) backing:NSBackingStoreBuffered defer:NO]
+		           autorelease];
+	#else
+		window = [ [ [GaleMainWindows alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+		           styleMask:(NSTitledWindowMask|NSMiniaturizableWindowMask|NSClosableWindowMask) backing:NSBackingStoreBuffered defer:NO]
+		           autorelease];
+	#endif
 	[window setAcceptsMouseMovedEvents:YES];
 	//id window = [ [MacOsAppDelegate alloc] autorelease];
 	
 	 // set the windows at a specific position :
 	[window cascadeTopLeftFromPoint:NSMakePoint(50,50)];
 	// set the windows resizable
-	[window setStyleMask:[window styleMask] | NSResizableWindowMask];
+	#ifdef __MAC_10_12
+		[window setStyleMask:[window styleMask] | NSWindowStyleMaskResizable];
+	#else
+		[window setStyleMask:[window styleMask] | NSResizableWindowMask];
+	#endif
 	// oposite : [window setStyleMask:[window styleMask] & ~NSResizableWindowMask];
 	// set the title
 	[window setTitle:appName];

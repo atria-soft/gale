@@ -27,7 +27,7 @@
 #include <sys/times.h>
 #include <mach/clock.h>
 #include <mach/mach.h>
-#include <etk/etk.h>
+#include <etk/etk.hpp>
 
 #import <Cocoa/Cocoa.h>
 

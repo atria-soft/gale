@@ -30,7 +30,11 @@
 	[windowsID cascadeTopLeftFromPoint:NSMakePoint(50,50)];
 	GALE_DEBUG("ALLOCATE ...");
 	// set the windows resizable
-	[windowsID setStyleMask:[windowsID styleMask] | NSResizableWindowMask];
+	#ifdef __MAC_10_12
+		[windowsID setStyleMask:[windowsID styleMask] | NSWindowStyleMaskResizable];
+	#else
+		[windowsID setStyleMask:[windowsID styleMask] | NSResizableWindowMask];
+	#endif
 	GALE_DEBUG("ALLOCATE ...");
 	// oposite : [window setStyleMask:[window styleMask] & ~NSResizableWindowMask];
 	// set the title
@@ -175,8 +179,12 @@ static gale::key::Special guiKeyBoardMode;
 }
 
 - (void)flagsChanged:(NSEvent *)theEvent {
-	if (([theEvent modifierFlags] & NSAlphaShiftKeyMask) != 0) {
-		GALE_VERBOSE("NSAlphaShiftKeyMask");
+	#ifdef __MAC_10_12
+		if (([theEvent modifierFlags] & NSEventModifierFlagCapsLock) != 0) {
+	#else
+		if (([theEvent modifierFlags] & NSAlphaShiftKeyMask) != 0) {
+	#endif
+		GALE_VERBOSE("NSEventModifierFlagCapsLock");
 		if (guiKeyBoardMode.getCapsLock() == false) {
 			guiKeyBoardMode.setCapsLock(true);
 			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::capLock, true, false);
@@ -188,8 +196,12 @@ static gale::key::Special guiKeyBoardMode;
 		}
 	}
 	
-	if (([theEvent modifierFlags] & NSShiftKeyMask) != 0) {
-		GALE_VERBOSE("NSShiftKeyMask");
+	#ifdef __MAC_10_12
+		if (([theEvent modifierFlags] & NSEventModifierFlagShift) != 0) {
+	#else
+		if (([theEvent modifierFlags] & NSShiftKeyMask) != 0) {
+	#endif
+		GALE_VERBOSE("NSEventModifierFlagShift");
 		if (guiKeyBoardMode.getShift() == false) {
 			guiKeyBoardMode.setShift(true);
 			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::shiftLeft, true, false);
@@ -201,23 +213,31 @@ static gale::key::Special guiKeyBoardMode;
 		}
 	}
 	
-	if (([theEvent modifierFlags] & NSControlKeyMask) != 0) {
-		//GALE_VERBOSE("NSControlKeyMask");
+	#ifdef __MAC_10_12
+		if (([theEvent modifierFlags] & NSEventModifierFlagControl) != 0) {
+	#else
+		if (([theEvent modifierFlags] & NSControlKeyMask) != 0) {
+	#endif
+		//GALE_VERBOSE("NSEventModifierFlagControl");
 		if (guiKeyBoardMode.getCtrl() == false) {
-			GALE_VERBOSE("NSControlKeyMask DOWN");
+			GALE_VERBOSE("NSEventModifierFlagControl DOWN");
 			guiKeyBoardMode.setCtrl(true);
 			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::ctrlLeft, true, false);
 		}
 	} else {
 		if (guiKeyBoardMode.getCtrl() == true) {
-			GALE_VERBOSE("NSControlKeyMask UP");
+			GALE_VERBOSE("NSEventModifierFlagControl UP");
 			guiKeyBoardMode.setCtrl(false);
 			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::ctrlLeft, false, false);
 		}
 	}
 	
-	if (([theEvent modifierFlags] & NSAlternateKeyMask) != 0) {
-		GALE_VERBOSE("NSAlternateKeyMask");
+	#ifdef __MAC_10_12
+		if (([theEvent modifierFlags] & NSEventModifierFlagOption) != 0) {
+	#else
+		if (([theEvent modifierFlags] & NSAlternateKeyMask) != 0) {
+	#endif
+		GALE_VERBOSE("NSEventModifierFlagOption");
 		if (guiKeyBoardMode.getAlt() == false) {
 			guiKeyBoardMode.setAlt(true);
 			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::alt, true, false);
@@ -229,8 +249,12 @@ static gale::key::Special guiKeyBoardMode;
 		}
 	}
 	
-	if (([theEvent modifierFlags] & NSCommandKeyMask) != 0) {
-		GALE_VERBOSE("NSCommandKeyMask");
+	#ifdef __MAC_10_12
+		if (([theEvent modifierFlags] & NSEventModifierFlagCommand) != 0) {
+	#else
+		if (([theEvent modifierFlags] & NSCommandKeyMask) != 0) {
+	#endif
+		GALE_VERBOSE("NSEventModifierFlagCommand");
 		if (guiKeyBoardMode.getMeta() == false) {
 			guiKeyBoardMode.setMeta(true);
 			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::metaLeft, true, false);
@@ -242,8 +266,12 @@ static gale::key::Special guiKeyBoardMode;
 		}
 	}
 	
-	if (([theEvent modifierFlags] & NSNumericPadKeyMask) != 0) {
-		GALE_VERBOSE("NSNumericPadKeyMask");
+	#ifdef __MAC_10_12
+		if (([theEvent modifierFlags] & NSEventModifierFlagNumericPad) != 0) {
+	#else
+		if (([theEvent modifierFlags] & NSNumericPadKeyMask) != 0) {
+	#endif
+		GALE_VERBOSE("NSEventModifierFlagNumericPad");
 		if (guiKeyBoardMode.getNumLock() == false) {
 			guiKeyBoardMode.setNumLock(true);
 			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::numLock, true, false);
@@ -254,11 +282,19 @@ static gale::key::Special guiKeyBoardMode;
 			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::numLock, false, false);
 		}
 	}
-	if (([theEvent modifierFlags] & NSHelpKeyMask) != 0) {
-		GALE_VERBOSE("NSHelpKeyMask");
+	#ifdef __MAC_10_12
+		if (([theEvent modifierFlags] & NSEventModifierFlagHelp) != 0) {
+	#else
+		if (([theEvent modifierFlags] & NSHelpKeyMask) != 0) {
+	#endif
+		GALE_VERBOSE("NSEventModifierFlagHelp");
 	}
-	if (([theEvent modifierFlags] & NSFunctionKeyMask) != 0) {
-		GALE_VERBOSE("NSFunctionKeyMask");
+	#ifdef __MAC_10_12
+		if (([theEvent modifierFlags] & NSEventModifierFlagFunction) != 0) {
+	#else
+		if (([theEvent modifierFlags] & NSFunctionKeyMask) != 0) {
+	#endif
+		GALE_VERBOSE("NSEventModifierFlagFunction");
 		MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::contextMenu, true, false);
 		MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::contextMenu, false, false);
 	}

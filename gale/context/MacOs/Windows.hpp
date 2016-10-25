@@ -5,7 +5,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <gale/context/MacOs/OpenglView.h>
+#import <gale/context/MacOs/OpenglView.hpp>
 
 @interface GaleMainWindows : NSWindow {
 	OpenGLView* _view;
