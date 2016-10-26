@@ -2,6 +2,7 @@
 import lutin.debug as debug
 import lutin.tools as tools
 import lutin.debug as debug
+import lutin.image as image
 import os
 import lutin.multiprocess as lutinMultiprocess
 
@@ -260,9 +261,14 @@ def tool_generate_main_java_class(target, module, package_name):
 				tmpFile.write( "		" + line + "\n")
 		tmpFile.write( "	}\n")
 	
-	tmpFile.write( "	public void onCreate(android.os.Bundle savedInstanceState) {\n")
-	tmpFile.write( "		super.onCreate(savedInstanceState);\n")
-	tmpFile.write( "		initApkPath(\"" + module.get_pkg("COMPAGNY_TYPE")+"\", \""+module.get_pkg("COMPAGNY_NAME2")+"\", \"" + application_name + "\", \"" + package_name + "\");\n")
+	if module.get_pkg("ANDROID_APPL_TYPE")!="APPL":
+		tmpFile.write( "	public void onCreate() {\n")
+		tmpFile.write( "		super.onCreate();\n")
+		tmpFile.write( "		initApkPath(\"" + module.get_pkg("COMPAGNY_TYPE")+"\", \""+module.get_pkg("COMPAGNY_NAME2")+"\", \"" + application_name + "\", \"" + package_name + "\");\n")
+	else:
+		tmpFile.write( "	public void onCreate(android.os.Bundle savedInstanceState) {\n")
+		tmpFile.write( "		super.onCreate(savedInstanceState);\n")
+		tmpFile.write( "		initApkPath(\"" + module.get_pkg("COMPAGNY_TYPE")+"\", \""+module.get_pkg("COMPAGNY_NAME2")+"\", \"" + application_name + "\", \"" + package_name + "\");\n")
 	
 	if module.get_pkg("GENERATE_SECTION__ON_CREATE") != None:
 		for elem in module.get_pkg("GENERATE_SECTION__ON_CREATE"):
@@ -326,23 +332,27 @@ def tool_generate_main_java_class(target, module, package_name):
 	# add java file to build:
 	module.add_src_file([java_file_wrapper])
 	
+	
+	## todo:
 	"""
-	    ## todo:
+	debug.warning("icon : " + module.get_pkg("ICON"))
 	tools.create_directory_of_file(target.get_staging_path(package_name) + "/res/drawable/icon.png");
 	if     module.get_pkg("ICON") != None \
 	   and module.get_pkg("ICON") != "":
 		image.resize(module.get_pkg("ICON"), target.get_staging_path(package_name) + "/res/drawable/icon.png", 256, 256)
+		# if must be copied befor as user data ... todo : check
+		pass
 	else:
+		debug.warning("copy a generic Atria-soft icon ...")
 		# to be sure that we have all time a resource ...
-		tmpFile = open(target.get_staging_path(package_name) + "/res/drawable/plop.txt", 'w')
-		tmpFile.write('plop\n')
-		tmpFile.flush()
-		tmpFile.close()
-	
+		image.resize(os.path.join(tools.get_current_path(__file__),"atria-soft.png"),
+		             os.path.join(target.get_staging_path(package_name), "res", "drawable", "icon.png"),
+		             256, 256)
 	"""
+	
 	if module.get_pkg("ANDROID_MANIFEST") == "":
 		# force manifest file:
-		module.set_pkg("ANDROID_MANIFEST", target.get_build_path(package_name) + "/AndroidManifest.xml");
+		module.set_pkg("ANDROID_MANIFEST", os.path.join(target.get_build_path(package_name), "AndroidManifest.xml"));
 		debug.debug(" create file: '" + module.get_pkg("ANDROID_MANIFEST") + "'")
 		if module.get_pkg("VERSION_CODE") == None:
 			module.set_pkg("VERSION_CODE", "1")
@@ -472,12 +482,13 @@ def tool_generate_main_java_class(target, module, package_name):
 		if module.get_pkg("ANDROID_APPL_TYPE") != "APPL":
 			#create the Wallpaper sub files : (main element for the application
 			debug.print_element("pkg", application_name + "_resource.xml", "<==", "package configurations")
-			tools.create_directory_of_file(target.get_build_path(package_name) + "/res/xml/" + application_name + "_resource.xml")
-			tmpFile = open(target.get_build_path(package_name) + "/res/xml/" + application_name + "_resource.xml", 'w')
+			resource_file_name = os.path.join(target.get_staging_path(package_name), "res", "xml", application_name + "_resource.xml")
+			tools.create_directory_of_file(resource_file_name)
+			tmpFile = open(resource_file_name, 'w')
 			tmpFile.write( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 			tmpFile.write( "<wallpaper xmlns:android=\"http://schemas.android.com/apk/res/android\"\n")
 			if len(module.get_pkg("ANDROID_WALLPAPER_PROPERTIES"))!=0:
-				tmpFile.write( "           android:settingsActivity=\""+android_package_name + "."+ application_name + "Settings\"\n")
+				tmpFile.write( "           android:settingsActivity=\"" + android_package_name + "." + application_name + "Settings\"\n")
 			if module.get_pkg("ICON") != None:
 				tmpFile.write( "           android:thumbnail=\"@drawable/icon\"\n")
 			tmpFile.write( "           />\n")
