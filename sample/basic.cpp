@@ -16,24 +16,48 @@
 #include <gale/resource/Program.hpp>
 
 
+#define GALE_SAMPLE_VBO_VERTICES  (0)
+#define GALE_SAMPLE_VBO_COLOR     (1)
+
 class MainApplication : public gale::Application {
 	private:
 		ememory::SharedPtr<gale::resource::Program> m_GLprogram;
 		int32_t m_GLPosition;
 		int32_t m_GLMatrix;
 		int32_t m_GLColor;
+		float m_angle;
+		ememory::SharedPtr<gale::resource::VirtualBufferObject> m_verticesVBO;
 	public:
 		void onCreate(gale::Context& _context) override {
 			setSize(vec2(800, 600));
+			m_angle = 0.0f;
 			m_GLprogram = gale::resource::Program::create("DATA:basic.prog");
 			if (m_GLprogram != nullptr) {
 				m_GLPosition = m_GLprogram->getAttribute("EW_coord3d");
 				m_GLColor    = m_GLprogram->getAttribute("EW_color");
 				m_GLMatrix   = m_GLprogram->getUniform("EW_MatrixTransformation");
 			}
+			// this is the properties of the buffer requested : "r"/"w" + "-" + buffer type "f"=flaot "i"=integer
+			m_verticesVBO = gale::resource::VirtualBufferObject::create(5);
+			if (m_verticesVBO == nullptr) {
+				TEST_ERROR("can not instanciate VBO ...");
+				return;
+			}
+			// TO facilitate some debugs we add a name of the VBO:
+			m_verticesVBO->setName("[VBO] of basic SAMPLE");
+			
+			m_verticesVBO->pushOnBuffer(GALE_SAMPLE_VBO_VERTICES, vec3(-0.5,-0.5,0));
+			m_verticesVBO->pushOnBuffer(GALE_SAMPLE_VBO_VERTICES, vec3(0,0.5,0));
+			m_verticesVBO->pushOnBuffer(GALE_SAMPLE_VBO_VERTICES, vec3(0.5,-0.5,0));
+			m_verticesVBO->pushOnBuffer(GALE_SAMPLE_VBO_COLOR, etk::Color<float>(etk::color::red));
+			m_verticesVBO->pushOnBuffer(GALE_SAMPLE_VBO_COLOR, etk::Color<float>(etk::color::green));
+			m_verticesVBO->pushOnBuffer(GALE_SAMPLE_VBO_COLOR, etk::Color<float>(etk::color::blue));
+			// update all the VBO elements ...
+			m_verticesVBO->flush();
 			TEST_INFO("==> Init APPL (END)");
 		}
 		void onDraw(gale::Context& _context) override {
+			m_angle += 0.01;
 			ivec2 size = getSize();
 			// set the basic openGL view port: (position drawed in the windows)
 			gale::openGL::setViewPort(ivec2(0,0),size);
@@ -51,31 +75,42 @@ class MainApplication : public gale::Application {
 			                                   -2, 2);
 			// set internal matrix system:
 			gale::openGL::setMatrix(tmpProjection);
-			
-			vec3 vertices[3]={ vec3(-0.5,-0.5,0),
-			                   vec3(0,0.5,0),
-			                   vec3(0.5,-0.5,0)
-			                 };
-			etk::Color<float> color[3] = { etk::color::red,
-			                               etk::color::green,
-			                               etk::color::blue
-			                             };
+			#if 0
+				vec3 vertices[3]={ vec3(-0.5,-0.5,0),
+				                   vec3(0,0.5,0),
+				                   vec3(0.5,-0.5,0)
+				                 };
+				etk::Color<float> color[3] = { etk::color::red,
+				                               etk::color::green,
+				                               etk::color::blue
+				                             };
+			#endif
 			if (m_GLprogram == nullptr) {
 				TEST_INFO("No shader ...");
 				return;
 			}
 			//EWOL_DEBUG("    display " << m_coord.size() << " elements" );
 			m_GLprogram->use();
+			
 			// set Matrix : translation/positionMatrix
-			mat4 projMatrix = gale::openGL::getMatrix();
+			mat4 projMatrix = gale::openGL::getMatrix() * etk::matRotate(vec3(0,0,1),m_angle);
 			mat4 camMatrix = gale::openGL::getCameraMatrix();
 			mat4 tmpMatrix = projMatrix * camMatrix;
+			
 			m_GLprogram->uniformMatrix(m_GLMatrix, tmpMatrix);
-			// position :
-			m_GLprogram->sendAttribute(m_GLPosition, 3/*x,y,z,unused*/, vertices, 4*sizeof(float));
-			// color :
-			m_GLprogram->sendAttribute(m_GLColor, 4/*r,g,b,a*/, color, 4*sizeof(float));
-			// Request the draw od the elements : 
+			#if 0
+				// position:
+				m_GLprogram->sendAttributePointer(m_GLPosition, m_verticesVBO, GALE_SAMPLE_VBO_VERTICES);
+				// color:
+				m_GLprogram->sendAttributePointer(m_GLColor, m_verticesVBO, GALE_SAMPLE_VBO_COLOR);
+			#else
+				// position:
+				m_GLprogram->sendAttribute(m_GLPosition, 3/*x,y,z,unused*/, vertices, 4*sizeof(float));
+				// color:
+				m_GLprogram->sendAttribute(m_GLColor, 4/*r,g,b,a*/, color, 4*sizeof(float));
+			#endif
+			
+			// Request the draw od the elements:
 			gale::openGL::drawArrays(gale::openGL::renderMode::triangle, 0, 3 /*number of points*/);
 			m_GLprogram->unUse();
 			// Restore context of matrix

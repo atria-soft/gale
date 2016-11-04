@@ -28,12 +28,12 @@ static void checkGlError(const char* _op, int32_t _localLine) {
 	#endif
 }
 
-#define OPENGL_ERROR(data) do { } while (false)
-//#define OPENGL_ERROR(data) GALE_ERROR(data)
-#define OPENGL_WARNING(data) do { } while (false)
-//#define OPENGL_WARNING(data) GALE_WARNING(data)
-#define OPENGL_INFO(data) do { } while (false)
-//#define OPENGL_INFO(data) GALE_INFO(data)
+//#define OPENGL_ERROR(data) do { } while (false)
+#define OPENGL_ERROR(data) GALE_ERROR(data)
+//#define OPENGL_WARNING(data) do { } while (false)
+#define OPENGL_WARNING(data) GALE_WARNING(data)
+//#define OPENGL_INFO(data) do { } while (false)
+#define OPENGL_INFO(data) GALE_INFO(data)
 
 
 
@@ -207,6 +207,7 @@ void gale::openGL::setViewPort(const ivec2& _start, const ivec2& _stop) {
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		if (s_simulationMode == false) {
 	#endif
+	OPENGL_INFO("setViewport " << _start << " " << _stop);
 	glViewport(_start.x(), _start.y(), _stop.x(), _stop.y());
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
@@ -217,6 +218,7 @@ void gale::openGL::setViewPort(const vec2& _start, const vec2& _stop) {
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		if (s_simulationMode == false) {
 	#endif
+	OPENGL_INFO("setViewport " << _start << " " << _stop);
 	glViewport(_start.x(), _start.y(), _stop.x(), _stop.y());
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
@@ -635,7 +637,7 @@ void gale::openGL::drawElements8(enum renderMode _mode, const std::vector<uint8_
 }
 
 void gale::openGL::useProgram(int32_t _id) {
-	//GALE_DEBUG("USE prog : " << _id);
+	GALE_DEBUG("USE prog : " << _id);
 	#if 1
 		// note : In normal openGL case, the system might call with the program ID and at the end with 0, 
 		//        here, we wrap this use to prevent over call of glUseProgram  == > then we set -1 when the 

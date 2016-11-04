@@ -19,6 +19,21 @@ void gale::resource::VirtualBufferObject::init(int32_t _number) {
 	GALE_DEBUG("OGL : load VBO count=\"" << _number << "\"");
 }
 
+void gale::resource::VirtualBufferObject::clear() {
+	for (auto &it : m_vbo) {
+		it = 0;
+	}
+	for (auto &it : m_vboUsed) {
+		it = false;
+	}
+	for (auto &it : m_buffer) {
+		it.clear();
+	}
+	for (auto &it : m_vboSizeDataOffset) {
+		it = -1;
+	}
+}
+
 gale::resource::VirtualBufferObject::VirtualBufferObject() :
   m_exist(false) {
 	addResourceType("gale::VirtualBufferObject");

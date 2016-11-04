@@ -588,8 +588,8 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 			m_FpsSystem.tic();
 		}
 		if (m_application != nullptr) {
-			if(    true == needRedraw
-			    || true == _displayEveryTime) {
+			if(    needRedraw == true
+			    || _displayEveryTime == true) {
 				m_FpsSystem.incrementCounter();
 				// set the curent interface :
 				lockContext();
@@ -621,7 +621,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		m_FpsFlush.draw();
 	}
 	{
-		// set the curent interface :
+		// set the curent interface:
 		lockContext();
 		// release open GL Context
 		gale::openGL::lock();
@@ -631,7 +631,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		gale::openGL::unLock();
 		// TODO : m_objectManager.cleanInternalRemoved();
 		m_resourceManager.cleanInternalRemoved();
-		// release the curent interface :
+		// release the curent interface:
 		unLockContext();
 	}
 	gale::openGL::threadHasNoMoreContext();

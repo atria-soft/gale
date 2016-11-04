@@ -39,6 +39,10 @@ namespace gale {
 				virtual ~VirtualBufferObject();
 			public:
 				/**
+				 * @brief clear buffers
+				 */
+				void clear();
+				/**
 				 * @brief get the real openGL ID.
 				 * @return the Ogl id reference of this VBO.
 				 */

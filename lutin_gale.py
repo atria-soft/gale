@@ -61,7 +61,9 @@ def configure(target, my_module):
 	    'gale/context/cursor.hpp',
 	    'gale/context/Fps.hpp'
 	    ])
-	if "Linux" in target.get_type():
+	if "Web" in target.get_type():
+		my_module.add_src_file('gale/context/SDL/Context.cpp')
+	elif "Linux" in target.get_type():
 		my_module.add_src_file('gale/context/X11/Context.cpp')
 		# check if egami is present in the worktree: this is for the icon parsing ...
 		my_module.add_optionnal_depend('egami', ["c++", "-DGALE_BUILD_EGAMI"])
@@ -150,7 +152,11 @@ def configure(target, my_module):
 	    "-DGALE_VERSION=\"\\\"" + tools.version_to_string(my_module.get_pkg("VERSION")) + "\\\"\""
 	    ])
 	
-	if "Linux" in target.get_type():
+	if "Web" in target.get_type():
+		my_module.add_depend([
+		    "SDL"
+		    ])
+	elif "Linux" in target.get_type():
 		pass
 	elif "Android" in target.get_type():
 		my_module.add_depend(["SDK", "jvm-basics"])

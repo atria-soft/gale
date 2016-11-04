@@ -3,12 +3,12 @@ precision mediump float;
 precision mediump int;
 #endif
 
-// Input :
+// Input:
 attribute vec3 EW_coord3d;
 attribute vec4 EW_color;
 uniform mat4 EW_MatrixTransformation;
 
-// output :
+// output:
 varying vec4 f_color;
 
 void main(void) {

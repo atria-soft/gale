@@ -24,9 +24,18 @@
 
 
 #if defined(__TARGET_OS__Linux)
-#include <GL/glx.h>
+	#if defined(__TARGET_OS__Web)
+		#include <X11/Xlibint.h>
+		#include <X11/Xutil.h>
+		#include <gale/renderer/openGL/openGL.hpp>
+		#include <gale/renderer/openGL/openGL-include.hpp>
+		#include <GL/glext.h>
+		#include <GL/glfw.h>
+	#else
+		#include <GL/glx.h>
+	#endif
 #elif defined(__TARGET_OS__MacOs)
-#include <OpenGL/glx.h>
+	#include <OpenGL/glx.h>
 #endif
 
 #include <X11/Xatom.h>
@@ -50,26 +59,28 @@ bool hasDisplay = false;
 	#define X11_CRITICAL   GALE_VERBOSE
 #endif
 
-// attributes for a single buffered visual in RGBA format with at least 4 bits per color and a 16 bit depth buffer
-static int attrListSgl[] = {
-	GLX_RGBA,
-	GLX_RED_SIZE, 4,
-	GLX_GREEN_SIZE, 4,
-	GLX_BLUE_SIZE, 4,
-	GLX_DEPTH_SIZE, 16,
-	None
-};
-
-// attributes for a double buffered visual in RGBA format with at least 4 bits per color and a 16 bit depth buffer
-static int attrListDbl[] = {
-	GLX_RGBA,
-	GLX_DOUBLEBUFFER,
-	GLX_RED_SIZE, 4,
-	GLX_GREEN_SIZE, 4,
-	GLX_BLUE_SIZE, 4,
-	GLX_DEPTH_SIZE, 16,
-	None
-};
+#if !defined(__TARGET_OS__Web)
+	// attributes for a single buffered visual in RGBA format with at least 4 bits per color and a 16 bit depth buffer
+	static int attrListSgl[] = {
+		GLX_RGBA,
+		GLX_RED_SIZE, 4,
+		GLX_GREEN_SIZE, 4,
+		GLX_BLUE_SIZE, 4,
+		GLX_DEPTH_SIZE, 16,
+		None
+	};
+	
+	// attributes for a double buffered visual in RGBA format with at least 4 bits per color and a 16 bit depth buffer
+	static int attrListDbl[] = {
+		GLX_RGBA,
+		GLX_DOUBLEBUFFER,
+		GLX_RED_SIZE, 4,
+		GLX_GREEN_SIZE, 4,
+		GLX_BLUE_SIZE, 4,
+		GLX_DEPTH_SIZE, 16,
+		None
+	};
+#endif
 
 extern "C" {
 	typedef struct Hints {
@@ -102,7 +113,9 @@ class X11Interface : public gale::Context {
 		int32_t m_cursorEventY;
 		int32_t m_currentHeight;
 		int32_t m_currentWidth;
-		XVisualInfo* m_visual;
+		#if !defined(__TARGET_OS__Web)
+			XVisualInfo* m_visual;
+		#endif
 		bool m_doubleBuffered;
 		bool m_run;
 		//forcing the position
@@ -136,7 +149,9 @@ class X11Interface : public gale::Context {
 		  m_cursorEventY(0),
 		  m_currentHeight(0),
 		  m_currentWidth(0),
-		  m_visual(nullptr),
+		  #if !defined(__TARGET_OS__Web)
+		  	m_visual(nullptr),
+		  #endif
 		  m_doubleBuffered(0),
 		  m_run(false),
 		  m_grabAllEvent(false),
@@ -160,7 +175,11 @@ class X11Interface : public gale::Context {
 				m_inputIsPressed[iii] = false;
 			}
 			if (m_doubleBuffered) {
-				glXSwapBuffers(m_display, m_WindowHandle);
+				#if defined(__TARGET_OS__Web)
+					glfwSwapBuffers();
+				#else
+					glXSwapBuffers(m_display, m_WindowHandle);
+				#endif
 				XSync(m_display,0);
 			}
 			createX11Context();
@@ -766,7 +785,11 @@ class X11Interface : public gale::Context {
 				}
 				if(m_run == true) {
 					if (m_doubleBuffered && hasDisplay) {
-						glXSwapBuffers(m_display, m_WindowHandle);
+						#if defined(__TARGET_OS__Web)
+							glfwSwapBuffers();
+						#else
+							glXSwapBuffers(m_display, m_WindowHandle);
+						#endif
 						XSync(m_display,0);
 					}
 					// draw after switch the previous windows ...
@@ -1033,24 +1056,36 @@ class X11Interface : public gale::Context {
 			gale::Dimension::setPixelRatio(vec2((float)DisplayWidth(m_display, Xscreen)/(float)DisplayWidthMM(m_display, Xscreen),
 			                                    (float)DisplayHeight(m_display, Xscreen)/(float)DisplayHeightMM(m_display, Xscreen)),
 			                               gale::distance::millimeter);
-			// get an appropriate visual
-			m_visual = glXChooseVisual(m_display, Xscreen, attrListDbl);
-			if (m_visual == nullptr) {
-				m_visual = glXChooseVisual(m_display, Xscreen, attrListSgl);
+			#if !defined(__TARGET_OS__Web)
+				// get an appropriate visual
+				m_visual = glXChooseVisual(m_display, Xscreen, attrListDbl);
+				if (m_visual == nullptr) {
+					m_visual = glXChooseVisual(m_display, Xscreen, attrListSgl);
+					m_doubleBuffered = false;
+					GALE_INFO("GL-X singlebuffered rendering will be used, no doublebuffering available");
+				} else {
+					m_doubleBuffered = true;
+					GALE_INFO("GL-X doublebuffered rendering available");
+				}
+			#else
 				m_doubleBuffered = false;
 				GALE_INFO("GL-X singlebuffered rendering will be used, no doublebuffering available");
-			} else {
-				m_doubleBuffered = true;
-				GALE_INFO("GL-X doublebuffered rendering available");
-			}
+			#endif
 			{
 				int32_t glxMajor, glxMinor;
-				glXQueryVersion(m_display, &glxMajor, &glxMinor);
+				#if defined(__TARGET_OS__Web)
+					int32_t glxRev;
+					glfwGetVersion(&glxMajor, &glxMinor, &glxRev);
+				#else
+					glXQueryVersion(m_display, &glxMajor, &glxMinor);
+				#endif
 				GALE_INFO("GLX-Version " << glxMajor << "." << glxMinor);
 			}
 			// Create a colormap - only needed on some X clients, eg. IRIX
 			Window Xroot = RootWindow(m_display, Xscreen);
-			attr.colormap = XCreateColormap(m_display, Xroot, m_visual->visual, AllocNone);
+			#if !defined(__TARGET_OS__Web)
+				attr.colormap = XCreateColormap(m_display, Xroot, m_visual->visual, AllocNone);
+			#endif
 			
 			attr.border_pixel = 0;
 			attr.event_mask =   StructureNotifyMask
@@ -1086,9 +1121,17 @@ class X11Interface : public gale::Context {
 			                               Xroot,
 			                               x, y, tmp_width, tmp_height,
 			                               1,
-			                               m_visual->depth,
+			                               #if defined(__TARGET_OS__Web)
+			                               	0,
+			                               #else
+			                               	m_visual->depth,
+			                               #endif
 			                               InputOutput,
-			                               m_visual->visual,
+			                               #if defined(__TARGET_OS__Web)
+			                               	0,
+			                               #else
+			                               	m_visual->visual,
+			                               #endif
 			                               attr_mask, &attr);
 			
 			if(!m_WindowHandle) {
@@ -1161,7 +1204,8 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		void setIcon(const std::string& _inputFile) {
-			#ifdef GALE_BUILD_EGAMI
+			#if    defined(GALE_BUILD_EGAMI) \
+			    && !defined(__TARGET_OS__Web)
 				egami::Image dataImage = egami::load(_inputFile);
 				// load data
 				if (dataImage.exist() == false) {
@@ -1318,7 +1362,11 @@ class X11Interface : public gale::Context {
 				GALE_ERROR("Can not set the vertical synchronisation status" << _sync << "   (1)");
 				return;
 			} else {
-				wglSwapIntervalEXT = (PFNWGLSWAPINTERVALPROC)glXGetProcAddress( (const GLubyte *)"wglSwapIntervalEXT" );
+				#if !defined(__TARGET_OS__Web)
+					wglSwapIntervalEXT = (PFNWGLSWAPINTERVALPROC)glXGetProcAddress( (const GLubyte *)"wglSwapIntervalEXT" );
+				#else
+					wglSwapIntervalEXT = (PFNWGLSWAPINTERVALPROC)glfwGetProcAddress( (const char *)"wglSwapIntervalEXT" );
+				#endif
 				if(wglSwapIntervalEXT) {
 					wglSwapIntervalEXT(_sync);
 				} else {
@@ -1329,15 +1377,27 @@ class X11Interface : public gale::Context {
 		/****************************************************************************************/
 		bool createOGlContext() {
 			X11_INFO("X11:CreateOGlContext");
-			/* create a GLX context */
-			GLXContext RenderContext = glXCreateContext(m_display, m_visual, 0, GL_TRUE);
-			/* connect the glx-context to the window */
-			glXMakeCurrent(m_display, m_WindowHandle, RenderContext);
-			if (glXIsDirect(m_display, RenderContext)) {
-				GALE_INFO("XF86 DRI enabled\n");
-			} else {
-				GALE_INFO("XF86 DRI NOT available\n");
-			}
+			#if defined(__TARGET_OS__Web)
+				/* create a GLX context */
+				GContext RenderContext = wglCreateContext(m_display, 0, GL_TRUE);
+				/* connect the glx-context to the window */
+				wglMakeCurrent(m_display, m_WindowHandle, RenderContext);
+				if (glwIsDirect(m_display, RenderContext)) {
+					GALE_INFO("XF86 DRI enabled\n");
+				} else {
+					GALE_INFO("XF86 DRI NOT available\n");
+				}
+			#else
+				/* create a GLX context */
+				GLXContext RenderContext = glXCreateContext(m_display, m_visual, 0, GL_TRUE);
+				/* connect the glx-context to the window */
+				glXMakeCurrent(m_display, m_WindowHandle, RenderContext);
+				if (glXIsDirect(m_display, RenderContext)) {
+					GALE_INFO("XF86 DRI enabled\n");
+				} else {
+					GALE_INFO("XF86 DRI NOT available\n");
+				}
+			#endif
 			// enable vertical synchronisation : (some computer has synchronisation disable)
 			setVSync(true);
 			return true;

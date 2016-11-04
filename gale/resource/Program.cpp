@@ -361,10 +361,11 @@ void gale::resource::Program::reload() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-void gale::resource::Program::sendAttribute(int32_t _idElem,
-                                            int32_t _nbElement,
-                                            const void* _pointer,
-                                            int32_t _jumpBetweenSample) {
+void gale::resource::Program::sendAttributePointer(int32_t _idElem,
+                                                   const ememory::SharedPtr<gale::resource::VirtualBufferObject>& _vbo,
+                                                   int32_t _index,
+                                                   int32_t _jumpBetweenSample,
+                                                   int32_t _offset) {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	if (m_exist == false) {
 		return;
@@ -375,34 +376,6 @@ void gale::resource::Program::sendAttribute(int32_t _idElem,
 		return;
 	}
 	if (m_elementList[_idElem].m_isLinked == false) {
-		return;
-	}
-	//GALE_ERROR("[" << m_elementList[_idElem].m_name << "] send " << _nbElement << " element");
-	glVertexAttribPointer(m_elementList[_idElem].m_elementId, // attribute ID of openGL
-	                      _nbElement, // number of elements per vertex, here (r,g,b,a)
-	                      GL_FLOAT, // the type of each element
-	                      GL_FALSE, // take our values as-is
-	                      _jumpBetweenSample, // no extra data between each position
-	                      _pointer); // Pointer on the buffer
-	checkGlError("glVertexAttribPointer", __LINE__, _idElem);
-	glEnableVertexAttribArray(m_elementList[_idElem].m_elementId);
-	checkGlError("glEnableVertexAttribArray", __LINE__, _idElem);
-}
-
-void gale::resource::Program::sendAttributePointer(int32_t _idElem,
-                                                   const ememory::SharedPtr<gale::resource::VirtualBufferObject>& _vbo,
-                                                   int32_t _index,
-                                                   int32_t _jumpBetweenSample,
-                                                   int32_t _offset) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
-	if (m_exist == false) {
-		return;
-	}
-	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
-		GALE_ERROR("idElem = " << _idElem << " not in [0.." << (m_elementList.size()-1) << "]");
-		return;
-	}
-	if (false == m_elementList[_idElem].m_isLinked) {
 		return;
 	}
 	// check error of the VBO goog enought ...
@@ -436,7 +409,8 @@ void gale::resource::Program::uniformMatrix(int32_t _idElem, const mat4& _matrix
 	if (m_exist == false) {
 		return;
 	}
-	if (_idElem<0 || (size_t)_idElem>m_elementList.size()) {
+	if (    _idElem < 0
+	     || (size_t)_idElem > m_elementList.size()) {
 		GALE_ERROR("idElem = " << _idElem << " not in [0.." << (m_elementList.size()-1) << "]");
 		return;
 	}
@@ -445,7 +419,7 @@ void gale::resource::Program::uniformMatrix(int32_t _idElem, const mat4& _matrix
 	}
 	//GALE_ERROR("[" << m_elementList[_idElem].m_name << "] send 1 matrix");
 	// note : Android des not supported the transposition of the matrix, then we will done it oursef:
-	if (true == _transpose) {
+	if (_transpose == true) {
 		mat4 tmp = _matrix;
 		tmp.transpose();
 		glUniformMatrix4fv(m_elementList[_idElem].m_elementId, 1, GL_FALSE, tmp.m_mat);
@@ -791,6 +765,7 @@ void gale::resource::Program::uniform4iv(int32_t _idElem, int32_t _nbElement, co
 
 
 void gale::resource::Program::use() {
+	GALE_WARNING("Will use program : " << m_program);
 	#ifdef PROGRAM_DISPLAY_SPEED
 		g_startTime = gale::getTime();
 	#endif
@@ -856,7 +831,7 @@ void gale::resource::Program::setTexture1(int32_t _idElem, int64_t _textureOpenG
 
 
 void gale::resource::Program::unUse() {
-	//GALE_WARNING("Will use program : " << m_program);
+	GALE_WARNING("Will UN-use program : " << m_program);
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	if (m_exist == false) {
 		return;
