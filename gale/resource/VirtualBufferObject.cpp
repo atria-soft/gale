@@ -20,11 +20,9 @@ void gale::resource::VirtualBufferObject::init(int32_t _number) {
 }
 
 void gale::resource::VirtualBufferObject::clear() {
-	for (auto &it : m_vbo) {
-		it = 0;
-	}
-	for (auto &it : m_vboUsed) {
-		it = false;
+	// DO not clear the m_vbo indexed in the graphic cards ...
+	for (size_t iii=0; iii<m_vboUsed.size(); ++iii) {
+		m_vboUsed[iii] = false;
 	}
 	for (auto &it : m_buffer) {
 		it.clear();
@@ -49,30 +47,30 @@ void gale::resource::VirtualBufferObject::retreiveData() {
 }
 
 bool gale::resource::VirtualBufferObject::updateContext() {
-	GALE_ERROR(" Start");
+	GALE_ERROR(" Start: [" << getId() << "] '" << getName() << "' (size=" << m_buffer[0].size() << ")");
 	std::unique_lock<std::recursive_mutex> lock(m_mutex, std::defer_lock);
 	if (lock.try_lock() == false) {
 		//Lock error ==> try later ...
 		return false;
 	}
-	if (false == m_exist) {
+	if (m_exist == false) {
 		// Allocate and assign a Vertex Array Object to our handle
 		gale::openGL::genBuffers(m_vbo);
 	}
 	m_exist = true;
 	for (size_t iii=0; iii<m_vbo.size(); iii++) {
 		GALE_INFO("VBO    : add [" << getId() << "]=" << m_buffer[iii].size() << "*sizeof(float) OGl_Id=" << m_vbo[iii]);
-		if (true == m_vboUsed[iii]) {
+		if (m_vboUsed[iii] == true) {
 			// select the buffer to set data inside it ...
 			if (m_buffer[iii].size()>0) {
 				gale::openGL::bindBuffer(m_vbo[iii]);
-				gale::openGL::bufferData(sizeof(float)*m_buffer[iii].size(), &((m_buffer[iii])[0]), gale::openGL::usage::staticDraw);
+				gale::openGL::bufferData(sizeof(float)*m_buffer[iii].size(), &((m_buffer[iii])[0]), gale::openGL::usage::streamDraw);
 			}
 		}
 	}
 	// un-bind it to permet to have no error in the next display ...
 	gale::openGL::unbindBuffer();
-	GALE_ERROR(" Stop");
+	GALE_ERROR(" Stop: [" << getId() << "] '" << getName() << "'");
 	return true;
 }
 
@@ -102,6 +100,7 @@ void gale::resource::VirtualBufferObject::flush() {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	// request to the manager to be call at the next update ...
 	getManager().update(ememory::dynamicPointerCast<gale::Resource>(sharedFromThis()));
+	GALE_ERROR("Request flush of VBO: [" << getId() << "] '" << getName() << "'");
 }
 
 void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const vec3& _data) {

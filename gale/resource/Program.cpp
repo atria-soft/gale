@@ -361,6 +361,34 @@ void gale::resource::Program::reload() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
+void gale::resource::Program::sendAttribute(int32_t _idElem,
+                                            int32_t _nbElement,
+                                            const void* _pointer,
+                                            int32_t _jumpBetweenSample) {
+	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	if (m_exist == false) {
+		return;
+	}
+	if (    _idElem < 0
+	     || (size_t)_idElem > m_elementList.size()) {
+		GALE_ERROR("idElem = " << _idElem << " not in [0.." << (m_elementList.size()-1) << "]");
+		return;
+	}
+	if (m_elementList[_idElem].m_isLinked == false) {
+		return;
+	}
+	//GALE_ERROR("[" << m_elementList[_idElem].m_name << "] send " << _nbElement << " element");
+	glVertexAttribPointer(m_elementList[_idElem].m_elementId, // attribute ID of openGL
+	                      _nbElement, // number of elements per vertex, here (r,g,b,a)
+	                      GL_FLOAT, // the type of each element
+	                      GL_FALSE, // take our values as-is
+	                      _jumpBetweenSample, // no extra data between each position
+	                      _pointer); // Pointer on the buffer
+	checkGlError("glVertexAttribPointer", __LINE__, _idElem);
+	glEnableVertexAttribArray(m_elementList[_idElem].m_elementId);
+	checkGlError("glEnableVertexAttribArray", __LINE__, _idElem);
+}
+
 void gale::resource::Program::sendAttributePointer(int32_t _idElem,
                                                    const ememory::SharedPtr<gale::resource::VirtualBufferObject>& _vbo,
                                                    int32_t _index,
