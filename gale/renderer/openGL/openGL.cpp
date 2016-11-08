@@ -28,12 +28,12 @@ static void checkGlError(const char* _op, int32_t _localLine) {
 	#endif
 }
 
-//#define OPENGL_ERROR(data) do { } while (false)
-#define OPENGL_ERROR(data) GALE_ERROR(data)
-//#define OPENGL_WARNING(data) do { } while (false)
-#define OPENGL_WARNING(data) GALE_WARNING(data)
-//#define OPENGL_INFO(data) do { } while (false)
-#define OPENGL_INFO(data) GALE_INFO(data)
+#define OPENGL_ERROR(data) do { } while (false)
+//#define OPENGL_ERROR(data) GALE_ERROR(data)
+#define OPENGL_WARNING(data) do { } while (false)
+//#define OPENGL_WARNING(data) GALE_WARNING(data)
+#define OPENGL_INFO(data) do { } while (false)
+//#define OPENGL_INFO(data) GALE_INFO(data)
 
 
 
@@ -642,7 +642,7 @@ void gale::openGL::useProgram(int32_t _id) {
 		// note : In normal openGL case, the system might call with the program ID and at the end with 0, 
 		//        here, we wrap this use to prevent over call of glUseProgram  == > then we set -1 when the 
 		//        user no more use this program, and just stop grnerating. (chen 0  == > this is an errored program ...
-		if (-1 == _id) {
+		if (_id == -1) {
 			// not used  == > because it is unneded
 			return;
 		}
@@ -657,7 +657,7 @@ void gale::openGL::useProgram(int32_t _id) {
 			#endif
 		}
 	#else
-		if (-1 == _id) {
+		if (_id == -1) {
 			#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 				if (s_simulationMode == false) {
 			#endif

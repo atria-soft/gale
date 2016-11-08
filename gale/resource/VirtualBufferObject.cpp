@@ -20,6 +20,7 @@ void gale::resource::VirtualBufferObject::init(int32_t _number) {
 }
 
 void gale::resource::VirtualBufferObject::clear() {
+	GALE_VERBOSE(" Clear: [" << getId() << "] '" << getName() << "' (size=" << m_buffer[0].size() << ")");
 	// DO not clear the m_vbo indexed in the graphic cards ...
 	for (size_t iii=0; iii<m_vboUsed.size(); ++iii) {
 		m_vboUsed[iii] = false;
@@ -47,7 +48,7 @@ void gale::resource::VirtualBufferObject::retreiveData() {
 }
 
 bool gale::resource::VirtualBufferObject::updateContext() {
-	GALE_ERROR(" Start: [" << getId() << "] '" << getName() << "' (size=" << m_buffer[0].size() << ")");
+	GALE_VERBOSE(" Start: [" << getId() << "] '" << getName() << "' (size=" << m_buffer[0].size() << ")");
 	std::unique_lock<std::recursive_mutex> lock(m_mutex, std::defer_lock);
 	if (lock.try_lock() == false) {
 		//Lock error ==> try later ...
@@ -59,7 +60,7 @@ bool gale::resource::VirtualBufferObject::updateContext() {
 	}
 	m_exist = true;
 	for (size_t iii=0; iii<m_vbo.size(); iii++) {
-		GALE_INFO("VBO    : add [" << getId() << "]=" << m_buffer[iii].size() << "*sizeof(float) OGl_Id=" << m_vbo[iii]);
+		GALE_VERBOSE("VBO    : add [" << getId() << "]=" << m_buffer[iii].size() << "*sizeof(float) OGl_Id=" << m_vbo[iii]);
 		if (m_vboUsed[iii] == true) {
 			// select the buffer to set data inside it ...
 			if (m_buffer[iii].size()>0) {
@@ -70,7 +71,7 @@ bool gale::resource::VirtualBufferObject::updateContext() {
 	}
 	// un-bind it to permet to have no error in the next display ...
 	gale::openGL::unbindBuffer();
-	GALE_ERROR(" Stop: [" << getId() << "] '" << getName() << "'");
+	GALE_VERBOSE(" Stop: [" << getId() << "] '" << getName() << "'");
 	return true;
 }
 
@@ -100,7 +101,7 @@ void gale::resource::VirtualBufferObject::flush() {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	// request to the manager to be call at the next update ...
 	getManager().update(ememory::dynamicPointerCast<gale::Resource>(sharedFromThis()));
-	GALE_ERROR("Request flush of VBO: [" << getId() << "] '" << getName() << "'");
+	GALE_VERBOSE("Request flush of VBO: [" << getId() << "] '" << getName() << "'");
 }
 
 void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const vec3& _data) {
@@ -158,6 +159,17 @@ vec2 gale::resource::VirtualBufferObject::getOnBufferVec2(int32_t _id, int32_t _
 	            m_buffer[_id][2*_elementID+1]);
 }
 
+void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const float& _data) {
+	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	if (m_vboSizeDataOffset[_id] == -1) {
+		m_vboSizeDataOffset[_id] = 1;
+	} else if (m_vboSizeDataOffset[_id] != 1) {
+		GALE_WARNING("set multiType in VBO (Not supported ==> TODO : Maybe update it");
+		return;
+	}
+	m_vboUsed[_id] = true;
+	m_buffer[_id].push_back(_data);
+}
 
 void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::Color<float,4>& _data) {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);

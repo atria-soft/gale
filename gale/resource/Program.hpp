@@ -51,6 +51,7 @@ namespace gale {
 				int64_t m_program; //!< openGL id of the current program
 				std::vector<ememory::SharedPtr<gale::resource::Shader>> m_shaderList; //!< List of all the shader loaded
 				std::vector<gale::resource::progAttributeElement> m_elementList; //!< List of all the attribute requested by the user
+				std::vector<int32_t> m_listOfVBOUsed; //!< retain the list of VBO used to disable it when unuse program ...
 				bool m_hasTexture; //!< A texture has been set to the current shader
 				bool m_hasTexture1; //!< A texture has been set to the current shader
 			protected:

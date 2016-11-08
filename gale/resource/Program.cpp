@@ -427,6 +427,7 @@ void gale::resource::Program::sendAttributePointer(int32_t _idElem,
 	                      (GLvoid *)_offset); // Pointer on the buffer
 	checkGlError("glVertexAttribPointer", __LINE__, _idElem);
 	glEnableVertexAttribArray(m_elementList[_idElem].m_elementId);
+	m_listOfVBOUsed.push_back(m_elementList[_idElem].m_elementId);
 	checkGlError("glEnableVertexAttribArray", __LINE__, _idElem);
 }
 
@@ -793,7 +794,7 @@ void gale::resource::Program::uniform4iv(int32_t _idElem, int32_t _nbElement, co
 
 
 void gale::resource::Program::use() {
-	GALE_WARNING("Will use program : " << m_program);
+	GALE_VERBOSE("Will use program : " << m_program);
 	#ifdef PROGRAM_DISPLAY_SPEED
 		g_startTime = gale::getTime();
 	#endif
@@ -859,11 +860,15 @@ void gale::resource::Program::setTexture1(int32_t _idElem, int64_t _textureOpenG
 
 
 void gale::resource::Program::unUse() {
-	GALE_WARNING("Will UN-use program : " << m_program);
+	GALE_VERBOSE("Will UN-use program : " << m_program);
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
+	for (auto &it : m_listOfVBOUsed) {
+		glDisableVertexAttribArray(it);
+	}
+	m_listOfVBOUsed.clear();
 	#if 0
 	if (m_hasTexture == true) {
 		gale::openGL::disable(GL_TEXTURE_2D);

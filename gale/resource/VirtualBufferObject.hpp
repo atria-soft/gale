@@ -96,6 +96,8 @@ namespace gale {
 				void pushOnBuffer(int32_t _id, const etk::Color<float,2>& _data);
 				//! @previous
 				void pushOnBuffer(int32_t _id, const etk::Color<float,1>& _data);
+				//! @previous
+				void pushOnBuffer(int32_t _id, const float& _data);
 				/**
 				 * @brief get the data from the graphic card.
 				 */

@@ -152,7 +152,7 @@ void gale::resource::Manager::updateContext() {
 		}
 		if (resourceListToUpdate.size() != 0) {
 			for (size_t jjj=0; jjj<MAX_RESOURCE_LEVEL; jjj++) {
-				GALE_INFO("    updateContext level (U) : " << jjj << "/" << (MAX_RESOURCE_LEVEL-1));
+				GALE_DEBUG("    updateContext level (U) : " << jjj << "/" << (MAX_RESOURCE_LEVEL-1));
 				for (auto &it : resourceListToUpdate) {
 					if (    it != nullptr
 					     && jjj == it->getResourceLevel()) {

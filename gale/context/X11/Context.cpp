@@ -795,7 +795,7 @@ class X11Interface : public gale::Context {
 					// draw after switch the previous windows ...
 					//GALE_DEBUG("specialEventThatNeedARedraw"<<specialEventThatNeedARedraw);
 					hasDisplay = OS_Draw(specialEventThatNeedARedraw);
-					specialEventThatNeedARedraw=false;
+					specialEventThatNeedARedraw = false;
 				}
 			}
 			return 0;
