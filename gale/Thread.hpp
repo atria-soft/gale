@@ -17,42 +17,66 @@
 
 namespace gale {
 	/**
-	 * @brief in the dimention class we store the data as the more usefull unit (pixel) 
-	 * but one case need to be dynamic the %, then when requested in % the register the % value
+	 * @brief We have our own thread in gale to manage gale context folowing and manage android rong management of std::thread when calling java.
 	 */
 	class Thread {
-		private:
-			enum class state {
-				stop,
-				starting,
-				running,
-				stopping
-			};
-			enum state m_state;
-			#if defined(__TARGET_OS__Android)
-				pthread_t m_thread;
-			#else
-				ememory::SharedPtr<std::thread> m_thread;
-			#endif
-			gale::Context* m_context;
 		public:
 			/**
-			 * @brief Constructor (default :0,0 mode pixel)
+			 * @brief Internal state capabilities of the thread.
+			 */
+			enum class state {
+				stop, //!< The thread is not active
+				starting, //!< The thread is in creation state
+				running, //!< The current thread is activate
+				stopping //!< The thread is stoping
+			};
+		private:
+			enum state m_state; //!< Current state of the thread.
+		public:
+			/**
+			 * @brief Get the current state of the thread
+			 * @return The state of the thread
+			 */
+			enum gale::Thread::state getState();
+		private:
+			#if defined(__TARGET_OS__Android)
+				pthread_t m_thread; //!< Current handle on the thread
+			#else
+				ememory::SharedPtr<std::thread> m_thread; //!< Current handle on the thread
+			#endif
+			gale::Context* m_context; //!< Copy of the gale context (permit to get current gale interface)
+		public:
+			/**
+			 * @brief Constructor
 			 */
 			Thread();
 			/**
 			 * @brief Destructor
 			 */
 			virtual ~Thread();
-			void start();
-			void stop();
+			/**
+			 * @brief Start the Thread (create thread here)
+			 */
+			virtual void start();
+			/**
+			 * @brief Stop the Thread (destroy thread here)
+			 */
+			virtual void stop();
 		private:
 			#if defined(__TARGET_OS__Android)
 				static void* threadCallback(void* _userData);
 			#endif
+			/**
+			 * @brief Internal periodic call of the thead
+			 */
 			void threadCall();
 		protected:
-			virtual bool onThreadCall() { return true; };
+			/**
+			 * @brief Periodic call of the thread process
+			 * @return true The thread has ended process and need to be destroyed
+			 * @return false Need an other cycle if user does not request stop
+			 */
+			virtual bool onThreadCall();
 	};
 }
 

@@ -109,3 +109,11 @@ void gale::Thread::threadCall() {
 	GALE_DEBUG("THREAD MAIN [STOP]");
 	m_state = state::stopping;
 }
+
+bool gale::Thread::onThreadCall() {
+	return true;
+};
+
+enum gale::Thread::state gale::Thread::getState() {
+	return m_state;
+}
