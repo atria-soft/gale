@@ -13,7 +13,7 @@ def get_desc():
 	return "Simple windows with gale"
 
 def get_licence():
-	return "APACHE-2"
+	return "MPL-2"
 
 def get_compagny_type():
 	return "com"

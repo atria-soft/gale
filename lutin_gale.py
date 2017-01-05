@@ -14,7 +14,7 @@ def get_desc():
 	return "gale is a main library to use widget in the openGl environement and manage all the wraping os"
 
 def get_licence():
-	return "APACHE-2"
+	return "MPL-2"
 
 def get_compagny_type():
 	return "com"
@@ -218,7 +218,7 @@ def tool_generate_main_java_class(target, module, package_name):
 	tmpFile.write( "/**\n")
 	tmpFile.write( " * @author Edouard DUPIN, Kevin BILLONNEAU\n")
 	tmpFile.write( " * @copyright 2011, Edouard DUPIN, all right reserved\n")
-	tmpFile.write( " * @license APACHE v2.0 (see license file)\n")
+	tmpFile.write( " * @license MPL-2 (see license file)\n")
 	tmpFile.write( " * @note This file is autogenerate ==> see documantation to generate your own\n")
 	tmpFile.write( " */\n")
 	tmpFile.write( "package "+ android_package_name + ";\n")
