@@ -64,7 +64,11 @@ def configure(target, my_module):
 	if "Web" in target.get_type():
 		my_module.add_src_file('gale/context/SDL/Context.cpp')
 	elif "Linux" in target.get_type():
-		my_module.add_src_file('gale/context/X11/Context.cpp')
+		# TODO : Do it better ...
+		if False:
+			my_module.add_src_file('gale/context/X11/Context.cpp')
+		else:
+			my_module.add_src_file('gale/context/wayland/Context.cpp')
 		# check if egami is present in the worktree: this is for the icon parsing ...
 		my_module.add_optionnal_depend('egami', ["c++", "-DGALE_BUILD_EGAMI"])
 	elif "Windows" in target.get_type():
@@ -157,7 +161,14 @@ def configure(target, my_module):
 		    "SDL"
 		    ])
 	elif "Linux" in target.get_type():
-		pass
+		if False:
+			my_module.add_depend("X11")
+		else:
+			my_module.add_depend([
+			    'wayland',
+			    'egl',
+			    'gles2'
+			    ])
 	elif "Android" in target.get_type():
 		my_module.add_depend(["SDK", "jvm-basics"])
 		# add tre creator of the basic java class ...

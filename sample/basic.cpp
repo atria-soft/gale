@@ -98,7 +98,7 @@ class MainApplication : public gale::Application {
 			mat4 tmpMatrix = projMatrix * camMatrix;
 			
 			m_GLprogram->uniformMatrix(m_GLMatrix, tmpMatrix);
-			#if 0
+			#if 1
 				// position:
 				m_GLprogram->sendAttributePointer(m_GLPosition, m_verticesVBO, GALE_SAMPLE_VBO_VERTICES);
 				// color:
