@@ -12,10 +12,6 @@
 #include <assert.h>
 #include <signal.h>
 
-
-
-
-
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -60,115 +56,31 @@ bool hasDisplay = false;
 	#define WAYLAND_CRITICAL   GALE_VERBOSE
 #endif
 
-static void signal_int(int _signum) {
-	GALE_ERROR("ploppppppppppppppp " << _signum);
-	//running = 0;
+
+bool g_runningSignal = true;
+
+static void
+signal_int(int signum)
+{
+	g_runningSignal = false;
 }
-
-
-// see this ... https://jan.newmarch.name/Wayland/Input/
-
-static void global_registry_handler(void* _data, struct wl_registry* _registry, uint32_t _id, const char* _interface, uint32_t _version);
-static void global_registry_remover(void* _data, struct wl_registry* _registry, uint32_t _id);
-static const struct wl_registry_listener registry_listener = {
-    global_registry_handler,
-    global_registry_remover
-};
-
-static void seat_handle_capabilities(void* _data, struct wl_seat* _seat, uint32_t _caps);
-static const struct wl_seat_listener seat_listener = {
-	seat_handle_capabilities,
-};
-
-static void pointer_handle_enter(void* _data, struct wl_pointer* _pointer, uint32_t _serial, struct wl_surface* _surface, wl_fixed_t _sx, wl_fixed_t _sy);
-static void pointer_handle_leave(void* _data, struct wl_pointer* _pointer, uint32_t _serial, struct wl_surface* _surface);
-static void pointer_handle_motion(void* _data, struct wl_pointer* _pointer, uint32_t _time, wl_fixed_t _sx, wl_fixed_t _sy);
-static void pointer_handle_button(void* _data, struct wl_pointer* _wl_pointer, uint32_t _serial, uint32_t _time, uint32_t _button, uint32_t _state);
-static void pointer_handle_axis(void* _data, struct wl_pointer* _wl_pointer, uint32_t _time, uint32_t _axis, wl_fixed_t _value);
-static const struct wl_pointer_listener pointer_listener = {
-    pointer_handle_enter,
-    pointer_handle_leave,
-    pointer_handle_motion,
-    pointer_handle_button,
-    pointer_handle_axis,
-};
-
-
-static void redraw(void* _data, struct wl_callback* _callback, uint32_t _time);
-static const struct wl_callback_listener frame_listener = {
-    redraw
-};
-
-static void configure_callback(void* _data, struct wl_callback* _callback, uint32_t _time);
-static struct wl_callback_listener configure_callback_listener = {
-    configure_callback,
-};
-
-
-static void handle_ping(void* _data, struct wl_shell_surface* _shell_surface, uint32_t _serial);
-static void handle_configure(void* _data, struct wl_shell_surface* _shell_surface, uint32_t _edges, int32_t _width, int32_t _height);
-static void handle_popup_done(void* _data, struct wl_shell_surface* _shell_surface);
-static const struct wl_shell_surface_listener shell_surface_listener = {
-	handle_ping,
-	handle_configure,
-	handle_popup_done
-};
-
-
-
-static void keyboard_handle_keymap(void *data, struct wl_keyboard *keyboard, uint32_t format, int fd, uint32_t size) {
-	GALE_INFO("KEY MAP : '" << format << "'");
-}
-
-static void keyboard_handle_enter(void *data, struct wl_keyboard *keyboard, uint32_t serial, struct wl_surface *surface, struct wl_array *keys) {
-	
-}
-
-static void keyboard_handle_leave(void *data, struct wl_keyboard *keyboard, uint32_t serial, struct wl_surface *surface) {
-	
-}
-
-static void keyboard_handle_key(void *data, struct wl_keyboard *keyboard, uint32_t serial, uint32_t time, uint32_t key, uint32_t state) {
-	GALE_INFO("KEY : '" << key << "'");
-	/*
-	struct display *d = (struct display *)data;
-	if (key == KEY_F11 && state)
-		toggle_fullscreen(d->window, d->window->fullscreen ^ 1);
-	else if (key == KEY_ESC && state)
-		running = 0;
-	*/
-}
-
-static void keyboard_handle_modifiers(void *data, struct wl_keyboard *keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group) {
-	
-}
-
-static const struct wl_keyboard_listener keyboard_listener = {
-	keyboard_handle_keymap,
-	keyboard_handle_enter,
-	keyboard_handle_leave,
-	keyboard_handle_key,
-	keyboard_handle_modifiers,
-};
-
-
 
 
 struct window;
 struct seat;
 
 struct display {
-	struct wl_display* display;
-	struct wl_registry* registry;
-	struct wl_compositor* compositor;
-	struct wl_shell* shell;
-	struct wl_seat* seat;
-	struct wl_pointer* pointer;
-	struct wl_keyboard* keyboard;
-	struct wl_shm* shm;
-	struct wl_cursor_theme* cursor_theme;
-	struct wl_cursor* default_cursor;
-	struct wl_surface* cursor_surface;
+	struct wl_display *display;
+	struct wl_registry *registry;
+	struct wl_compositor *compositor;
+	struct wl_shell *shell;
+	struct wl_seat *seat;
+	struct wl_pointer *pointer;
+	struct wl_keyboard *keyboard;
+	struct wl_shm *shm;
+	struct wl_cursor_theme *cursor_theme;
+	struct wl_cursor *default_cursor;
+	struct wl_surface *cursor_surface;
 	struct {
 		EGLDisplay dpy;
 		EGLContext ctx;
@@ -215,8 +127,91 @@ static const char *frag_shader_text =
 	"  gl_FragColor = v_color;\n"
 	"}\n";
 
+// ***********************************************************************
+
+static void global_registry_handler(void* _data, struct wl_registry* _registry, uint32_t _id, const char* _interface, uint32_t _version);
+static void global_registry_remover(void* _data, struct wl_registry* _registry, uint32_t _id);
+static const struct wl_registry_listener registry_listener = {
+    global_registry_handler,
+    global_registry_remover
+};
+
+static void seat_handle_capabilities(void* _data, struct wl_seat* _seat, uint32_t _caps);
+static const struct wl_seat_listener seat_listener = {
+	seat_handle_capabilities,
+};
+
+static void pointer_handle_enter(void* _data, struct wl_pointer* _pointer, uint32_t _serial, struct wl_surface* _surface, wl_fixed_t _sx, wl_fixed_t _sy);
+static void pointer_handle_leave(void* _data, struct wl_pointer* _pointer, uint32_t _serial, struct wl_surface* _surface);
+static void pointer_handle_motion(void* _data, struct wl_pointer* _pointer, uint32_t _time, wl_fixed_t _sx, wl_fixed_t _sy);
+static void pointer_handle_button(void* _data, struct wl_pointer* _wl_pointer, uint32_t _serial, uint32_t _time, uint32_t _button, uint32_t _state);
+static void pointer_handle_axis(void* _data, struct wl_pointer* _wl_pointer, uint32_t _time, uint32_t _axis, wl_fixed_t _value);
+static const struct wl_pointer_listener pointer_listener = {
+    pointer_handle_enter,
+    pointer_handle_leave,
+    pointer_handle_motion,
+    pointer_handle_button,
+    pointer_handle_axis,
+};
+
+static void redraw(void* _data, struct wl_callback* _callback, uint32_t _time);
+static const struct wl_callback_listener frame_listener = {
+    redraw
+};
+
+static void configure_callback(void* _data, struct wl_callback* _callback, uint32_t _time);
+static struct wl_callback_listener configure_callback_listener = {
+    configure_callback,
+};
+
+static void handle_ping(void* _data, struct wl_shell_surface* _shell_surface, uint32_t _serial);
+static void handle_configure(void* _data, struct wl_shell_surface* _shell_surface, uint32_t _edges, int32_t _width, int32_t _height);
+static void handle_popup_done(void* _data, struct wl_shell_surface* _shell_surface);
+static const struct wl_shell_surface_listener shell_surface_listener = {
+	handle_ping,
+	handle_configure,
+	handle_popup_done
+};
 
 
+static void keyboard_handle_keymap(void *data, struct wl_keyboard *keyboard, uint32_t format, int fd, uint32_t size) {
+	GALE_WARNING("callback ...");
+	GALE_INFO("KEY MAP : '" << format << "'");
+}
+
+static void keyboard_handle_enter(void *data, struct wl_keyboard *keyboard, uint32_t serial, struct wl_surface *surface, struct wl_array *keys) {
+	GALE_WARNING("callback ...");
+	
+}
+
+static void keyboard_handle_leave(void *data, struct wl_keyboard *keyboard, uint32_t serial, struct wl_surface *surface) {
+	GALE_WARNING("callback ...");
+	
+}
+
+static void keyboard_handle_key(void *data, struct wl_keyboard *keyboard, uint32_t serial, uint32_t time, uint32_t key, uint32_t state) {
+	GALE_WARNING("callback ...");
+	GALE_INFO("KEY : '" << key << "'");
+	/*
+	struct display *d = (struct display *)data;
+	if (key == KEY_F11 && state)
+		toggle_fullscreen(d->window, d->window->fullscreen ^ 1);
+	else if (key == KEY_ESC && state)
+		running = 0;
+	*/
+}
+
+static void keyboard_handle_modifiers(void *data, struct wl_keyboard *keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group) {
+	
+}
+
+static const struct wl_keyboard_listener keyboard_listener = {
+	keyboard_handle_keymap,
+	keyboard_handle_enter,
+	keyboard_handle_leave,
+	keyboard_handle_key,
+	keyboard_handle_modifiers,
+};
 
 
 class WAYLANDInterface : public gale::Context {
@@ -232,6 +227,83 @@ class WAYLANDInterface : public gale::Context {
 		
 		bool m_fullscreen;
 		bool m_opaque;
+		
+	public:
+		WAYLANDInterface(gale::Application* _application, int32_t _argc, const char* _argv[]) :
+		  gale::Context(_application, _argc, _argv),
+		  m_size(800,600),
+		  m_run(false),
+		  m_fullscreen(false),
+		  m_opaque(false) {
+			// in case ...
+			g_runningSignal = true;
+			GALE_WARNING("WAYLAND: INIT [START]");
+			for (int32_t iii=0; iii<MAX_MANAGE_INPUT; iii++) {
+				m_inputIsPressed[iii] = false;
+			}
+			memset(&m_sigint, 0, sizeof(struct sigaction));
+			memset(&m_display, 0, sizeof(struct display));
+			memset(&m_window, 0, sizeof(struct window));
+			int i, ret = 0;
+			
+			m_window.display = &m_display;
+			m_display.window = &m_window;
+			m_window.window_size.width  = 250;
+			m_window.window_size.height = 250;
+			
+			m_display.display = wl_display_connect(nullptr);
+			assert(m_display.display);
+			
+			m_display.registry = wl_display_get_registry(m_display.display);
+			wl_registry_add_listener(m_display.registry, &registry_listener, this);
+			
+			wl_display_dispatch(m_display.display);
+			initEgl(m_window.opaque);
+			
+			createSurface();
+			initGL();
+			
+			m_display.cursor_surface = wl_compositor_create_surface(m_display.compositor);
+			
+			m_sigint.sa_handler = signal_int;
+			sigemptyset(&m_sigint.sa_mask);
+			m_sigint.sa_flags = SA_RESETHAND;
+			sigaction(SIGINT, &m_sigint, nullptr);
+			
+			m_uniqueWindowsName   = "GALE_" + etk::to_string(etk::tool::irand(0, 1999999999));
+			m_run = true;
+			GALE_WARNING("WAYLAND: INIT [STOP]");
+		}
+		
+		~WAYLANDInterface() {
+			destroySurface();
+			unInitEgl();
+			wl_surface_destroy(m_display.cursor_surface);
+			if (m_display.cursor_theme) {
+				wl_cursor_theme_destroy(m_display.cursor_theme);
+			}
+			if (m_display.shell) {
+				wl_shell_destroy(m_display.shell);
+			}
+			if (m_display.compositor) {
+				wl_compositor_destroy(m_display.compositor);
+			}
+			wl_registry_destroy(m_display.registry);
+			wl_display_flush(m_display.display);
+			wl_display_disconnect(m_display.display);
+		}
+		/****************************************************************************************/
+		int32_t run() {
+			int ret = 0;
+			while (    g_runningSignal == true
+			        && m_run == true
+			        && ret != -1) {
+				ret = wl_display_dispatch(m_display.display);
+				GALE_INFO("loop dispatch event " << ret);
+			}
+			GALE_INFO("Normal application exit ...");
+			return 0;
+		}
 		
 		GLuint create_shader(const char* _source, GLenum _shaderType) {
 			GLuint shader = glCreateShader(_shaderType);
@@ -249,8 +321,8 @@ class WAYLANDInterface : public gale::Context {
 			}
 			return shader;
 		}
-		
 		void initGL() {
+			GALE_WARNING("initGL: [START]");
 			GLuint frag, vert;
 			GLuint program;
 			GLint status;
@@ -275,67 +347,7 @@ class WAYLANDInterface : public gale::Context {
 			glBindAttribLocation(program, m_window.gl.col, "color");
 			glLinkProgram(program);
 			m_window.gl.rotation_uniform = glGetUniformLocation(program, "rotation");
-		}
-	public:
-		WAYLANDInterface(gale::Application* _application, int32_t _argc, const char* _argv[]) :
-		  gale::Context(_application, _argc, _argv),
-		  m_size(800,600),
-		  m_run(false),
-		  m_fullscreen(false),
-		  m_opaque(false) {
-			WAYLAND_INFO("WAYLAND:INIT");
-			for (int32_t iii=0; iii<MAX_MANAGE_INPUT; iii++) {
-				m_inputIsPressed[iii] = false;
-			}
-			memset(&m_sigint, 0, sizeof(struct sigaction));
-			memset(&m_display, 0, sizeof(struct display));
-			memset(&m_window, 0, sizeof(struct window));
-			int i, ret = 0;
-			
-			m_window.display = &m_display;
-			m_display.window = &m_window;
-			m_window.window_size.width  = 250;
-			m_window.window_size.height = 250;
-			
-			m_display.display = wl_display_connect(nullptr);
-			assert(m_display.display);
-			
-			m_display.registry = wl_display_get_registry(m_display.display);
-			wl_registry_add_listener(m_display.registry, &registry_listener, this);
-			
-			wl_display_dispatch(m_display.display);
-			
-			initEgl(m_window.opaque);
-			createSurface();
-			initGL();
-			
-			m_display.cursor_surface = wl_compositor_create_surface(m_display.compositor);
-			
-			m_sigint.sa_handler = signal_int;
-			sigemptyset(&m_sigint.sa_mask);
-			m_sigint.sa_flags = SA_RESETHAND;
-			sigaction(SIGINT, &m_sigint, nullptr);
-			
-			m_uniqueWindowsName   = "GALE_" + etk::to_string(etk::tool::irand(0, 1999999999));
-			m_run = true;
-		}
-		
-		~WAYLANDInterface() {
-			destroySurface();
-			unInitEgl();
-			wl_surface_destroy(m_display.cursor_surface);
-			if (m_display.cursor_theme) {
-				wl_cursor_theme_destroy(m_display.cursor_theme);
-			}
-			if (m_display.shell) {
-				wl_shell_destroy(m_display.shell);
-			}
-			if (m_display.compositor) {
-				wl_compositor_destroy(m_display.compositor);
-			}
-			wl_registry_destroy(m_display.registry);
-			wl_display_flush(m_display.display);
-			wl_display_disconnect(m_display.display);
+			GALE_WARNING("initGL: [STOP]");
 		}
 		
 		void initEgl(int _opaque) {
@@ -393,8 +405,7 @@ class WAYLANDInterface : public gale::Context {
 		
 		void unInitEgl() {
 			GALE_INFO("un-Init EGL [START]");
-			/* Required, otherwise segfault in egl_dri2.c: dri2_make_current()
-			 * on eglReleaseThread(). */
+			/* Required, otherwise segfault in egl_dri2.c: dri2_make_current() on eglReleaseThread(). */
 			eglMakeCurrent(m_display.egl.dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 			eglTerminate(m_display.egl.dpy);
 			eglReleaseThread();
@@ -404,10 +415,9 @@ class WAYLANDInterface : public gale::Context {
 		
 		void createSurface() {
 			GALE_INFO("CRATE the SURFACE [START]");
-			struct display *display = m_window.display;
 			EGLBoolean ret;
-			m_window.surface = wl_compositor_create_surface(display->compositor);
-			m_window.shell_surface = wl_shell_get_shell_surface(display->shell, m_window.surface);
+			m_window.surface = wl_compositor_create_surface(m_display.compositor);
+			m_window.shell_surface = wl_shell_get_shell_surface(m_display.shell, m_window.surface);
 			wl_shell_surface_add_listener(m_window.shell_surface, &shell_surface_listener, this);
 			m_window.native = wl_egl_window_create(m_window.surface, m_window.window_size.width, m_window.window_size.height);
 			m_window.egl_surface = eglCreateWindowSurface(m_display.egl.dpy, m_display.egl.conf, m_window.native, nullptr);
@@ -430,6 +440,7 @@ class WAYLANDInterface : public gale::Context {
 		}
 		
 		void toggleFullscreen(int _fullscreen) {
+			GALE_INFO("toggleFullscreen [START]");
 			m_window.fullscreen = _fullscreen;
 			m_window.configured = 0;
 			if (_fullscreen) {
@@ -438,10 +449,12 @@ class WAYLANDInterface : public gale::Context {
 				wl_shell_surface_set_toplevel(m_window.shell_surface);
 				handleConfigure(m_window.shell_surface, 0, ivec2(m_window.window_size.width, m_window.window_size.height));
 			}
-			struct wl_callback *callback = wl_display_sync(m_window.display->display);
+			struct wl_callback *callback = wl_display_sync(m_display.display);
 			wl_callback_add_listener(callback, &configure_callback_listener, this);
+			//wl_callback_add_listener(callback, &configure_callback_listener, &m_window);
+			GALE_INFO("toggleFullscreen [STOP]");
 		}
-
+		
 		/****************************************************************************************/
 		// recorder on elements ...
 		
@@ -461,6 +474,7 @@ class WAYLANDInterface : public gale::Context {
 			} else {
 				GALE_WARNING("    ==> Not used ...");
 			}
+			GALE_INFO("registry_handle_global [STOP]");
 		}
 		
 		void registryRemover(struct wl_registry* _registry, uint32_t _id) {
@@ -472,17 +486,19 @@ class WAYLANDInterface : public gale::Context {
 		void seatHandleCapabilities(struct wl_seat* _seat, enum wl_seat_capability _caps) {
 			if ((_caps & WL_SEAT_CAPABILITY_POINTER) && !m_display.pointer) {
 				GALE_WARNING("Display has a pointer");
-				m_display.pointer = wl_seat_get_pointer(m_display.seat);
+				m_display.pointer = wl_seat_get_pointer(_seat);
 				wl_pointer_add_listener(m_display.pointer, &pointer_listener, this);
+				//wl_pointer_add_listener(m_display.pointer, &pointer_listener, &m_display);
 			} else if (!(_caps & WL_SEAT_CAPABILITY_POINTER) && m_display.pointer) {
 				GALE_WARNING("Display has No more pointer");
 				wl_pointer_destroy(m_display.pointer);
 				m_display.pointer = nullptr;
 			}
-			
 			if ((_caps & WL_SEAT_CAPABILITY_KEYBOARD) && !m_display.keyboard) {
-				m_display.keyboard = wl_seat_get_keyboard(m_display.seat);
+				GALE_WARNING("Display has a keyboard");
+				m_display.keyboard = wl_seat_get_keyboard(_seat);
 				wl_keyboard_add_listener(m_display.keyboard, &keyboard_listener, this);
+				//wl_keyboard_add_listener(m_display.keyboard, &keyboard_listener, &m_display);
 			} else if (!(_caps & WL_SEAT_CAPABILITY_KEYBOARD) && m_display.keyboard) {
 				wl_keyboard_destroy(m_display.keyboard);
 				m_display.keyboard = nullptr;
@@ -491,7 +507,6 @@ class WAYLANDInterface : public gale::Context {
 			if (_caps & WL_SEAT_CAPABILITY_TOUCH) {
 				GALE_WARNING("Display has a touch screen");
 			}
-			
 		}
 		
 		/****************************************************************************************/
@@ -513,6 +528,7 @@ class WAYLANDInterface : public gale::Context {
 				wl_surface_damage(m_display.cursor_surface, 0, 0, image->width, image->height);
 				wl_surface_commit(m_display.cursor_surface);
 			}
+			GALE_WARNING("Pointer enter [STOP]");
 		}
 		void pointerHandleLeave(struct wl_pointer* _pointer, uint32_t _serial, struct wl_surface* _surface) {
 			GALE_WARNING("Pointer left surface" << _surface);
@@ -522,18 +538,20 @@ class WAYLANDInterface : public gale::Context {
 		}
 		void pointerHandleButton(struct wl_pointer* _wl_pointer, uint32_t _serial, uint32_t _time, uint32_t _button, uint32_t _state) {
 			GALE_WARNING("Pointer button");
+			#if 0
 			if (    _button == BTN_LEFT
 			     && _state == WL_POINTER_BUTTON_STATE_PRESSED) {
 				wl_shell_surface_move(m_window.shell_surface, m_display.seat, _serial);
 			}
+			#endif
 		}
 		void pointerHandleAxis(struct wl_pointer* _wl_pointer, uint32_t _time, uint32_t _axis, wl_fixed_t _value) {
 			GALE_WARNING("Pointer handle axis");
 		}
 		/****************************************************************************************/
-
+		
 		void redraw(struct wl_callback* _callback, uint32_t _time) {
-			GALE_WARNING("REDRAW");
+			GALE_WARNING("REDRAW [START]");
 			static const GLfloat verts[3][2] = {
 				{ -0.5, -0.5 },
 				{  0.5, -0.5 },
@@ -591,7 +609,7 @@ class WAYLANDInterface : public gale::Context {
 			
 			if (    m_window.opaque
 			     || m_window.fullscreen) {
-				struct wl_region *region = (struct wl_region *)wl_compositor_create_region(m_window.display->compositor);
+				struct wl_region *region = (struct wl_region *)wl_compositor_create_region(m_display.compositor);
 				wl_region_add(region, 0, 0, m_window.geometry.width, m_window.geometry.height);
 				wl_surface_set_opaque_region(m_window.surface, region);
 				wl_region_destroy(region);
@@ -600,16 +618,18 @@ class WAYLANDInterface : public gale::Context {
 			}
 			m_window.callback = wl_surface_frame(m_window.surface);
 			wl_callback_add_listener(m_window.callback, &frame_listener, this);
-			eglSwapBuffers(m_window.display->egl.dpy, m_window.egl_surface);
+			eglSwapBuffers(m_display.egl.dpy, m_window.egl_surface);
+			GALE_WARNING("REDRAW [STOP]");
 		}
-		/*
-		void configure_callback(struct wl_callback* _callback, uint32_t _time) {
-			if (_callback == nullptr) {
-				//redraw(_data, this, _time);
-				
+		
+		void configureCallback(struct wl_callback* _callback, uint32_t _time) {
+			wl_callback_destroy(_callback);
+			m_window.configured = 1;
+			if (m_window.callback == nullptr) {
+				GALE_ERROR("    ==> nullptr");
+				redraw(nullptr, _time);
 			}
 		}
-		*/
 		
 		/****************************************************************************************/
 		void handlePing(struct wl_shell_surface* _shell_surface, uint32_t _serial) {
@@ -628,34 +648,11 @@ class WAYLANDInterface : public gale::Context {
 			if (!m_window.fullscreen) {
 				m_window.window_size = m_window.geometry;
 			}
+			GALE_WARNING("configure [STOP]");
 		}
 		
 		void handlePopupDone(struct wl_shell_surface* _shell_surface) {
 			GALE_WARNING("Pop-up done");
-		}
-		
-		/****************************************************************************************/
-		int32_t run() {
-			int ret = 0;
-			while (    m_run == true
-			        && ret != -1) {
-				ret = wl_display_dispatch(m_display.display);
-				GALE_INFO("loop dispatch event " << ret);
-			}
-			GALE_INFO("Normal application exit ...");
-			return 0;
-			/*
-			while (m_run == true) {
-				auto retDispatch = wl_display_dispatch(m_display);
-				if (retDispatch < 0) {
-					GALE_INFO("Main loop error");
-					m_run = false;
-				} else {
-					GALE_INFO("loop dispatch event " << retDispatch);
-				}
-			}
-			return 0;
-			*/
 		}
 		/****************************************************************************************/
 		virtual void stop() {
@@ -709,6 +706,7 @@ class WAYLANDInterface : public gale::Context {
 		}
 		/****************************************************************************************/
 		virtual void grabKeyboardEvents(bool _status) {
+			GALE_WARNING("grabKeyboardEvents [START]");
 			/*
 			if (_status == true) {
 				WAYLAND_INFO("WAYLAND-API: Grab Keyboard Events");
@@ -722,6 +720,7 @@ class WAYLANDInterface : public gale::Context {
 				XUngrabKeyboard(m_display, CurrentTime);
 			}
 			*/
+			GALE_WARNING("grabKeyboardEvents [STOP]");
 		}
 		/****************************************************************************************/
 		virtual void setWindowsDecoration(bool _status) {
@@ -1056,36 +1055,6 @@ class WAYLANDInterface : public gale::Context {
 			*/
 		}
 		/****************************************************************************************/
-		bool createOGlContext() {
-			#if 0
-			WAYLAND_INFO("WAYLAND:CreateOGlContext");
-			#if defined(__TARGET_OS__Web)
-				/* create a GLX context */
-				GContext RenderContext = wglCreateContext(m_display, 0, GL_TRUE);
-				/* connect the glx-context to the window */
-				wglMakeCurrent(m_display, m_WindowHandle, RenderContext);
-				if (glwIsDirect(m_display, RenderContext)) {
-					GALE_INFO("XF86 DRI enabled\n");
-				} else {
-					GALE_INFO("XF86 DRI NOT available\n");
-				}
-			#else
-				/* create a GLX context */
-				GLXContext RenderContext = glXCreateContext(m_display, m_visual, 0, GL_TRUE);
-				/* connect the glx-context to the window */
-				glXMakeCurrent(m_display, m_WindowHandle, RenderContext);
-				if (glXIsDirect(m_display, RenderContext)) {
-					GALE_INFO("XF86 DRI enabled\n");
-				} else {
-					GALE_INFO("XF86 DRI NOT available\n");
-				}
-			#endif
-			// enable vertical synchronisation : (some computer has synchronisation disable)
-			setVSync(true);
-			#endif
-			return true;
-		}
-		/****************************************************************************************/
 		void setTitle(const std::string& _title) {
 			WAYLAND_INFO("WAYLAND: set Title (START)");
 			/*
@@ -1172,118 +1141,137 @@ class WAYLANDInterface : public gale::Context {
 			*/
 		}
 };
-
-
 static void global_registry_handler(void* _data, struct wl_registry* _registry, uint32_t _id, const char* _interface, uint32_t _version) {
+	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
+		GALE_ERROR("    ==> nullptr");
 		return;
 	}
 	interface->registryHandler(_registry, _id, _interface, _version);
 }
 
 static void global_registry_remover(void* _data, struct wl_registry* _registry, uint32_t _id) {
+	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
+		GALE_ERROR("    ==> nullptr");
 		return;
 	}
 	interface->registryRemover(_registry, _id);
 }
 
 static void seat_handle_capabilities(void* _data, struct wl_seat* _seat, uint32_t _caps) {
+	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
+		GALE_ERROR("    ==> nullptr");
 		return;
 	}
 	interface->seatHandleCapabilities(_seat, (enum wl_seat_capability)_caps);
 }
 
 static void pointer_handle_enter(void* _data, struct wl_pointer* _pointer, uint32_t _serial, struct wl_surface* _surface, wl_fixed_t _sx, wl_fixed_t _sy) {
+	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
+		GALE_ERROR("    ==> nullptr");
 		return;
 	}
 	interface->pointerHandleEnter(_pointer, _serial, _surface, ivec2(_sx, _sy));
 }
 static void pointer_handle_leave(void* _data, struct wl_pointer* _pointer, uint32_t _serial, struct wl_surface* _surface) {
+	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
+		GALE_ERROR("    ==> nullptr");
 		return;
 	}
 	interface->pointerHandleLeave(_pointer, _serial, _surface);
 }
 
 static void pointer_handle_motion(void* _data, struct wl_pointer* _pointer, uint32_t _time, wl_fixed_t _sx, wl_fixed_t _sy) {
+	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
+		GALE_ERROR("    ==> nullptr");
 		return;
 	}
 	interface->pointerHandleMotion(_pointer, _time, ivec2(_sx, _sy));
 }
 
 static void pointer_handle_button(void* _data, struct wl_pointer* _wl_pointer, uint32_t _serial, uint32_t _time, uint32_t _button, uint32_t _state) {
+	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
+		GALE_ERROR("    ==> nullptr");
 		return;
 	}
 	interface->pointerHandleButton(_wl_pointer, _serial, _time, _button, _state);
 }
 
 static void pointer_handle_axis(void* _data, struct wl_pointer* _wl_pointer, uint32_t _time, uint32_t _axis, wl_fixed_t _value) {
+	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
+		GALE_ERROR("    ==> nullptr");
 		return;
 	}
 	interface->pointerHandleAxis(_wl_pointer, _time, _axis, _value);
 }
 
 static void redraw(void* _data, struct wl_callback* _callback, uint32_t _time) {
+	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
+		GALE_ERROR("    ==> nullptr");
 		return;
 	}
 	interface->redraw(_callback, _time);
 }
 
 static void configure_callback(void* _data, struct wl_callback* _callback, uint32_t _time) {
-	struct window *window = (struct window *)_data;
-	wl_callback_destroy(_callback);
-	window->configured = 1;
-	if (window->callback == nullptr) {
-		redraw(_data, nullptr, _time);
+	GALE_WARNING("callback ...");
+	
+	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
+	if (interface == nullptr) {
+		GALE_ERROR("    ==> nullptr");
+		return;
 	}
+	interface->configureCallback(_callback, _time);
 }
 
 static void handle_ping(void* _data, struct wl_shell_surface* _shell_surface, uint32_t _serial) {
+	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
+		GALE_ERROR("    ==> nullptr");
 		return;
 	}
 	interface->handlePing(_shell_surface, _serial);
 }
 
 static void handle_configure(void* _data, struct wl_shell_surface* _shell_surface, uint32_t _edges, int32_t _width, int32_t _height) {
+	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
+		GALE_ERROR("    ==> nullptr");
 		return;
 	}
 	interface->handleConfigure(_shell_surface, _edges, ivec2(_width, _height));
 }
 
 static void handle_popup_done(void* _data, struct wl_shell_surface* _shell_surface) {
+	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
+		GALE_ERROR("    ==> nullptr");
 		return;
 	}
 	interface->handlePopupDone(_shell_surface);
 }
 
 
-/**
- * @brief Main of the program
- * @param std IO
- * @return std IO
- */
 int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 	etk::init(_argc, _argv);
 	WAYLANDInterface* interface = new WAYLANDInterface(_application, _argc, _argv);
@@ -1296,5 +1284,4 @@ int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 	interface = nullptr;
 	return retValue;
 }
-
 
