@@ -64,7 +64,9 @@ class MainApplication : public gale::Application {
 			// Clear all the stacked matrix ...
 			gale::openGL::setBasicMatrix(mat4());
 			// clear background
-			gale::openGL::clearColor(etk::color::yellow);
+			etk::Color<float,4> bgColor = etk::color::yellow;
+			bgColor.setA(0.75);
+			gale::openGL::clearColor(bgColor);
 			// real clear request:
 			gale::openGL::clear(gale::openGL::clearFlag_colorBuffer);
 			// create a local matrix environnement.
