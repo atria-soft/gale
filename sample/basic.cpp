@@ -122,10 +122,12 @@ class MainApplication : public gale::Application {
 		               int32_t _pointerID,
 		               const vec2& _pos,
 		               gale::key::status _state) override {
+			/*
 			TEST_INFO("input event: type=" << _type);
 			TEST_INFO("               id=" << _pointerID);
 			TEST_INFO("              pos=" << _pos);
 			TEST_INFO("            state=" << _state);
+			*/
 		}
 		void onKeyboard(const gale::key::Special& _special,
 		                enum gale::key::keyboard _type,

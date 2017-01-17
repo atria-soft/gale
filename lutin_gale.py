@@ -167,7 +167,8 @@ def configure(target, my_module):
 			my_module.add_depend([
 			    'wayland',
 			    'egl',
-			    'gles2'
+			    'gles2',
+			    'xkbcommon'
 			    ])
 	elif "Android" in target.get_type():
 		my_module.add_depend(["SDK", "jvm-basics"])

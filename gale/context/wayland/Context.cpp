@@ -29,6 +29,8 @@
 #include <gale/Dimension.hpp>
 #include <etk/etk.hpp>
 
+// this does not work now ...
+#define GALE_XKB_WRAPPER_INPUT
 extern "C" {
 	#include <linux/input.h>
 	//https://people.freedesktop.org/~whot/wayland-doxygen/wayland/Client/
@@ -39,6 +41,13 @@ extern "C" {
 	#include <EGL/egl.h>
 	#include <EGL/egl.h>
 	#include <GLES2/gl2.h>
+	// XKB layout wrapping of keyboard ...
+	#ifdef GALE_XKB_WRAPPER_INPUT
+		#include <xkbcommon/xkbcommon.h>
+		#include <xkbcommon/xkbcommon-compose.h>
+		#include <sys/mman.h> // form mmap
+		#include <unistd.h> // need for close
+	#endif
 }
 
 #include <gale/renderer/openGL/openGL-include.hpp>
@@ -111,6 +120,7 @@ static const struct wl_keyboard_listener keyboard_listener = {
 	keyboard_handle_modifiers,
 };
 
+
 /**
  * @brief Wayland interface context to load specific context wrapper...
  */
@@ -148,6 +158,13 @@ class WAYLANDInterface : public gale::Context {
 		EGLContext m_eglContext;
 		EGLConfig m_eglConfig;
 		EGLSurface m_eglSurface;
+		#ifdef GALE_XKB_WRAPPER_INPUT
+			struct xkb_context* m_XKBContext;
+			struct xkb_keymap* m_XKBKeymap;
+			struct xkb_state* m_XKBState;
+			struct xkb_compose_table* m_XkbComposeTable;
+			struct xkb_compose_state* m_XkbComposeState;
+		#endif
 	public:
 		WAYLANDInterface(gale::Application* _application, int32_t _argc, const char* _argv[]) :
 		  gale::Context(_application, _argc, _argv),
@@ -171,14 +188,32 @@ class WAYLANDInterface : public gale::Context {
 		  m_eglWindow(nullptr),
 		  m_surface(nullptr),
 		  m_shellSurface(nullptr),
-		  m_callback(nullptr) {
+		  m_callback(nullptr)
+		#ifdef GALE_XKB_WRAPPER_INPUT
+		  ,m_XKBContext(nullptr),
+		  m_XKBKeymap(nullptr),
+		  m_XKBState(nullptr),
+		  m_XkbComposeTable(nullptr),
+		  m_XkbComposeState(nullptr)
+		#endif
+		  {
 			// in case ...
 			GALE_WARNING("WAYLAND: INIT [START]");
 			for (int32_t iii=0; iii<MAX_MANAGE_INPUT; iii++) {
 				m_inputIsPressed[iii] = false;
 			}
 			int i, ret = 0;
-			
+			#ifdef GALE_XKB_WRAPPER_INPUT
+				m_XKBContext = xkb_context_new(XKB_CONTEXT_NO_DEFAULT_INCLUDES);
+				if (m_XKBContext == nullptr) {
+					GALE_CRITICAL("Couldn't create xkb context");
+				}
+				m_XkbComposeTable = xkb_compose_table_new(m_XKBContext, XKB_COMPOSE_COMPILE_NO_FLAGS);
+				if (m_XkbComposeTable == nullptr) {
+					GALE_CRITICAL("Couldn't create xkb compose table");
+				}
+				m_XkbComposeState = xkb_compose_state_new(m_XkbComposeTable, XKB_COMPOSE_STATE_NO_FLAGS);
+			#endif
 			m_display = wl_display_connect(nullptr);
 			assert(m_display);
 			
@@ -198,6 +233,20 @@ class WAYLANDInterface : public gale::Context {
 		}
 		
 		~WAYLANDInterface() {
+			#ifdef GALE_XKB_WRAPPER_INPUT
+				if (m_XKBState != nullptr) {
+					xkb_state_unref(m_XKBState);
+					m_XKBState = nullptr;
+				}
+				if (m_XKBKeymap != nullptr) {
+					xkb_keymap_unref(m_XKBKeymap);
+					m_XKBKeymap = nullptr;
+				}
+				if (m_XKBContext != nullptr) {
+					xkb_context_unref(m_XKBContext);
+					m_XKBContext = nullptr;
+				}
+			#endif
 			destroySurface();
 			unInitEgl();
 			wl_surface_destroy(m_cursorSurface);
@@ -220,7 +269,7 @@ class WAYLANDInterface : public gale::Context {
 			while (    m_run == true
 			        && ret != -1) {
 				ret = wl_display_dispatch(m_display);
-				GALE_INFO("loop dispatch event " << ret);
+				//GALE_INFO("loop dispatch event " << ret);
 			}
 			GALE_INFO("Normal application exit ...");
 			return 0;
@@ -374,6 +423,16 @@ class WAYLANDInterface : public gale::Context {
 			} else if (!(_caps & WL_SEAT_CAPABILITY_KEYBOARD) && m_keyboard) {
 				wl_keyboard_destroy(m_keyboard);
 				m_keyboard = nullptr;
+				#ifdef GALE_XKB_WRAPPER_INPUT
+					if (m_XKBState != nullptr) {
+						xkb_state_unref(m_XKBState);
+						m_XKBState = nullptr;
+					}
+					if (m_XKBKeymap != nullptr) {
+						xkb_keymap_unref(m_XKBKeymap);
+						m_XKBKeymap = nullptr;
+					}
+				#endif
 			}
 			
 			if (_caps & WL_SEAT_CAPABILITY_TOUCH) {
@@ -385,8 +444,7 @@ class WAYLANDInterface : public gale::Context {
 		// Pointer section event ...
 		
 		void pointerHandleEnter(struct wl_pointer* _pointer, uint32_t _serial, struct wl_surface* _surface, ivec2 _pos) {
-			GALE_WARNING("Pointer Enter surface" << _surface << " at pos=" << _pos);
-			m_cursorCurrentPosition = vec2(_pos.x(), _pos.y());
+			m_cursorCurrentPosition = vec2(_pos.x(), m_size.y()-_pos.y());
 			struct wl_buffer *buffer;
 			struct wl_cursor *cursor = m_cursorDefault;
 			struct wl_cursor_image *image;
@@ -401,13 +459,11 @@ class WAYLANDInterface : public gale::Context {
 				wl_surface_damage(m_cursorSurface, 0, 0, image->width, image->height);
 				wl_surface_commit(m_cursorSurface);
 			}
-			GALE_WARNING("Pointer enter [STOP]");
 		}
 		void pointerHandleLeave(struct wl_pointer* _pointer, uint32_t _serial, struct wl_surface* _surface) {
-			GALE_WARNING("Pointer left surface" << _surface);
+			GALE_VERBOSE("Pointer left surface" << _surface);
 		}
 		void pointerHandleMotion(struct wl_pointer* _pointer, uint32_t _time, ivec2 _pos) {
-			GALE_WARNING("Pointer moved at " << _pos);
 			m_cursorCurrentPosition = vec2(_pos.x(), _pos.y());
 			bool findPointer = false;
 			for (int32_t iii=0; iii<MAX_MANAGE_INPUT; iii++) {
@@ -427,7 +483,6 @@ class WAYLANDInterface : public gale::Context {
 			}
 		}
 		void pointerHandleButton(struct wl_pointer* _wl_pointer, uint32_t _serial, uint32_t _time, uint32_t _button, bool _btPressed) {
-			GALE_WARNING("Pointer button");
 			int32_t idButton = -1;
 			switch (_button) {
 				case BTN_LEFT:   idButton = 1; break;
@@ -435,7 +490,7 @@ class WAYLANDInterface : public gale::Context {
 				case BTN_RIGHT:  idButton = 3; break;
 				default: GALE_ERROR("unknow button:" << _button); break;
 			}
-			if (idButton != -1) {
+			if (idButton == -1) {
 				return;
 			}
 			if (_btPressed == true) {
@@ -452,13 +507,36 @@ class WAYLANDInterface : public gale::Context {
 			m_inputIsPressed[idButton] = _btPressed;
 		}
 		void pointerHandleAxis(struct wl_pointer* _wl_pointer, uint32_t _time, uint32_t _axis, wl_fixed_t _value) {
-			GALE_WARNING("Pointer handle axis");
-			// scroll up and down ....
+			int32_t idButton = -1;
+			// scroll up and down .... 
+			if (_axis == WL_POINTER_AXIS_VERTICAL_SCROLL) {
+				if (_value > 0) {
+					idButton = 4;
+				} else {
+					idButton = 5;
+				}
+			} else if (_axis == WL_POINTER_AXIS_HORIZONTAL_SCROLL) {
+				if (_value > 0) {
+					idButton = 11;
+				} else {
+					idButton = 10;
+				}
+			} else {
+				GALE_ERROR("Unknow the axix mode of this button " << _axis);
+				return;
+			}
+			OS_SetInput(gale::key::type::mouse,
+			            gale::key::status::down,
+			            idButton,
+			            m_cursorCurrentPosition);
+			OS_SetInput(gale::key::type::mouse,
+			            gale::key::status::up,
+			            idButton,
+			            m_cursorCurrentPosition);
 		}
 		/****************************************************************************************/
 		
 		void redraw(struct wl_callback* _callback, uint32_t _time) {
-			GALE_WARNING("REDRAW [START]");
 			assert(m_callback == _callback);
 			m_callback = nullptr;
 			if (_callback) {
@@ -483,7 +561,6 @@ class WAYLANDInterface : public gale::Context {
 			m_callback = wl_surface_frame(m_surface);
 			wl_callback_add_listener(m_callback, &frame_listener, this);
 			eglSwapBuffers(m_eglDisplay, m_eglSurface);
-			GALE_WARNING("REDRAW [STOP]");
 		}
 		
 		void configureCallback(struct wl_callback* _callback, uint32_t _time) {
@@ -515,33 +592,324 @@ class WAYLANDInterface : public gale::Context {
 			GALE_WARNING("Pop-up done");
 		}
 		/****************************************************************************************/
-		void keyboardKeymap(struct wl_keyboard* _keyboard, uint32_t _format, int _fd, uint32_t _size) {
-			GALE_WARNING("callback ...");
-			GALE_INFO("KEY MAP : '" << _format << "'");
+		void keyboardKeymap(struct wl_keyboard* _keyboard, enum wl_keyboard_keymap_format _format, int _fd, uint32_t _size) {
+			//GALE_INFO("KEY MAP : '" << _format << "'");
+			switch (_format) {
+				case WL_KEYBOARD_KEYMAP_FORMAT_NO_KEYMAP:
+					GALE_ERROR("NO keymap: client must understand how to interpret the raw keycode");
+				case WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1:
+					GALE_INFO("XKB_V1: Memory on the keymap use ... XKB-v1");
+			}
+			#ifdef GALE_XKB_WRAPPER_INPUT
+				void *buf;
+				buf = mmap(nullptr, _size, PROT_READ, MAP_SHARED, _fd, 0);
+				if (buf == MAP_FAILED) {
+					GALE_ERROR("Failed to mmap keymap: " << errno);
+					close(_fd);
+					return;
+				}
+				m_XKBKeymap = xkb_keymap_new_from_buffer(m_XKBContext, (const char *)buf, _size - 1, XKB_KEYMAP_FORMAT_TEXT_V1, (enum xkb_keymap_compile_flags)0);
+				munmap(buf, _size);
+				close(_fd);
+				if (!m_XKBKeymap) {
+					GALE_ERROR("Failed to compile XKB keymap");
+					return;
+				}
+				m_XKBState = xkb_state_new(m_XKBKeymap);
+				if (!m_XKBState) {
+					GALE_ERROR("Failed to create XKB state");
+					return;
+				}
+			#else
+				// use internal wrapper:
+				GALE_INFO("KEY MAP size=" << _size);
+			#endif
 		}
 		
 		void keyboardEnter(struct wl_keyboard* _keyboard, uint32_t _serial, struct wl_surface* _surface, struct wl_array* _keys) {
-			GALE_WARNING("callback ...");
-			
+			GALE_INFO("keyboard Enter...");
 		}
 		
 		void keyboardLeave(struct wl_keyboard* _keyboard, uint32_t _serial, struct wl_surface* _surface) {
-			GALE_WARNING("callback ...");
-			
+			GALE_INFO("keyboardLeave...");
 		}
-		
-		void keyboardKey(struct wl_keyboard* _keyboard, uint32_t _serial, uint32_t _time, uint32_t _key, uint32_t _state) {
-			GALE_WARNING("callback ...");
-			GALE_INFO("KEY : '" << _key << "'");
-			if (_key == KEY_F11 && _state) {
-				setFullScreen(m_fullscreen?false:true);
-			} else if (_key == KEY_ESC && _state) {
-				m_run = false;
+		#ifdef GALE_XKB_WRAPPER_INPUT
+		void test_print_keycode_state(struct xkb_state* _state,
+		                              struct xkb_compose_state* _composeState,
+		                              xkb_keycode_t _keycode,
+		                              enum xkb_consumed_mode _consumedMode) {
+			struct xkb_keymap *keymap;
+			xkb_keysym_t sym;
+			const xkb_keysym_t *syms;
+			int nsyms;
+			char s[16];
+			xkb_layout_index_t layout;
+			enum xkb_compose_status status;
+			keymap = xkb_state_get_keymap(_state);
+			nsyms = xkb_state_key_get_syms(_state, _keycode, &syms);
+			if (nsyms <= 0) {
+				return;
+			}
+			status = XKB_COMPOSE_NOTHING;
+			if (_composeState) {
+				status = xkb_compose_state_get_status(_composeState);
+			}
+			if (    status == XKB_COMPOSE_COMPOSING
+			     || status == XKB_COMPOSE_CANCELLED) {
+				return;
+			}
+			if (status == XKB_COMPOSE_COMPOSED) {
+				sym = xkb_compose_state_get_one_sym(_composeState);
+				syms = &sym;
+				nsyms = 1;
+			} else if (nsyms == 1) {
+				sym = xkb_state_key_get_one_sym(_state, _keycode);
+				syms = &sym;
+			}
+			printf("keysyms [ ");
+			for (int i = 0; i < nsyms; i++) {
+				xkb_keysym_get_name(syms[i], s, sizeof(s));
+				printf("%-*s ", (int) sizeof(s), s);
+			}
+			printf("] ");
+			
+			if (status == XKB_COMPOSE_COMPOSED) {
+				xkb_compose_state_get_utf8(_composeState, s, sizeof(s));
+			}else {
+				xkb_state_key_get_utf8(_state, _keycode, s, sizeof(s));
+			}
+			printf("unicode [ %s ] ", s);
+			layout = xkb_state_key_get_layout(_state, _keycode);
+			printf("layout [ %s (%d) ] ",
+			xkb_keymap_layout_get_name(keymap, layout), layout);
+			printf("level [ %d ] ",
+			xkb_state_key_get_level(_state, _keycode, layout));
+			printf("mods [ ");
+			for (xkb_mod_index_t mod = 0; mod < xkb_keymap_num_mods(keymap); mod++) {
+				if (xkb_state_mod_index_is_active(_state, mod, XKB_STATE_MODS_EFFECTIVE) <= 0) {
+					continue;
+				}
+				if (xkb_state_mod_index_is_consumed2(_state, _keycode, mod, _consumedMode)) {
+					printf("-%s ", xkb_keymap_mod_get_name(keymap, mod));
+				} else {
+					printf("%s ", xkb_keymap_mod_get_name(keymap, mod));
+				}
+			}
+			printf("] ");
+			
+			printf("leds [ ");
+			for (xkb_led_index_t led = 0; led < xkb_keymap_num_leds(keymap); led++) {
+				if (xkb_state_led_index_is_active(_state, led) <= 0) {
+					continue;
+				}
+				printf("%s ", xkb_keymap_led_get_name(keymap, led));
+			}
+			printf("] ");
+			printf("\n");
+		}
+		#endif
+		void keyboardKey(struct wl_keyboard* _keyboard, uint32_t _serial, uint32_t _time, uint32_t _key, bool _isDown) {
+			#ifdef GALE_XKB_WRAPPER_INPUT
+				if (_isDown == true) {
+					test_print_keycode_state(m_XKBState, m_XkbComposeState, _key + 8, XKB_CONSUMED_MODE_GTK);
+					/* Exit on ESC. */
+					if (xkb_state_key_get_one_sym(m_XKBState, _key + 8) == XKB_KEY_Escape) {
+						m_run = false;
+					}
+					xkb_keysym_t sym = xkb_state_key_get_one_sym(m_XKBState, _key + 8);
+				}
+			#endif
+			GALE_INFO("KEY : '" << _key << "' _isDown=" << _isDown);
+			bool find = true;
+			enum gale::key::keyboard keyInput;
+			switch (_key) {
+				//case 80: // keypad
+				case KEY_UP:          keyInput = gale::key::keyboard::up;            break;
+				//case 83: // keypad
+				case KEY_LEFT:        keyInput = gale::key::keyboard::left;          break;
+				//case 85: // keypad
+				case KEY_RIGHT:       keyInput = gale::key::keyboard::right;         break;
+				//case 88: // keypad
+				case KEY_DOWN:        keyInput = gale::key::keyboard::down;          break;
+				//case 81: // keypad
+				case KEY_PAGEUP:      keyInput = gale::key::keyboard::pageUp;        break;
+				//case 89: // keypad
+				case KEY_PAGEDOWN:    keyInput = gale::key::keyboard::pageDown;      break;
+				//case 79: // keypad
+				case KEY_HOME:        keyInput = gale::key::keyboard::start;         break;
+				case KEY_END:         keyInput = gale::key::keyboard::end;           break;
+				case KEY_SCROLLLOCK:  keyInput = gale::key::keyboard::stopDefil;     break;
+				case KEY_PAUSE:       keyInput = gale::key::keyboard::wait;          break;
+				// screen shot ...
+				//case KEY_SYSRQ:       keyInput = gale::key::keyboard::screenShot;    break;
+				//case 90: // keypad
+				case KEY_INSERT:
+					keyInput = gale::key::keyboard::insert;
+					if(_isDown == false) {
+						if (m_guiKeyBoardMode.getInsert() == true) {
+							m_guiKeyBoardMode.setInsert(false);
+						} else {
+							m_guiKeyBoardMode.setInsert(true);
+						}
+					}
+					break;
+				//case 84:  keyInput = gale::key::keyboardCenter; break; // Keypad
+				case KEY_F1:     keyInput = gale::key::keyboard::f1; break;
+				case KEY_F2:     keyInput = gale::key::keyboard::f2; break;
+				case KEY_F3:     keyInput = gale::key::keyboard::f3; break;
+				case KEY_F4:     keyInput = gale::key::keyboard::f4; break;
+				case KEY_F5:     keyInput = gale::key::keyboard::f5; break;
+				case KEY_F6:     keyInput = gale::key::keyboard::f6; break;
+				case KEY_F7:     keyInput = gale::key::keyboard::f7; break;
+				case KEY_F8:     keyInput = gale::key::keyboard::f8; break;
+				case KEY_F9:     keyInput = gale::key::keyboard::f9; break;
+				case KEY_F10:    keyInput = gale::key::keyboard::f10; break;
+				case KEY_F11:    keyInput = gale::key::keyboard::f11; break;
+				case KEY_F12:    keyInput = gale::key::keyboard::f12; break;
+				case KEY_CAPSLOCK:    keyInput = gale::key::keyboard::capLock;     m_guiKeyBoardMode.setCapsLock(_isDown); break;
+				case KEY_LEFTSHIFT:   keyInput = gale::key::keyboard::shiftLeft;   m_guiKeyBoardMode.setShift   (_isDown); break;
+				case KEY_RIGHTSHIFT:  keyInput = gale::key::keyboard::shiftRight;  m_guiKeyBoardMode.setShift   (_isDown); break;
+				case KEY_LEFTCTRL:    keyInput = gale::key::keyboard::ctrlLeft;    m_guiKeyBoardMode.setCtrl    (_isDown); break;
+				case KEY_RIGHTCTRL:   keyInput = gale::key::keyboard::ctrlRight;   m_guiKeyBoardMode.setCtrl    (_isDown); break;
+				case KEY_LEFTMETA:    keyInput = gale::key::keyboard::metaLeft;    m_guiKeyBoardMode.setMeta    (_isDown); break;
+				case KEY_RIGHTMETA:   keyInput = gale::key::keyboard::metaRight;   m_guiKeyBoardMode.setMeta    (_isDown); break;
+				case KEY_LEFTALT:     keyInput = gale::key::keyboard::alt;         m_guiKeyBoardMode.setAlt     (_isDown); break;
+				case KEY_RIGHTALT:    keyInput = gale::key::keyboard::altGr;       m_guiKeyBoardMode.setAltGr   (_isDown); break;
+				case KEY_COMPOSE:     keyInput = gale::key::keyboard::contextMenu; break;
+				case KEY_NUMLOCK:     keyInput = gale::key::keyboard::numLock;     m_guiKeyBoardMode.setNumLock (_isDown); break;
+				case KEY_DELETE: // Suppr on keypad
+					find = false;
+					if(m_guiKeyBoardMode.getNumLock() == true){
+						OS_setKeyboard(m_guiKeyBoardMode,
+						               gale::key::keyboard::character,
+						               (_isDown==true?gale::key::status::down:gale::key::status::up),
+						               false,
+						               '.');
+					} else {
+						OS_setKeyboard(m_guiKeyBoardMode,
+						               gale::key::keyboard::character,
+						               (_isDown==true?gale::key::status::down:gale::key::status::up),
+						               false,
+						               0x7F);
+					}
+					break;
+				case KEY_TAB: // special case for TAB
+					find = false;
+					OS_setKeyboard(m_guiKeyBoardMode,
+					               gale::key::keyboard::character,
+					               (_isDown==true?gale::key::status::down:gale::key::status::up),
+					               false,
+					               0x09);
+					break;
+				default:
+					find = false;
+					{
+						// must use xkbcommon library to manage correct map ...
+					/*
+						char buf[11];
+						//GALE_DEBUG("Keycode: " << event.xkey.keycode);
+						// change keystate for simple reson of the ctrl error...
+						int32_t keyStateSave = event.xkey.state;
+						if (event.xkey.state & (1<<2) ) {
+							event.xkey.state = event.xkey.state & 0xFFFFFFFB;
+						}
+						KeySym keysym;
+						Status status = 0;
+						//int count = Xutf8LookupString(m_xic, (XKeyPressedEvent*)&event, buf, 10, &keysym, &status);
+						int count = Xutf8LookupString(m_xic, &event.xkey, buf, 10, &keysym, &status);
+						// retreave real keystate
+						event.xkey.state = keyStateSave;
+						buf[count] = '\0';
+						// Replace \r error ...
+						if (buf[0] == '\r') {
+							buf[0] = '\n';
+							buf[1] = '\0';
+						}
+						if (count >= 0) {
+							// repeated kay from previous element :
+							if (count > 0) {
+								// transform it in unicode
+								m_lastKeyPressed = utf8::convertChar32(buf);
+							}
+							X11_INFO("event Key : " << event.xkey.keycode << " char=\"" << buf << "\"'len=" << strlen(buf) << " unicode=" << m_lastKeyPressed);
+							OS_setKeyboard(m_guiKeyBoardMode,
+							               gale::key::keyboard::character,
+							               (event.type==KeyPress?gale::key::status::down:gale::key::status::up),
+							               false,
+							               m_lastKeyPressed);
+						} else {
+							GALE_WARNING("Unknow event Key : " << event.xkey.keycode << " res='" << buf << "' repeate=" << thisIsAReapeateKey);
+						}
+						*/
+					}
 			}
 		}
 		
-		static void keyboardModifiers(struct wl_keyboard* _keyboard, uint32_t _serial, uint32_t _modsDepressed, uint32_t _modsLatched, uint32_t _modsLocked, uint32_t _group) {
-			
+		void keyboardModifiers(struct wl_keyboard* _keyboard, uint32_t _serial, uint32_t _modsDepressed, uint32_t _modsLatched, uint32_t _modsLocked, uint32_t _group) {
+			GALE_INFO("keyboard Modifiers...  _modsDepressed=" << _modsDepressed << " _modsLatched=" << _modsLatched << " _modsLocked=" << _modsLocked << " group=" << _group);
+			GALE_VERBOSE("         _modsDepressed=" << _modsDepressed);
+			GALE_VERBOSE("                 0x80 = " << ((_modsDepressed&0x80)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x40 = " << ((_modsDepressed&0x40)!=0?"true":"false") << "  Meta");
+			GALE_VERBOSE("                 0x20 = " << ((_modsDepressed&0x20)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x10 = " << ((_modsDepressed&0x10)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x08 = " << ((_modsDepressed&0x08)!=0?"true":"false") << "  ALT");
+			GALE_VERBOSE("                 0x04 = " << ((_modsDepressed&0x04)!=0?"true":"false") << "  ctrl");
+			GALE_VERBOSE("                 0x02 = " << ((_modsDepressed&0x02)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x01 = " << ((_modsDepressed&0x01)!=0?"true":"false") << "  shift");
+			GALE_VERBOSE("         _modsLatched=" << _modsLatched);
+			GALE_VERBOSE("                 0x80 = " << ((_modsLatched&0x80)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x40 = " << ((_modsLatched&0x40)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x20 = " << ((_modsLatched&0x20)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x10 = " << ((_modsLatched&0x10)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x08 = " << ((_modsLatched&0x08)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x04 = " << ((_modsLatched&0x04)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x02 = " << ((_modsLatched&0x02)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x01 = " << ((_modsLatched&0x01)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("         _modsLocked=" << _modsLocked);
+			GALE_VERBOSE("                 0x80 = " << ((_modsLocked&0x80)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x40 = " << ((_modsLocked&0x40)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x20 = " << ((_modsLocked&0x20)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x10 = " << ((_modsLocked&0x10)!=0?"true":"false") << "  VER num");
+			GALE_VERBOSE("                 0x08 = " << ((_modsLocked&0x08)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x04 = " << ((_modsLocked&0x04)!=0?"true":"false") << "  ");
+			GALE_VERBOSE("                 0x02 = " << ((_modsLocked&0x02)!=0?"true":"false") << "  CAP-lock");
+			GALE_VERBOSE("                 0x01 = " << ((_modsLocked&0x01)!=0?"true":"false") << "  ");
+			if ((_modsLocked&0x02)!=0) {
+				m_guiKeyBoardMode.setCapsLock(true);
+			} else {
+				m_guiKeyBoardMode.setCapsLock(false);
+			}
+			if ((_modsDepressed&0x01)!=0) {
+				m_guiKeyBoardMode.setShift(true);
+			} else {
+				m_guiKeyBoardMode.setShift(false);
+			}
+			if ((_modsDepressed&0x04)!=0) {
+				m_guiKeyBoardMode.setCtrl(true);
+			} else {
+				m_guiKeyBoardMode.setCtrl(false);
+			}
+			if ((_modsDepressed&0x40)!=0) {
+				m_guiKeyBoardMode.setMeta(true);
+			} else {
+				m_guiKeyBoardMode.setMeta(false);
+			}
+			if ((_modsDepressed&0x08)!=0) {
+				m_guiKeyBoardMode.setAlt(true);
+			} else {
+				m_guiKeyBoardMode.setAlt(false);
+			}
+			// this is not specific ...
+			m_guiKeyBoardMode.setAltGr(false);
+			if ((_modsLocked&0x10)!=0) {
+				m_guiKeyBoardMode.setNumLock(true);
+			} else {
+				m_guiKeyBoardMode.setNumLock(false);
+			}
+			GALE_INFO("        ==> " << m_guiKeyBoardMode);
+			#ifdef GALE_XKB_WRAPPER_INPUT
+				xkb_state_update_mask(m_XKBState, _modsDepressed, _modsLatched, _modsLocked, 0, 0, _group);
+			#endif
 		}
 		
 		/****************************************************************************************/
@@ -966,8 +1334,8 @@ class WAYLANDInterface : public gale::Context {
 			*/
 		}
 };
+
 static void global_registry_handler(void* _data, struct wl_registry* _registry, uint32_t _id, const char* _interface, uint32_t _version) {
-	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
 		GALE_ERROR("    ==> nullptr");
@@ -977,7 +1345,6 @@ static void global_registry_handler(void* _data, struct wl_registry* _registry, 
 }
 
 static void global_registry_remover(void* _data, struct wl_registry* _registry, uint32_t _id) {
-	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
 		GALE_ERROR("    ==> nullptr");
@@ -987,7 +1354,6 @@ static void global_registry_remover(void* _data, struct wl_registry* _registry, 
 }
 
 static void seat_handle_capabilities(void* _data, struct wl_seat* _seat, uint32_t _caps) {
-	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
 		GALE_ERROR("    ==> nullptr");
@@ -997,7 +1363,6 @@ static void seat_handle_capabilities(void* _data, struct wl_seat* _seat, uint32_
 }
 
 static void pointer_handle_enter(void* _data, struct wl_pointer* _pointer, uint32_t _serial, struct wl_surface* _surface, wl_fixed_t _sx, wl_fixed_t _sy) {
-	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
 		GALE_ERROR("    ==> nullptr");
@@ -1005,8 +1370,8 @@ static void pointer_handle_enter(void* _data, struct wl_pointer* _pointer, uint3
 	}
 	interface->pointerHandleEnter(_pointer, _serial, _surface, ivec2(_sx, _sy));
 }
+
 static void pointer_handle_leave(void* _data, struct wl_pointer* _pointer, uint32_t _serial, struct wl_surface* _surface) {
-	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
 		GALE_ERROR("    ==> nullptr");
@@ -1016,7 +1381,6 @@ static void pointer_handle_leave(void* _data, struct wl_pointer* _pointer, uint3
 }
 
 static void pointer_handle_motion(void* _data, struct wl_pointer* _pointer, uint32_t _time, wl_fixed_t _sx, wl_fixed_t _sy) {
-	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
 		GALE_ERROR("    ==> nullptr");
@@ -1026,7 +1390,6 @@ static void pointer_handle_motion(void* _data, struct wl_pointer* _pointer, uint
 }
 
 static void pointer_handle_button(void* _data, struct wl_pointer* _pointer, uint32_t _serial, uint32_t _time, uint32_t _button, uint32_t _state) {
-	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
 		GALE_ERROR("    ==> nullptr");
@@ -1040,7 +1403,6 @@ static void pointer_handle_button(void* _data, struct wl_pointer* _pointer, uint
 }
 
 static void pointer_handle_axis(void* _data, struct wl_pointer* _pointer, uint32_t _time, uint32_t _axis, wl_fixed_t _value) {
-	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
 		GALE_ERROR("    ==> nullptr");
@@ -1050,7 +1412,6 @@ static void pointer_handle_axis(void* _data, struct wl_pointer* _pointer, uint32
 }
 
 static void redraw(void* _data, struct wl_callback* _callback, uint32_t _time) {
-	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
 		GALE_ERROR("    ==> nullptr");
@@ -1060,8 +1421,6 @@ static void redraw(void* _data, struct wl_callback* _callback, uint32_t _time) {
 }
 
 static void configure_callback(void* _data, struct wl_callback* _callback, uint32_t _time) {
-	GALE_WARNING("callback ...");
-	
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
 		GALE_ERROR("    ==> nullptr");
@@ -1071,7 +1430,6 @@ static void configure_callback(void* _data, struct wl_callback* _callback, uint3
 }
 
 static void handle_ping(void* _data, struct wl_shell_surface* _shellSurface, uint32_t _serial) {
-	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
 		GALE_ERROR("    ==> nullptr");
@@ -1081,7 +1439,6 @@ static void handle_ping(void* _data, struct wl_shell_surface* _shellSurface, uin
 }
 
 static void handle_configure(void* _data, struct wl_shell_surface* _shellSurface, uint32_t _edges, int32_t _width, int32_t _height) {
-	GALE_WARNING("callback ...");
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == nullptr) {
 		GALE_ERROR("    ==> nullptr");
@@ -1103,7 +1460,7 @@ static void keyboard_handle_keymap(void* _data, struct wl_keyboard* _keyboard, u
 	if (interface == nullptr) {
 		return;
 	}
-	interface->keyboardKeymap(_keyboard, _format, _fd, _size);
+	interface->keyboardKeymap(_keyboard, (enum wl_keyboard_keymap_format)_format, _fd, _size);
 }
 
 static void keyboard_handle_enter(void* _data, struct wl_keyboard* _keyboard, uint32_t _serial, struct wl_surface* _surface, struct wl_array* _keys) {
@@ -1127,7 +1484,11 @@ static void keyboard_handle_key(void* _data, struct wl_keyboard* _keyboard, uint
 	if (interface == nullptr) {
 		return;
 	}
-	interface->keyboardKey(_keyboard, _serial, _time, _key, _state);
+	interface->keyboardKey(_keyboard,
+	                       _serial,
+	                       _time,
+	                       _key,
+	                       _state==WL_KEYBOARD_KEY_STATE_PRESSED);
 }
 
 static void keyboard_handle_modifiers(void* _data, struct wl_keyboard* _keyboard, uint32_t _serial, uint32_t _modsDepressed, uint32_t _modsLatched, uint32_t _modsLocked, uint32_t _group) {
