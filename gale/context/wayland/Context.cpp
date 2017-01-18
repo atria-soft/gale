@@ -121,6 +121,165 @@ static const struct wl_keyboard_listener keyboard_listener = {
 };
 
 
+/*
+struct data_offer {
+	struct wl_data_offer *offer;
+	struct input *input;
+	struct wl_array types;
+	int refcount;
+	//struct task io_task;
+	int fd;
+	data_func_t func;
+	int32_t x, y;
+	uint32_t dnd_action;
+	uint32_t source_actions;
+	void *user_data;
+};
+
+static void data_offer_offer(void *data, struct wl_data_offer *wl_data_offer, const char *type) {
+	struct data_offer *offer = data;
+	char **p;
+	p = wl_array_add(&offer->types, sizeof *p);
+	*p = strdup(type);
+}
+
+static void data_offer_source_actions(void *data, struct wl_data_offer *wl_data_offer, uint32_t source_actions) {
+	struct data_offer *offer = data;
+	offer->source_actions = source_actions;
+}
+
+static void data_offer_action(void *data, struct wl_data_offer *wl_data_offer, uint32_t dnd_action) {
+	struct data_offer *offer = data;
+	offer->dnd_action = dnd_action;
+}
+
+static const struct wl_data_offer_listener data_offer_listener = {
+	data_offer_offer,
+	data_offer_source_actions,
+	data_offer_action
+};
+
+static void data_offer_destroy(struct data_offer *offer) {
+	char **p;
+	offer->refcount--;
+	if (offer->refcount == 0) {
+		wl_data_offer_destroy(offer->offer);
+		for (p = offer->types.data; *p; p++)
+			free(*p);
+		wl_array_release(&offer->types);
+		free(offer);
+	}
+}
+
+static void data_device_data_offer(void *data, struct wl_data_device *data_device, struct wl_data_offer *_offer) {
+	struct data_offer *offer;
+	offer = xmalloc(sizeof *offer);
+	wl_array_init(&offer->types);
+	offer->refcount = 1;
+	offer->input = data;
+	offer->offer = _offer;
+	wl_data_offer_add_listener(offer->offer, &data_offer_listener, offer);
+}
+
+static void data_device_enter(void *data, struct wl_data_device *data_device, uint32_t serial, struct wl_surface *surface, wl_fixed_t x_w, wl_fixed_t y_w, struct wl_data_offer *offer) {
+	struct input *input = data;
+	struct window *window;
+	void *types_data;
+	float x = wl_fixed_to_double(x_w);
+	float y = wl_fixed_to_double(y_w);
+	char **p;
+	window = wl_surface_get_user_data(surface);
+	input->drag_enter_serial = serial;
+	input->drag_focus = window,
+	input->drag_x = x;
+	input->drag_y = y;
+	if (!input->touch_grab) {
+		input->pointer_enter_serial = serial;
+	}
+	if (offer) {
+		input->drag_offer = wl_data_offer_get_user_data(offer);
+		p = wl_array_add(&input->drag_offer->types, sizeof *p);
+		*p = nullptr;
+		types_data = input->drag_offer->types.data;
+		if (input->display->data_device_manager_version >= WL_DATA_OFFER_SET_ACTIONS_SINCE_VERSION) {
+			wl_data_offer_set_actions(offer,
+			                            WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY
+			                          | WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE,
+			                          WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE);
+		}
+	} else {
+		input->drag_offer = nullptr;
+		types_data = nullptr;
+	}
+	if (window->data_handler) {
+		window->data_handler(window, input, x, y, types_data, window->user_data);
+	}
+}
+
+static void data_device_leave(void *data, struct wl_data_device *data_device) {
+	struct input *input = data;
+	if (input->drag_offer) {
+		data_offer_destroy(input->drag_offer);
+		input->drag_offer = nullptr;
+	}
+}
+
+static void data_device_motion(void *data, struct wl_data_device *data_device, uint32_t time, wl_fixed_t x_w, wl_fixed_t y_w) {
+	struct input *input = data;
+	struct window *window = input->drag_focus;
+	float x = wl_fixed_to_double(x_w);
+	float y = wl_fixed_to_double(y_w);
+	void *types_data;
+	input->drag_x = x;
+	input->drag_y = y;
+	if (input->drag_offer) {
+		types_data = input->drag_offer->types.data;
+	} else {
+		types_data = nullptr;
+	}
+	if (window->data_handler) {
+		window->data_handler(window, input, x, y, types_data, window->user_data);
+	}
+}
+
+static void data_device_drop(void *data, struct wl_data_device *data_device) {
+	struct input *input = data;
+	struct window *window = input->drag_focus;
+	float x, y;
+	x = input->drag_x;
+	y = input->drag_y;
+	if (window->drop_handler) {
+		window->drop_handler(window, input, x, y, window->user_data);
+	}
+	if (input->touch_grab) {
+		touch_ungrab(input);
+	}
+}
+
+static void data_device_selection(void *data, struct wl_data_device *wl_data_device, struct wl_data_offer *offer) {
+	struct input *input = data;
+	char **p;
+	if (input->selection_offer) {
+		data_offer_destroy(input->selection_offer);
+	}
+	if (offer) {
+		input->selection_offer = wl_data_offer_get_user_data(offer);
+		p = wl_array_add(&input->selection_offer->types, sizeof *p);
+		*p = nullptr;
+	} else {
+		input->selection_offer = nullptr;
+	}
+}
+static const struct wl_data_device_listener data_device_listener = {
+	data_device_data_offer,
+	data_device_enter,
+	data_device_leave,
+	data_device_motion,
+	data_device_drop,
+	data_device_selection
+};
+*/
+
 /**
  * @brief Wayland interface context to load specific context wrapper...
  */
@@ -136,6 +295,7 @@ class WAYLANDInterface : public gale::Context {
 		bool m_opaque;
 		enum gale::context::cursor m_cursorCurrent; //!< curent cursor
 		vec2 m_cursorCurrentPosition;
+		char32_t m_lastKeyPressed;
 		
 		// Wayland interface
 		struct wl_display* m_display;
@@ -153,6 +313,8 @@ class WAYLANDInterface : public gale::Context {
 		struct wl_surface *m_surface;
 		struct wl_shell_surface *m_shellSurface;
 		struct wl_callback *m_callback;
+		struct wl_data_device_manager* m_dataDeviceManager;
+		int32_t m_dataDeviceManagerVersion;
 		// EGL interface:
 		EGLDisplay m_eglDisplay;
 		EGLContext m_eglContext;
@@ -162,8 +324,6 @@ class WAYLANDInterface : public gale::Context {
 			struct xkb_context* m_XKBContext;
 			struct xkb_keymap* m_XKBKeymap;
 			struct xkb_state* m_XKBState;
-			struct xkb_compose_table* m_XkbComposeTable;
-			struct xkb_compose_state* m_XkbComposeState;
 		#endif
 	public:
 		WAYLANDInterface(gale::Application* _application, int32_t _argc, const char* _argv[]) :
@@ -174,6 +334,7 @@ class WAYLANDInterface : public gale::Context {
 		  m_configured(false),
 		  m_opaque(false),
 		  m_cursorCurrent(gale::context::cursor::leftArrow),
+		  m_lastKeyPressed(0),
 		  m_display(nullptr),
 		  m_registry(nullptr),
 		  m_compositor(nullptr),
@@ -188,13 +349,13 @@ class WAYLANDInterface : public gale::Context {
 		  m_eglWindow(nullptr),
 		  m_surface(nullptr),
 		  m_shellSurface(nullptr),
-		  m_callback(nullptr)
+		  m_callback(nullptr),
+		  m_dataDeviceManager(nullptr),
+		  m_dataDeviceManagerVersion(0)
 		#ifdef GALE_XKB_WRAPPER_INPUT
 		  ,m_XKBContext(nullptr),
 		  m_XKBKeymap(nullptr),
-		  m_XKBState(nullptr),
-		  m_XkbComposeTable(nullptr),
-		  m_XkbComposeState(nullptr)
+		  m_XKBState(nullptr)
 		#endif
 		  {
 			// in case ...
@@ -208,11 +369,6 @@ class WAYLANDInterface : public gale::Context {
 				if (m_XKBContext == nullptr) {
 					GALE_CRITICAL("Couldn't create xkb context");
 				}
-				m_XkbComposeTable = xkb_compose_table_new(m_XKBContext, XKB_COMPOSE_COMPILE_NO_FLAGS);
-				if (m_XkbComposeTable == nullptr) {
-					GALE_CRITICAL("Couldn't create xkb compose table");
-				}
-				m_XkbComposeState = xkb_compose_state_new(m_XkbComposeTable, XKB_COMPOSE_STATE_NO_FLAGS);
 			#endif
 			m_display = wl_display_connect(nullptr);
 			assert(m_display);
@@ -258,6 +414,9 @@ class WAYLANDInterface : public gale::Context {
 			}
 			if (m_compositor) {
 				wl_compositor_destroy(m_compositor);
+			}
+			if (m_dataDeviceManager) {
+				wl_data_device_manager_destroy(m_dataDeviceManager);
 			}
 			wl_registry_destroy(m_registry);
 			wl_display_flush(m_display);
@@ -394,6 +553,9 @@ class WAYLANDInterface : public gale::Context {
 				m_shm = (struct wl_shm*)wl_registry_bind(_registry, _id, &wl_shm_interface, 1);
 				m_cursorTheme = wl_cursor_theme_load(nullptr, 32, m_shm);
 				m_cursorDefault = wl_cursor_theme_get_cursor(m_cursorTheme, "left_ptr");
+			} else if (strcmp(_interface, "wl_data_device_manager") == 0) {
+				m_dataDeviceManagerVersion = std::min(3, int32_t(_version));
+				m_dataDeviceManager = (struct wl_data_device_manager*)wl_registry_bind(_registry, _id, &wl_data_device_manager_interface, m_dataDeviceManagerVersion);
 			} else {
 				GALE_WARNING("    ==> Not used ...");
 			}
@@ -464,7 +626,7 @@ class WAYLANDInterface : public gale::Context {
 			GALE_VERBOSE("Pointer left surface" << _surface);
 		}
 		void pointerHandleMotion(struct wl_pointer* _pointer, uint32_t _time, ivec2 _pos) {
-			m_cursorCurrentPosition = vec2(_pos.x(), _pos.y());
+			m_cursorCurrentPosition = vec2(_pos.x(), m_size.y()-_pos.y());
 			bool findPointer = false;
 			for (int32_t iii=0; iii<MAX_MANAGE_INPUT; iii++) {
 				if (m_inputIsPressed[iii] == true) {
@@ -546,9 +708,7 @@ class WAYLANDInterface : public gale::Context {
 			if (m_configured == false) {
 				return;
 			}
-			
 			bool hasDisplay = OS_Draw(true);
-			
 			if (    m_opaque == true
 			     || m_fullscreen == true) {
 				struct wl_region *region = (struct wl_region *)wl_compositor_create_region(m_compositor);
@@ -633,7 +793,7 @@ class WAYLANDInterface : public gale::Context {
 		void keyboardLeave(struct wl_keyboard* _keyboard, uint32_t _serial, struct wl_surface* _surface) {
 			GALE_INFO("keyboardLeave...");
 		}
-		#ifdef GALE_XKB_WRAPPER_INPUT
+		#if 0
 		void test_print_keycode_state(struct xkb_state* _state,
 		                              struct xkb_compose_state* _composeState,
 		                              xkb_keycode_t _keycode,
@@ -651,21 +811,8 @@ class WAYLANDInterface : public gale::Context {
 				return;
 			}
 			status = XKB_COMPOSE_NOTHING;
-			if (_composeState) {
-				status = xkb_compose_state_get_status(_composeState);
-			}
-			if (    status == XKB_COMPOSE_COMPOSING
-			     || status == XKB_COMPOSE_CANCELLED) {
-				return;
-			}
-			if (status == XKB_COMPOSE_COMPOSED) {
-				sym = xkb_compose_state_get_one_sym(_composeState);
-				syms = &sym;
-				nsyms = 1;
-			} else if (nsyms == 1) {
-				sym = xkb_state_key_get_one_sym(_state, _keycode);
-				syms = &sym;
-			}
+			sym = xkb_state_key_get_one_sym(_state, _keycode);
+			syms = &sym;
 			printf("keysyms [ ");
 			for (int i = 0; i < nsyms; i++) {
 				xkb_keysym_get_name(syms[i], s, sizeof(s));
@@ -673,11 +820,7 @@ class WAYLANDInterface : public gale::Context {
 			}
 			printf("] ");
 			
-			if (status == XKB_COMPOSE_COMPOSED) {
-				xkb_compose_state_get_utf8(_composeState, s, sizeof(s));
-			}else {
-				xkb_state_key_get_utf8(_state, _keycode, s, sizeof(s));
-			}
+			xkb_state_key_get_utf8(_state, _keycode, s, sizeof(s));
 			printf("unicode [ %s ] ", s);
 			layout = xkb_state_key_get_layout(_state, _keycode);
 			printf("layout [ %s (%d) ] ",
@@ -709,14 +852,13 @@ class WAYLANDInterface : public gale::Context {
 		}
 		#endif
 		void keyboardKey(struct wl_keyboard* _keyboard, uint32_t _serial, uint32_t _time, uint32_t _key, bool _isDown) {
-			#ifdef GALE_XKB_WRAPPER_INPUT
+			#if 0
 				if (_isDown == true) {
-					test_print_keycode_state(m_XKBState, m_XkbComposeState, _key + 8, XKB_CONSUMED_MODE_GTK);
+					test_print_keycode_state(m_XKBState, nullptr, _key + 8, XKB_CONSUMED_MODE_GTK);
 					/* Exit on ESC. */
 					if (xkb_state_key_get_one_sym(m_XKBState, _key + 8) == XKB_KEY_Escape) {
 						m_run = false;
 					}
-					xkb_keysym_t sym = xkb_state_key_get_one_sym(m_XKBState, _key + 8);
 				}
 			#endif
 			GALE_INFO("KEY : '" << _key << "' _isDown=" << _isDown);
@@ -802,45 +944,43 @@ class WAYLANDInterface : public gale::Context {
 					               0x09);
 					break;
 				default:
-					find = false;
 					{
-						// must use xkbcommon library to manage correct map ...
-					/*
-						char buf[11];
-						//GALE_DEBUG("Keycode: " << event.xkey.keycode);
-						// change keystate for simple reson of the ctrl error...
-						int32_t keyStateSave = event.xkey.state;
-						if (event.xkey.state & (1<<2) ) {
-							event.xkey.state = event.xkey.state & 0xFFFFFFFB;
-						}
-						KeySym keysym;
-						Status status = 0;
-						//int count = Xutf8LookupString(m_xic, (XKeyPressedEvent*)&event, buf, 10, &keysym, &status);
-						int count = Xutf8LookupString(m_xic, &event.xkey, buf, 10, &keysym, &status);
-						// retreave real keystate
-						event.xkey.state = keyStateSave;
-						buf[count] = '\0';
-						// Replace \r error ...
-						if (buf[0] == '\r') {
-							buf[0] = '\n';
-							buf[1] = '\0';
-						}
-						if (count >= 0) {
-							// repeated kay from previous element :
-							if (count > 0) {
-								// transform it in unicode
-								m_lastKeyPressed = utf8::convertChar32(buf);
-							}
-							X11_INFO("event Key : " << event.xkey.keycode << " char=\"" << buf << "\"'len=" << strlen(buf) << " unicode=" << m_lastKeyPressed);
+						xkb_keysym_t sym = xkb_state_key_get_one_sym(m_XKBState, _key + 8);
+						char buf[16];
+						xkb_state_key_get_utf8(m_XKBState, _key + 8, buf, 16);
+						if (buf[0] != '\0') {
+							//GALE_INFO("KEY : val='" << buf << "' _isDown=" << _isDown);
+							m_lastKeyPressed = utf8::convertChar32(buf);
+							//GALE_INFO("KEY : val='" << buf << "'='" << m_lastKeyPressed <<"' _isDown=" << _isDown);
 							OS_setKeyboard(m_guiKeyBoardMode,
 							               gale::key::keyboard::character,
-							               (event.type==KeyPress?gale::key::status::down:gale::key::status::up),
+							               (_isDown==true?gale::key::status::down:gale::key::status::up),
 							               false,
 							               m_lastKeyPressed);
+							m_lastKeyPressed = 0;
 						} else {
-							GALE_WARNING("Unknow event Key : " << event.xkey.keycode << " res='" << buf << "' repeate=" << thisIsAReapeateKey);
+							find = true;
+							switch(sym) {
+								case XKB_KEY_dead_circumflex: m_lastKeyPressed = '^'; break;
+								case XKB_KEY_dead_diaeresis: m_lastKeyPressed = '"'; break;
+								//case XKB_KEY_ISO_Level3_Shif: m_lastKeyPressed = '~'; break;
+								//case XKB_KEY_: m_lastKeyPressed = ''; break;
+								default:
+									GALE_ERROR("UNKNOW KEY : sym='" << sym << "' _isDown=" << _isDown);
+									find = false;
+									break;
+							}
+							if (find == false) {
+								//GALE_INFO("KEY : sym='" << sym << "' _isDown=" << _isDown);
+							} else {
+								OS_setKeyboard(m_guiKeyBoardMode,
+								               gale::key::keyboard::character,
+								               (_isDown==true?gale::key::status::down:gale::key::status::up),
+								               false,
+								               m_lastKeyPressed);
+							}
 						}
-						*/
+						// must use xkbcommon library to manage correct map ...
 					}
 			}
 		}
@@ -1512,4 +1652,5 @@ int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 	interface = nullptr;
 	return retValue;
 }
+
 

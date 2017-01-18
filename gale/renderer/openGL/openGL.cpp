@@ -27,6 +27,8 @@ static void checkGlError(const char* _op, int32_t _localLine) {
 	}
 	#endif
 }
+#define CHECK_GL_ERROR(cmd,line) do { } while (false)
+//#define CHECK_GL_ERROR(cmd,line) checkGlError(cmd,line)
 
 #define OPENGL_ERROR(data) do { } while (false)
 //#define OPENGL_ERROR(data) GALE_ERROR(data)
@@ -117,7 +119,6 @@ void gale::openGL::threadHasNoMoreContext() {
 	} else {
 		GALE_ERROR("rm openGL context associate with threadID that is not registered.");
 	}
-	
 	mutexOpenGl().unlock();
 }
 
@@ -191,6 +192,7 @@ void gale::openGL::flush() {
 		if (s_simulationMode == false) {
 	#endif
 	glFlush();
+	checkGlError("glFlush", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
@@ -209,6 +211,7 @@ void gale::openGL::setViewPort(const ivec2& _start, const ivec2& _stop) {
 	#endif
 	OPENGL_INFO("setViewport " << _start << " " << _stop);
 	glViewport(_start.x(), _start.y(), _stop.x(), _stop.y());
+	CHECK_GL_ERROR("glViewport", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
@@ -220,6 +223,7 @@ void gale::openGL::setViewPort(const vec2& _start, const vec2& _stop) {
 	#endif
 	OPENGL_INFO("setViewport " << _start << " " << _stop);
 	glViewport(_start.x(), _start.y(), _stop.x(), _stop.y());
+	CHECK_GL_ERROR("glViewport", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
@@ -243,6 +247,7 @@ void gale::openGL::clearColor(const etk::Color<float>& _color) {
 		if (s_simulationMode == false) {
 	#endif
 	glClearColor(_color.r(), _color.g(), _color.b(), _color.a());
+	CHECK_GL_ERROR("glClearColor", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
@@ -254,9 +259,11 @@ void gale::openGL::clearDepth(float _value) {
 	#endif
 	#if !((defined(__TARGET_OS__Android) || defined(__TARGET_OS__IOs)))
 		glClearDepth(_value);
+		CHECK_GL_ERROR("glClearDepth", __LINE__);
 	#endif
 	#if defined(__TARGET_OS__IOs)
 		glClearDepthf(_value);
+		CHECK_GL_ERROR("glClearDepthf", __LINE__);
 	#endif
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
@@ -267,6 +274,7 @@ void gale::openGL::clearStencil(int32_t _value) {
 		if (s_simulationMode == false) {
 	#endif
 	glClearStencil(_value);
+	CHECK_GL_ERROR("glClearStencil", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
@@ -283,6 +291,7 @@ void gale::openGL::clear(uint32_t _flags) {
 		if (s_simulationMode == false) {
 	#endif
 	glClear(field);
+	CHECK_GL_ERROR("glClear", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
@@ -469,8 +478,9 @@ void gale::openGL::enable(enum gale::openGL::flag _flagID) {
 			if (s_simulationMode == false) {
 		#endif
 		for (int32_t iii=0; iii<basicFlagCount ; iii++) {
-			if ( basicFlag[iii].curentFlag == (uint32_t)_flagID ) {
+			if (basicFlag[iii].curentFlag == (uint32_t)_flagID) {
 				glEnable(basicFlag[iii].OGlFlag);
+				CHECK_GL_ERROR("glEnable", __LINE__);
 			}
 		}
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
@@ -487,11 +497,12 @@ void gale::openGL::disable(enum gale::openGL::flag _flagID) {
 	//GALE_INFO("Disable : " << _flagID);
 	#ifdef DIRECT_MODE
 		for (int32_t iii=0; iii<basicFlagCount ; iii++) {
-			if ( basicFlag[iii].curentFlag == (uint32_t)_flagID ) {
+			if (basicFlag[iii].curentFlag == (uint32_t)_flagID) {
 				#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 					if (s_simulationMode == false) {
 				#endif
 				glDisable(basicFlag[iii].OGlFlag);
+				CHECK_GL_ERROR("glDisable", __LINE__);
 				#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 					}
 				#endif
@@ -522,6 +533,7 @@ void gale::openGL::updateAllFlags() {
 					if (s_simulationMode == false) {
 				#endif
 				glEnable(basicFlag[iii].OGlFlag);
+				CHECK_GL_ERROR("glEnable", __LINE__);
 				#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 					}
 				#endif
@@ -531,6 +543,7 @@ void gale::openGL::updateAllFlags() {
 					if (s_simulationMode == false) {
 				#endif
 				glDisable(basicFlag[iii].OGlFlag);
+				CHECK_GL_ERROR("glDisable", __LINE__);
 				#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 					}
 				#endif
@@ -548,6 +561,7 @@ void gale::openGL::activeTexture(uint32_t _flagID) {
 			if (s_simulationMode == false) {
 		#endif
 		glActiveTexture(_flagID);
+		CHECK_GL_ERROR("glActiveTexture", __LINE__);
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			}
 		#endif
@@ -590,6 +604,7 @@ void gale::openGL::drawArrays(enum gale::openGL::renderMode _mode, int32_t _firs
 			if (s_simulationMode == false) {
 		#endif
 		glDrawArrays(convertRenderMode[uint32_t(_mode)], _first, _count);
+		CHECK_GL_ERROR("glDrawArrays", __LINE__);
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			}
 		#endif
@@ -604,6 +619,7 @@ void gale::openGL::drawElements(enum renderMode _mode, const std::vector<uint32_
 		#endif
 		//GALE_DEBUG("Request draw of " << indices.size() << "elements");
 		glDrawElements(convertRenderMode[uint32_t(_mode)], _indices.size(), GL_UNSIGNED_INT, &_indices[0]);
+		CHECK_GL_ERROR("glDrawElements", __LINE__);
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			}
 		#endif
@@ -617,6 +633,7 @@ void gale::openGL::drawElements16(enum renderMode _mode, const std::vector<uint1
 			if (s_simulationMode == false) {
 		#endif
 		glDrawElements(convertRenderMode[uint32_t(_mode)], _indices.size(), GL_UNSIGNED_SHORT, &_indices[0]);
+		CHECK_GL_ERROR("glDrawElements", __LINE__);
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			}
 		#endif
@@ -630,6 +647,7 @@ void gale::openGL::drawElements8(enum renderMode _mode, const std::vector<uint8_
 			if (s_simulationMode == false) {
 		#endif
 		glDrawElements(convertRenderMode[uint32_t(_mode)], _indices.size(), GL_UNSIGNED_BYTE, &_indices[0]);
+		CHECK_GL_ERROR("glDrawElements", __LINE__);
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			}
 		#endif
@@ -676,11 +694,11 @@ void gale::openGL::useProgram(int32_t _id) {
 			#endif
 		}
 	#endif
-	#if 0
+	#if 1
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			if (s_simulationMode == false) {
 		#endif
-		checkGlError("glUseProgram", __LINE__);
+		CHECK_GL_ERROR("glUseProgram", __LINE__);
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 			}
 		#endif
@@ -700,7 +718,7 @@ bool gale::openGL::genBuffers(std::vector<uint32_t>& _buffers) {
 		if (s_simulationMode == false) {
 	#endif
 	glGenBuffers(_buffers.size(), &_buffers[0]);
-	checkGlError("glGenBuffers", __LINE__);
+	CHECK_GL_ERROR("glGenBuffers", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
@@ -723,7 +741,7 @@ bool gale::openGL::deleteBuffers(std::vector<uint32_t>& _buffers) {
 		if (s_simulationMode == false) {
 	#endif
 	glDeleteBuffers(_buffers.size(), &_buffers[0]);
-	checkGlError("glDeleteBuffers", __LINE__);
+	CHECK_GL_ERROR("glDeleteBuffers", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
@@ -738,7 +756,7 @@ bool gale::openGL::bindBuffer(uint32_t _bufferId) {
 		if (s_simulationMode == false) {
 	#endif
 	glBindBuffer(GL_ARRAY_BUFFER, _bufferId);
-	checkGlError("glBindBuffer", __LINE__);
+	CHECK_GL_ERROR("glBindBuffer", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
@@ -756,7 +774,7 @@ bool gale::openGL::bufferData(size_t _size, const void* _data, enum gale::openGL
 		if (s_simulationMode == false) {
 	#endif
 	glBufferData(GL_ARRAY_BUFFER, _size, _data, convertUsage[uint32_t(_usage)]);
-	checkGlError("glBufferData", __LINE__);
+	CHECK_GL_ERROR("glBufferData", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
@@ -768,7 +786,7 @@ bool gale::openGL::unbindBuffer() {
 		if (s_simulationMode == false) {
 	#endif
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	checkGlError("glBindBuffer(0)", __LINE__);
+	CHECK_GL_ERROR("glBindBuffer(0)", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
@@ -836,6 +854,7 @@ void gale::openGL::shader::remove(int64_t& _shader) {
 		if (s_simulationMode == false) {
 	#endif
 	glDeleteShader(GLuint(_shader));
+	CHECK_GL_ERROR("glDeleteShader", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
@@ -848,9 +867,12 @@ bool gale::openGL::shader::compile(int64_t _shader, const std::string& _data) {
 		if (s_simulationMode == false) {
 	#endif
 	glShaderSource(GLuint(_shader), 1, (const char**)&data, nullptr);
+	CHECK_GL_ERROR("glShaderSource", __LINE__);
 	glCompileShader(GLuint(_shader));
+	CHECK_GL_ERROR("glCompileShader", __LINE__);
 	GLint compiled = 0;
 	glGetShaderiv(GLuint(_shader), GL_COMPILE_STATUS, &compiled);
+	CHECK_GL_ERROR("glGetShaderiv", __LINE__);
 	if (!compiled) {
 		GLint infoLen = 0;
 		l_bufferDisplayError[0] = '\0';
@@ -877,7 +899,7 @@ int64_t gale::openGL::program::create() {
 	program = glCreateProgram();
 	if (program == 0) {
 		GALE_ERROR("program creation return error ...");
-		checkGlError("glCreateProgram", __LINE__);
+		CHECK_GL_ERROR("glCreateProgram", __LINE__);
 		return -1;
 	}
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
@@ -898,7 +920,7 @@ void gale::openGL::program::remove(int64_t& _prog) {
 		if (s_simulationMode == false) {
 	#endif
 	glDeleteProgram(GLuint(_prog));
-	checkGlError("glDeleteProgram", __LINE__);
+	CHECK_GL_ERROR("glDeleteProgram", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
@@ -918,7 +940,7 @@ bool gale::openGL::program::attach(int64_t _prog, int64_t _shader) {
 		if (s_simulationMode == false) {
 	#endif
 	glAttachShader(GLuint(_prog), GLuint(_shader));
-	checkGlError("glAttachShader", __LINE__);
+	CHECK_GL_ERROR("glAttachShader", __LINE__);
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		}
 	#endif
@@ -933,10 +955,10 @@ bool gale::openGL::program::compile(int64_t _prog) {
 		if (s_simulationMode == false) {
 	#endif
 	glLinkProgram(GLuint(_prog));
-	checkGlError("glLinkProgram", __LINE__);
+	CHECK_GL_ERROR("glLinkProgram", __LINE__);
 	GLint linkStatus = GL_FALSE;
 	glGetProgramiv(GLuint(_prog), GL_LINK_STATUS, &linkStatus);
-	checkGlError("glGetProgramiv", __LINE__);
+	CHECK_GL_ERROR("glGetProgramiv", __LINE__);
 	if (linkStatus != GL_TRUE) {
 		GLint bufLength = 0;
 		l_bufferDisplayError[0] = '\0';
@@ -986,7 +1008,7 @@ int32_t gale::openGL::program::getAttributeLocation(int64_t _prog, const std::st
 	#endif
 	val = glGetAttribLocation(GLuint(_prog), _name.c_str());
 	if (val < 0) {
-		checkGlError("glGetAttribLocation", __LINE__);
+		CHECK_GL_ERROR("glGetAttribLocation", __LINE__);
 		GALE_WARNING("glGetAttribLocation(\"" << _name << "\") = " << val);
 	}
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
@@ -1009,8 +1031,14 @@ int32_t gale::openGL::program::getUniformLocation(int64_t _prog, const std::stri
 		if (s_simulationMode == false) {
 	#endif
 	val = glGetUniformLocation(GLuint(_prog), _name.c_str());
-	if (val < 0) {
-		checkGlError("glGetUniformLocation", __LINE__);
+	if (val == GL_INVALID_VALUE) {
+		CHECK_GL_ERROR("glGetUniformLocation", __LINE__);
+		GALE_WARNING("glGetUniformLocation(\"" << _name << "\") = GL_INVALID_VALUE");
+	} else if (val == GL_INVALID_OPERATION) {
+		CHECK_GL_ERROR("glGetUniformLocation", __LINE__);
+		GALE_WARNING("glGetUniformLocation(\"" << _name << "\") = GL_INVALID_OPERATION");
+	} else if (val < 0) {
+		CHECK_GL_ERROR("glGetUniformLocation", __LINE__);
 		GALE_WARNING("glGetUniformLocation(\"" << _name << "\") = " << val);
 	}
 	#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
