@@ -48,6 +48,7 @@ extern "C" {
 		#include <sys/mman.h> // form mmap
 		#include <unistd.h> // need for close
 	#endif
+	#include <poll.h>
 }
 
 #include <gale/renderer/openGL/openGL-include.hpp>
@@ -121,36 +122,44 @@ static const struct wl_keyboard_listener keyboard_listener = {
 };
 
 
-/*
+
 struct data_offer {
 	struct wl_data_offer *offer;
-	struct input *input;
 	struct wl_array types;
 	int refcount;
 	//struct task io_task;
 	int fd;
-	data_func_t func;
+	//data_func_t func;
 	int32_t x, y;
 	uint32_t dnd_action;
 	uint32_t source_actions;
 	void *user_data;
 };
 
-static void data_offer_offer(void *data, struct wl_data_offer *wl_data_offer, const char *type) {
-	struct data_offer *offer = data;
+static void data_offer_offer(void* _data, struct wl_data_offer* _wl_data_offer, const char* _type) {
+	GALE_ERROR("plop 1 '" << _type << "'");
+	/*
+	struct data_offer *offer = (struct data_offer *)_data;
 	char **p;
-	p = wl_array_add(&offer->types, sizeof *p);
-	*p = strdup(type);
+	p = (char **)wl_array_add(&offer->types, sizeof *p);
+	*p = strdup(_type);
+	*/
 }
 
-static void data_offer_source_actions(void *data, struct wl_data_offer *wl_data_offer, uint32_t source_actions) {
-	struct data_offer *offer = data;
-	offer->source_actions = source_actions;
+static void data_offer_source_actions(void* _data, struct wl_data_offer* _wl_data_offer, uint32_t _source_actions) {
+	GALE_ERROR("plop 2 : " << _source_actions);
+	/*
+	struct data_offer *offer = (struct data_offer *)_data;
+	offer->source_actions = _source_actions;
+	*/
 }
 
-static void data_offer_action(void *data, struct wl_data_offer *wl_data_offer, uint32_t dnd_action) {
-	struct data_offer *offer = data;
-	offer->dnd_action = dnd_action;
+static void data_offer_action(void* _data, struct wl_data_offer* _wl_data_offer, uint32_t _dnd_action) {
+	GALE_ERROR("plop 3 : " << _dnd_action);
+	/*
+	struct data_offer *offer = (struct data_offer *)_data;
+	offer->dnd_action = _dnd_action;
+	*/
 }
 
 static const struct wl_data_offer_listener data_offer_listener = {
@@ -159,117 +168,26 @@ static const struct wl_data_offer_listener data_offer_listener = {
 	data_offer_action
 };
 
-static void data_offer_destroy(struct data_offer *offer) {
+static void data_offer_destroy(struct data_offer* _offer) {
 	char **p;
-	offer->refcount--;
-	if (offer->refcount == 0) {
-		wl_data_offer_destroy(offer->offer);
-		for (p = offer->types.data; *p; p++)
+	_offer->refcount--;
+	if (_offer->refcount == 0) {
+		wl_data_offer_destroy(_offer->offer);
+		for (p = (char **)_offer->types.data; *p; p++) {
 			free(*p);
-		wl_array_release(&offer->types);
-		free(offer);
-	}
-}
-
-static void data_device_data_offer(void *data, struct wl_data_device *data_device, struct wl_data_offer *_offer) {
-	struct data_offer *offer;
-	offer = xmalloc(sizeof *offer);
-	wl_array_init(&offer->types);
-	offer->refcount = 1;
-	offer->input = data;
-	offer->offer = _offer;
-	wl_data_offer_add_listener(offer->offer, &data_offer_listener, offer);
-}
-
-static void data_device_enter(void *data, struct wl_data_device *data_device, uint32_t serial, struct wl_surface *surface, wl_fixed_t x_w, wl_fixed_t y_w, struct wl_data_offer *offer) {
-	struct input *input = data;
-	struct window *window;
-	void *types_data;
-	float x = wl_fixed_to_double(x_w);
-	float y = wl_fixed_to_double(y_w);
-	char **p;
-	window = wl_surface_get_user_data(surface);
-	input->drag_enter_serial = serial;
-	input->drag_focus = window,
-	input->drag_x = x;
-	input->drag_y = y;
-	if (!input->touch_grab) {
-		input->pointer_enter_serial = serial;
-	}
-	if (offer) {
-		input->drag_offer = wl_data_offer_get_user_data(offer);
-		p = wl_array_add(&input->drag_offer->types, sizeof *p);
-		*p = nullptr;
-		types_data = input->drag_offer->types.data;
-		if (input->display->data_device_manager_version >= WL_DATA_OFFER_SET_ACTIONS_SINCE_VERSION) {
-			wl_data_offer_set_actions(offer,
-			                            WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY
-			                          | WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE,
-			                          WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE);
 		}
-	} else {
-		input->drag_offer = nullptr;
-		types_data = nullptr;
-	}
-	if (window->data_handler) {
-		window->data_handler(window, input, x, y, types_data, window->user_data);
+		wl_array_release(&_offer->types);
+		free(_offer);
+		_offer = nullptr;
 	}
 }
 
-static void data_device_leave(void *data, struct wl_data_device *data_device) {
-	struct input *input = data;
-	if (input->drag_offer) {
-		data_offer_destroy(input->drag_offer);
-		input->drag_offer = nullptr;
-	}
-}
-
-static void data_device_motion(void *data, struct wl_data_device *data_device, uint32_t time, wl_fixed_t x_w, wl_fixed_t y_w) {
-	struct input *input = data;
-	struct window *window = input->drag_focus;
-	float x = wl_fixed_to_double(x_w);
-	float y = wl_fixed_to_double(y_w);
-	void *types_data;
-	input->drag_x = x;
-	input->drag_y = y;
-	if (input->drag_offer) {
-		types_data = input->drag_offer->types.data;
-	} else {
-		types_data = nullptr;
-	}
-	if (window->data_handler) {
-		window->data_handler(window, input, x, y, types_data, window->user_data);
-	}
-}
-
-static void data_device_drop(void *data, struct wl_data_device *data_device) {
-	struct input *input = data;
-	struct window *window = input->drag_focus;
-	float x, y;
-	x = input->drag_x;
-	y = input->drag_y;
-	if (window->drop_handler) {
-		window->drop_handler(window, input, x, y, window->user_data);
-	}
-	if (input->touch_grab) {
-		touch_ungrab(input);
-	}
-}
-
-static void data_device_selection(void *data, struct wl_data_device *wl_data_device, struct wl_data_offer *offer) {
-	struct input *input = data;
-	char **p;
-	if (input->selection_offer) {
-		data_offer_destroy(input->selection_offer);
-	}
-	if (offer) {
-		input->selection_offer = wl_data_offer_get_user_data(offer);
-		p = wl_array_add(&input->selection_offer->types, sizeof *p);
-		*p = nullptr;
-	} else {
-		input->selection_offer = nullptr;
-	}
-}
+static void data_device_data_offer(void* _data, struct wl_data_device* _data_device, struct wl_data_offer* _offer);
+static void data_device_enter(void* _data, struct wl_data_device* _data_device, uint32_t _serial, struct wl_surface* _surface, wl_fixed_t _x_w, wl_fixed_t _y_w, struct wl_data_offer* _offer);
+static void data_device_leave(void* _data, struct wl_data_device* _data_device);
+static void data_device_motion(void* _data, struct wl_data_device* _data_device, uint32_t _time, wl_fixed_t _x_w, wl_fixed_t _y_w);
+static void data_device_drop(void* _data, struct wl_data_device* _data_device);
+static void data_device_selection(void* _data, struct wl_data_device* _wl_data_device, struct wl_data_offer* _offer);
 static const struct wl_data_device_listener data_device_listener = {
 	data_device_data_offer,
 	data_device_enter,
@@ -278,7 +196,17 @@ static const struct wl_data_device_listener data_device_listener = {
 	data_device_drop,
 	data_device_selection
 };
-*/
+
+
+static void data_source_target(void* _data, struct wl_data_source* _wl_data_source, const char* _mime_type);
+static void data_source_send(void* _data, struct wl_data_source* _wl_data_source, const char* _mime_type, int _fd);
+static void data_source_cancelled(void* _data, struct wl_data_source* _wl_data_source);
+static const struct wl_data_source_listener data_source_listener = {
+	data_source_target,
+	data_source_send,
+	data_source_cancelled
+};
+
 
 /**
  * @brief Wayland interface context to load specific context wrapper...
@@ -315,6 +243,12 @@ class WAYLANDInterface : public gale::Context {
 		struct wl_callback *m_callback;
 		struct wl_data_device_manager* m_dataDeviceManager;
 		int32_t m_dataDeviceManagerVersion;
+		struct wl_data_device *m_dataDevice;
+		int32_t m_serial; //!< Unique ID of the serial element (based on the enter time)
+		bool m_offerIsInside; //!< Offer request in inside the windows
+		bool m_offerInternalCopy; //!< The windows own th copy buffer
+		struct wl_data_offer* m_offerCopy;
+		struct wl_data_source* m_dataSource;
 		// EGL interface:
 		EGLDisplay m_eglDisplay;
 		EGLContext m_eglContext;
@@ -351,7 +285,13 @@ class WAYLANDInterface : public gale::Context {
 		  m_shellSurface(nullptr),
 		  m_callback(nullptr),
 		  m_dataDeviceManager(nullptr),
-		  m_dataDeviceManagerVersion(0)
+		  m_dataDeviceManagerVersion(0),
+		  m_dataDevice(nullptr),
+		  m_serial(0),
+		  m_offerIsInside(false),
+		  m_offerInternalCopy(false),
+		  m_offerCopy(nullptr),
+		  m_dataSource(nullptr)
 		#ifdef GALE_XKB_WRAPPER_INPUT
 		  ,m_XKBContext(nullptr),
 		  m_XKBKeymap(nullptr),
@@ -549,6 +489,12 @@ class WAYLANDInterface : public gale::Context {
 			} else if (strcmp(_interface, "wl_seat") == 0) {
 				m_seat = (struct wl_seat*)wl_registry_bind(_registry, _id, &wl_seat_interface, 1);
 				wl_seat_add_listener(m_seat, &seat_listener, this);
+				if (m_dataDeviceManager != nullptr) {
+					m_dataDevice = wl_data_device_manager_get_data_device(m_dataDeviceManager, m_seat);
+					wl_data_device_add_listener(m_dataDevice, &data_device_listener, this);
+					m_dataSource = wl_data_device_manager_create_data_source(m_dataDeviceManager);
+					wl_data_source_add_listener(m_dataSource, &data_source_listener, this);
+				}
 			} else if (strcmp(_interface, "wl_shm") == 0) {
 				m_shm = (struct wl_shm*)wl_registry_bind(_registry, _id, &wl_shm_interface, 1);
 				m_cursorTheme = wl_cursor_theme_load(nullptr, 32, m_shm);
@@ -621,9 +567,11 @@ class WAYLANDInterface : public gale::Context {
 				wl_surface_damage(m_cursorSurface, 0, 0, image->width, image->height);
 				wl_surface_commit(m_cursorSurface);
 			}
+			m_offerIsInside = true;
 		}
 		void pointerHandleLeave(struct wl_pointer* _pointer, uint32_t _serial, struct wl_surface* _surface) {
 			GALE_VERBOSE("Pointer left surface" << _surface);
+			m_offerIsInside = false;
 		}
 		void pointerHandleMotion(struct wl_pointer* _pointer, uint32_t _time, ivec2 _pos) {
 			m_cursorCurrentPosition = vec2(_pos.x(), m_size.y()-_pos.y());
@@ -646,6 +594,7 @@ class WAYLANDInterface : public gale::Context {
 		}
 		void pointerHandleButton(struct wl_pointer* _wl_pointer, uint32_t _serial, uint32_t _time, uint32_t _button, bool _btPressed) {
 			int32_t idButton = -1;
+			m_serial = _time;
 			switch (_button) {
 				case BTN_LEFT:   idButton = 1; break;
 				case BTN_MIDDLE: idButton = 2; break;
@@ -949,9 +898,9 @@ class WAYLANDInterface : public gale::Context {
 						char buf[16];
 						xkb_state_key_get_utf8(m_XKBState, _key + 8, buf, 16);
 						if (buf[0] != '\0') {
-							//GALE_INFO("KEY : val='" << buf << "' _isDown=" << _isDown);
+							GALE_INFO("KEY : val='" << buf << "' _isDown=" << _isDown);
 							m_lastKeyPressed = utf8::convertChar32(buf);
-							//GALE_INFO("KEY : val='" << buf << "'='" << m_lastKeyPressed <<"' _isDown=" << _isDown);
+							GALE_INFO("KEY : _key='" << _key << "' val='" << buf << "'='" << m_lastKeyPressed <<"' _isDown=" << _isDown << "  " << m_guiKeyBoardMode);
 							OS_setKeyboard(m_guiKeyBoardMode,
 							               gale::key::keyboard::character,
 							               (_isDown==true?gale::key::status::down:gale::key::status::up),
@@ -1048,8 +997,144 @@ class WAYLANDInterface : public gale::Context {
 			}
 			GALE_INFO("        ==> " << m_guiKeyBoardMode);
 			#ifdef GALE_XKB_WRAPPER_INPUT
-				xkb_state_update_mask(m_XKBState, _modsDepressed, _modsLatched, _modsLocked, 0, 0, _group);
+				// remove the ctrl check ==> create many error in parsing specific short-cut ... (ex ctrl+v change in  a unknow ascii value ...)
+				xkb_state_update_mask(m_XKBState, _modsDepressed & 0xFB, _modsLatched, _modsLocked, 0, 0, _group);
 			#endif
+		}
+		
+		
+		void dataDeviceDataOffer(struct wl_data_device* _data_device, struct wl_data_offer* _offer) {
+			GALE_ERROR("CALL : data_device_data_offer");
+			if (m_offerIsInside == true) {
+				//We get our own copy or drag & drop ...
+				m_offerInternalCopy = true;
+			} else {
+				m_offerInternalCopy = false;
+			}
+			if (m_offerCopy != nullptr) {
+				//data_offer_destroy(m_offerCopy);
+				wl_data_offer_destroy(m_offerCopy);
+				m_offerCopy = nullptr;
+			}
+			if (_offer == nullptr) {
+				GALE_ERROR("    nullptr offer");
+			} else {
+				m_offerCopy = _offer;
+				wl_data_offer_add_listener(_offer, &data_offer_listener, this);
+			}
+		}
+		
+		void dataDeviceEnter(struct wl_data_device* _data_device, uint32_t _serial, struct wl_surface* _surface, vec2 _pos, struct wl_data_offer* _offer) {
+			GALE_ERROR("CALL : data_device_enter (drag & drop)");
+			/*
+			struct input *input = data;
+			struct window *window;
+			void *types_data;
+			float x = wl_fixed_to_double(x_w);
+			float y = wl_fixed_to_double(y_w);
+			char **p;
+			window = wl_surface_get_user_data(surface);
+			input->drag_enter_serial = serial;
+			input->drag_focus = window,
+			input->drag_x = x;
+			input->drag_y = y;
+			if (!input->touch_grab) {
+				input->pointer_enter_serial = serial;
+			}
+			if (offer) {
+				input->drag_offer = wl_data_offer_get_user_data(offer);
+				p = wl_array_add(&input->drag_offer->types, sizeof *p);
+				*p = nullptr;
+				types_data = input->drag_offer->types.data;
+				if (input->display->data_device_manager_version >= WL_DATA_OFFER_SET_ACTIONS_SINCE_VERSION) {
+					wl_data_offer_set_actions(offer,
+					                            WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY
+					                          | WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE,
+					                          WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE);
+				}
+			} else {
+				input->drag_offer = nullptr;
+				types_data = nullptr;
+			}
+			if (window->data_handler) {
+				window->data_handler(window, input, x, y, types_data, window->user_data);
+			}
+			*/
+		}
+		
+		void dataDeviceLeave(struct wl_data_device* _data_device) {
+			GALE_ERROR("CALL : data_device_leave (drag & drop)");
+			/*
+			struct input *input = data;
+			if (input->drag_offer) {
+				data_offer_destroy(input->drag_offer);
+				input->drag_offer = nullptr;
+			}
+			*/
+		}
+		
+		void dataDeviceMotion(struct wl_data_device* _data_device, uint32_t _time, vec2 _pos) {
+			GALE_ERROR("CALL : data_device_motion (drag & drop)");
+			/*
+			struct input *input = data;
+			struct window *window = input->drag_focus;
+			float x = wl_fixed_to_double(x_w);
+			float y = wl_fixed_to_double(y_w);
+			void *types_data;
+			input->drag_x = x;
+			input->drag_y = y;
+			if (input->drag_offer) {
+				types_data = input->drag_offer->types.data;
+			} else {
+				types_data = nullptr;
+			}
+			if (window->data_handler) {
+				window->data_handler(window, input, x, y, types_data, window->user_data);
+			}
+			*/
+		}
+		
+		void dataDeviceDrop(struct wl_data_device* _data_device) {
+			GALE_ERROR("CALL : data_device_drop (drag & drop)");
+			/*
+			struct input *input = data;
+			struct window *window = input->drag_focus;
+			float x, y;
+			x = input->drag_x;
+			y = input->drag_y;
+			if (window->drop_handler) {
+				window->drop_handler(window, input, x, y, window->user_data);
+			}
+			if (input->touch_grab) {
+				touch_ungrab(input);
+			}
+			*/
+		}
+		
+		void dataDeviceSelection(struct wl_data_device* _wl_data_device, struct wl_data_offer* _offer) {
+			GALE_ERROR("CALL : data_device_selection");
+			// I do not understand what it is used for ???
+		}
+		
+		
+		void dataSourceTarget(struct wl_data_source* _wl_data_source, const char* _mime_type) {
+			GALE_VERBOSE("CALL : dataSourceTarget " << _mime_type);
+		}
+		void dataSourceSend(struct wl_data_source* _wl_data_source, const char* _mime_type, int _fd) {
+			GALE_VERBOSE("CALL : dataSourceSend " << _mime_type);
+			std::string data = gale::context::clipBoard::get(gale::context::clipBoard::clipboardStd);
+			if (_fd == 0) {
+				GALE_ERROR("    ==> No data availlable ...");
+				return;
+			}
+			// simple is best ...
+			write(_fd, data.c_str(), data.size());
+			GALE_VERBOSE("    ==> send " << data.size() << " Bytes");
+			close(_fd);
+			GALE_VERBOSE("    ==> Close done");
+		}
+		void dataSourceCancelled(struct wl_data_source* _wl_data_source) {
+			GALE_VERBOSE("CALL : dataSourceCancelled");
 		}
 		
 		/****************************************************************************************/
@@ -1409,71 +1494,118 @@ class WAYLANDInterface : public gale::Context {
 			system(req.c_str());
 			return;
 		}
+		bool dataPaste() {
+			GALE_VERBOSE("Request PAST ...");
+			if(m_offerCopy == nullptr) {
+				return false;
+			} 
+			GALE_VERBOSE("Request PAST .2.");
+			int pipe_fd[2] = {0, 0};
+			if (pipe(pipe_fd) == -1) {
+				return false;
+			}
+			GALE_VERBOSE("Request PAST .3.");
+			
+			//MIME must be from the ones returned by data_offer_offer()
+			//wl_data_offer_receive(m_offerCopy, "TEXT", pipe_fd[1]);
+			//wl_data_offer_receive(m_offerCopy, "text/plain", pipe_fd[1]);
+			wl_data_offer_receive(m_offerCopy, "text/plain;charset=utf-8", pipe_fd[1]);
+			close(pipe_fd[1]);
+			wl_display_flush(m_display);
+			
+			int len = 1;
+			char buffer[4097];
+			buffer[0] = '\0';
+			std::string localBufferData;
+			
+			struct pollfd fds;
+			fds.fd = pipe_fd[0];
+			fds.events = POLLIN;
+			
+			// Choose some reasonable timeout here in ms
+			int ret = poll(&fds, 1, 300);
+			if (    ret == -1
+			     || ret == 0) {
+				GALE_WARNING("Can not open FD ...");
+				return false;
+			}
+			buffer[0] = '\0';
+			while (len > 0) {
+				len = read(pipe_fd[0], buffer, 4096);
+				if (len > 0) {
+					buffer[len] = '\0';
+					localBufferData += buffer;
+				}
+			}
+			close(pipe_fd[0]);
+			pipe_fd[0] = 0;
+			if (localBufferData.size() != 0) {
+				GALE_VERBOSE("Clipboard data: '" << localBufferData << "' len = " << localBufferData.size());
+				gale::context::clipBoard::setSystem(gale::context::clipBoard::clipboardStd, localBufferData);
+				return true;
+			} else {
+				GALE_ERROR("can not past data ...");
+			}
+			return false;
+		}
 		/****************************************************************************************/
 		void clipBoardGet(enum gale::context::clipBoard::clipboardListe _clipboardID) {
-			/*
 			switch (_clipboardID) {
 				case gale::context::clipBoard::clipboardSelection:
-					if (m_clipBoardOwnerPrimary == false) {
-						m_clipBoardRequestPrimary = true;
-						// generate a request on WAYLAND
-						XConvertSelection(m_display,
-						                  XAtomSelection,
-						                  XAtomTargetStringUTF8,
-						                  XAtomGALE,
-						                  m_WindowHandle,
-						                  CurrentTime);
-					} else {
-						// just transmit an event , we have the data in the system
-						OS_ClipBoardArrive(_clipboardID);
-					}
+					OS_ClipBoardArrive(_clipboardID);
 					break;
 				case gale::context::clipBoard::clipboardStd:
-					if (m_clipBoardOwnerStd == false) {
-						m_clipBoardRequestPrimary = false;
-						// generate a request on WAYLAND
-						XConvertSelection(m_display,
-						                  XAtomClipBoard,
-						                  XAtomTargetStringUTF8,
-						                  XAtomGALE,
-						                  m_WindowHandle,
-						                  CurrentTime);
-					} else {
-						// just transmit an event , we have the data in the system
-						OS_ClipBoardArrive(_clipboardID);
+					if (m_offerInternalCopy == false) {
+						if (dataPaste() == false) {
+							gale::context::clipBoard::setSystem(gale::context::clipBoard::clipboardSelection, "");
+						}
 					}
+					OS_ClipBoardArrive(_clipboardID);
 					break;
 				default:
 					GALE_ERROR("Request an unknow ClipBoard ...");
 					break;
 			}
-			*/
 		}
 		/****************************************************************************************/
 		void clipBoardSet(enum gale::context::clipBoard::clipboardListe _clipboardID) {
-			/*
 			switch (_clipboardID) {
 				case gale::context::clipBoard::clipboardSelection:
-					// Request the selection :
-					if (m_clipBoardOwnerPrimary == false) {
-						XSetSelectionOwner(m_display, XAtomSelection, m_WindowHandle, CurrentTime);
-						m_clipBoardOwnerPrimary = true;
-					}
+					// Use internal middle button ...
 					break;
 				case gale::context::clipBoard::clipboardStd:
-					// Request the clipBoard :
-					if (m_clipBoardOwnerStd == false) {
-						XSetSelectionOwner(m_display, XAtomClipBoard, m_WindowHandle, CurrentTime);
-						m_clipBoardOwnerStd = true;
+					// Request the clipBoard:
+					GALE_VERBOSE("Request copy ...");
+					// Destroy any existing data source
+					if (m_dataSource != nullptr) {
+						wl_data_source_destroy(m_dataSource);
+						m_dataSource = nullptr;
 					}
+					// try to create a new data source
+					m_dataSource = wl_data_device_manager_create_data_source(m_dataDeviceManager);
+					if (m_dataSource == nullptr) {
+						GALE_ERROR("Can not create the data source interface");
+						return;
+					}
+					// set the value of availlable elements:
+					wl_data_source_offer(m_dataSource, "UTF8_STRING");
+					wl_data_source_offer(m_dataSource, "COMPOUND_TEXT");
+					wl_data_source_offer(m_dataSource, "TEXT");
+					wl_data_source_offer(m_dataSource, "STRING");
+					wl_data_source_offer(m_dataSource, "text/plain;charset=utf-8");
+					wl_data_source_offer(m_dataSource, "text/plain");
+					// add a listener for data source events
+					wl_data_source_add_listener(m_dataSource, &data_source_listener, this);
+					// set the selection
+					wl_data_device_set_selection(m_dataDevice, m_dataSource, m_serial++);
 					break;
 				default:
 					GALE_ERROR("Request an unknow ClipBoard ...");
 					break;
 			}
-			*/
 		}
 };
+
 
 static void global_registry_handler(void* _data, struct wl_registry* _registry, uint32_t _id, const char* _interface, uint32_t _version) {
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
@@ -1637,6 +1769,76 @@ static void keyboard_handle_modifiers(void* _data, struct wl_keyboard* _keyboard
 		return;
 	}
 	interface->keyboardModifiers(_keyboard, _serial, _modsDepressed, _modsLatched, _modsLocked, _group);
+}
+
+static void data_device_data_offer(void* _data, struct wl_data_device* _data_device, struct wl_data_offer* _offer) {
+	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
+	if (interface == nullptr) {
+		return;
+	}
+	interface->dataDeviceDataOffer(_data_device, _offer);
+}
+
+static void data_device_enter(void* _data, struct wl_data_device* _data_device, uint32_t _serial, struct wl_surface* _surface, wl_fixed_t _x_w, wl_fixed_t _y_w, struct wl_data_offer* _offer) {
+	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
+	if (interface == nullptr) {
+		return;
+	}
+	interface->dataDeviceEnter(_data_device, _serial, _surface, vec2(_x_w,_y_w), _offer);
+}
+
+static void data_device_leave(void* _data, struct wl_data_device* _data_device) {
+	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
+	if (interface == nullptr) {
+		return;
+	}
+	interface->dataDeviceLeave(_data_device);
+}
+
+static void data_device_motion(void* _data, struct wl_data_device* _data_device, uint32_t _time, wl_fixed_t _x_w, wl_fixed_t _y_w) {
+	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
+	if (interface == nullptr) {
+		return;
+	}
+	interface->dataDeviceMotion(_data_device, _time, vec2(_x_w,_y_w));
+}
+
+static void data_device_drop(void* _data, struct wl_data_device* _data_device) {
+	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
+	if (interface == nullptr) {
+		return;
+	}
+	interface->dataDeviceDrop(_data_device);
+}
+
+static void data_device_selection(void* _data, struct wl_data_device* _wl_data_device, struct wl_data_offer* _offer) {
+	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
+	if (interface == nullptr) {
+		return;
+	}
+	interface->dataDeviceSelection(_wl_data_device, _offer);
+}
+
+static void data_source_target(void* _data, struct wl_data_source* _wl_data_source, const char* _mime_type) {
+	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
+	if (interface == nullptr) {
+		return;
+	}
+	interface->dataSourceTarget(_wl_data_source, _mime_type);
+}
+static void data_source_send(void* _data, struct wl_data_source* _wl_data_source, const char* _mime_type, int _fd) {
+	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
+	if (interface == nullptr) {
+		return;
+	}
+	interface->dataSourceSend(_wl_data_source, _mime_type, _fd);
+}
+static void data_source_cancelled(void* _data, struct wl_data_source* _wl_data_source) {
+	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
+	if (interface == nullptr) {
+		return;
+	}
+	interface->dataSourceCancelled(_wl_data_source);
 }
 
 
