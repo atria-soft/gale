@@ -48,6 +48,16 @@ namespace etk {
 	template<> std::string to_string<enum gale::context::clipBoard::clipboardListe>(const enum gale::context::clipBoard::clipboardListe& _obj) {
 		return clipboardDescriptionString[int32_t(_obj)];
 	}
+	
+	template <> bool from_string<enum gale::context::clipBoard::clipboardListe>(enum gale::context::clipBoard::clipboardListe& _variableRet, const std::string& _value) {
+		for (size_t iii=0; iii< sizeof(clipboardDescriptionString); ++iii) {
+			if (clipboardDescriptionString[iii] == _value) {
+				_variableRet = (enum gale::context::clipBoard::clipboardListe)iii;
+				return true;
+			}
+		}
+		return false;
+	}
 }
 
 void gale::context::clipBoard::init() {

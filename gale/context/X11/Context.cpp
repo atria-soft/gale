@@ -45,7 +45,7 @@
 #define GUI_LOCK()          XLockDisplay(m_display)
 #define GUI_UNLOCK()        XUnlockDisplay(m_display)
 */
-bool hasDisplay = false;
+static bool hasDisplay = false;
 //#define DEBUG_X11_EVENT
 #ifdef DEBUG_X11_EVENT
 	#define X11_DEBUG      GALE_DEBUG
@@ -1484,21 +1484,13 @@ class X11Interface : public gale::Context {
 		}
 };
 
+#include <gale/context/X11/Context.hpp>
 
-/**
- * @brief Main of the program
- * @param std IO
- * @return std IO
- */
-int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
-	etk::init(_argc, _argv);
-	X11Interface* interface = new X11Interface(_application, _argc, _argv);
-	if (interface == nullptr) {
-		GALE_CRITICAL("Can not create the X11 interface ... MEMORY allocation error");
-		return -2;
-	}
-	int32_t retValue = interface->run();
-	delete(interface);
-	interface = nullptr;
-	return retValue;
+bool gale::context::x11::isBackendPresent() {
+	// TODO : Do it better...
+	return true;
+}
+
+ememory::SharedPtr<gale::Context> gale::context::x11::createInstance(gale::Application* _application, int _argc, const char *_argv[]) {
+	return ememory::makeShared<X11Interface>(_application, _argc, _argv);
 }

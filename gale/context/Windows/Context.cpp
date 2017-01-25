@@ -625,23 +625,13 @@ static LRESULT CALLBACK WndProc(HWND _hWnd, UINT _message, WPARAM _wParam, LPARA
 	return galeWindowsContext->WndProcReal(_hWnd, _message, _wParam, _lParam);
 }
 
-/**
- * @brief Main of the program
- * @param std IO
- * @return std IO
- */
-int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
-	etk::init(_argc, _argv);
-	WindowsContext* localInterface = new WindowsContext(_application, _argc, _argv);
-	if (localInterface == nullptr) {
-		GALE_CRITICAL("Can not create the 'Windows' interface ... MEMORY allocation error");
-		return -2;
-	}
-	
-	int32_t retValue = localInterface->run();
-	delete(localInterface);
-	localInterface = nullptr;
-	GALE_INFO("END APPLICATION");
-	return retValue;
+#include <gale/context/Windows/Context.hpp>
+
+bool gale::context::windows::isBackendPresent() {
+	// TODO : Do it better...
+	return true;
 }
 
+ememory::SharedPtr<gale::Context> gale::context::windows::createInstance(gale::Application* _application, int _argc, const char *_argv[]) {
+	return ememory::makeShared<WindowsContext>(_application, _argc, _argv);
+}

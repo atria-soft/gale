@@ -24,4 +24,14 @@ namespace etk {
 	template<> std::string to_string<enum gale::key::type>(const enum gale::key::type& _obj) {
 		return typeDescriptionString[int32_t(_obj)];
 	}
+	
+	template <> bool from_string<enum gale::key::type>(enum gale::key::type& _variableRet, const std::string& _value) {
+		for (size_t iii=0; iii< sizeof(typeDescriptionString); ++iii) {
+			if (typeDescriptionString[iii] == _value) {
+				_variableRet = (enum gale::key::type)iii;
+				return true;
+			}
+		}
+		return false;
+	}
 }

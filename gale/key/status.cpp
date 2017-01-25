@@ -35,5 +35,14 @@ namespace etk {
 	template<> std::string to_string<enum gale::key::status>(const enum gale::key::status& _obj) {
 		return statusDescriptionString[int32_t(_obj)];
 	}
+	
+	template <> bool from_string<enum gale::key::status>(enum gale::key::status& _variableRet, const std::string& _value) {
+		for (size_t iii=0; iii< sizeof(statusDescriptionString); ++iii) {
+			if (statusDescriptionString[iii] == _value) {
+				_variableRet = (enum gale::key::status)iii;
+				return true;
+			}
+		}
+		return false;
+	}
 }
-

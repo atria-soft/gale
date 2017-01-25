@@ -262,4 +262,32 @@ namespace etk {
 		}
 		return out;
 	}
+	template <> bool from_string<gale::key::Special>(gale::key::Special& _variableRet, const std::string& _value) {
+		gale::key::Special out;
+		std::vector<std::string> listElem = etk::split(_value, "|");
+		for (auto &it : listElem) {
+			if (it == "CAPS") {
+				out.setCapsLock(true);
+			} else if (it == "SHIFT") {
+				out.setShift(true);
+			} else if (it == "CTRL") {
+				out.setCtrl(true);
+			} else if (it == "META") {
+				out.setMeta(true);
+			} else if (it == "ALT") {
+				out.setAlt(true);
+			} else if (it == "ALTGR") {
+				out.setAltGr(true);
+			} else if (it == "NUM_LOCK") {
+				out.setNumLock(true);
+			} else if (it == "INSERT") {
+				out.setInsert(true);
+			} else {
+				GALE_ERROR("unknow element '" << it << "'");
+				return false;
+			}
+		}
+		_variableRet = out;
+		return true;
+	}
 }

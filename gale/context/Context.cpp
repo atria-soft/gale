@@ -172,7 +172,7 @@ void gale::Context::setArchiveDir(int _mode, const char* _str, const char* _appl
 
 gale::Context::Context(gale::Application* _application, int32_t _argc, const char* _argv[]) :
   m_application(_application),
-  m_imulationActive(false),
+  m_simulationActive(false),
   m_simulationFile("gale.gsim"),
   //m_objectManager(*this),
   m_previousDisplayTime(),
@@ -207,10 +207,10 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 			m_displayFps=true;
 		} else if (etk::start_with(m_commandLine.get(iii), "--gale-simulation-file=") == true) {
 			m_simulationFile.setName(std::string(m_commandLine.get(iii).begin()+23, m_commandLine.get(iii).end()) );
-		} else if (etk::start_with(m_commandLine.get(iii), "--gale-simulation-mode=") == true) {
-			m_imulationActive = true;
-		} else if (m_commandLine.get(iii) == "--gale-simulation-stop") {
-			
+		} else if (m_commandLine.get(iii) == "--gale-simulation-record") {
+			m_simulationActive = true;
+		} else if (etk::start_with(m_commandLine.get(iii), "--gale-backend=") == true) {
+			// nothing to do ==> parse in the buttom of the current file ...
 		#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 		} else if (m_commandLine.get(iii) == "--gale-disable-opengl") {
 			gale::openGL::startSimulationMode();
@@ -222,18 +222,39 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 			GALE_PRINT("    " << etk::getApplicationName() << " [options]");
 			GALE_PRINT("        --gale-simulation-file=XXX.gsim");
 			GALE_PRINT("                Enable the simulation mode of the gale IO, parameter: file (default:simulation gale.gsim)");
-			GALE_PRINT("        --gale-simulation-mode=XXX");
-			GALE_PRINT("                Mode of the simulation");
-			GALE_PRINT("                    - record   Record all input of the playing element (default)");
-			GALE_PRINT("                    - play     Play all the sequence write in the simulation file");
-			GALE_PRINT("        --gale-simulation-stop");
-			GALE_PRINT("                Stop at the end of the simulation");
+			GALE_PRINT("        --gale-simulation-record");
+			GALE_PRINT("                Record the IO in the simulation file");
 			#ifdef GALE_SIMULATION_OPENGL_AVAILLABLE
 				GALE_PRINT("        --gale-disable-opengl");
 				GALE_PRINT("                Disable openGL access (availlable in SIMULATION mode)");
 			#endif
 			GALE_PRINT("        --gale-fps");
 			GALE_PRINT("                Display the current fps of the display");
+			#if defined(__TARGET_OS__Linux)
+				GALE_PRINT("        --gale-backend=XXX");
+				GALE_PRINT("                'X11'          For X11 backend (default)");
+				GALE_PRINT("                'wayland'      For wayland backend");
+				#ifdef GALE_BUILD_SIMULATION
+				GALE_PRINT("                'simulation'   For simulation backend");
+				#endif
+				GALE_PRINT("                can be set with environement variable 'export EWOL_BACKEND=xxx'");
+			#endif
+			#if defined(__TARGET_OS__Windows)
+				GALE_PRINT("        --gale-backend=XXX");
+				GALE_PRINT("                'windows'      For windows backend (default)");
+				#ifdef GALE_BUILD_SIMULATION
+				GALE_PRINT("                'simulation'   For simulation backend");
+				#endif
+				GALE_PRINT("                can be set with environement variable 'export EWOL_BACKEND=xxx'");
+			#endif
+			#if defined(__TARGET_OS__MacOs)
+				GALE_PRINT("        --gale-backend=XXX");
+				GALE_PRINT("                'macos'          For MacOs backend (default)");
+				#ifdef GALE_BUILD_SIMULATION
+				GALE_PRINT("                'simulation'   For simulation backend");
+				#endif
+				GALE_PRINT("                can be set with environement variable 'export EWOL_BACKEND=xxx'");
+			#endif
 			GALE_PRINT("        -h/--help");
 			GALE_PRINT("                Display this help");
 			GALE_PRINT("    example:");
@@ -255,10 +276,16 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	
 	GALE_INFO("GALE v:" << gale::getVersion());
 	// request the init of the application in the main context of openGL ...
-	if (m_imulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
-		m_simulationFile.filePuts(":INIT");
-		m_simulationFile.filePuts("\n");
+	if (m_simulationActive == true) {
+		// in simulation case:
+		if (m_simulationFile.fileOpenWrite() == false) {
+			GALE_CRITICAL("Can not create Simulation file : " << m_simulationFile);
+			m_simulationActive = false;
+		} else {
+			m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
+			m_simulationFile.filePuts(":INIT");
+			m_simulationFile.filePuts("\n");
+		}
 	}
 	m_msgSystem.post([](gale::Context& _context){
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
@@ -279,10 +306,6 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	#else
 		forceOrientation(gale::orientation::screenAuto);
 	#endif
-	if (m_imulationActive == true) {
-		// in simulation case:
-		m_simulationFile.fileOpenWrite();
-	}
 	// release the curent interface :
 	unLockContext();
 	GALE_INFO(" == > Gale system init (END)");
@@ -321,14 +344,14 @@ gale::Context::~Context() {
 	// release the curent interface :
 	unLockContext();
 	GALE_INFO(" == > Gale system Un-Init (END)");
-	if (m_imulationActive == true) {
+	if (m_simulationActive == true) {
 		// in simulation case:
 		m_simulationFile.fileClose();
 	}
 }
 
 void gale::Context::requestUpdateSize() {
-	if (m_imulationActive == true) {
+	if (m_simulationActive == true) {
 		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":RECALCULATE_SIZE\n");
 	}
@@ -345,7 +368,7 @@ void gale::Context::OS_Resize(const vec2& _size) {
 	}
 	// TODO : Better in the thread ...  ==> but generate some init error ...
 	gale::Dimension::setPixelWindowsSize(_size);
-	if (m_imulationActive == true) {
+	if (m_simulationActive == true) {
 		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":RESIZE:");
 		m_simulationFile.filePuts(etk::to_string(_size));
@@ -398,7 +421,7 @@ void gale::Context::OS_SetInput(enum gale::key::type _type,
                                 enum gale::key::status _status,
                                 int32_t _pointerID,
                                 const vec2& _pos) {
-	if (m_imulationActive == true) {
+	if (m_simulationActive == true) {
 		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":INPUT:");
 		m_simulationFile.filePuts(etk::to_string(_type));
@@ -435,7 +458,7 @@ void gale::Context::OS_setKeyboard(const gale::key::Special& _special,
 			_state = gale::key::status::upRepeate;
 		}
 	}
-	if (m_imulationActive == true) {
+	if (m_simulationActive == true) {
 		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":KEYBOARD:");
 		m_simulationFile.filePuts(etk::to_string(_special));
@@ -461,7 +484,7 @@ void gale::Context::OS_setKeyboard(const gale::key::Special& _special,
 }
 
 void gale::Context::OS_Hide() {
-	if (m_imulationActive == true) {
+	if (m_simulationActive == true) {
 		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":VIEW:false\n");
 	}
@@ -482,7 +505,7 @@ void gale::Context::OS_Hide() {
 }
 
 void gale::Context::OS_Show() {
-	if (m_imulationActive == true) {
+	if (m_simulationActive == true) {
 		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":VIEW:true\n");
 	}
@@ -503,7 +526,7 @@ void gale::Context::OS_Show() {
 
 
 void gale::Context::OS_ClipBoardArrive(enum gale::context::clipBoard::clipboardListe _clipboardID) {
-	if (m_imulationActive == true) {
+	if (m_simulationActive == true) {
 		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
 		m_simulationFile.filePuts(":CLIPBOARD_ARRIVE:");
 		m_simulationFile.filePuts(etk::to_string(_clipboardID));
@@ -528,6 +551,12 @@ void gale::Context::clipBoardSet(enum gale::context::clipBoard::clipboardListe _
 }
 
 bool gale::Context::OS_Draw(bool _displayEveryTime) {
+	if (m_simulationActive == true) {
+		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
+		m_simulationFile.filePuts(":DRAW:");
+		m_simulationFile.filePuts(etk::to_string(_displayEveryTime));
+		m_simulationFile.filePuts("\n");
+	}
 	gale::openGL::threadHasContext();
 	echrono::Steady currentTime = echrono::Steady::now();
 	// this is to prevent the multiple display at the a high frequency ...
@@ -746,3 +775,298 @@ void gale::Context::keyboardHide() {
 	GALE_INFO("keyboardHide: NOT implemented ...");
 }
 
+// for IOs and Android, this is embended system ==> it is too complex tro wrap it ...
+#if    !defined(__TARGET_OS__Android) \
+    && !defined(__TARGET_OS__IOs)
+
+#if defined(__TARGET_OS__Linux)
+	#ifdef GALE_BUILD_X11
+		#include <gale/context/X11/Context.hpp>
+	#endif
+	#ifdef GALE_BUILD_WAYLAND
+		#include <gale/context/wayland/Context.hpp>
+	#endif
+#elif defined(__TARGET_OS__Windows)
+	#include <gale/context/Windows/Context.hpp>
+#elif defined(__TARGET_OS__Web)
+	#include <gale/context/SDL/Context.hpp>
+#elif defined(__TARGET_OS__Android)
+	//#include <gale/context/Android/Context.hpp>
+#elif defined(__TARGET_OS__IOs)
+	//#include <gale/context/IOs/Context.hpp>
+#elif defined(__TARGET_OS__MacOs)
+	#include <gale/context/MacOs/Context.hpp>
+#endif
+
+#ifdef GALE_BUILD_SIMULATION
+	#include <gale/context/simulation/Context.hpp>
+#endif
+/**
+ * @brief Main of the program
+ * @param std IO
+ * @return std IO
+ */
+int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
+	etk::init(_argc, _argv);
+	ememory::SharedPtr<gale::Context> context;
+	std::string request = "";
+	
+	// get the environement variable:
+	char * basicEnv = getenv("EWOL_BACKEND");
+	if (nullptr != basicEnv) {
+		std::string tmpVal = basicEnv;
+		//TODO : Check if it leak ...
+		#if defined(__TARGET_OS__Linux)
+			if (false) { }
+			#ifdef GALE_BUILD_X11
+			 else if (tmpVal == "X11") {
+				request = tmpVal;
+			}
+			#endif
+			#ifdef GALE_BUILD_WAYLAND
+			 else if (tmpVal == "wayland") {
+				request = tmpVal;
+			}
+			#endif
+			#ifdef GALE_BUILD_SIMULATION
+			 else if (tmpVal == "simulation") {
+				request = tmpVal;
+			}
+			#endif
+			 else {
+				GALE_ERROR("Unsupported environement variable : '" << tmpVal << "' only: ["
+				#ifdef GALE_BUILD_X11
+					<< "X11"
+				#endif
+				#ifdef GALE_BUILD_WAYLAND
+					<< ",wayland"
+				#endif
+				#ifdef GALE_BUILD_SIMULATION
+					<< ",simulation"
+				#endif
+					<< "]");
+			}
+		#elif defined(__TARGET_OS__Windows)
+			if (    tmpVal != "windows"
+			#ifdef GALE_BUILD_SIMULATION
+			     || tmpVal != "simulation"
+			#endif
+			   ) {
+				GALE_ERROR("Unsupported environement variable : '" << tmpVal << "' only: [windows,"
+				#ifdef GALE_BUILD_SIMULATION
+					<< ",simulation"
+				#endif
+					<< "]");
+			} else {
+				request = tmpVal;
+			}
+		#elif defined(__TARGET_OS__MacOs)
+			if (    tmpVal != "macos"
+			#ifdef GALE_BUILD_SIMULATION
+			     || tmpVal != "simulation"
+			#endif
+			   ) {
+				GALE_ERROR("Unsupported environement variable : '" << tmpVal << "' only: [macos,"
+				#ifdef GALE_BUILD_SIMULATION
+					<< ",simulation"
+				#endif
+					<< "]");
+			} else {
+				request = tmpVal;
+			}
+		#else
+			GALE_ERROR("Unsupported environement variable 'EWOL_BACKEND' in this mode");
+		#endif
+	}
+	for(int32_t iii=0; iii<_argc; ++iii) {
+		if (etk::start_with(_argv[iii], "--gale-backend=") == true) {
+			std::string tmpVal = &(_argv[iii][15]);
+			#if defined(__TARGET_OS__Linux)
+				if (false) { }
+				#ifdef GALE_BUILD_X11
+				 else if (tmpVal == "X11") {
+					request = tmpVal;
+				}
+				#endif
+				#ifdef GALE_BUILD_WAYLAND
+				 else if (tmpVal == "wayland") {
+					request = tmpVal;
+				}
+				#endif
+				#ifdef GALE_BUILD_SIMULATION
+				 else if (tmpVal == "simulation") {
+					request = tmpVal;
+				}
+				#endif
+				 else {
+					GALE_ERROR("Unsupported environement variable : '" << tmpVal << "' only: ["
+					#ifdef GALE_BUILD_X11
+						<< "X11"
+					#endif
+					#ifdef GALE_BUILD_WAYLAND
+						<< ",wayland"
+					#endif
+					#ifdef GALE_BUILD_SIMULATION
+						<< ",simulation"
+					#endif
+						<< "]");
+				}
+			#elif defined(__TARGET_OS__Windows)
+				if (    tmpVal != "windows"
+				#ifdef GALE_BUILD_SIMULATION
+				     || tmpVal != "simulation"
+				#endif
+				   ) {
+					GALE_ERROR("Unsupported command line input --gale-backend='" << tmpVal << "' only: [windows,"
+				#ifdef GALE_BUILD_SIMULATION
+					<< ",simulation"
+				#endif
+					<< "]");
+				} else {
+					request = tmpVal;
+				}
+			#elif defined(__TARGET_OS__MacOs)
+				if (    tmpVal != "macos"
+				#ifdef GALE_BUILD_SIMULATION
+				     || tmpVal != "simulation"
+				#endif
+				   ) {
+					GALE_ERROR("Unsupported command line input --gale-backend='" << tmpVal << "' only: [macos,"
+				#ifdef GALE_BUILD_SIMULATION
+					<< ",simulation"
+				#endif
+					<< "]");
+				} else {
+					request = tmpVal;
+				}
+			#else
+				GALE_ERROR("Unsupported environement variable 'EWOL_BACKEND' in this mode");
+			#endif
+		}
+	}
+	#if defined(__TARGET_OS__Linux)
+		if (request == "") {
+			if (false) {}
+			#ifdef GALE_BUILD_X11
+			 else if (gale::context::x11::isBackendPresent() == true) {
+				context = gale::context::x11::createInstance(_application, _argc, _argv);
+			}
+			#endif
+			#ifdef GALE_BUILD_WAYLAND
+			 else if (gale::context::wayland::isBackendPresent() == true) {
+				context = gale::context::wayland::createInstance(_application, _argc, _argv);
+			}
+			#endif
+			#ifdef GALE_BUILD_SIMULATION
+			 else if (gale::context::simulation::isBackendPresent() == true) {
+				context = gale::context::simulation::createInstance(_application, _argc, _argv);
+			}
+			#endif
+			 else {
+				GALE_CRITICAL("Have no backend to generate display ...");
+			}
+		}
+		#ifdef GALE_BUILD_X11
+		 else if (request == "X11") {
+			if (gale::context::x11::isBackendPresent() == true) {
+				context = gale::context::x11::createInstance(_application, _argc, _argv);
+			} else {
+				GALE_CRITICAL("Backend 'X11' is not present");
+			}
+		}
+		#endif
+		#ifdef GALE_BUILD_WAYLAND
+		 else if (request == "wayland") {
+			if (gale::context::wayland::isBackendPresent() == true) {
+				context = gale::context::wayland::createInstance(_application, _argc, _argv);
+			} else {
+				GALE_CRITICAL("Backend 'wayland' is not present");
+			}
+		#endif
+		#ifdef GALE_BUILD_SIMULATION
+		} else if (request == "simulation") {
+			if (gale::context::simulation::isBackendPresent() == true) {
+				context = gale::context::simulation::createInstance(_application, _argc, _argv);
+			} else {
+				GALE_CRITICAL("Backend 'simulation' is not present");
+			}
+		#endif
+		} else {
+			GALE_CRITICAL("Must not appear");
+		}
+	#elif defined(__TARGET_OS__Windows)
+		if (request == "") {
+			if (gale::context::windows::isBackendPresent() == true) {
+				context = gale::context::windows::createInstance(_application, _argc, _argv);
+			}
+			#ifdef GALE_BUILD_SIMULATION
+			 else if (gale::context::simulation::isBackendPresent() == true) {
+				context = gale::context::simulation::createInstance(_application, _argc, _argv);
+			}
+			#endif
+			 else {
+				GALE_CRITICAL("Have no backend to generate display ...");
+			}
+		} else if (request == "windows") {
+			if (gale::context::windows::isBackendPresent() == true) {
+				context = gale::context::windows::createInstance(_application, _argc, _argv);
+			} else {
+				GALE_CRITICAL("Backend 'windows' is not present");
+			}
+		}
+		#ifdef GALE_BUILD_SIMULATION
+		 else if (request == "simulation") {
+			if (gale::context::simulation::isBackendPresent() == true) {
+				context = gale::context::simulation::createInstance(_application, _argc, _argv);
+			} else {
+				GALE_CRITICAL("Backend 'simulation' is not present");
+			}
+		#endif
+		} else {
+			GALE_CRITICAL("Must not appear");
+		}
+	#elif defined(__TARGET_OS__Web)
+		context = gale::context::web::createInstance(_application, _argc, _argv);
+	#elif defined(__TARGET_OS__Android)
+		context = gale::context::andoid::createInstance(_application, _argc, _argv);
+	#elif defined(__TARGET_OS__IOs)
+		context = gale::context::ios::createInstance(_application, _argc, _argv);
+	#elif defined(__TARGET_OS__MacOs)
+		if (request == "") {
+			if (gale::context::macos::isBackendPresent() == true) {
+				context = gale::context::macos::createInstance(_application, _argc, _argv);
+			}
+			#ifdef GALE_BUILD_SIMULATION
+			 else if (gale::context::simulation::isBackendPresent() == true) {
+				context = gale::context::simulation::createInstance(_application, _argc, _argv);
+			}
+			#endif
+			 else {
+				GALE_CRITICAL("Have no backend to generate display ...");
+			}
+		} else if (request == "macos") {
+			if (gale::context::macos::isBackendPresent() == true) {
+				context = gale::context::macos::createInstance(_application, _argc, _argv);
+			} else {
+				GALE_CRITICAL("Backend 'macos' is not present");
+			}
+		#ifdef GALE_BUILD_SIMULATION
+		} else if (request == "simulation") {
+			if (gale::context::simulation::isBackendPresent() == true) {
+				context = gale::context::simulation::createInstance(_application, _argc, _argv);
+			} else {
+				GALE_CRITICAL("Backend 'simulation' is not present");
+			}
+		#endif
+		} else {
+			GALE_CRITICAL("Must not appear");
+		}
+	#endif
+	
+	if (context == nullptr) {
+		GALE_ERROR("Can not allocate the interface of the GUI ...");
+		return -1;
+	}
+	return context->run();
+}
+#endif

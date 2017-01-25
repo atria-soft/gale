@@ -53,7 +53,7 @@ extern "C" {
 
 #include <gale/renderer/openGL/openGL-include.hpp>
 
-bool hasDisplay = false;
+static bool hasDisplay = false;
 #define DEBUG_WAYLAND_EVENT
 #ifdef DEBUG_WAYLAND_EVENT
 	#define WAYLAND_DEBUG      GALE_DEBUG
@@ -1842,17 +1842,15 @@ static void data_source_cancelled(void* _data, struct wl_data_source* _wl_data_s
 }
 
 
-int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
-	etk::init(_argc, _argv);
-	WAYLANDInterface* interface = new WAYLANDInterface(_application, _argc, _argv);
-	if (interface == nullptr) {
-		GALE_CRITICAL("Can not create the WAYLAND interface ... MEMORY allocation error");
-		return -2;
-	}
-	int32_t retValue = interface->run();
-	delete(interface);
-	interface = nullptr;
-	return retValue;
+#include <gale/context/wayland/Context.hpp>
+
+bool gale::context::wayland::isBackendPresent() {
+	// TODO : Do it better...
+	return true;
+}
+
+ememory::SharedPtr<gale::Context> gale::context::wayland::createInstance(gale::Application* _application, int _argc, const char *_argv[]) {
+	return ememory::makeShared<WAYLANDInterface>(_application, _argc, _argv);
 }
 
 

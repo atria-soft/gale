@@ -32,3 +32,25 @@ namespace IOs {
 	void suspend();
 }
 
+#if 0
+namespace gale {
+	namespace context {
+		namespace ios {
+			/**
+			 * @brief Check if the backend can be instanciate
+			 * @return true if the backend is availlable (false otherwise)
+			 */
+			bool isBackendPresent();
+			/**
+			 * @brief Create the context main intance
+			 * @param[in] _application pointer on the application
+			 * @param[in] _argc number of parameter
+			 * @param[in] _argv araay of pointer of each parameters
+			 * @return instance on the generic created context
+			 */
+			ememory::SharedPtr<gale::Context> createInstance(gale::Application* _application, int _argc, const char *_argv[]);
+		}
+	}
+}
+#endif
+

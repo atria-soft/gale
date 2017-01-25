@@ -60,9 +60,9 @@ namespace gale {
 			 * @note this un-lock the main mutex
 			 */
 			void unLockContext();
-		private:
+		protected:
 			// simulation area:
-			bool m_imulationActive;
+			bool m_simulationActive;
 			etk::FSNode m_simulationFile;
 		private:
 			echrono::Steady m_previousDisplayTime;  // this is to limit framerate ... in case...
@@ -289,6 +289,12 @@ namespace gale {
 			 * @param[in] _fileName Name of the image to load
 			 */
 			void setInitImage(const std::string& _fileName);
+			/**
+			 * @brief Internal API to run the processing of the event loop ...
+			 * @return The Exit value of the program
+			 * @note INTERNAL API
+			 */
+			virtual int32_t run() = 0;
 	};
 	/**
 	 * @brief From everyware in the program, we can get the context inteface.

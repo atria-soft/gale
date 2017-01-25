@@ -260,6 +260,10 @@ class GLUTInterface : public gale::Context {
 				            m_cursorEventPos);
 			}
 		}
+		int32_t run() {
+			glutMainLoop();
+			return 0;
+		}
 };
 
 GLUTInterface* g_interface = nullptr;
@@ -287,12 +291,17 @@ static void gale_glut_mouse_pasive(int _x, int _y) {
 	g_interface->mousePasive(vec2(_x, _y));
 }
 
-/**
- * @brief Main of the program
- * @param std IO
- * @return std IO
- */
-int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
+
+
+
+#include <gale/context/SDL/Context.hpp>
+
+bool gale::context::sdl::isBackendPresent() {
+	// TODO : Do it better...
+	return true;
+}
+
+ememory::SharedPtr<gale::Context> gale::context::sdl::createInstance(gale::Application* _application, int _argc, const char *_argv[]) {
 	#ifndef __EMSCRIPTEN__
 		// include GL stuff, to check that we can compile hybrid 2d/GL apps
 		extern void glBegin(int mode);
@@ -302,12 +311,7 @@ int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 			glBindBuffer(0, 0);
 		}
 	#endif
-	etk::init(_argc, _argv);
-	g_interface = new GLUTInterface(_application, _argc, _argv);
-	if (g_interface == nullptr) {
-		GALE_CRITICAL("Can not create the GLUT interface ... MEMORY allocation error");
-		return -2;
-	}
+	ememory::SharedPtr<gale::Context> out; ememory::makeShared<X11Interface>(_application, _argc, _argv);
 	
 	/* Initialize the window */
 	glutInit(&_argc, (char**)_argv);
@@ -325,11 +329,5 @@ int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 	glutMotionFunc(gale_glut_mouse_pasive);
 	GALE_DEBUG("7987984654654\n");
 	
-	glutMainLoop();
-	
-	int32_t retValue = 0;
-	
-	delete(g_interface);
-	g_interface = nullptr;
-	return retValue;
+	return out;
 }

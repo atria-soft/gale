@@ -64,11 +64,21 @@ def configure(target, my_module):
 	if "Web" in target.get_type():
 		my_module.add_src_file('gale/context/SDL/Context.cpp')
 	elif "Linux" in target.get_type():
-		# TODO : Do it better ...
-		if False:
-			my_module.add_src_file('gale/context/X11/Context.cpp')
-		else:
-			my_module.add_src_file('gale/context/wayland/Context.cpp')
+		
+		my_module.add_optionnal_depend(
+		    'X11',
+		    ["c++", "-DGALE_BUILD_X11"],
+		    src_file=[
+		        'gale/context/X11/Context.cpp',
+		        ]
+		    )
+		my_module.add_optionnal_depend(
+		    'wayland',
+		    ["c++", "-DGALE_BUILD_WAYLAND"],
+		    src_file=[
+		        'gale/context/wayland/Context.cpp',
+		        ]
+		    )
 		# check if egami is present in the worktree: this is for the icon parsing ...
 		my_module.add_optionnal_depend('egami', ["c++", "-DGALE_BUILD_EGAMI"])
 	elif "Windows" in target.get_type():
@@ -104,6 +114,15 @@ def configure(target, my_module):
 		    ])
 	else:
 		debug.error("unknow mode...")
+	
+	if    "Linux" in target.get_type() \
+	   or "Windows" in target.get_type() \
+	   or "MacOs" in target.get_type():
+		# only in debug we add simulation:
+		if target.get_mode() == "debug":
+			my_module.add_flag('c++', "-DGALE_BUILD_SIMULATION")
+			my_module.add_src_file('gale/context/simulation/Context.cpp')
+	
 	# Key properties:
 	my_module.add_src_file([
 	    'gale/key/keyboard.cpp',
@@ -161,15 +180,12 @@ def configure(target, my_module):
 		    "SDL"
 		    ])
 	elif "Linux" in target.get_type():
-		if False:
-			my_module.add_depend("X11")
-		else:
-			my_module.add_depend([
-			    'wayland',
-			    'egl',
-			    'gles2',
-			    'xkbcommon'
-			    ])
+		# TODO : This is specific at wayland ==> check How we can add it better
+		my_module.add_depend([
+		    'egl',
+		    'gles2',
+		    'xkbcommon'
+		    ])
 	elif "Android" in target.get_type():
 		my_module.add_depend(["SDK", "jvm-basics"])
 		# add tre creator of the basic java class ...
