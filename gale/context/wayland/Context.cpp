@@ -323,6 +323,9 @@ class WAYLANDInterface : public gale::Context {
 			
 			m_cursorSurface = wl_compositor_create_surface(m_compositor);
 			
+			// set the DPI for the current screen: TODO : do it with real value, for now, we use a generic dpi value (most common screen)
+			gale::Dimension::setPixelRatio(vec2(75,75),gale::distance::inch);
+			
 			m_uniqueWindowsName = "GALE_" + etk::to_string(etk::tool::irand(0, 1999999999));
 			m_run = true;
 			GALE_WARNING("WAYLAND: INIT [STOP]");
@@ -346,21 +349,31 @@ class WAYLANDInterface : public gale::Context {
 			destroySurface();
 			unInitEgl();
 			wl_surface_destroy(m_cursorSurface);
-			if (m_cursorTheme) {
+			if (m_cursorTheme != nullptr) {
 				wl_cursor_theme_destroy(m_cursorTheme);
+				m_cursorTheme = nullptr;
 			}
-			if (m_shell) {
+			if (m_shell != nullptr) {
 				wl_shell_destroy(m_shell);
+				m_shell = nullptr;
 			}
-			if (m_compositor) {
+			if (m_compositor != nullptr) {
 				wl_compositor_destroy(m_compositor);
+				m_compositor = nullptr;
 			}
-			if (m_dataDeviceManager) {
+			if (m_dataDeviceManager != nullptr) {
 				wl_data_device_manager_destroy(m_dataDeviceManager);
+				m_dataDeviceManager = nullptr;
 			}
-			wl_registry_destroy(m_registry);
-			wl_display_flush(m_display);
-			wl_display_disconnect(m_display);
+			if (m_registry != nullptr) {
+				wl_registry_destroy(m_registry);
+				m_registry = nullptr;
+			}
+			if (m_display != nullptr) {
+				wl_display_flush(m_display);
+				wl_display_disconnect(m_display);
+				m_display = nullptr;
+			}
 		}
 		/****************************************************************************************/
 		int32_t run() {
@@ -498,7 +511,11 @@ class WAYLANDInterface : public gale::Context {
 			} else if (strcmp(_interface, "wl_shm") == 0) {
 				m_shm = (struct wl_shm*)wl_registry_bind(_registry, _id, &wl_shm_interface, 1);
 				m_cursorTheme = wl_cursor_theme_load(nullptr, 32, m_shm);
-				m_cursorDefault = wl_cursor_theme_get_cursor(m_cursorTheme, "left_ptr");
+				if (m_cursorTheme != nullptr) {
+					m_cursorDefault = wl_cursor_theme_get_cursor(m_cursorTheme, "left_ptr");
+				} else {
+					GALE_WARNING("Can not get the generic theme");
+				}
 			} else if (strcmp(_interface, "wl_data_device_manager") == 0) {
 				m_dataDeviceManagerVersion = std::min(3, int32_t(_version));
 				m_dataDeviceManager = (struct wl_data_device_manager*)wl_registry_bind(_registry, _id, &wl_data_device_manager_interface, m_dataDeviceManagerVersion);
@@ -622,9 +639,9 @@ class WAYLANDInterface : public gale::Context {
 			// scroll up and down .... 
 			if (_axis == WL_POINTER_AXIS_VERTICAL_SCROLL) {
 				if (_value > 0) {
-					idButton = 4;
-				} else {
 					idButton = 5;
+				} else {
+					idButton = 4;
 				}
 			} else if (_axis == WL_POINTER_AXIS_HORIZONTAL_SCROLL) {
 				if (_value > 0) {
@@ -810,7 +827,7 @@ class WAYLANDInterface : public gale::Context {
 					}
 				}
 			#endif
-			GALE_INFO("KEY : '" << _key << "' _isDown=" << _isDown);
+			GALE_ERROR("KEY : '" << _key << "' _isDown=" << _isDown);
 			bool find = true;
 			enum gale::key::keyboard keyInput;
 			switch (_key) {
@@ -870,6 +887,14 @@ class WAYLANDInterface : public gale::Context {
 				case KEY_NUMLOCK:     keyInput = gale::key::keyboard::numLock;     m_guiKeyBoardMode.setNumLock (_isDown); break;
 				case KEY_DELETE: // Suppr on keypad
 					find = false;
+					OS_setKeyboard(m_guiKeyBoardMode,
+					               gale::key::keyboard::character,
+					               (_isDown==true?gale::key::status::down:gale::key::status::up),
+					               false,
+					               0x7F);
+					break;
+				case KEY_KPDOT: // Suppr on keypad
+					find = false;
 					if(m_guiKeyBoardMode.getNumLock() == true){
 						OS_setKeyboard(m_guiKeyBoardMode,
 						               gale::key::keyboard::character,
@@ -897,6 +922,10 @@ class WAYLANDInterface : public gale::Context {
 						xkb_keysym_t sym = xkb_state_key_get_one_sym(m_XKBState, _key + 8);
 						char buf[16];
 						xkb_state_key_get_utf8(m_XKBState, _key + 8, buf, 16);
+						if (buf[0] == '\r') {
+							buf[0] = '\n';
+							buf[1] = '\0';
+						}
 						if (buf[0] != '\0') {
 							GALE_INFO("KEY : val='" << buf << "' _isDown=" << _isDown);
 							m_lastKeyPressed = utf8::convertChar32(buf);
@@ -931,6 +960,14 @@ class WAYLANDInterface : public gale::Context {
 						}
 						// must use xkbcommon library to manage correct map ...
 					}
+					find = false;
+			}
+			if (find == true) {
+				GALE_WARNING("    ==> " << keyInput);
+				OS_setKeyboard(m_guiKeyBoardMode,
+				               keyInput,
+				               (_isDown==true?gale::key::status::down:gale::key::status::up),
+				               false);
 			}
 		}
 		
@@ -1221,6 +1258,10 @@ class WAYLANDInterface : public gale::Context {
 				return;
 			}
 			m_cursorCurrent = _newCursor;
+			if (m_cursorTheme == nullptr) {
+				GALE_WARNING("WAYLAND-API: set New Cursor : " << _newCursor << " missing acces on theme ...");
+				return;
+			}
 			WAYLAND_DEBUG("WAYLAND-API: set New Cursor : " << _newCursor);
 			switch (m_cursorCurrent) {
 				case gale::context::cursor::none:
