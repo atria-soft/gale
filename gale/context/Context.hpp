@@ -16,6 +16,7 @@
 #include <gale/context/commandLine.hpp>
 // TODO : #include <gale/context/InputManager.hpp>
 #include <gale/context/Fps.hpp>
+#include <gale/Thread.hpp>
 #include <ememory/memory.hpp>
 #include <gale/orientation.hpp>
 #include <gale/context/clipBoard.hpp>
@@ -25,9 +26,11 @@
 #define MAX_MANAGE_INPUT (15)
 
 namespace gale {
+	class Thread;
 	class Context {
 		protected:
 			std::recursive_mutex m_mutex;
+			ememory::SharedPtr<gale::Thread> m_periodicThread;
 		private:
 			ememory::SharedPtr<gale::Application> m_application; //!< Application handle
 		public:

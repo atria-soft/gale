@@ -130,6 +130,21 @@ void gale::contextUnRegisterThread(std::thread* _thread) {
 	g_lockContextMap.unlock();
 }
 
+class PeriodicThread : public gale::Thread {
+	public:
+		PeriodicThread() {
+			
+		}
+		bool onThreadCall() override {
+			ethread::setName("galeThread 2");
+			std::this_thread::sleep_for(std::chrono::milliseconds(200));
+			GALE_INFO("periodicThread");
+			return false;
+		}
+};
+
+
+
 
 void gale::Context::setInitImage(const std::string& _fileName) {
 	//m_initDisplayImageName = _fileName;
@@ -223,8 +238,13 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	GALE_INFO(" == > Gale system init (BEGIN)");
 	// Reset the random system to be sure have real random values...
 	etk::tool::resetRandom();
-	// set the curent interface :
+	// set the curent interface:
 	lockContext();
+	// create thread to manage real periodic event
+	m_periodicThread = ememory::makeShared<PeriodicThread>();
+	m_periodicThread->start();
+	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+	
 	// By default we set 2 themes (1 color and 1 shape ...) :
 	etk::theme::setNameDefault("GUI", "shape/square/");
 	etk::theme::setNameDefault("COLOR", "color/black/");
@@ -345,6 +365,7 @@ void gale::Context::postAction(std::function<void(gale::Context& _context)> _act
 
 gale::Context::~Context() {
 	GALE_INFO(" == > Gale system Un-Init (BEGIN)");
+	m_periodicThread->stop();
 	getResourcesManager().applicationExiting();
 	// TODO : Clean the message list ...
 	// set the curent interface :
@@ -603,8 +624,19 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 	bool needRedraw = false;
 	//! Event management section ...
 	{
-		// set the curent interface :
+		// set the current interface:
 		lockContext();
+		/*
+		Lock the event processing
+		
+		Wait end of current processing
+		
+		Display ...
+		
+		Release the event processing
+		
+		*/
+		
 		processEvents();
 		// call all the application for periodic request (the application manage multiple instance ...
 		if (m_application != nullptr) {
