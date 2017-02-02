@@ -42,6 +42,8 @@ static std::map<std::thread::id, gale::Context*>& getContextList() {
 	return g_val;
 }
 
+static gale::Context* lastContextSet = nullptr;
+
 gale::Context& gale::getContext() {
 	std::map<std::thread::id, gale::Context*>& list = getContextList();
 	g_lockContextMap.lock();
@@ -52,11 +54,33 @@ gale::Context& gale::getContext() {
 	}
 	
 	g_lockContextMap.unlock();
-	#if DEBUG_LEVEL > 2
-		if(out ==nullptr){
-			GALE_CRITICAL("[CRITICAL] try acces at an empty interface");
+	if (out == nullptr) {
+		for (auto &it2 : list) {
+			if (out == nullptr) {
+				if (it2.second != nullptr) {
+					out = it2.second;
+				}
+			} else {
+				if (it2.second == nullptr) {
+					continue;
+				} else if (it2.second == out) {
+					continue;
+				} else {
+					GALE_CRITICAL("[CRITICAL] try acces at an empty context interface ==> bad use of library gale ...");
+				}
+			}
 		}
-	#endif
+		if (out == nullptr) {
+			if (lastContextSet != nullptr) {
+				GALE_ERROR("[CRITICAL] try acces at an empty context interface && fallback on the last context SET ==> you must correct yout implementation");
+				out = lastContextSet;
+			} else {
+				GALE_CRITICAL("[CRITICAL] try acces at an empty context interface && No context availlable ...");
+			}
+		} else {
+			GALE_ERROR("[CRITICAL] try acces at an empty context interface && fallback on the only context that exit ==> you must correct yout implementation");
+		}
+	}
 	return *out;
 }
 
@@ -64,6 +88,9 @@ void gale::setContext(gale::Context* _context) {
 	std::map<std::thread::id, gale::Context*>& list = getContextList();
 	//GALE_ERROR("Set context : " << std::this_thread::get_id() << " context pointer : " << uint64_t(_context));
 	g_lockContextMap.lock();
+	if (_context != nullptr) {
+		lastContextSet = _context;
+	}
 	std::map<std::thread::id, gale::Context*>::iterator it = list.find(std::this_thread::get_id());
 	if (it == list.end()) {
 		list.insert(std::pair<std::thread::id, gale::Context*>(std::this_thread::get_id(), _context));
