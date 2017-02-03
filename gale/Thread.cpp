@@ -93,12 +93,22 @@ void gale::Thread::stop() {
 
 void gale::Thread::threadCall() {
 	GALE_DEBUG("THREAD MAIN [START]");
+	if (m_name != "") {
+		ethread::setName(m_name);
+		m_lastUpdatateName = echrono::Steady::now();
+	}
 	gale::setContext(m_context);
 	while (m_state != state::stopping) {
 		if (m_state == state::starting) {
 			GALE_DEBUG("run std::thread [NOTHING to do]");
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			continue;
+		}
+		if (m_name != "") {
+			if ((echrono::Steady::now()-m_lastUpdatateName) > echrono::seconds(10)) {
+				m_lastUpdatateName = echrono::Steady::now();
+				ethread::setName(m_name);
+			}
 		}
 		if (onThreadCall() == true) {
 			GALE_DEBUG("run std::thread [AUTO STOP]");
@@ -107,6 +117,7 @@ void gale::Thread::threadCall() {
 		}
 	}
 	GALE_DEBUG("THREAD MAIN [STOP]");
+	gale::setContext(nullptr);
 	m_state = state::stopping;
 }
 
@@ -116,4 +127,8 @@ bool gale::Thread::onThreadCall() {
 
 enum gale::Thread::state gale::Thread::getState() {
 	return m_state;
+}
+
+void gale::Thread::setName(std::string _name) {
+	m_name = _name;
 }

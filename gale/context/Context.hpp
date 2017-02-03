@@ -14,7 +14,6 @@
 #include <gale/Application.hpp>
 #include <gale/context/clipBoard.hpp>
 #include <gale/context/commandLine.hpp>
-// TODO : #include <gale/context/InputManager.hpp>
 #include <gale/context/Fps.hpp>
 #include <gale/Thread.hpp>
 #include <ememory/memory.hpp>
@@ -27,7 +26,9 @@
 
 namespace gale {
 	class Thread;
+	class PeriodicThread;
 	class Context {
+		friend class gale::PeriodicThread;
 		protected:
 			std::recursive_mutex m_mutex;
 			ememory::SharedPtr<gale::Thread> m_periodicThread;
@@ -69,7 +70,6 @@ namespace gale {
 			etk::FSNode m_simulationFile;
 		private:
 			echrono::Steady m_previousDisplayTime;  // this is to limit framerate ... in case...
-			// TODO : gale::context::InputManager m_input;
 			etk::Fifo<std::function<void(gale::Context& _context)> > m_msgSystem;
 			bool m_displayFps;
 			gale::context::Fps m_FpsSystemEvent;
@@ -262,13 +262,6 @@ namespace gale {
 			 * @param[in] _status "true" to enable decoration / false otherwise
 			 */
 			virtual void setWindowsDecoration(bool _status) {};
-			/**
-			 * @brief get the curent time in micro-second
-			 * @note : must be implemented in all system OS implementation
-			 * @return The curent time of the process
-			 */
-			// TODO : REMOVE this ... deprecated since c++11
-			static int64_t getTime();
 		private:
 			// TODO : set user argument here ....
 			

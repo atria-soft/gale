@@ -130,22 +130,6 @@ void gale::contextUnRegisterThread(std::thread* _thread) {
 	g_lockContextMap.unlock();
 }
 
-class PeriodicThread : public gale::Thread {
-	public:
-		PeriodicThread() {
-			
-		}
-		bool onThreadCall() override {
-			ethread::setName("galeThread 2");
-			std::this_thread::sleep_for(std::chrono::milliseconds(200));
-			GALE_INFO("periodicThread");
-			return false;
-		}
-};
-
-
-
-
 void gale::Context::setInitImage(const std::string& _fileName) {
 	//m_initDisplayImageName = _fileName;
 }
@@ -210,6 +194,38 @@ void gale::Context::setArchiveDir(int _mode, const char* _str, const char* _appl
 	}
 }
 
+namespace gale {
+	class PeriodicThread : public gale::Thread {
+		private:
+			gale::Context* m_context;
+		public:
+			PeriodicThread(gale::Context* _context):
+			  m_context(_context) {
+				setName("GaleThread 2");
+			}
+			bool onThreadCall() override {
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				#if 0
+					m_context->lockContext();
+				#else
+					mutexInterface().lock();
+				#endif
+				m_context->processEvents();
+				// call all the application for periodic request (the application manage multiple instance )...
+				if (m_context->m_application != nullptr) {
+					m_context->m_application->onPeriod(echrono::Steady::now());
+				}
+				#if 0
+					m_context->unLockContext();
+				#else
+					mutexInterface().unlock();
+				#endif
+				return false;
+			}
+	};
+}
+
+
 
 
 gale::Context::Context(gale::Application* _application, int32_t _argc, const char* _argv[]) :
@@ -241,7 +257,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	// set the curent interface:
 	lockContext();
 	// create thread to manage real periodic event
-	m_periodicThread = ememory::makeShared<PeriodicThread>();
+	m_periodicThread = ememory::makeShared<PeriodicThread>(this);
 	m_periodicThread->start();
 	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 	
@@ -637,11 +653,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		
 		*/
 		
-		processEvents();
-		// call all the application for periodic request (the application manage multiple instance ...
-		if (m_application != nullptr) {
-			m_application->onPeriod(currentTime);
-		}
+		
 		if (m_application != nullptr) {
 			// Redraw all needed elements
 			m_application->onRegenerateDisplay(*this);
