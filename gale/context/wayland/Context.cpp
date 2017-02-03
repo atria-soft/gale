@@ -1526,6 +1526,10 @@ class WAYLANDInterface : public gale::Context {
 		void setTitle(const std::string& _title) {
 			WAYLAND_INFO("WAYLAND: set Title (START)");
 			m_uniqueWindowsName = _title;
+			if (m_shellSurface == nullptr) {
+				GALE_ERROR("WAYLAND: set Title (END) ==> missing surface pointer");
+				return;
+			}
 			wl_shell_surface_set_title(m_shellSurface, m_uniqueWindowsName.c_str());
 			WAYLAND_INFO("WAYLAND: set Title (END)");
 		}

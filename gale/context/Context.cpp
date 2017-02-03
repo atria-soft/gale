@@ -259,7 +259,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	// create thread to manage real periodic event
 	m_periodicThread = ememory::makeShared<PeriodicThread>(this);
 	m_periodicThread->start();
-	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	
 	// By default we set 2 themes (1 color and 1 shape ...) :
 	etk::theme::setNameDefault("GUI", "shape/square/");
