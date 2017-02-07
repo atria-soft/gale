@@ -66,6 +66,8 @@ void gale::Thread::stop() {
 	if (m_state == state::stop) {
 		return;
 	}
+	// Request thread stop ==> other wise, we waint indefinitly ...
+	m_state = state::stopping;
 	while (    m_state == state::running
 	        || m_state == state::starting) {
 		// requesting a stop ...
