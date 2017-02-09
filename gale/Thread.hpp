@@ -19,7 +19,7 @@ namespace gale {
 	/**
 	 * @brief We have our own thread in gale to manage gale context folowing and manage android rong management of std::thread when calling java.
 	 */
-	class Thread {
+	class Thread : public ememory::EnableSharedFromThis<Thread> {
 		public:
 			/**
 			 * @brief Internal state capabilities of the thread.
