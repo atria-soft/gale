@@ -72,7 +72,7 @@ void gale::Thread::stop() {
 	        || m_state == state::starting) {
 		// requesting a stop ...
 		GALE_INFO("wait Thread stopping");
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 	GALE_DEBUG("stop std::thread [START]");
 	#if defined(__TARGET_OS__Android)
@@ -90,7 +90,7 @@ void gale::Thread::stop() {
 	#endif
 	GALE_DEBUG("stop std::thread [set state]");
 	m_state = state::stop;
-	GALE_DEBUG("stop std::thread [STOP]");
+	GALE_INFO("stop std::thread [STOP]");
 }
 
 void gale::Thread::threadCall() {

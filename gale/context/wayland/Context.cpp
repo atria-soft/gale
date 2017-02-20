@@ -137,7 +137,7 @@ struct data_offer {
 };
 
 static void data_offer_offer(void* _data, struct wl_data_offer* _wl_data_offer, const char* _type) {
-	GALE_ERROR("plop 1 '" << _type << "'");
+	GALE_VERBOSE("plop 1 '" << _type << "'");
 	/*
 	struct data_offer *offer = (struct data_offer *)_data;
 	char **p;
@@ -147,7 +147,7 @@ static void data_offer_offer(void* _data, struct wl_data_offer* _wl_data_offer, 
 }
 
 static void data_offer_source_actions(void* _data, struct wl_data_offer* _wl_data_offer, uint32_t _source_actions) {
-	GALE_ERROR("plop 2 : " << _source_actions);
+	GALE_VERBOSE("plop 2 : " << _source_actions);
 	/*
 	struct data_offer *offer = (struct data_offer *)_data;
 	offer->source_actions = _source_actions;
@@ -155,7 +155,7 @@ static void data_offer_source_actions(void* _data, struct wl_data_offer* _wl_dat
 }
 
 static void data_offer_action(void* _data, struct wl_data_offer* _wl_data_offer, uint32_t _dnd_action) {
-	GALE_ERROR("plop 3 : " << _dnd_action);
+	GALE_VERBOSE("plop 3 : " << _dnd_action);
 	/*
 	struct data_offer *offer = (struct data_offer *)_data;
 	offer->dnd_action = _dnd_action;
@@ -494,7 +494,7 @@ class WAYLANDInterface : public gale::Context {
 		// recorder on elements ...
 		
 		void registryHandler(struct wl_registry* _registry, uint32_t _id, const char* _interface, uint32_t _version) {
-			GALE_WARNING("Got a registry event for '" << _interface  << "' id=" << _id);
+			GALE_DEBUG("Got a registry event for '" << _interface  << "' id=" << _id);
 			if (strcmp(_interface, "wl_compositor") == 0) {
 				m_compositor = (struct wl_compositor *)wl_registry_bind(_registry, _id, &wl_compositor_interface, 1);
 			} else if (strcmp(_interface, "wl_shell") == 0) {
@@ -520,9 +520,9 @@ class WAYLANDInterface : public gale::Context {
 				m_dataDeviceManagerVersion = std::min(3, int32_t(_version));
 				m_dataDeviceManager = (struct wl_data_device_manager*)wl_registry_bind(_registry, _id, &wl_data_device_manager_interface, m_dataDeviceManagerVersion);
 			} else {
-				GALE_WARNING("    ==> Not used ...");
+				GALE_WARNING("    ==> Not used ... '" << _interface  << "'");
 			}
-			GALE_INFO("registry_handle_global [STOP]");
+			GALE_DEBUG("registry_handle_global [STOP]");
 		}
 		
 		void registryRemover(struct wl_registry* _registry, uint32_t _id) {
@@ -533,16 +533,16 @@ class WAYLANDInterface : public gale::Context {
 		// screen capabilities
 		void seatHandleCapabilities(struct wl_seat* _seat, enum wl_seat_capability _caps) {
 			if ((_caps & WL_SEAT_CAPABILITY_POINTER) && !m_pointer) {
-				GALE_WARNING("Display has a pointer");
+				GALE_DEBUG("Display has a pointer");
 				m_pointer = wl_seat_get_pointer(_seat);
 				wl_pointer_add_listener(m_pointer, &pointer_listener, this);
 			} else if (!(_caps & WL_SEAT_CAPABILITY_POINTER) && m_pointer) {
-				GALE_WARNING("Display has No more pointer");
+				GALE_DEBUG("Display has No more pointer");
 				wl_pointer_destroy(m_pointer);
 				m_pointer = nullptr;
 			}
 			if ((_caps & WL_SEAT_CAPABILITY_KEYBOARD) && !m_keyboard) {
-				GALE_WARNING("Display has a keyboard");
+				GALE_DEBUG("Display has a keyboard");
 				m_keyboard = wl_seat_get_keyboard(_seat);
 				wl_keyboard_add_listener(m_keyboard, &keyboard_listener, this);
 			} else if (!(_caps & WL_SEAT_CAPABILITY_KEYBOARD) && m_keyboard) {
@@ -561,7 +561,7 @@ class WAYLANDInterface : public gale::Context {
 			}
 			
 			if (_caps & WL_SEAT_CAPABILITY_TOUCH) {
-				GALE_WARNING("Display has a touch screen");
+				GALE_DEBUG("Display has a touch screen");
 			}
 		}
 		
@@ -724,7 +724,7 @@ class WAYLANDInterface : public gale::Context {
 				case WL_KEYBOARD_KEYMAP_FORMAT_NO_KEYMAP:
 					GALE_ERROR("NO keymap: client must understand how to interpret the raw keycode");
 				case WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1:
-					GALE_INFO("XKB_V1: Memory on the keymap use ... XKB-v1");
+					GALE_DEBUG("XKB_V1: Memory on the keymap use ... XKB-v1");
 			}
 			#ifdef GALE_XKB_WRAPPER_INPUT
 				void *buf;
@@ -753,11 +753,11 @@ class WAYLANDInterface : public gale::Context {
 		}
 		
 		void keyboardEnter(struct wl_keyboard* _keyboard, uint32_t _serial, struct wl_surface* _surface, struct wl_array* _keys) {
-			GALE_INFO("keyboard Enter...");
+			GALE_VERBOSE("keyboard Enter...");
 		}
 		
 		void keyboardLeave(struct wl_keyboard* _keyboard, uint32_t _serial, struct wl_surface* _surface) {
-			GALE_INFO("keyboardLeave...");
+			GALE_VERBOSE("keyboardLeave...");
 		}
 		#if 0
 		void test_print_keycode_state(struct xkb_state* _state,
@@ -827,7 +827,7 @@ class WAYLANDInterface : public gale::Context {
 					}
 				}
 			#endif
-			GALE_ERROR("KEY : '" << _key << "' _isDown=" << _isDown);
+			GALE_VERBOSE("KEY : '" << _key << "' _isDown=" << _isDown);
 			bool find = true;
 			enum gale::key::keyboard keyInput;
 			switch (_key) {
@@ -927,9 +927,9 @@ class WAYLANDInterface : public gale::Context {
 							buf[1] = '\0';
 						}
 						if (buf[0] != '\0') {
-							GALE_INFO("KEY : val='" << buf << "' _isDown=" << _isDown);
+							GALE_DEBUG("KEY : val='" << buf << "' _isDown=" << _isDown);
 							m_lastKeyPressed = utf8::convertChar32(buf);
-							GALE_INFO("KEY : _key='" << _key << "' val='" << buf << "'='" << m_lastKeyPressed <<"' _isDown=" << _isDown << "  " << m_guiKeyBoardMode);
+							GALE_DEBUG("KEY : _key='" << _key << "' val='" << buf << "'='" << m_lastKeyPressed <<"' _isDown=" << _isDown << "  " << m_guiKeyBoardMode);
 							OS_setKeyboard(m_guiKeyBoardMode,
 							               gale::key::keyboard::character,
 							               (_isDown==true?gale::key::status::down:gale::key::status::up),
@@ -963,7 +963,7 @@ class WAYLANDInterface : public gale::Context {
 					find = false;
 			}
 			if (find == true) {
-				GALE_WARNING("    ==> " << keyInput);
+				GALE_DEBUG("    ==> " << keyInput);
 				OS_setKeyboard(m_guiKeyBoardMode,
 				               keyInput,
 				               (_isDown==true?gale::key::status::down:gale::key::status::up),
@@ -972,7 +972,7 @@ class WAYLANDInterface : public gale::Context {
 		}
 		
 		void keyboardModifiers(struct wl_keyboard* _keyboard, uint32_t _serial, uint32_t _modsDepressed, uint32_t _modsLatched, uint32_t _modsLocked, uint32_t _group) {
-			GALE_INFO("keyboard Modifiers...  _modsDepressed=" << _modsDepressed << " _modsLatched=" << _modsLatched << " _modsLocked=" << _modsLocked << " group=" << _group);
+			GALE_DEBUG("keyboard Modifiers...  _modsDepressed=" << _modsDepressed << " _modsLatched=" << _modsLatched << " _modsLocked=" << _modsLocked << " group=" << _group);
 			GALE_VERBOSE("         _modsDepressed=" << _modsDepressed);
 			GALE_VERBOSE("                 0x80 = " << ((_modsDepressed&0x80)!=0?"true":"false") << "  ");
 			GALE_VERBOSE("                 0x40 = " << ((_modsDepressed&0x40)!=0?"true":"false") << "  Meta");
@@ -1041,7 +1041,7 @@ class WAYLANDInterface : public gale::Context {
 		
 		
 		void dataDeviceDataOffer(struct wl_data_device* _data_device, struct wl_data_offer* _offer) {
-			GALE_ERROR("CALL : data_device_data_offer");
+			GALE_VERBOSE("CALL : data_device_data_offer");
 			if (m_offerIsInside == true) {
 				//We get our own copy or drag & drop ...
 				m_offerInternalCopy = true;
@@ -1062,7 +1062,7 @@ class WAYLANDInterface : public gale::Context {
 		}
 		
 		void dataDeviceEnter(struct wl_data_device* _data_device, uint32_t _serial, struct wl_surface* _surface, vec2 _pos, struct wl_data_offer* _offer) {
-			GALE_ERROR("CALL : data_device_enter (drag & drop)");
+			GALE_VERBOSE("CALL : data_device_enter (drag & drop)");
 			/*
 			struct input *input = data;
 			struct window *window;
@@ -1100,7 +1100,7 @@ class WAYLANDInterface : public gale::Context {
 		}
 		
 		void dataDeviceLeave(struct wl_data_device* _data_device) {
-			GALE_ERROR("CALL : data_device_leave (drag & drop)");
+			GALE_VERBOSE("CALL : data_device_leave (drag & drop)");
 			/*
 			struct input *input = data;
 			if (input->drag_offer) {
@@ -1111,7 +1111,7 @@ class WAYLANDInterface : public gale::Context {
 		}
 		
 		void dataDeviceMotion(struct wl_data_device* _data_device, uint32_t _time, vec2 _pos) {
-			GALE_ERROR("CALL : data_device_motion (drag & drop)");
+			GALE_VERBOSE("CALL : data_device_motion (drag & drop)");
 			/*
 			struct input *input = data;
 			struct window *window = input->drag_focus;
@@ -1132,7 +1132,7 @@ class WAYLANDInterface : public gale::Context {
 		}
 		
 		void dataDeviceDrop(struct wl_data_device* _data_device) {
-			GALE_ERROR("CALL : data_device_drop (drag & drop)");
+			GALE_VERBOSE("CALL : data_device_drop (drag & drop)");
 			/*
 			struct input *input = data;
 			struct window *window = input->drag_focus;
@@ -1149,7 +1149,7 @@ class WAYLANDInterface : public gale::Context {
 		}
 		
 		void dataDeviceSelection(struct wl_data_device* _wl_data_device, struct wl_data_offer* _offer) {
-			GALE_ERROR("CALL : data_device_selection");
+			GALE_VERBOSE("CALL : data_device_selection");
 			// I do not understand what it is used for ???
 		}
 		
@@ -1761,7 +1761,7 @@ static void handle_configure(void* _data, struct wl_shell_surface* _shellSurface
 		GALE_ERROR("    ==> nullptr");
 		return;
 	}
-	interface->handleConfigure(_shellSurface, _edges, ivec2(_width, _height));
+	interface->handleConfigure(_shellSurface, _edges, ivec2(_width-1, _height));
 }
 
 static void handle_popup_done(void* _data, struct wl_shell_surface* _shellSurface) {
