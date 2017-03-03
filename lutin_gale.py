@@ -157,7 +157,7 @@ def configure(target, my_module):
 		    "SDL"
 		    ])
 	elif "Linux" in target.get_type():
-		pass
+		my_module.add_depend("X11")
 	elif "Android" in target.get_type():
 		my_module.add_depend(["SDK", "jvm-basics"])
 		# add tre creator of the basic java class ...
