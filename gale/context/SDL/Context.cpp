@@ -96,6 +96,7 @@ class GLUTInterface : public gale::Context {
 				GALE_INFO("monitor property : dpi=" << dpi << " px/inch");
 			}
 			m_run = true;
+			start2ntThreadProcessing();
 		}
 		
 		~GLUTInterface() {

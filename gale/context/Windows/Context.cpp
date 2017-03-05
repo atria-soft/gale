@@ -71,6 +71,7 @@ class WindowsContext : public gale::Context {
 				m_inputIsPressed[iii] = false;
 			}
 			configure();
+			start2ntThreadProcessing();
 		}
 		
 		~WindowsContext() {

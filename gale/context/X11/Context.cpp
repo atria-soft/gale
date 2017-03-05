@@ -52,11 +52,36 @@ static bool hasDisplay = false;
 	#define X11_VERBOSE    GALE_VERBOSE
 	#define X11_INFO       GALE_INFO
 	#define X11_CRITICAL   GALE_CRITICAL
+	static int32_t callLevel = 0;
+	std::string getOffset(int32_t _size) {
+		std::string out;
+		for (int32_t iii=0; iii<_size; ++iii) {
+			out += "....";
+		}
+		return out;
+	}
+	class GaleTmpFuncCall {
+		private:
+			std::string m_value;
+			int32_t m_level;
+		public:
+			GaleTmpFuncCall(const std::string& _value) :
+			  m_value(_value),
+			  m_level(callLevel++) {
+				GALE_INFO(getOffset(m_level) << " ==> " << m_value);
+			}
+			~GaleTmpFuncCall() {
+				GALE_INFO(getOffset(m_level) << "<==  " << m_value);
+				callLevel--;
+			}
+	};
+	#define X11_FUNC()     GaleTmpFuncCall tmpValueCallqsdfqsdfqsdfqsdfqsdfqsdfqsdfqsdfqsdf(__PRETTY_FUNCTION__)
 #else
 	#define X11_DEBUG      GALE_VERBOSE
 	#define X11_VERBOSE    GALE_VERBOSE
 	#define X11_INFO       GALE_VERBOSE
 	#define X11_CRITICAL   GALE_VERBOSE
+	#define X11_FUNC()       do {} while(false)
 #endif
 
 #if !defined(__TARGET_OS__Web)
@@ -170,6 +195,7 @@ class X11Interface : public gale::Context {
 		  XAtomDeleteWindows(0),
 		  m_currentCursor(gale::context::cursor::arrow),
 		  m_lastKeyPressed(0) {
+			X11_FUNC();
 			X11_INFO("X11:INIT");
 			for (int32_t iii=0; iii<MAX_MANAGE_INPUT; iii++) {
 				m_inputIsPressed[iii] = false;
@@ -194,13 +220,16 @@ class X11Interface : public gale::Context {
 			XAtomGALE             = XInternAtom(m_display, m_uniqueWindowsName.c_str(), 0);
 			XAtomDeleteWindows    = XInternAtom(m_display, "WM_DELETE_WINDOW", 0);
 			m_run = true;
+			start2ntThreadProcessing();
 		}
 		
 		~X11Interface() {
 			// TODO : ...
+			X11_FUNC();
 		}
 		
 		int32_t run() {
+			X11_FUNC();
 			bool specialEventThatNeedARedraw = false;
 			// main cycle
 			while(m_run == true) {
@@ -802,11 +831,13 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		virtual void stop() {
+			X11_FUNC();
 			X11_INFO("X11-API: Stop");
 			m_run = false;
 		}
 		/****************************************************************************************/
 		virtual void setSize(const vec2& _size) {
+			X11_FUNC();
 			X11_INFO("X11-API: changeSize=" << _size);
 			m_currentHeight = _size.y();
 			m_currentWidth = _size.x();
@@ -814,6 +845,7 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		void setFullScreen(bool _status) {
+			X11_FUNC();
 			X11_INFO("X11-API: changeFullscreen=" << _status);
 			XEvent event;
 			event.xclient.type = ClientMessage;
@@ -848,6 +880,7 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		virtual void grabKeyboardEvents(bool _status) {
+			X11_FUNC();
 			if (_status == true) {
 				X11_INFO("X11-API: Grab Keyboard Events");
 				XGrabKeyboard(m_display, m_WindowHandle,
@@ -862,6 +895,7 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		virtual void setWindowsDecoration(bool _status) {
+			X11_FUNC();
 			X11_INFO("X11-API: setWindows Decoration :" << _status);
 			// Remove/set decoration
 			Hints hints;
@@ -879,6 +913,7 @@ class X11Interface : public gale::Context {
 		};
 		/****************************************************************************************/
 		virtual void setPos(const vec2& _pos) {
+			X11_FUNC();
 			X11_INFO("X11-API: changePos=" << _pos);
 			m_windowsPos = _pos;
 			XMoveWindow(m_display, m_WindowHandle, _pos.x(), _pos.y());
@@ -888,6 +923,7 @@ class X11Interface : public gale::Context {
 		/****************************************************************************************/
 		/*
 		virtual void getAbsPos(ivec2& pos) {
+			X11_FUNC();
 			X11_INFO("X11-API: getAbsPos");
 			int tmp;
 			unsigned int tmp2;
@@ -897,6 +933,7 @@ class X11Interface : public gale::Context {
 		*/
 		/****************************************************************************************/
 		virtual void setCursor(enum gale::context::cursor _newCursor) {
+			X11_FUNC();
 			if (_newCursor != m_currentCursor) {
 				X11_DEBUG("X11-API: set New Cursor : " << _newCursor);
 				// undefine previous cursors ...
@@ -987,6 +1024,7 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		void grabPointerEvents(bool _status, const vec2& _forcedPosition) {
+			X11_FUNC();
 			if (_status == true) {
 				X11_DEBUG("X11-API: Grab Events");
 				int32_t test = XGrabPointer(m_display,RootWindow(m_display, DefaultScreen(m_display)), True,
@@ -1034,6 +1072,7 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		bool createX11Context() {
+			X11_FUNC();
 			X11_INFO("X11: CreateX11Context");
 			int x,y, attr_mask;
 			XSizeHints hints;
@@ -1062,7 +1101,7 @@ class X11Interface : public gale::Context {
 				if (m_visual == nullptr) {
 					m_visual = glXChooseVisual(m_display, Xscreen, attrListSgl);
 					m_doubleBuffered = false;
-					GALE_INFO("GL-X singlebuffered rendering will be used, no doublebuffering available");
+					GALE_ERROR("GL-X singlebuffered rendering will be used, no doublebuffering available");
 				} else {
 					m_doubleBuffered = true;
 					GALE_INFO("GL-X doublebuffered rendering available");
@@ -1084,7 +1123,10 @@ class X11Interface : public gale::Context {
 			// Create a colormap - only needed on some X clients, eg. IRIX
 			Window Xroot = RootWindow(m_display, Xscreen);
 			#if !defined(__TARGET_OS__Web)
-				attr.colormap = XCreateColormap(m_display, Xroot, m_visual->visual, AllocNone);
+				if (    m_display != nullptr
+				     && m_visual != nullptr) {
+					attr.colormap = XCreateColormap(m_display, Xroot, m_visual->visual, AllocNone);
+				}
 			#endif
 			
 			attr.border_pixel = 0;
@@ -1204,6 +1246,7 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		void setIcon(const std::string& _inputFile) {
+			X11_FUNC();
 			#if    defined(GALE_BUILD_EGAMI) \
 			    && !defined(__TARGET_OS__Web)
 				egami::Image dataImage = egami::load(_inputFile);
@@ -1272,7 +1315,11 @@ class X11Interface : public gale::Context {
 					default:
 						return;
 				}
-				
+				if (    m_display == nullptr
+				     || m_visual == nullptr) {
+					GALE_ERROR("X11 Can not create Image Icon ==> nullptr on m_display or m_visual");
+					return;
+				}
 				XImage* myImage = XCreateImage(m_display,
 				                               m_visual->visual,
 				                               depth,
@@ -1354,6 +1401,7 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		static void setVSync(bool _sync) {
+			X11_FUNC();
 			// Function pointer for the wgl extention function we need to enable/disable
 			typedef int32_t (APIENTRY *PFNWGLSWAPINTERVALPROC)( int );
 			PFNWGLSWAPINTERVALPROC wglSwapIntervalEXT = 0;
@@ -1376,6 +1424,7 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		bool createOGlContext() {
+			X11_FUNC();
 			X11_INFO("X11:CreateOGlContext");
 			#if defined(__TARGET_OS__Web)
 				/* create a GLX context */
@@ -1404,6 +1453,7 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		void setTitle(const std::string& _title) {
+			X11_FUNC();
 			X11_INFO("X11: set Title (START)");
 			XTextProperty tp;
 			tp.value = (unsigned char *)_title.c_str();
@@ -1417,6 +1467,7 @@ class X11Interface : public gale::Context {
 			X11_INFO("X11: set Title (END)");
 		}
 		void openURL(const std::string& _url) {
+			X11_FUNC();
 			std::string req = "xdg-open ";
 			req += _url;
 			system(req.c_str());
@@ -1424,6 +1475,7 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		void clipBoardGet(enum gale::context::clipBoard::clipboardListe _clipboardID) {
+			X11_FUNC();
 			switch (_clipboardID) {
 				case gale::context::clipBoard::clipboardSelection:
 					if (m_clipBoardOwnerPrimary == false) {
@@ -1462,6 +1514,7 @@ class X11Interface : public gale::Context {
 		}
 		/****************************************************************************************/
 		void clipBoardSet(enum gale::context::clipBoard::clipboardListe _clipboardID) {
+			X11_FUNC();
 			switch (_clipboardID) {
 				case gale::context::clipBoard::clipboardSelection:
 					// Request the selection :

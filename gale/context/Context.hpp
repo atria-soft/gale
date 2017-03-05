@@ -53,6 +53,11 @@ namespace gale {
 		public:
 			Context(gale::Application* _application, int32_t _argc=0, const char* _argv[]=nullptr);
 			virtual ~Context();
+			/**
+			 * @brief StartProcessing (2nd thread).
+			 * @note to call when all the Context is started
+			 */
+			void start2ntThreadProcessing();
 		protected:
 			/**
 			 * @brief set the curent interface.

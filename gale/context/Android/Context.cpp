@@ -202,6 +202,7 @@ class AndroidContext : public gale::Context {
 					GALE_CRITICAL(" mission one function ==> system can not work withut it...");
 				}
 			}
+			start2ntThreadProcessing();
 		}
 		
 		~AndroidContext() {

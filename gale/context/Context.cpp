@@ -258,8 +258,6 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	lockContext();
 	// create thread to manage real periodic event
 	m_periodicThread = ememory::makeShared<PeriodicThread>(this);
-	m_periodicThread->start();
-	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	
 	// By default we set 2 themes (1 color and 1 shape ...) :
 	etk::theme::setNameDefault("GUI", "shape/square/");
@@ -350,6 +348,14 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 			m_simulationFile.filePuts("\n");
 		}
 	}
+	#if defined(__GALE_ANDROID_ORIENTATION_LANDSCAPE__)
+		forceOrientation(gale::orientation::screenLandscape);
+	#elif defined(__GALE_ANDROID_ORIENTATION_PORTRAIT__)
+		forceOrientation(gale::orientation::screenPortrait);
+	#else
+		forceOrientation(gale::orientation::screenAuto);
+	#endif
+	
 	m_msgSystem.post([](gale::Context& _context){
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
 		if (appl == nullptr) {
@@ -362,16 +368,18 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	
 	// force a recalculation
 	requestUpdateSize();
-	#if defined(__GALE_ANDROID_ORIENTATION_LANDSCAPE__)
-		forceOrientation(gale::orientation::screenLandscape);
-	#elif defined(__GALE_ANDROID_ORIENTATION_PORTRAIT__)
-		forceOrientation(gale::orientation::screenPortrait);
-	#else
-		forceOrientation(gale::orientation::screenAuto);
-	#endif
 	// release the curent interface :
 	unLockContext();
 	GALE_INFO(" == > Gale system init (END)");
+}
+
+void gale::Context::start2ntThreadProcessing() {
+	// set the curent interface:
+	lockContext();
+	m_periodicThread->start();
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	// release the curent interface:
+	unLockContext();
 }
 
 void gale::Context::postAction(std::function<void(gale::Context& _context)> _action) {
@@ -384,7 +392,7 @@ gale::Context::~Context() {
 	m_periodicThread->stop();
 	getResourcesManager().applicationExiting();
 	// TODO : Clean the message list ...
-	// set the curent interface :
+	// set the curent interface:
 	lockContext();
 	// clean all widget and sub widget with their resources:
 	//m_objectManager.cleanInternalRemoved();
