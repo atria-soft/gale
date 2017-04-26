@@ -38,7 +38,7 @@ class MacOSInterface : public gale::Context {
 		MacOSInterface(gale::Application* _application, int _argc, const char* _argv[]) :
 		  gale::Context(_application, _argc, _argv) {
 			mm_main(_argc, _argv);
-			start2ntThreadProcessing();
+			start2ndThreadProcessing();
 		}
 		
 		int32_t Run() {

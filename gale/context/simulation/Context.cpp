@@ -65,7 +65,7 @@ class SimulationInterface : public gale::Context {
 		  gale::Context(_application, _argc, _argv) {
 			GALE_INFO("SIMU:INIT");
 			m_run = true;
-			start2ntThreadProcessing();
+			start2ndThreadProcessing();
 		}
 		
 		~SimulationInterface() {

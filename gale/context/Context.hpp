@@ -57,7 +57,7 @@ namespace gale {
 			 * @brief StartProcessing (2nd thread).
 			 * @note to call when all the Context is started
 			 */
-			void start2ntThreadProcessing();
+			void start2ndThreadProcessing();
 		protected:
 			/**
 			 * @brief set the curent interface.

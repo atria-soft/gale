@@ -283,8 +283,8 @@ def tool_generate_main_java_class(target, module, package_name):
 	tmpFile.write( "	\n")
 	if module.get_pkg("ANDROID_APPL_TYPE")!="APPL":
 		tmpFile.write( "	public Engine onCreateEngine() {\n")
-		tmpFile.write( "		Engine tmpEngine = super.onCreateEngine();\n")
 		tmpFile.write( "		initApkPath(\"" + module.get_pkg("COMPAGNY_TYPE")+"\", \""+module.get_pkg("COMPAGNY_NAME2")+"\", \"" + application_name + "\", \"" + package_name + "\");\n")
+		tmpFile.write( "		Engine tmpEngine = super.onCreateEngine();\n")
 		tmpFile.write( "		return tmpEngine;\n")
 		tmpFile.write( "	}\n")
 	
@@ -297,12 +297,12 @@ def tool_generate_main_java_class(target, module, package_name):
 	
 	if module.get_pkg("ANDROID_APPL_TYPE")!="APPL":
 		tmpFile.write( "	public void onCreate() {\n")
-		tmpFile.write( "		super.onCreate();\n")
 		tmpFile.write( "		initApkPath(\"" + module.get_pkg("COMPAGNY_TYPE")+"\", \""+module.get_pkg("COMPAGNY_NAME2")+"\", \"" + application_name + "\", \"" + package_name + "\");\n")
+		tmpFile.write( "		super.onCreate();\n")
 	else:
 		tmpFile.write( "	public void onCreate(android.os.Bundle savedInstanceState) {\n")
-		tmpFile.write( "		super.onCreate(savedInstanceState);\n")
 		tmpFile.write( "		initApkPath(\"" + module.get_pkg("COMPAGNY_TYPE")+"\", \""+module.get_pkg("COMPAGNY_NAME2")+"\", \"" + application_name + "\", \"" + package_name + "\");\n")
+		tmpFile.write( "		super.onCreate(savedInstanceState);\n")
 	
 	if module.get_pkg("GENERATE_SECTION__ON_CREATE") != None:
 		for elem in module.get_pkg("GENERATE_SECTION__ON_CREATE"):

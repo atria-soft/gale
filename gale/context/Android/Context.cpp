@@ -202,7 +202,6 @@ class AndroidContext : public gale::Context {
 					GALE_CRITICAL(" mission one function ==> system can not work withut it...");
 				}
 			}
-			start2ntThreadProcessing();
 		}
 		
 		~AndroidContext() {
@@ -465,10 +464,30 @@ class AndroidContext : public gale::Context {
 		}
 		
 		void OS_Resize(const vec2& _size) {
-			GALE_VERBOSE("OS_Resize [BEGIN]");
+			GALE_INFO("OS_Resize [BEGIN]");
 			m_currentHeight = _size.y();
 			gale::Context::OS_Resize(_size);
-			GALE_VERBOSE("OS_Resize [END]");
+			GALE_INFO("OS_Resize [END]");
+		}
+		void ANDROID_start() {
+			GALE_INFO("ANDROID_start [BEGIN]");
+			
+			GALE_INFO("ANDROID_start [END]");
+		}
+		void ANDROID_reStart() {
+			GALE_INFO("ANDROID_reStart [BEGIN]");
+			
+			GALE_INFO("ANDROID_reStart [END]");
+		}
+		void ANDROID_create() {
+			GALE_INFO("ANDROID_create [BEGIN]");
+			start2ndThreadProcessing();
+			GALE_INFO("ANDROID_create [END]");
+		}
+		void ANDROID_destroy() {
+			GALE_INFO("ANDROID_destroy [BEGIN]");
+			
+			GALE_INFO("ANDROID_destroy [END]");
 		}
 };
 
@@ -588,6 +607,7 @@ extern "C" {
 			// TODO : generate error in java to stop the current instance
 			return;
 		}
+		s_listInstance[_id]->ANDROID_create();
 		//s_listInstance[_id]->init();
 	}
 	
@@ -603,6 +623,7 @@ extern "C" {
 			// TODO : generate error in java to stop the current instance
 			return;
 		}
+		s_listInstance[_id]->ANDROID_start();
 		//SendSystemMessage(" testmessages ... ");
 	}
 	void Java_org_gale_Gale_EWonReStart(JNIEnv* _env, jobject _thiz, jint _id) {
@@ -617,6 +638,7 @@ extern "C" {
 			// TODO : generate error in java to stop the current instance
 			return;
 		}
+		s_listInstance[_id]->ANDROID_reStart();
 	}
 	void Java_org_gale_Gale_EWonResume(JNIEnv* _env, jobject _thiz, jint _id) {
 		std::unique_lock<std::mutex> lock(g_interfaceMutex);
@@ -674,6 +696,7 @@ extern "C" {
 			// TODO : generate error in java to stop the current instance
 			return;
 		}
+		s_listInstance[_id]->ANDROID_destroy();
 		//s_listInstance[_id]->UnInit();
 	}
 	

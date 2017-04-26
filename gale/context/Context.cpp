@@ -172,6 +172,7 @@ void gale::Context::processEvents() {
 }
 
 void gale::Context::setArchiveDir(int _mode, const char* _str, const char* _applName) {
+	GALE_INFO("Set archive DIR : " << _mode << " " << _str << " " << _applName << "[BEGIN]");
 	switch(_mode) {
 		case 0:
 			GALE_DEBUG("Directory APK : path=" << _str);
@@ -192,6 +193,7 @@ void gale::Context::setArchiveDir(int _mode, const char* _str, const char* _appl
 			GALE_DEBUG("Directory mode=???? path=" << _str);
 			break;
 	}
+	GALE_INFO("Set archive DIR : " << _mode << " " << _str << " " << _applName << "[ END ]");
 }
 
 namespace gale {
@@ -373,7 +375,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	GALE_INFO(" == > Gale system init (END)");
 }
 
-void gale::Context::start2ntThreadProcessing() {
+void gale::Context::start2ndThreadProcessing() {
 	// set the curent interface:
 	lockContext();
 	m_periodicThread->start();

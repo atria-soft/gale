@@ -329,7 +329,7 @@ class WAYLANDInterface : public gale::Context {
 			m_uniqueWindowsName = "GALE_" + etk::to_string(etk::tool::irand(0, 1999999999));
 			m_run = true;
 			GALE_WARNING("WAYLAND: INIT [STOP]");
-			start2ntThreadProcessing();
+			start2ndThreadProcessing();
 		}
 		
 		~WAYLANDInterface() {

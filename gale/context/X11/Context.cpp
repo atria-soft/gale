@@ -220,7 +220,7 @@ class X11Interface : public gale::Context {
 			XAtomGALE             = XInternAtom(m_display, m_uniqueWindowsName.c_str(), 0);
 			XAtomDeleteWindows    = XInternAtom(m_display, "WM_DELETE_WINDOW", 0);
 			m_run = true;
-			start2ntThreadProcessing();
+			start2ndThreadProcessing();
 		}
 		
 		~X11Interface() {
