@@ -633,6 +633,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 	}
 	gale::openGL::threadHasContext();
 	echrono::Steady currentTime = echrono::Steady::now();
+	// TODO : Review this ...
 	// this is to prevent the multiple display at the a high frequency ...
 	#if (!defined(__TARGET_OS__Android) && !defined(__TARGET_OS__Windows))
 	if(currentTime - m_previousDisplayTime < echrono::milliseconds(8)) {
@@ -662,8 +663,6 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		Release the event processing
 		
 		*/
-		
-		
 		if (m_application != nullptr) {
 			// Redraw all needed elements
 			m_application->onRegenerateDisplay(*this);
@@ -713,6 +712,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 			m_FpsFlush.tic();
 		}
 		if (hasDisplayDone == true) {
+			//GALE_INFO("lklklklklk " << _displayEveryTime);
 			if (m_displayFps == true) {
 				m_FpsFlush.incrementCounter();
 			}

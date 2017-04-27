@@ -799,12 +799,12 @@ class X11Interface : public gale::Context {
 						//	break;
 						case MapNotify:
 							X11_INFO("X11 event : MapNotify");
-							specialEventThatNeedARedraw=true;
+							specialEventThatNeedARedraw = true;
 							OS_Show();
 							break;
 						case UnmapNotify:
 							X11_INFO("X11 event : UnmapNotify");
-							specialEventThatNeedARedraw=true;
+							specialEventThatNeedARedraw = true;
 							OS_Hide();
 							break;
 						default:
@@ -822,9 +822,14 @@ class X11Interface : public gale::Context {
 						XSync(m_display,0);
 					}
 					// draw after switch the previous windows ...
-					//GALE_DEBUG("specialEventThatNeedARedraw"<<specialEventThatNeedARedraw);
+					if (specialEventThatNeedARedraw == true) {
+						X11_INFO("specialEventThatNeedARedraw = " << specialEventThatNeedARedraw);
+					}
 					hasDisplay = OS_Draw(specialEventThatNeedARedraw);
-					specialEventThatNeedARedraw = false;
+					if (hasDisplay == true) {
+						// need to request it every time needed to have a redrawing (this can take some time if the application filter the drfaw periodicity)
+						specialEventThatNeedARedraw = false;
+					}
 				}
 			}
 			return 0;
