@@ -7,7 +7,7 @@
 
 #include <etk/types.hpp>
 #include <vector>
-#include <etk/math/Matrix4.hpp>
+#include <etk/math/Matrix4x4.hpp>
 #include <etk/math/Vector2D.hpp>
 #include <etk/Color.hpp>
 
