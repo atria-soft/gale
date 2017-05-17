@@ -366,6 +366,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 		appl->onCreate(_context);
 		appl->onStart(_context);
 		appl->onResume(_context);
+		appl->m_canDraw = true;
 	});
 	
 	// force a recalculation
@@ -399,6 +400,7 @@ gale::Context::~Context() {
 	// clean all widget and sub widget with their resources:
 	//m_objectManager.cleanInternalRemoved();
 	// call application to uninit
+	m_application->m_canDraw = false;
 	m_application->onPause(*this);
 	m_application->onStop(*this);
 	m_application->onDestroy(*this);
@@ -702,7 +704,9 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 				m_FpsSystem.incrementCounter();
 				// set the curent interface :
 				lockContext();
-				m_application->onDraw(*this);
+				if (m_application->m_canDraw == true) {
+					m_application->onDraw(*this);
+				}
 				unLockContext();
 				hasDisplayDone = true;
 			}

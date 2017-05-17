@@ -10,6 +10,7 @@
 
 
 gale::Application::Application() :
+  m_canDraw(false),
   m_needRedraw(true),
   m_title("gale"),
   m_iconName(""),

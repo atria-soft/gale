@@ -23,6 +23,7 @@ namespace gale {
 			Application();
 			virtual ~Application();
 		public:
+			bool m_canDraw;
 			/**
 			 * @brief The application is created.
 			 * @param[in] _context Current gale context.
