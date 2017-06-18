@@ -25,6 +25,7 @@ namespace gale {
 				echrono::Duration m_avg_idle;
 				echrono::Duration m_max_idle;
 				echrono::Steady m_ticTime;
+				echrono::Steady m_lastDrawTime;
 				bool m_display;
 				bool m_drawingDone;
 				const char * m_displayName;
@@ -46,7 +47,7 @@ namespace gale {
 				  m_drawingDone(false),
 				  m_displayName(_displayName),
 				  m_displayFPS(_displayFPS) {
-					
+					m_lastDrawTime = echrono::Steady::now();
 				}
 				/**
 				 * @brief Destructor
@@ -115,7 +116,9 @@ namespace gale {
 							                         << m_max_idle << " ");
 						}
 						if (m_displayFPS == true) {
-							GALE_PRINT("FPS : " << m_nbDisplayTime << "/" << m_nbCallTime << "fps");
+							float nbSeconds = (echrono::Steady::now() - m_lastDrawTime).toSeconds();
+							m_lastDrawTime = echrono::Steady::now();
+							GALE_PRINT("FPS : " << m_nbDisplayTime << "/" << m_nbCallTime << " frames ==> " << (float(m_nbDisplayTime)/nbSeconds) << "fps");
 						}
 						m_max = echrono::Duration(0);
 						m_min = echrono::Duration(99999999,0);

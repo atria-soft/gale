@@ -56,7 +56,7 @@ bool gale::resource::Texture::updateContext() {
 		//Lock error ==> try later ...
 		return false;
 	}
-	if (false == m_loaded) {
+	if (m_loaded == false) {
 		// Request a new texture at openGl :
 		glGenTextures(1, &m_texId);
 	}
