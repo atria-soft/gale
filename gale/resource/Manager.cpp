@@ -127,7 +127,7 @@ void gale::resource::Manager::updateContext() {
 		}
 		if (resourceList.size() != 0) {
 			for (size_t jjj=0; jjj<MAX_RESOURCE_LEVEL; jjj++) {
-				GALE_INFO("    updateContext level (D) : " << jjj << "/" << (MAX_RESOURCE_LEVEL-1));
+				GALE_VERBOSE("    updateContext level (D) : " << jjj << "/" << (MAX_RESOURCE_LEVEL-1));
 				for (auto &it : resourceList) {
 					ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
 					if(    tmpRessource != nullptr
@@ -152,7 +152,7 @@ void gale::resource::Manager::updateContext() {
 		}
 		if (resourceListToUpdate.size() != 0) {
 			for (size_t jjj=0; jjj<MAX_RESOURCE_LEVEL; jjj++) {
-				GALE_DEBUG("    updateContext level (U) : " << jjj << "/" << (MAX_RESOURCE_LEVEL-1));
+				GALE_VERBOSE("    updateContext level (U) : " << jjj << "/" << (MAX_RESOURCE_LEVEL-1));
 				for (auto &it : resourceListToUpdate) {
 					if (    it != nullptr
 					     && jjj == it->getResourceLevel()) {

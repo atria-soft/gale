@@ -402,7 +402,7 @@ def tool_generate_main_java_class(target, module, package_name):
 			module.set_pkg("VERSION_CODE", "0")
 		tmpFile.write( '          android:versionCode="' + str(module.get_pkg("VERSION_CODE")) + '" \n')
 		tmpFile.write( '          android:versionName="'+tools.version_to_string(module.get_pkg("VERSION"))+'"> \n')
-		tmpFile.write( '	<uses-feature android:glEsVersion="0x00020000" android:required="true" />\n')
+		tmpFile.write( '	<uses-feature android:glEsVersion="0x00030000" android:required="true" />\n')
 		tmpFile.write( '	<uses-sdk android:minSdkVersion="' + str(target.board_id) + '" \n')
 		tmpFile.write( '	          android:targetSdkVersion="' + str(target.board_id) + '" /> \n')
 		if module.get_pkg("ANDROID_APPL_TYPE")=="APPL":

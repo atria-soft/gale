@@ -22,7 +22,7 @@ extern "C" {
 		#undef glTranslatef
 	#elif defined(__TARGET_OS__Android)
 		// Include openGL ES 2
-		#include <GLES2/gl2.h>
+		#include <GLES3/gl3.h>
 		#include <GLES2/gl2ext.h>
 	#elif defined(__TARGET_OS__Windows)
 		// TO ENABLE THE SHADER api ...
