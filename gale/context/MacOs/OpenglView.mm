@@ -7,7 +7,7 @@
 
 #import <gale/context/MacOs/OpenglView.hpp>
 #include <OpenGL/gl.h>
-#include <gale/context/MacOS/Context.hpp>
+#include <gale/context/MacOs/Context.hpp>
 #include <gale/debug.hpp>
 #include <gale/Dimension.hpp>
 

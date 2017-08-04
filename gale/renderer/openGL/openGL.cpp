@@ -745,8 +745,8 @@ bool gale::openGL::deleteBuffers(std::vector<uint32_t>& _buffers) {
 	#ifdef GALE_BUILD_SIMULATION
 		if (s_simulationMode == false) {
 	#endif
-	glDeleteBuffers(_buffers.size(), &_buffers[0]);
-	CHECK_GL_ERROR("glDeleteBuffers", __LINE__);
+	//glDeleteBuffers(_buffers.size(), &_buffers[0]);
+	//CHECK_GL_ERROR("glDeleteBuffers", __LINE__);
 	#ifdef GALE_BUILD_SIMULATION
 		}
 	#endif
@@ -858,8 +858,8 @@ void gale::openGL::shader::remove(int64_t& _shader) {
 	#ifdef GALE_BUILD_SIMULATION
 		if (s_simulationMode == false) {
 	#endif
-	glDeleteShader(GLuint(_shader));
-	CHECK_GL_ERROR("glDeleteShader", __LINE__);
+	//glDeleteShader(GLuint(_shader));
+	//CHECK_GL_ERROR("glDeleteShader", __LINE__);
 	#ifdef GALE_BUILD_SIMULATION
 		}
 	#endif
@@ -924,8 +924,8 @@ void gale::openGL::program::remove(int64_t& _prog) {
 	#ifdef GALE_BUILD_SIMULATION
 		if (s_simulationMode == false) {
 	#endif
-	glDeleteProgram(GLuint(_prog));
-	CHECK_GL_ERROR("glDeleteProgram", __LINE__);
+	//glDeleteProgram(GLuint(_prog));
+	//CHECK_GL_ERROR("glDeleteProgram", __LINE__);
 	#ifdef GALE_BUILD_SIMULATION
 		}
 	#endif

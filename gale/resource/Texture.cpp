@@ -56,7 +56,7 @@ bool gale::resource::Texture::updateContext() {
 		//Lock error ==> try later ...
 		return false;
 	}
-	if (m_loaded == false) {
+	if (false == m_loaded) {
 		// Request a new texture at openGl :
 		glGenTextures(1, &m_texId);
 	}
@@ -92,7 +92,7 @@ void gale::resource::Texture::removeContext() {
 	if (true == m_loaded) {
 		// Request remove texture ...
 		GALE_INFO("TEXTURE: Rm [" << getId() << "] texId=" << m_texId);
-		glDeleteTextures(1, &m_texId);
+		//glDeleteTextures(1, &m_texId);
 		m_loaded = false;
 	}
 }

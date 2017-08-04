@@ -6,7 +6,7 @@
 
 
 #import <gale/context/MacOs/Windows.hpp>
-#include <gale/context/MacOS/Context.hpp>
+#include <gale/context/MacOs/Context.hpp>
 #include <gale/key/key.hpp>
 
 #include <gale/debug.hpp>

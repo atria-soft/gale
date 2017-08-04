@@ -41,7 +41,7 @@ class MacOSInterface : public gale::Context {
 			start2ndThreadProcessing();
 		}
 		
-		int32_t Run() {
+		int32_t run() {
 			return mm_run();
 		}
 	public:
@@ -148,7 +148,8 @@ MacOSInterface* interface = nullptr;
 
 
 bool MacOs::draw(bool _displayEveryTime) {
-	if (interface == nullptr) {
+    GALE_VERBOSE("draw request " << uint64_t(interface) << "  "  << _displayEveryTime);
+    if (interface == nullptr) {
 		return false;
 	}
 	return interface->MAC_Draw(_displayEveryTime);
@@ -204,29 +205,15 @@ void MacOs::setRedrawCallback(const std::function<void()>& _func) {
 	interface->getWidgetManager().setCallbackonRedrawNeeded(_func);
 }
 */
-/**
- * @brief Main of the program
- * @param std IO
- * @return std IO
- */
-int gale::run(gale::Application* _application, int _argc, const char* _argv[]) {
-	etk::init(_argc, _argv);
-	interface = new MacOSInterface(_application, _argc, _argv);
-	if (nullptr == interface) {
-		GALE_CRITICAL("Can not create the X11 interface ... MEMORY allocation error");
-		return -2;
-	}
-	
-	int32_t retValue = interface->Run();
-	GALE_INFO("Stop running");
-	delete(interface);
-	interface = nullptr;
-	return retValue;
+
+
+bool gale::context::macos::isBackendPresent() {
+	// TODO : Do it better...
+	return true;
 }
 
-
-
-
-
-
-
+ememory::SharedPtr<gale::Context> gale::context::macos::createInstance(gale::Application* _application, int _argc, const char *_argv[]) {
+	ememory::SharedPtr<MacOSInterface> tmp = ememory::makeShared<MacOSInterface>(_application, _argc, _argv);
+    interface = tmp.get();
+    return tmp;
+}

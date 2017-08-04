@@ -6,6 +6,8 @@
 #pragma once
 
 #include <gale/key/key.hpp>
+#include <ememory/SharedPtr.hpp>
+#include <gale/context/Context.hpp>
 
 namespace MacOs	{
 	// return true if a flush is needed
