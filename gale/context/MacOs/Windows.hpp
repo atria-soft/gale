@@ -6,6 +6,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <gale/context/MacOs/OpenglView.hpp>
+#include <gale/key/key.hpp>
 
 @interface GaleMainWindows : NSWindow {
 	OpenGLView* _view;
@@ -32,6 +33,15 @@
 - (void)flagsChanged:(NSEvent *)theEvent;
 - (void)closeRequestGale;
 - (void)UpdateScreenRequested;
+/**
+ * @brief Check if we have the need to change the internal flag of shift, ctrl ...
+ * @param[in] bitField MacOs bit field
+ * @param[in] flags Patern to check
+ * @param[in] key Gale key
+ */
+- (void)flagsUpdate:(uint32_t) bitField
+                   :(uint32_t) flags
+                   :(enum gale::key::keyboard) key;
 @end
 
 

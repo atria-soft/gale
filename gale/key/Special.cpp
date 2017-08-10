@@ -7,14 +7,22 @@
 #include <gale/key/Special.hpp>
 #include <etk/stdTools.hpp>
 
-#define GALE_FLAG_KEY_CAPS_LOCK 0x00000001
-#define GALE_FLAG_KEY_SHIFT     0x00000002
-#define GALE_FLAG_KEY_CTRL      0x00000004
-#define GALE_FLAG_KEY_META      0x00000008
-#define GALE_FLAG_KEY_ALT       0x00000010
-#define GALE_FLAG_KEY_ALTGR     0x00000020
-#define GALE_FLAG_KEY_NUM_LOCK  0x00000040
-#define GALE_FLAG_KEY_INSERT    0x00000080
+#define GALE_FLAG_KEY_CAPS_LOCK   0x00000001
+#define GALE_FLAG_KEY_SHIFT       0x00000030
+#define GALE_FLAG_KEY_SHIFT_LEFT  0x80000010
+#define GALE_FLAG_KEY_SHIFT_RIGHT 0x40000020
+#define GALE_FLAG_KEY_CTRL        0x00000300
+#define GALE_FLAG_KEY_CTRL_LEFT   0x00000100
+#define GALE_FLAG_KEY_CTRL_RIGHT  0x00000200
+#define GALE_FLAG_KEY_META        0x00003000
+#define GALE_FLAG_KEY_META_LEFT   0x00001000
+#define GALE_FLAG_KEY_META_RIGHT  0x00002000
+#define GALE_FLAG_KEY_ALT         0x00030000
+#define GALE_FLAG_KEY_ALT_LEFT    0x00010000
+#define GALE_FLAG_KEY_ALT_RIGHT   0x00020000
+#define GALE_FLAG_KEY_ALTGR       0x00020000
+#define GALE_FLAG_KEY_NUM_LOCK    0x00000002
+#define GALE_FLAG_KEY_INSERT      0x00000003
 
 // TODO : Update to support the Left and right of some key ...
 
@@ -31,22 +39,28 @@ void gale::key::Special::update(enum gale::key::keyboard _move, bool _isDown) {
 			setCapsLock(_isDown);
 			break;
 		case keyboard::shiftLeft:
+			setShiftLeft(_isDown);
+			break;
 		case keyboard::shiftRight:
-			setShift(_isDown);
+			setShiftRight(_isDown);
 			break;
 		case keyboard::ctrlLeft:
+			setCtrlLeft(_isDown);
+			break;
 		case keyboard::ctrlRight:
-			setCtrl(_isDown);
+			setCtrlRight(_isDown);
 			break;
 		case keyboard::metaLeft:
+			setMetaLeft(_isDown);
+			break;
 		case keyboard::metaRight:
-			setMeta(_isDown);
+			setMetaRight(_isDown);
 			break;
-		case keyboard::alt:
-			setAlt(_isDown);
+		case keyboard::altLeft:
+			setAltLeft(_isDown);
 			break;
-		case keyboard::altGr:
-			setAltGr(_isDown);
+		case keyboard::altRight:
+			setAltRight(_isDown);
 			break;
 		case keyboard::numLock:
 			setNumLock(_isDown);
@@ -56,148 +70,138 @@ void gale::key::Special::update(enum gale::key::keyboard _move, bool _isDown) {
 	}
 }
 
-bool gale::key::Special::getCapsLock() const {
-	if ((m_value & GALE_FLAG_KEY_CAPS_LOCK) != 0) {
-		return true;
+bool gale::key::Special::get(enum gale::key::keyboard _move) {
+	switch (_move) {
+		case keyboard::insert:
+			return getInsert();
+		case keyboard::capLock:
+			return getCapsLock();
+		case keyboard::shiftLeft:
+			return getShiftLeft();
+		case keyboard::shiftRight:
+			return getShiftRight();
+		case keyboard::ctrlLeft:
+			return getCtrlLeft();
+		case keyboard::ctrlRight:
+			return getCtrlRight();
+		case keyboard::metaLeft:
+			return getMetaLeft();
+		case keyboard::metaRight:
+			return getMetaRight();
+		case keyboard::altRight:
+			return getAltLeft();
+		case keyboard::altLeft:
+			return getAltRight();
+		case keyboard::numLock:
+			return getNumLock();
+		default:
+			break;
 	}
 	return false;
 }
-void gale::key::Special::setCapsLock(bool _value) {
-	if ((m_value & GALE_FLAG_KEY_CAPS_LOCK) != 0) {
-		if (_value == false) {
-			m_value -= GALE_FLAG_KEY_CAPS_LOCK;
+
+
+void gale::key::Special::setFlag(uint32_t _flag, bool _isDown) {
+	if ((m_value & _flag) != 0) {
+		if (_isDown == false) {
+			m_value -= _flag;
 		}
 	} else {
-		if (_value == true) {
-			m_value += GALE_FLAG_KEY_CAPS_LOCK;
+		if (_isDown == true) {
+			m_value += _flag;
 		}
 	}
+}
+bool gale::key::Special::getFlag(uint32_t _flag) const {
+	if ((m_value & _flag) != 0) {
+		return true;
+	}
+	return false;
+};
+
+bool gale::key::Special::getCapsLock() const {
+	return getFlag(GALE_FLAG_KEY_CAPS_LOCK);
+}
+void gale::key::Special::setCapsLock(bool _value) {
+	setFlag(GALE_FLAG_KEY_CAPS_LOCK, _value);
 }
 
 bool gale::key::Special::getShift() const {
-	if ((m_value & GALE_FLAG_KEY_SHIFT) != 0) {
-		return true;
-	}
-	return false;
+	return getFlag(GALE_FLAG_KEY_SHIFT);
 }
-void gale::key::Special::setShift(bool _value) {
-	if ((m_value & GALE_FLAG_KEY_SHIFT) != 0) {
-		if (_value == false) {
-			m_value -= GALE_FLAG_KEY_SHIFT;
-		}
-	} else {
-		if (_value == true) {
-			m_value += GALE_FLAG_KEY_SHIFT;
-		}
-	}
+bool gale::key::Special::getShiftLeft() const {
+	return getFlag(GALE_FLAG_KEY_SHIFT_LEFT);
+}
+bool gale::key::Special::getShiftRight() const {
+	return getFlag(GALE_FLAG_KEY_SHIFT_RIGHT);
+}
+void gale::key::Special::setShiftLeft(bool _value) {
+	setFlag(GALE_FLAG_KEY_SHIFT_LEFT, _value);
+}
+void gale::key::Special::setShiftRight(bool _value) {
+	setFlag(GALE_FLAG_KEY_SHIFT_RIGHT, _value);
 }
 
 bool gale::key::Special::getCtrl() const {
-	if ((m_value & GALE_FLAG_KEY_CTRL) != 0) {
-		return true;
-	}
-	return false;
+	return getFlag(GALE_FLAG_KEY_CTRL);
 }
-void gale::key::Special::setCtrl(bool _value) {
-	if ((m_value & GALE_FLAG_KEY_CTRL) != 0) {
-		if (_value == false) {
-			m_value -= GALE_FLAG_KEY_CTRL;
-		}
-	} else {
-		if (_value == true) {
-			m_value += GALE_FLAG_KEY_CTRL;
-		}
-	}
+bool gale::key::Special::getCtrlLeft() const {
+	return getFlag(GALE_FLAG_KEY_CTRL_LEFT);
+}
+bool gale::key::Special::getCtrlRight() const {
+	return getFlag(GALE_FLAG_KEY_CTRL_RIGHT);
+}
+void gale::key::Special::setCtrlLeft(bool _value) {
+	setFlag(GALE_FLAG_KEY_CTRL_LEFT, _value);
+}
+void gale::key::Special::setCtrlRight(bool _value) {
+	setFlag(GALE_FLAG_KEY_CTRL_RIGHT, _value);
 }
 
 bool gale::key::Special::getMeta() const {
-	if ((m_value & GALE_FLAG_KEY_META) != 0) {
-		return true;
-	}
-	return false;
+	return getFlag(GALE_FLAG_KEY_META);
 }
-void gale::key::Special::setMeta(bool _value) {
-	if ((m_value & GALE_FLAG_KEY_META) != 0) {
-		if (_value == false) {
-			m_value -= GALE_FLAG_KEY_META;
-		}
-	} else {
-		if (_value == true) {
-			m_value += GALE_FLAG_KEY_META;
-		}
-	}
+bool gale::key::Special::getMetaLeft() const {
+	return getFlag(GALE_FLAG_KEY_META_LEFT);
+}
+bool gale::key::Special::getMetaRight() const {
+	return getFlag(GALE_FLAG_KEY_META_RIGHT);
+}
+void gale::key::Special::setMetaLeft(bool _value) {
+	setFlag(GALE_FLAG_KEY_META_LEFT, _value);
+}
+void gale::key::Special::setMetaRight(bool _value) {
+	setFlag(GALE_FLAG_KEY_META_RIGHT, _value);
 }
 
 bool gale::key::Special::getAlt() const {
-	if ((m_value & GALE_FLAG_KEY_ALT) != 0) {
-		return true;
-	}
-	return false;
+	return getFlag(GALE_FLAG_KEY_ALT);
 }
-void gale::key::Special::setAlt(bool _value) {
-	if ((m_value & GALE_FLAG_KEY_ALT) != 0) {
-		if (_value == false) {
-			m_value -= GALE_FLAG_KEY_ALT;
-		}
-	} else {
-		if (_value == true) {
-			m_value += GALE_FLAG_KEY_ALT;
-		}
-	}
+bool gale::key::Special::getAltLeft() const {
+	return getFlag(GALE_FLAG_KEY_ALT_LEFT);
 }
-
-bool gale::key::Special::getAltGr() const {
-	if ((m_value & GALE_FLAG_KEY_ALTGR) != 0) {
-		return true;
-	}
-	return false;
+bool gale::key::Special::getAltRight() const {
+	return getFlag(GALE_FLAG_KEY_ALT_RIGHT);
 }
-void gale::key::Special::setAltGr(bool _value) {
-	if ((m_value & GALE_FLAG_KEY_ALTGR) != 0) {
-		if (_value == false) {
-			m_value -= GALE_FLAG_KEY_ALTGR;
-		}
-	} else {
-		if (_value == true) {
-			m_value += GALE_FLAG_KEY_ALTGR;
-		}
-	}
+void gale::key::Special::setAltLeft(bool _value) {
+	setFlag(GALE_FLAG_KEY_ALT_LEFT, _value);
+}
+void gale::key::Special::setAltRight(bool _value) {
+	setFlag(GALE_FLAG_KEY_ALT_RIGHT, _value);
 }
 
 bool gale::key::Special::getNumLock() const {
-	if ((m_value & GALE_FLAG_KEY_NUM_LOCK) != 0) {
-		return true;
-	}
-	return false;
+	return getFlag(GALE_FLAG_KEY_NUM_LOCK);
 }
 void gale::key::Special::setNumLock(bool _value) {
-	if ((m_value & GALE_FLAG_KEY_NUM_LOCK) != 0) {
-		if (_value == false) {
-			m_value -= GALE_FLAG_KEY_NUM_LOCK;
-		}
-	} else {
-		if (_value == true) {
-			m_value += GALE_FLAG_KEY_NUM_LOCK;
-		}
-	}
+	setFlag(GALE_FLAG_KEY_NUM_LOCK, _value);
 }
 
 bool gale::key::Special::getInsert() const {
-	if ((m_value & GALE_FLAG_KEY_INSERT) != 0) {
-		return true;
-	}
-	return false;
+	return getFlag(GALE_FLAG_KEY_INSERT);
 }
 void gale::key::Special::setInsert(bool _value) {
-	if ((m_value & GALE_FLAG_KEY_INSERT) != 0) {
-		if (_value == false) {
-			m_value -= GALE_FLAG_KEY_INSERT;
-		}
-	} else {
-		if (_value == true) {
-			m_value += GALE_FLAG_KEY_INSERT;
-		}
-	}
+	setFlag(GALE_FLAG_KEY_INSERT, _value);
 }
 
 std::ostream& gale::key::operator <<(std::ostream& _os, const gale::key::Special& _obj) {
@@ -206,7 +210,6 @@ std::ostream& gale::key::operator <<(std::ostream& _os, const gale::key::Special
 	_os << " ctrl=" << _obj.getCtrl();
 	_os << " meta=" << _obj.getMeta();
 	_os << " alt=" << _obj.getAlt();
-	_os << " altGr=" << _obj.getAltGr();
 	_os << " verNum=" << _obj.getNumLock();
 	_os << " insert=" << _obj.getInsert();
 	return _os;
@@ -223,30 +226,44 @@ namespace etk {
 				out += "|";
 			}
 			out += "SHIFT";
+			if (_obj.getShiftLeft() == false) {
+				out += "-RIGHT";
+			} else if (_obj.getShiftRight() == false) {
+				out += "-LEFT";
+			}
 		}
 		if (_obj.getCtrl() == true) {
 			if (out.size() > 0) {
 				out += "|";
 			}
 			out += "CTRL";
+			if (_obj.getCtrlLeft() == false) {
+				out += "-RIGHT";
+			} else if (_obj.getCtrlRight() == false) {
+				out += "-LEFT";
+			}
 		}
 		if (_obj.getMeta() == true) {
 			if (out.size() > 0) {
 				out += "|";
 			}
 			out += "META";
+			if (_obj.getMetaLeft() == false) {
+				out += "-RIGHT";
+			} else if (_obj.getMetaRight() == false) {
+				out += "-LEFT";
+			}
 		}
 		if (_obj.getAlt() == true) {
 			if (out.size() > 0) {
 				out += "|";
 			}
 			out += "ALT";
-		}
-		if (_obj.getAltGr() == true) {
-			if (out.size() > 0) {
-				out += "|";
+			if (_obj.getAltLeft() == false) {
+				out += "-RIGHT";
+			} else if (_obj.getAltRight() == false) {
+				out += "-LEFT";
 			}
-			out += "ALTGR";
 		}
 		if (_obj.getNumLock() == true) {
 			if (out.size() > 0) {
@@ -269,15 +286,33 @@ namespace etk {
 			if (it == "CAPS") {
 				out.setCapsLock(true);
 			} else if (it == "SHIFT") {
-				out.setShift(true);
+				out.setShiftLeft(true);
+				out.setShiftRight(true);
+			} else if (it == "SHIFT-LEFT") {
+				out.setShiftLeft(true);
+			} else if (it == "SHIFT-RIGHT") {
+				out.setShiftRight(true);
 			} else if (it == "CTRL") {
-				out.setCtrl(true);
+				out.setCtrlLeft(true);
+				out.setCtrlRight(true);
+			} else if (it == "CTRL-LEFT") {
+				out.setCtrlLeft(true);
+			} else if (it == "CTRL-RIGHT") {
+				out.setCtrlRight(true);
 			} else if (it == "META") {
-				out.setMeta(true);
+				out.setMetaLeft(true);
+				out.setMetaRight(true);
+			} else if (it == "META-LEFT") {
+				out.setMetaLeft(true);
+			} else if (it == "META-RIGHT") {
+				out.setMetaRight(true);
 			} else if (it == "ALT") {
-				out.setAlt(true);
-			} else if (it == "ALTGR") {
-				out.setAltGr(true);
+				out.setAltLeft(true);
+				out.setAltRight(true);
+			} else if (it == "ALT-LEFT") {
+				out.setAltLeft(true);
+			} else if (it == "ALT-RIGHT") {
+				out.setAltRight(true);
 			} else if (it == "NUM_LOCK") {
 				out.setNumLock(true);
 			} else if (it == "INSERT") {

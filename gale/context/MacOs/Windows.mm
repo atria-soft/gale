@@ -28,38 +28,27 @@
 	GALE_DEBUG("INIT ...");
 	// set the windows at a specific position :
 	[windowsID cascadeTopLeftFromPoint:NSMakePoint(50,50)];
-	GALE_DEBUG("ALLOCATE ...");
 	// set the windows resizable
 	#ifdef __MAC_10_12
 		[windowsID setStyleMask:[windowsID styleMask] | NSWindowStyleMaskResizable];
 	#else
 		[windowsID setStyleMask:[windowsID styleMask] | NSResizableWindowMask];
 	#endif
-	GALE_DEBUG("ALLOCATE ...");
 	// oposite : [window setStyleMask:[window styleMask] & ~NSResizableWindowMask];
 	// set the title
 	id appName = [[NSProcessInfo processInfo] processName];
-	GALE_DEBUG("ALLOCATE ...");
 	[windowsID setTitle:appName];
-	GALE_DEBUG("ALLOCATE ...");
 	
 	[windowsID setAcceptsMouseMovedEvents:YES];
-	GALE_DEBUG("ALLOCATE ...");
 	// ???
 	[windowsID makeKeyAndOrderFront:nil];
-	GALE_DEBUG("ALLOCATE ...");
 	[NSApp activateIgnoringOtherApps:YES];
-	GALE_DEBUG("ALLOCATE ...");
 	
 	NSRect window_frame = [windowsID frame];
-	GALE_DEBUG("ALLOCATE ...");
 	
 	_view=[[OpenGLView alloc]initWithFrame:window_frame]; //NSMakeRect(0, 0, 800, 600)];
-	GALE_DEBUG("ALLOCATE ...");
 	[windowsID setContentView:_view];
-	GALE_DEBUG("ALLOCATE ...");
 	[_view setAutoresizesSubviews:YES];
-	GALE_DEBUG("ALLOCATE ...");
 	
 	// Override point for customization after application launch.
 	//[window addSubview:view];
@@ -67,7 +56,6 @@
 	//[window makeKeyAndVisible];
 	
 	//[windowsID setDelegate:view];
-	GALE_DEBUG("ALLOCATE ...");
 	return windowsID;
 }
 
@@ -84,32 +72,44 @@
 
 static gale::key::Special guiKeyBoardMode;
 
+static std::vector<std::pair<uint16_t,unichar>> g_listlasteventDown;
 
 -(void)localKeyEvent:(NSEvent*)theEvent isDown:(bool)_isDown {
 	bool thisIsAReapeateKey = false;
 	if ([theEvent isARepeat]) {
 		thisIsAReapeateKey = true;
 	}
+	//[self flagsChanged:theEvent];
 	NSString *str = [theEvent charactersIgnoringModifiers];
 	// TODO : set if for every char in the string !!!
 	unichar c = [str characterAtIndex:0];
-	GALE_VERBOSE("Key Event " << c << "  = '" << char(c) << "' isDown=" << _isDown);
+	uint16_t keycode = [theEvent keyCode];
+	// special case for \t + shift:
+	if (    guiKeyBoardMode.getShift() == true
+	     && c == 25) {
+		// We remap it to the correct tabulation.
+		c = 9;
+	}
+	GALE_WARNING("Key Event " << c << "  = '" << char(c) << "' isDown=" << _isDown << " keycode=" << keycode);
 	bool find = true;
 	enum gale::key::keyboard keyInput;
 	switch (c) {
-		case 63232:	keyInput = gale::key::keyboard::up;            break;
-		case 63233:	keyInput = gale::key::keyboard::down;          break;
-		case 63234:	keyInput = gale::key::keyboard::left;          break;
-		case 63235:	keyInput = gale::key::keyboard::right;         break;
-		case 63276:	keyInput = gale::key::keyboard::pageUp;        break;
-		case 63277:	keyInput = gale::key::keyboard::pageDown;      break;
-		case 63273:	keyInput = gale::key::keyboard::start;         break;
-		case 63275:	keyInput = gale::key::keyboard::end;           break;
-		/*
-		case 78:	keyInput = gale::key::keyboard::stopDefil;     break;
-		case 127:	keyInput = gale::key::keyboard::wait;          break;
-		*/
+		case NSUpArrowFunctionKey:     keyInput = gale::key::keyboard::up;            break;
+		case NSDownArrowFunctionKey:   keyInput = gale::key::keyboard::down;          break;
+		case NSLeftArrowFunctionKey:   keyInput = gale::key::keyboard::left;          break;
+		case NSRightArrowFunctionKey:  keyInput = gale::key::keyboard::right;         break;
+		case NSPageUpFunctionKey:      keyInput = gale::key::keyboard::pageUp;        break;
+		case NSPageDownFunctionKey:    keyInput = gale::key::keyboard::pageDown;      break;
+		case NSBeginFunctionKey:
+		case NSHomeFunctionKey:        keyInput = gale::key::keyboard::start;         break;
+		case NSEndFunctionKey:         keyInput = gale::key::keyboard::end;           break;
+		case NSScrollLockFunctionKey:  keyInput = gale::key::keyboard::stopDefil;     break;
+		case NSPauseFunctionKey:       keyInput = gale::key::keyboard::wait;          break;
+		case NSPrintScreenFunctionKey: keyInput = gale::key::keyboard::print;         break;
+		case 16:                       keyInput = gale::key::keyboard::contextMenu;   break;
+		
 		case 63302:
+		case NSInsertFunctionKey:
 			find = false;
 			keyInput = gale::key::keyboard::insert;
 			if(_isDown == false) {
@@ -125,19 +125,44 @@ static gale::key::Special guiKeyBoardMode;
 			MacOs::setKeyboardMove(guiKeyBoardMode, keyInput, false, thisIsAReapeateKey);
 			break;
 			//case 84:  keyInput = gale::key::keyboardCenter; break; // Keypad
-		case 63236:    keyInput = gale::key::keyboard::f1; break;
-		case 63237:    keyInput = gale::key::keyboard::f2; break;
-		case 63238:    keyInput = gale::key::keyboard::f3; break;
-		case 63239:    keyInput = gale::key::keyboard::f4; break;
-		case 63240:    keyInput = gale::key::keyboard::f5; break;
-		case 63241:    keyInput = gale::key::keyboard::f6; break;
-		case 63242:    keyInput = gale::key::keyboard::f7; break;
-		case 63243:    keyInput = gale::key::keyboard::f8; break;
-		case 63244:    keyInput = gale::key::keyboard::f9; break;
-		case 63245:    keyInput = gale::key::keyboard::f10; break;
-		case 63246:    keyInput = gale::key::keyboard::f11; break;
-		case 63247:    keyInput = gale::key::keyboard::f12; break;
-		case 63272: // Suppress
+		case NSF1FunctionKey:    keyInput = gale::key::keyboard::f1; break;
+		case NSF2FunctionKey:    keyInput = gale::key::keyboard::f2; break;
+		case NSF3FunctionKey:    keyInput = gale::key::keyboard::f3; break;
+		case NSF4FunctionKey:    keyInput = gale::key::keyboard::f4; break;
+		case NSF5FunctionKey:    keyInput = gale::key::keyboard::f5; break;
+		case NSF6FunctionKey:    keyInput = gale::key::keyboard::f6; break;
+		case NSF7FunctionKey:    keyInput = gale::key::keyboard::f7; break;
+		case NSF8FunctionKey:    keyInput = gale::key::keyboard::f8; break;
+		case NSF9FunctionKey:    keyInput = gale::key::keyboard::f9; break;
+		case NSF10FunctionKey:    keyInput = gale::key::keyboard::f10; break;
+		case NSF11FunctionKey:    keyInput = gale::key::keyboard::f11; break;
+		case NSF12FunctionKey:    keyInput = gale::key::keyboard::f12; break;
+		case NSF13FunctionKey:
+		case NSF14FunctionKey:
+		case NSF15FunctionKey:
+		case NSF16FunctionKey:
+		case NSF17FunctionKey:
+		case NSF18FunctionKey:
+		case NSF19FunctionKey:
+		case NSF20FunctionKey:
+		case NSF21FunctionKey:
+		case NSF22FunctionKey:
+		case NSF23FunctionKey:
+		case NSF24FunctionKey:
+		case NSF25FunctionKey:
+		case NSF26FunctionKey:
+		case NSF27FunctionKey:
+		case NSF28FunctionKey:
+		case NSF29FunctionKey:
+		case NSF30FunctionKey:
+		case NSF31FunctionKey:
+		case NSF32FunctionKey:
+		case NSF33FunctionKey:
+		case NSF34FunctionKey:
+		case NSF35FunctionKey:
+			find = false;
+			break;
+		case NSDeleteFunctionKey: // Suppress
 			find = false;
 			MacOs::setKeyboard(guiKeyBoardMode, u32char::Delete, _isDown, thisIsAReapeateKey);
 			if (true == thisIsAReapeateKey) {
@@ -151,10 +176,36 @@ static gale::key::Special guiKeyBoardMode;
 					// special keyboard transcription ...
 					str = [theEvent characters];
 					c = [str characterAtIndex:0];
+					GALE_VERBOSE("Key Event ALT " << c << "  = '" << char(c) << "' isDown=" << _isDown << " nb in list=" << g_listlasteventDown.size());
+				} else {
+					GALE_VERBOSE("Key Event     " << c << "  = '" << char(c) << "' isDown=" << _isDown);
 				}
-				GALE_VERBOSE("Key Event " << c << "  = '" << char(c) << "' isDown=" << _isDown);
+				// MacOs have a problem of synchronizing the correct key with the modifier...
+				if (_isDown == false) {
+					for (auto it = g_listlasteventDown.begin();
+					     it != g_listlasteventDown.end();
+					     ++it) {
+						if (it->first == keycode) {
+							c = it->second;
+							g_listlasteventDown.erase(it);
+							GALE_VERBOSE("Key Event " << c << "  = '" << char(c) << "' isDown=" << _isDown << " (override)");
+							break;
+						}
+					}
+				} else {
+					// remove a previous occurence of this element (case where Macos does not send the UP)...
+					for (auto it = g_listlasteventDown.begin();
+					     it != g_listlasteventDown.end();
+					     ++it) {
+						if (it->first == keycode) {
+							g_listlasteventDown.erase(it);
+							break;
+						}
+					}
+					g_listlasteventDown.push_back(std::make_pair(keycode, c));
+				}
 				MacOs::setKeyboard(guiKeyBoardMode, c, _isDown, thisIsAReapeateKey);
-				if (true==thisIsAReapeateKey) {
+				if (thisIsAReapeateKey == true) {
 					MacOs::setKeyboard(guiKeyBoardMode, c, !_isDown, thisIsAReapeateKey);
 				}
 			}
@@ -178,127 +229,76 @@ static gale::key::Special guiKeyBoardMode;
 	[self localKeyEvent:theEvent isDown:false];
 }
 
+- (void)flagsUpdate:(uint32_t) bitField
+                   :(uint32_t) flags
+                   :(enum gale::key::keyboard) key {
+	if ((bitField & flags) != 0) {
+		GALE_VERBOSE("Flag change: " << key);
+		if (guiKeyBoardMode.get(key) == false) {
+			GALE_WARNING("    " << key << " DOWN");
+			guiKeyBoardMode.update(key, true);
+			MacOs::setKeyboardMove(guiKeyBoardMode, key, true, false);
+		}
+	} else {
+		if (guiKeyBoardMode.get(key) == true) {
+			GALE_WARNING("    " << key << " UP");
+			guiKeyBoardMode.update(key, false);
+			MacOs::setKeyboardMove(guiKeyBoardMode, key, false, false);
+		}
+	}
+}
+
 - (void)flagsChanged:(NSEvent *)theEvent {
+	uint32_t bitField = [theEvent modifierFlags];
+	GALE_ERROR("flagsChanged : " << std::hex << [theEvent modifierFlags]);
 	#ifdef __MAC_10_12
-		if (([theEvent modifierFlags] & NSEventModifierFlagCapsLock) != 0) {
+		[self flagsUpdate:bitField: NSEventModifierFlagCapsLock: gale::key::keyboard::capLock];
 	#else
-		if (([theEvent modifierFlags] & NSAlphaShiftKeyMask) != 0) {
+		[self flagsUpdate:bitField: NSAlphaShiftKeyMask: gale::key::keyboard::capLock];
 	#endif
-		GALE_VERBOSE("NSEventModifierFlagCapsLock");
-		if (guiKeyBoardMode.getCapsLock() == false) {
-			guiKeyBoardMode.setCapsLock(true);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::capLock, true, false);
-		}
-	} else {
-		if (guiKeyBoardMode.getCapsLock() == true) {
-			guiKeyBoardMode.setCapsLock(false);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::capLock, false, false);
-		}
-	}
-	
 	#ifdef __MAC_10_12
-		if (([theEvent modifierFlags] & NSEventModifierFlagShift) != 0) {
+		//[self flagsUpdate:bitField: NSEventModifierFlagShift: gale::key::keyboard::shiftLeft];
+		[self flagsUpdate:bitField: 0x02: gale::key::keyboard::shiftLeft];
+		[self flagsUpdate:bitField: 0x04: gale::key::keyboard::shiftRight];
 	#else
-		if (([theEvent modifierFlags] & NSShiftKeyMask) != 0) {
+		[self flagsUpdate:bitField: NSShiftKeyMask: gale::key::keyboard::shiftLeft];
 	#endif
-		GALE_VERBOSE("NSEventModifierFlagShift");
-		if (guiKeyBoardMode.getShift() == false) {
-			guiKeyBoardMode.setShift(true);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::shiftLeft, true, false);
-		}
-	} else {
-		if (guiKeyBoardMode.getShift() == true) {
-			guiKeyBoardMode.setShift(false);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::shiftLeft, false, false);
-		}
-	}
-	
 	#ifdef __MAC_10_12
-		if (([theEvent modifierFlags] & NSEventModifierFlagControl) != 0) {
+		//[self flagsUpdate:bitField: NSEventModifierFlagControl: gale::key::keyboard::ctrlLeft];
+		[self flagsUpdate:bitField: 0x0001: gale::key::keyboard::ctrlLeft];
+		[self flagsUpdate:bitField: 0x2000: gale::key::keyboard::ctrlRight];
 	#else
-		if (([theEvent modifierFlags] & NSControlKeyMask) != 0) {
+		[self flagsUpdate:bitField: NSControlKeyMask: gale::key::keyboard::ctrlLeft];
 	#endif
-		//GALE_VERBOSE("NSEventModifierFlagControl");
-		if (guiKeyBoardMode.getCtrl() == false) {
-			GALE_VERBOSE("NSEventModifierFlagControl DOWN");
-			guiKeyBoardMode.setCtrl(true);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::ctrlLeft, true, false);
-		}
-	} else {
-		if (guiKeyBoardMode.getCtrl() == true) {
-			GALE_VERBOSE("NSEventModifierFlagControl UP");
-			guiKeyBoardMode.setCtrl(false);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::ctrlLeft, false, false);
-		}
-	}
-	
 	#ifdef __MAC_10_12
-		if (([theEvent modifierFlags] & NSEventModifierFlagOption) != 0) {
+		//[self flagsUpdate:bitField: NSEventModifierFlagOption: gale::key::keyboard::altLeft];
+		[self flagsUpdate:bitField: 0x0020: gale::key::keyboard::altLeft];
+		[self flagsUpdate:bitField: 0x0040: gale::key::keyboard::altRight];
 	#else
-		if (([theEvent modifierFlags] & NSAlternateKeyMask) != 0) {
+		[self flagsUpdate:bitField: NSAlternateKeyMask: gale::key::keyboard::altLeft];
 	#endif
-		GALE_VERBOSE("NSEventModifierFlagOption");
-		if (guiKeyBoardMode.getAlt() == false) {
-			guiKeyBoardMode.setAlt(true);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::alt, true, false);
-		}
-	} else {
-		if (guiKeyBoardMode.getAlt() == true) {
-			guiKeyBoardMode.setAlt(false);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::alt, false, false);
-		}
-	}
-	
 	#ifdef __MAC_10_12
-		if (([theEvent modifierFlags] & NSEventModifierFlagCommand) != 0) {
+		//[self flagsUpdate:bitField: NSEventModifierFlagCommand: gale::key::keyboard::metaLeft];
+		[self flagsUpdate:bitField: 0x0008: gale::key::keyboard::metaLeft];
+		[self flagsUpdate:bitField: 0x0010: gale::key::keyboard::metaRight];
 	#else
-		if (([theEvent modifierFlags] & NSCommandKeyMask) != 0) {
+		[self flagsUpdate:bitField: NSCommandKeyMask: gale::key::keyboard::metaLeft];
 	#endif
-		GALE_VERBOSE("NSEventModifierFlagCommand");
-		if (guiKeyBoardMode.getMeta() == false) {
-			guiKeyBoardMode.setMeta(true);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::metaLeft, true, false);
-		}
-	} else {
-		if (guiKeyBoardMode.getMeta() == true) {
-			guiKeyBoardMode.setMeta(false);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::metaLeft, false, false);
-		}
-	}
-	
 	#ifdef __MAC_10_12
-		if (([theEvent modifierFlags] & NSEventModifierFlagNumericPad) != 0) {
+		[self flagsUpdate:bitField: NSEventModifierFlagNumericPad: gale::key::keyboard::numLock];
 	#else
-		if (([theEvent modifierFlags] & NSNumericPadKeyMask) != 0) {
+		[self flagsUpdate:bitField: NSNumericPadKeyMask: gale::key::keyboard::numLock];
 	#endif
-		GALE_VERBOSE("NSEventModifierFlagNumericPad");
-		if (guiKeyBoardMode.getNumLock() == false) {
-			guiKeyBoardMode.setNumLock(true);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::numLock, true, false);
-		}
-	} else {
-		if (guiKeyBoardMode.getNumLock() == true) {
-			guiKeyBoardMode.setNumLock(false);
-			MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::numLock, false, false);
-		}
-	}
 	#ifdef __MAC_10_12
-		if (([theEvent modifierFlags] & NSEventModifierFlagHelp) != 0) {
+		if ((bitField & NSEventModifierFlagFunction) != 0) {
 	#else
-		if (([theEvent modifierFlags] & NSHelpKeyMask) != 0) {
+		if ((bitField & NSFunctionKeyMask) != 0) {
 	#endif
-		GALE_VERBOSE("NSEventModifierFlagHelp");
-	}
-	#ifdef __MAC_10_12
-		if (([theEvent modifierFlags] & NSEventModifierFlagFunction) != 0) {
-	#else
-		if (([theEvent modifierFlags] & NSFunctionKeyMask) != 0) {
-	#endif
-		GALE_VERBOSE("NSEventModifierFlagFunction");
+		GALE_WARNING("NSEventModifierFlagFunction");
 		MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::contextMenu, true, false);
 		MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::contextMenu, false, false);
 	}
-	GALE_VERBOSE("EVENT : " << int32_t([theEvent modifierFlags]));
+	GALE_WARNING("        ==> new state special: " << etk::to_string(guiKeyBoardMode));
 }
 
 // this generate all the event entry availlable ==> like a big keep focus ...

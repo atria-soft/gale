@@ -41,8 +41,8 @@ static const char* keyboardDescriptionString[] = {
 	"keyboard::ctrlRight",
 	"keyboard::metaLeft",
 	"keyboard::metaRight",
-	"keyboard::alt",
-	"keyboard::altGr",
+	"keyboard::altLeft",
+	"keyboard::altRight",
 	"keyboard::contextMenu",
 	"keyboard::numLock",
 	// harware section:

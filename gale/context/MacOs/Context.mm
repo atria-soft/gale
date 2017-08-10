@@ -91,9 +91,9 @@ class MacOSInterface : public gale::Context {
 						move = gale::key::keyboard::right;
 						break;
 				}
-				OS_setKeyboard(_special, move, (_isDown==false?gale::key::status::down:gale::key::status::up), _isAReapeateKey);
+				OS_setKeyboard(_special, move, (_isDown==true?gale::key::status::down:gale::key::status::up), _isAReapeateKey);
 			} else {
-				OS_setKeyboard(_special, gale::key::keyboard::character, (_isDown==false?gale::key::status::down:gale::key::status::up), _isAReapeateKey, _unichar);
+				OS_setKeyboard(_special, gale::key::keyboard::character, (_isDown==true?gale::key::status::down:gale::key::status::up), _isAReapeateKey, _unichar);
 			}
 		}
 		void MAC_SetKeyboardMove(gale::key::Special& _special,
