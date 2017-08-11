@@ -90,7 +90,7 @@ static std::vector<std::pair<uint16_t,unichar>> g_listlasteventDown;
 		// We remap it to the correct tabulation.
 		c = 9;
 	}
-	GALE_WARNING("Key Event " << c << "  = '" << char(c) << "' isDown=" << _isDown << " keycode=" << keycode);
+	GALE_VERBOSE("Key Event " << c << "  = '" << char(c) << "' isDown=" << _isDown << " keycode=" << keycode);
 	bool find = true;
 	enum gale::key::keyboard keyInput;
 	switch (c) {
@@ -235,13 +235,13 @@ static std::vector<std::pair<uint16_t,unichar>> g_listlasteventDown;
 	if ((bitField & flags) != 0) {
 		GALE_VERBOSE("Flag change: " << key);
 		if (guiKeyBoardMode.get(key) == false) {
-			GALE_WARNING("    " << key << " DOWN");
+			GALE_DEBUG("    " << key << " DOWN");
 			guiKeyBoardMode.update(key, true);
 			MacOs::setKeyboardMove(guiKeyBoardMode, key, true, false);
 		}
 	} else {
 		if (guiKeyBoardMode.get(key) == true) {
-			GALE_WARNING("    " << key << " UP");
+			GALE_DEBUG("    " << key << " UP");
 			guiKeyBoardMode.update(key, false);
 			MacOs::setKeyboardMove(guiKeyBoardMode, key, false, false);
 		}
@@ -250,7 +250,7 @@ static std::vector<std::pair<uint16_t,unichar>> g_listlasteventDown;
 
 - (void)flagsChanged:(NSEvent *)theEvent {
 	uint32_t bitField = [theEvent modifierFlags];
-	GALE_ERROR("flagsChanged : " << std::hex << [theEvent modifierFlags]);
+	GALE_VERBOSE("flagsChanged : " << std::hex << [theEvent modifierFlags]);
 	#ifdef __MAC_10_12
 		[self flagsUpdate:bitField: NSEventModifierFlagCapsLock: gale::key::keyboard::capLock];
 	#else
@@ -294,11 +294,11 @@ static std::vector<std::pair<uint16_t,unichar>> g_listlasteventDown;
 	#else
 		if ((bitField & NSFunctionKeyMask) != 0) {
 	#endif
-		GALE_WARNING("NSEventModifierFlagFunction");
+		GALE_VERBOSE("NSEventModifierFlagFunction");
 		MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::contextMenu, true, false);
 		MacOs::setKeyboardMove(guiKeyBoardMode, gale::key::keyboard::contextMenu, false, false);
 	}
-	GALE_WARNING("        ==> new state special: " << etk::to_string(guiKeyBoardMode));
+	GALE_VERBOSE("        ==> new state special: " << etk::to_string(guiKeyBoardMode));
 }
 
 // this generate all the event entry availlable ==> like a big keep focus ...

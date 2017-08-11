@@ -9,8 +9,8 @@
 
 #define GALE_FLAG_KEY_CAPS_LOCK   0x00000001
 #define GALE_FLAG_KEY_SHIFT       0x00000030
-#define GALE_FLAG_KEY_SHIFT_LEFT  0x80000010
-#define GALE_FLAG_KEY_SHIFT_RIGHT 0x40000020
+#define GALE_FLAG_KEY_SHIFT_LEFT  0x00000010
+#define GALE_FLAG_KEY_SHIFT_RIGHT 0x00000020
 #define GALE_FLAG_KEY_CTRL        0x00000300
 #define GALE_FLAG_KEY_CTRL_LEFT   0x00000100
 #define GALE_FLAG_KEY_CTRL_RIGHT  0x00000200
@@ -20,7 +20,6 @@
 #define GALE_FLAG_KEY_ALT         0x00030000
 #define GALE_FLAG_KEY_ALT_LEFT    0x00010000
 #define GALE_FLAG_KEY_ALT_RIGHT   0x00020000
-#define GALE_FLAG_KEY_ALTGR       0x00020000
 #define GALE_FLAG_KEY_NUM_LOCK    0x00000002
 #define GALE_FLAG_KEY_INSERT      0x00000003
 
@@ -88,9 +87,9 @@ bool gale::key::Special::get(enum gale::key::keyboard _move) {
 			return getMetaLeft();
 		case keyboard::metaRight:
 			return getMetaRight();
-		case keyboard::altRight:
-			return getAltLeft();
 		case keyboard::altLeft:
+			return getAltLeft();
+		case keyboard::altRight:
 			return getAltRight();
 		case keyboard::numLock:
 			return getNumLock();

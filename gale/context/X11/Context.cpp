@@ -210,7 +210,7 @@ class X11Interface : public gale::Context {
 			}
 			createX11Context();
 			createOGlContext();
-			// reset the Atom properties ...
+			// Reset the Atom properties.
 			XAtomSelection        = XInternAtom(m_display, "PRIMARY", 0);
 			XAtomClipBoard        = XInternAtom(m_display, "CLIPBOARD", 0);
 			XAtomTargetString     = XInternAtom(m_display, "STRING", 0);
@@ -344,9 +344,9 @@ class X11Interface : public gale::Context {
 								char * atomNameSelection = XGetAtomName(m_display, req->selection);
 								char * atomNameTarget = XGetAtomName(m_display, req->target);
 								GALE_INFO("    from: " << atomNameProperty << "  request=" << atomNameSelection << " in " << atomNameTarget);
-								if (nullptr != atomNameProperty) { XFree(atomNameProperty); }
-								if (nullptr != atomNameSelection) { XFree(atomNameSelection); }
-								if (nullptr != atomNameTarget) { XFree(atomNameTarget); }
+								if (atomNameProperty != nullptr) { XFree(atomNameProperty); }
+								if (atomNameSelection != nullptr) { XFree(atomNameSelection); }
+								if (atomNameTarget != nullptr) { XFree(atomNameTarget); }
 							}
 							#endif
 							
@@ -586,6 +586,7 @@ class X11Interface : public gale::Context {
 							X11_INFO("X11 event : " << event.type << " = 'KeyPress/KeyRelease' ");
 							{
 								X11_DEBUG("eventKey : " << event.xkey.keycode << " state : " << event.xkey.state);
+								/*
 								if (event.xkey.state & (1<<0) ) {
 									//GALE_DEBUG("    Special Key : SHIFT");
 									m_guiKeyBoardMode.setShift(true);
@@ -631,6 +632,7 @@ class X11Interface : public gale::Context {
 								} else {
 									m_guiKeyBoardMode.setAltGr(false);
 								}
+								*/
 								bool find = true;
 								enum gale::key::keyboard keyInput;
 								switch (event.xkey.keycode) {
@@ -676,17 +678,17 @@ class X11Interface : public gale::Context {
 									case 76:    keyInput = gale::key::keyboard::f10; break;
 									case 95:    keyInput = gale::key::keyboard::f11; break;
 									case 96:    keyInput = gale::key::keyboard::f12; break;
-									case 66:    keyInput = gale::key::keyboard::capLock;     m_guiKeyBoardMode.setCapsLock( (event.type == KeyPress) ? true : false); break;
-									case 50:    keyInput = gale::key::keyboard::shiftLeft;   m_guiKeyBoardMode.setShift   ( (event.type == KeyPress) ? true : false); break;
-									case 62:    keyInput = gale::key::keyboard::shiftRight;  m_guiKeyBoardMode.setShift   ( (event.type == KeyPress) ? true : false); break;
-									case 37:    keyInput = gale::key::keyboard::ctrlLeft;    m_guiKeyBoardMode.setCtrl    ( (event.type == KeyPress) ? true : false); break;
-									case 105:   keyInput = gale::key::keyboard::ctrlRight;   m_guiKeyBoardMode.setCtrl    ( (event.type == KeyPress) ? true : false); break;
-									case 133:   keyInput = gale::key::keyboard::metaLeft;    m_guiKeyBoardMode.setMeta    ( (event.type == KeyPress) ? true : false); break;
-									case 134:   keyInput = gale::key::keyboard::metaRight;   m_guiKeyBoardMode.setMeta    ( (event.type == KeyPress) ? true : false); break;
-									case 64:    keyInput = gale::key::keyboard::alt;         m_guiKeyBoardMode.setAlt     ( (event.type == KeyPress) ? true : false); break;
-									case 108:   keyInput = gale::key::keyboard::altGr;       m_guiKeyBoardMode.setAltGr   ( (event.type == KeyPress) ? true : false); break;
+									case 66:    keyInput = gale::key::keyboard::capLock;     m_guiKeyBoardMode.setCapsLock  (event.type == KeyPress); break;
+									case 50:    keyInput = gale::key::keyboard::shiftLeft;   m_guiKeyBoardMode.setShiftLeft (event.type == KeyPress); break;
+									case 62:    keyInput = gale::key::keyboard::shiftRight;  m_guiKeyBoardMode.setShiftRight(event.type == KeyPress); break;
+									case 37:    keyInput = gale::key::keyboard::ctrlLeft;    m_guiKeyBoardMode.setCtrlLeft  (event.type == KeyPress); break;
+									case 105:   keyInput = gale::key::keyboard::ctrlRight;   m_guiKeyBoardMode.setCtrlRight (event.type == KeyPress); break;
+									case 133:   keyInput = gale::key::keyboard::metaLeft;    m_guiKeyBoardMode.setMetaLeft  (event.type == KeyPress); break;
+									case 134:   keyInput = gale::key::keyboard::metaRight;   m_guiKeyBoardMode.setMetaRight (event.type == KeyPress); break;
+									case 64:    keyInput = gale::key::keyboard::alt;         m_guiKeyBoardMode.setAltLeft   (event.type == KeyPress); break;
+									case 108:   keyInput = gale::key::keyboard::altGr;       m_guiKeyBoardMode.setAltRight  (event.type == KeyPress); break;
 									case 135:   keyInput = gale::key::keyboard::contextMenu; break;
-									case 77:    keyInput = gale::key::keyboard::numLock;     m_guiKeyBoardMode.setNumLock ( (event.type == KeyPress) ? true : false); break;
+									case 77:    keyInput = gale::key::keyboard::numLock;     m_guiKeyBoardMode.setNumLock   (event.type == KeyPress); break;
 									case 91: // Suppr on keypad
 										find = false;
 										if(m_guiKeyBoardMode.getNumLock() == true){
