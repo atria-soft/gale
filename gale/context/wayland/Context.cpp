@@ -875,15 +875,15 @@ class WAYLANDInterface : public gale::Context {
 				case KEY_F10:    keyInput = gale::key::keyboard::f10; break;
 				case KEY_F11:    keyInput = gale::key::keyboard::f11; break;
 				case KEY_F12:    keyInput = gale::key::keyboard::f12; break;
-				case KEY_CAPSLOCK:    keyInput = gale::key::keyboard::capLock;     m_guiKeyBoardMode.setCapsLock(_isDown); break;
-				case KEY_LEFTSHIFT:   keyInput = gale::key::keyboard::shiftLeft;   m_guiKeyBoardMode.setShift   (_isDown); break;
-				case KEY_RIGHTSHIFT:  keyInput = gale::key::keyboard::shiftRight;  m_guiKeyBoardMode.setShift   (_isDown); break;
-				case KEY_LEFTCTRL:    keyInput = gale::key::keyboard::ctrlLeft;    m_guiKeyBoardMode.setCtrl    (_isDown); break;
-				case KEY_RIGHTCTRL:   keyInput = gale::key::keyboard::ctrlRight;   m_guiKeyBoardMode.setCtrl    (_isDown); break;
-				case KEY_LEFTMETA:    keyInput = gale::key::keyboard::metaLeft;    m_guiKeyBoardMode.setMeta    (_isDown); break;
-				case KEY_RIGHTMETA:   keyInput = gale::key::keyboard::metaRight;   m_guiKeyBoardMode.setMeta    (_isDown); break;
-				case KEY_LEFTALT:     keyInput = gale::key::keyboard::alt;         m_guiKeyBoardMode.setAlt     (_isDown); break;
-				case KEY_RIGHTALT:    keyInput = gale::key::keyboard::altGr;       m_guiKeyBoardMode.setAltGr   (_isDown); break;
+				case KEY_CAPSLOCK:    keyInput = gale::key::keyboard::capLock;     m_guiKeyBoardMode.setCapsLock  (_isDown); break;
+				case KEY_LEFTSHIFT:   keyInput = gale::key::keyboard::shiftLeft;   m_guiKeyBoardMode.setShiftLeft (_isDown); break;
+				case KEY_RIGHTSHIFT:  keyInput = gale::key::keyboard::shiftRight;  m_guiKeyBoardMode.setShiftRight(_isDown); break;
+				case KEY_LEFTCTRL:    keyInput = gale::key::keyboard::ctrlLeft;    m_guiKeyBoardMode.setCtrlLeft  (_isDown); break;
+				case KEY_RIGHTCTRL:   keyInput = gale::key::keyboard::ctrlRight;   m_guiKeyBoardMode.setCtrlRight (_isDown); break;
+				case KEY_LEFTMETA:    keyInput = gale::key::keyboard::metaLeft;    m_guiKeyBoardMode.setMetaLeft  (_isDown); break;
+				case KEY_RIGHTMETA:   keyInput = gale::key::keyboard::metaRight;   m_guiKeyBoardMode.setMetaRight (_isDown); break;
+				case KEY_LEFTALT:     keyInput = gale::key::keyboard::alt;         m_guiKeyBoardMode.setAltLeft   (_isDown); break;
+				case KEY_RIGHTALT:    keyInput = gale::key::keyboard::altGr;       m_guiKeyBoardMode.setAltRight  (_isDown); break;
 				case KEY_COMPOSE:     keyInput = gale::key::keyboard::contextMenu; break;
 				case KEY_NUMLOCK:     keyInput = gale::key::keyboard::numLock;     m_guiKeyBoardMode.setNumLock (_isDown); break;
 				case KEY_DELETE: // Suppr on keypad
@@ -1001,6 +1001,7 @@ class WAYLANDInterface : public gale::Context {
 			GALE_VERBOSE("                 0x04 = " << ((_modsLocked&0x04)!=0?"true":"false") << "  ");
 			GALE_VERBOSE("                 0x02 = " << ((_modsLocked&0x02)!=0?"true":"false") << "  CAP-lock");
 			GALE_VERBOSE("                 0x01 = " << ((_modsLocked&0x01)!=0?"true":"false") << "  ");
+			/*
 			if ((_modsLocked&0x02)!=0) {
 				m_guiKeyBoardMode.setCapsLock(true);
 			} else {
@@ -1022,12 +1023,13 @@ class WAYLANDInterface : public gale::Context {
 				m_guiKeyBoardMode.setMeta(false);
 			}
 			if ((_modsDepressed&0x08)!=0) {
-				m_guiKeyBoardMode.setAlt(true);
+				m_guiKeyBoardMode.setAltLeft(true);
 			} else {
-				m_guiKeyBoardMode.setAlt(false);
+				m_guiKeyBoardMode.setAltLeft(false);
 			}
 			// this is not specific ...
-			m_guiKeyBoardMode.setAltGr(false);
+			m_guiKeyBoardMode.setAltRight(false);
+			*/
 			if ((_modsLocked&0x10)!=0) {
 				m_guiKeyBoardMode.setNumLock(true);
 			} else {
