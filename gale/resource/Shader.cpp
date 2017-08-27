@@ -22,7 +22,7 @@ gale::resource::Shader::Shader() :
 	m_resourceLevel = 0;
 }
 
-void gale::resource::Shader::init(const std::string& _filename) {
+void gale::resource::Shader::init(const etk::String& _filename) {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	gale::Resource::init(_filename);
 	GALE_DEBUG("OGL : load SHADER '" << _filename << "'");

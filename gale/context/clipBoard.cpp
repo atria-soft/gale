@@ -17,7 +17,7 @@ note: copy id data :
        10 : middle button
 */
 //!< Local copy of the clipboards
-static std::string myCopy[gale::context::clipBoard::clipboardCount];
+static etk::String myCopy[gale::context::clipBoard::clipboardCount];
 
 static const char* clipboardDescriptionString[gale::context::clipBoard::clipboardCount+1] = {
 	"clipboard0",
@@ -35,7 +35,7 @@ static const char* clipboardDescriptionString[gale::context::clipBoard::clipboar
 	"clipboardCount"
 };
 
-std::ostream& gale::operator <<(std::ostream& _os, enum gale::context::clipBoard::clipboardListe _obj) {
+etk::Stream& gale::operator <<(etk::Stream& _os, enum gale::context::clipBoard::clipboardListe _obj) {
 	if (_obj >= 0 && _obj <gale::context::clipBoard::clipboardCount) {
 		_os << clipboardDescriptionString[int32_t(_obj)];
 	} else {
@@ -45,11 +45,11 @@ std::ostream& gale::operator <<(std::ostream& _os, enum gale::context::clipBoard
 }
 
 namespace etk {
-	template<> std::string to_string<enum gale::context::clipBoard::clipboardListe>(const enum gale::context::clipBoard::clipboardListe& _obj) {
+	template<> etk::String toString<enum gale::context::clipBoard::clipboardListe>(const enum gale::context::clipBoard::clipboardListe& _obj) {
 		return clipboardDescriptionString[int32_t(_obj)];
 	}
 	
-	template <> bool from_string<enum gale::context::clipBoard::clipboardListe>(enum gale::context::clipBoard::clipboardListe& _variableRet, const std::string& _value) {
+	template <> bool from_string<enum gale::context::clipBoard::clipboardListe>(enum gale::context::clipBoard::clipboardListe& _variableRet, const etk::String& _value) {
 		for (size_t iii=0; iii< sizeof(clipboardDescriptionString); ++iii) {
 			if (clipboardDescriptionString[iii] == _value) {
 				_variableRet = (enum gale::context::clipBoard::clipboardListe)iii;
@@ -76,7 +76,7 @@ void gale::context::clipBoard::unInit() {
 }
 
 
-void gale::context::clipBoard::set(enum gale::context::clipBoard::clipboardListe _clipboardID, const std::string& _data) {
+void gale::context::clipBoard::set(enum gale::context::clipBoard::clipboardListe _clipboardID, const etk::String& _data) {
 	// check if ID is correct
 	if(0 == _data.size()) {
 		GALE_INFO("request a copy of nothing");
@@ -113,7 +113,7 @@ void gale::context::clipBoard::request(enum gale::context::clipBoard::clipboardL
 }
 
 
-void gale::context::clipBoard::setSystem(enum gale::context::clipBoard::clipboardListe _clipboardID, const std::string& _data) {
+void gale::context::clipBoard::setSystem(enum gale::context::clipBoard::clipboardListe _clipboardID, const etk::String& _data) {
 	if(_clipboardID >= gale::context::clipBoard::clipboardCount) {
 		GALE_WARNING("request ClickBoard id error");
 		return;
@@ -123,8 +123,8 @@ void gale::context::clipBoard::setSystem(enum gale::context::clipBoard::clipboar
 }
 
 
-const std::string& gale::context::clipBoard::get(enum gale::context::clipBoard::clipboardListe _clipboardID) {
-	static const std::string emptyString("");
+const etk::String& gale::context::clipBoard::get(enum gale::context::clipBoard::clipboardListe _clipboardID) {
+	static const etk::String emptyString("");
 	if(_clipboardID >= gale::context::clipBoard::clipboardCount) {
 		GALE_WARNING("request ClickBoard id error");
 		return emptyString;

@@ -45,7 +45,7 @@ namespace gale {
 				};
 			// Public API:
 			protected:
-				void init(const std::string& _filename);
+				void init(const etk::String& _filename);
 				void init();
 				Texture();
 			public:
@@ -57,12 +57,12 @@ namespace gale {
 			
 			private:
 				// Image propoerties:
-				ememory::SharedPtr<std::vector<char>> m_data; //!< pointer on the image data.
+				ememory::SharedPtr<etk::Vector<char>> m_data; //!< pointer on the image data.
 				ivec2 m_size; //!< size of the image data.
 				enum dataType m_dataType; //!< Type of the image.
 				enum color m_dataColorSpace; //!< Color space of the image.
 			public:
-				void setTexture(const ememory::SharedPtr<std::vector<char>>& _data,
+				void setTexture(const ememory::SharedPtr<etk::Vector<char>>& _data,
 				                const ivec2& _size,
 				                enum gale::resource::Texture::dataType _dataType,
 				                enum gale::resource::Texture::color _dataColorSpace);

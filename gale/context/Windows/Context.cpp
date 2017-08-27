@@ -23,16 +23,16 @@
 #include <windowsx.h>
 #include <etk/etk.hpp>
 
-static std::string GetLastErrorAsString() {
+static etk::String GetLastErrorAsString() {
 	//Get the error message, if any.
 	DWORD errorMessageID = ::GetLastError();
 	if(errorMessageID == 0) {
-		return std::string(); //No error message has been recorded
+		return etk::String(); //No error message has been recorded
 	}
 	LPSTR messageBuffer = nullptr;
 	size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 	                             NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
-	std::string message(messageBuffer, size);
+	etk::String message(messageBuffer, size);
 	//Free the buffer.
 	LocalFree(messageBuffer);
 	return message;
@@ -236,7 +236,7 @@ class WindowsContext : public gale::Context {
 						char* buffer = nullptr;
 						if(OpenClipboard(m_hWnd)) {
 							buffer = (char*)GetClipboardData(CF_TEXT);
-							std::string tmpppp((char*)buffer);
+							etk::String tmpppp((char*)buffer);
 							// TODO : Check if we need to free buffer ...
 							gale::context::clipBoard::setSystem(gale::context::clipBoard::clipboardSelection, tmpppp);
 							// just transmit an event , we have the data in the system
@@ -262,7 +262,7 @@ class WindowsContext : public gale::Context {
 				case gale::context::clipBoard::clipboardStd:
 					// Request the clipBoard :
 					if (m_clipBoardOwnerStd == false) {
-						std::string tmpData = gale::context::clipBoard::get(_clipboardID);
+						etk::String tmpData = gale::context::clipBoard::get(_clipboardID);
 						//put your text in source
 						if(OpenClipboard(m_hWnd)) {
 							HGLOBAL clipbuffer;
@@ -611,7 +611,7 @@ class WindowsContext : public gale::Context {
 			return DefWindowProc(_hWnd, _message, _wParam, _lParam);
 		}
 		/****************************************************************************************/
-		void setTitle(const std::string& _title) {
+		void setTitle(const etk::String& _title) {
 			GALE_VERBOSE("Windows: set Title (START)");
 			SetWindowText(m_hWnd, _title.c_str());
 			GALE_VERBOSE("Windows: set Title (END)");

@@ -18,7 +18,7 @@ namespace gale {
 		class Shader : public gale::Resource {
 			private :
 				bool m_exist; //!< The shader file existed and has been loaded
-				std::string m_fileData; //!< A copy of the data loaded from the file (usefull only when opengl context is removed)
+				etk::String m_fileData; //!< A copy of the data loaded from the file (usefull only when opengl context is removed)
 				int64_t m_shader; //!< opengl id of this element
 				gale::openGL::shader::type m_type; //!< Type of the current shader(vertex/fragment)
 			protected:
@@ -28,7 +28,7 @@ namespace gale {
 				 */
 				Shader();
 			public:
-				void init(const std::string& _filename);
+				void init(const etk::String& _filename);
 				DECLARE_RESOURCE_NAMED_FACTORY(Shader);
 				/**
 				 * @brief Destructor, remove the current Shader

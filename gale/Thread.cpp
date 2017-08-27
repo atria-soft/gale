@@ -131,6 +131,6 @@ enum gale::Thread::state gale::Thread::getState() {
 	return m_state;
 }
 
-void gale::Thread::setName(std::string _name) {
+void gale::Thread::setName(etk::String _name) {
 	m_name = _name;
 }

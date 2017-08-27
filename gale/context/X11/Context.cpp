@@ -53,8 +53,8 @@ static bool hasDisplay = false;
 	#define X11_INFO       GALE_INFO
 	#define X11_CRITICAL   GALE_CRITICAL
 	static int32_t callLevel = 0;
-	std::string getOffset(int32_t _size) {
-		std::string out;
+	etk::String getOffset(int32_t _size) {
+		etk::String out;
 		for (int32_t iii=0; iii<_size; ++iii) {
 			out += "....";
 		}
@@ -62,10 +62,10 @@ static bool hasDisplay = false;
 	}
 	class GaleTmpFuncCall {
 		private:
-			std::string m_value;
+			etk::String m_value;
 			int32_t m_level;
 		public:
-			GaleTmpFuncCall(const std::string& _value) :
+			GaleTmpFuncCall(const etk::String& _value) :
 			  m_value(_value),
 			  m_level(callLevel++) {
 				GALE_INFO(getOffset(m_level) << " ==> " << m_value);
@@ -161,7 +161,7 @@ class X11Interface : public gale::Context {
 		Atom XAtomTargetTarget;
 		Atom XAtomGALE;
 		Atom XAtomDeleteWindows;
-		std::string m_uniqueWindowsName;
+		etk::String m_uniqueWindowsName;
 		enum gale::context::cursor m_currentCursor; //!< select the current cursor to display :
 		char32_t m_lastKeyPressed; //!< The last element key presed...
 	public:
@@ -216,7 +216,7 @@ class X11Interface : public gale::Context {
 			XAtomTargetString     = XInternAtom(m_display, "STRING", 0);
 			XAtomTargetStringUTF8 = XInternAtom(m_display, "UTF8_STRING", 0);
 			XAtomTargetTarget     = XInternAtom(m_display, "TARGETS", 0);
-			m_uniqueWindowsName   = "GALE_" + etk::to_string(etk::tool::irand(0, 1999999999));
+			m_uniqueWindowsName   = "GALE_" + etk::toString(etk::tool::irand(0, 1999999999));
 			XAtomGALE             = XInternAtom(m_display, m_uniqueWindowsName.c_str(), 0);
 			XAtomDeleteWindows    = XInternAtom(m_display, "WM_DELETE_WINDOW", 0);
 			m_run = true;
@@ -311,12 +311,12 @@ class X11Interface : public gale::Context {
 								                   &buf// **prop_return);
 								                   );
 								if (m_clipBoardRequestPrimary == true) {
-									std::string tmpppp((char*)buf);
+									etk::String tmpppp((char*)buf);
 									gale::context::clipBoard::setSystem(gale::context::clipBoard::clipboardSelection, tmpppp);
 									// just transmit an event , we have the data in the system
 									OS_ClipBoardArrive(gale::context::clipBoard::clipboardSelection);
 								} else {
-									std::string tmpppp((char*)buf);
+									etk::String tmpppp((char*)buf);
 									gale::context::clipBoard::setSystem(gale::context::clipBoard::clipboardStd, tmpppp);
 									// just transmit an event , we have the data in the system
 									OS_ClipBoardArrive(gale::context::clipBoard::clipboardStd);
@@ -350,7 +350,7 @@ class X11Interface : public gale::Context {
 							}
 							#endif
 							
-							std::string tmpData = "";
+							etk::String tmpData = "";
 							if (req->selection == XAtomSelection) {
 								tmpData = gale::context::clipBoard::get(gale::context::clipBoard::clipboardSelection);
 							} else if (req->selection == XAtomClipBoard) {
@@ -1252,7 +1252,7 @@ class X11Interface : public gale::Context {
 			return true;
 		}
 		/****************************************************************************************/
-		void setIcon(const std::string& _inputFile) {
+		void setIcon(const etk::String& _inputFile) {
 			X11_FUNC();
 			#if    defined(GALE_BUILD_EGAMI) \
 			    && !defined(__TARGET_OS__Web)
@@ -1459,7 +1459,7 @@ class X11Interface : public gale::Context {
 			return true;
 		}
 		/****************************************************************************************/
-		void setTitle(const std::string& _title) {
+		void setTitle(const etk::String& _title) {
 			X11_FUNC();
 			X11_INFO("X11: set Title (START)");
 			XTextProperty tp;
@@ -1473,9 +1473,9 @@ class X11Interface : public gale::Context {
 			XSetWMIconName(m_display, m_WindowHandle, &tp);
 			X11_INFO("X11: set Title (END)");
 		}
-		void openURL(const std::string& _url) {
+		void openURL(const etk::String& _url) {
 			X11_FUNC();
-			std::string req = "xdg-open ";
+			etk::String req = "xdg-open ";
 			req += _url;
 			system(req.c_str());
 			return;

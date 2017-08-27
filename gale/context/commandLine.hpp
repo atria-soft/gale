@@ -11,7 +11,7 @@ namespace gale {
 	namespace context {
 		class CommandLine {
 			private:
-				std::vector<std::string> m_listArgs; //!< list of all argument parsed
+				etk::Vector<etk::String> m_listArgs; //!< list of all argument parsed
 			public:
 				/**
 				 * @brief Parse the command line parameters
@@ -26,12 +26,12 @@ namespace gale {
 				 * @brief get an element with a specific ID
 				 * @return _id The cmdLine Id element
 				 */
-				const std::string& get(int32_t _id);
+				const etk::String& get(int32_t _id);
 				/**
 				 * @brief add one element at the Command line
 				 * @param[in] _newElement String in the input that might be added.
 				 */
-				void add(const std::string& _newElement);
+				void add(const etk::String& _newElement);
 				/**
 				 * @brief remove an element
 				 * @param[in] _id Id of the element

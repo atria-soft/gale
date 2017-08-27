@@ -193,7 +193,7 @@ namespace gale {
 				 */
 				bool getFlag(uint32_t _flag) const;
 		};
-		std::ostream& operator <<(std::ostream& _os, const gale::key::Special& _obj);
+		etk::Stream& operator <<(etk::Stream& _os, const gale::key::Special& _obj);
 	}
 }
 

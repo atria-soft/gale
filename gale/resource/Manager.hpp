@@ -6,7 +6,7 @@
 #pragma once
 
 #include <list>
-#include <vector>
+#include <etk/Vector.hpp>
 #include <etk/types.hpp>
 #include <gale/debug.hpp>
 #include <gale/resource/Resource.hpp>
@@ -16,7 +16,7 @@ namespace gale {
 		class Manager{
 			private:
 				std::list<ememory::WeakPtr<gale::Resource>> m_resourceList;
-				std::vector<ememory::SharedPtr<gale::Resource>> m_resourceListToUpdate;
+				etk::Vector<ememory::SharedPtr<gale::Resource>> m_resourceListToUpdate;
 				bool m_contextHasBeenRemoved;
 				bool m_exiting;
 				std::recursive_mutex m_mutex;
@@ -62,7 +62,7 @@ namespace gale {
 				void applicationExiting();
 			public:
 				// internal API to extent eResources in extern Soft
-				ememory::SharedPtr<gale::Resource> localKeep(const std::string& _filename);
+				ememory::SharedPtr<gale::Resource> localKeep(const etk::String& _filename);
 				void localAdd(const ememory::SharedPtr<gale::Resource>& _object);
 				virtual void cleanInternalRemoved();
 		};

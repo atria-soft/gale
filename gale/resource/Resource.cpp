@@ -25,7 +25,7 @@ void gale::Resource::init() {
 	m_resourceHasBeenInit=true;
 }
 
-void gale::Resource::init(const std::string& _name) {
+void gale::Resource::init(const etk::String& _name) {
 	m_resourceHasBeenInit=true;
 	m_name = _name;
 }
@@ -42,10 +42,10 @@ void gale::Resource::addResourceType(const char* _type) {
 		GALE_ERROR(" try to add a type with no value...");
 		return;
 	}
-	m_listType.push_back(_type);
+	m_listType.pushBack(_type);
 }
-std::string gale::Resource::getTypeDescription() {
-	std::string ret("gale::Resource");
+etk::String gale::Resource::getTypeDescription() {
+	etk::String ret("gale::Resource");
 	for(auto element : m_listType) {
 		ret += "|";
 		ret += element;
@@ -53,7 +53,7 @@ std::string gale::Resource::getTypeDescription() {
 	return ret;
 }
 
-bool gale::Resource::isTypeCompatible(const std::string& _type) {
+bool gale::Resource::isTypeCompatible(const etk::String& _type) {
 	if (_type == "gale::Resource") {
 		return true;
 	}

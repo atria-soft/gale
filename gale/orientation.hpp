@@ -11,5 +11,5 @@ namespace gale {
 		screenLandscape,
 		screenPortrait
 	};
-	std::ostream& operator <<(std::ostream& _os, enum gale::orientation _obj);
+	etk::Stream& operator <<(etk::Stream& _os, enum gale::orientation _obj);
 }

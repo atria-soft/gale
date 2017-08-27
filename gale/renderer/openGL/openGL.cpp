@@ -4,7 +4,7 @@
  * @license MPL v2.0 (see license file)
  */
 
-#include <vector>
+#include <etk/Vector.hpp>
 #include <gale/debug.hpp>
 #include <gale/renderer/openGL/openGL.hpp>
 #include <etk/stdTools.hpp>
@@ -60,7 +60,7 @@ static std::mutex& mutexOpenGl() {
 	return s_drawMutex;
 }
 
-std::vector<mat4> l_matrixList;
+etk::Vector<mat4> l_matrixList;
 mat4 l_matrixCamera;
 static uint32_t l_flagsCurrent = 0;
 static uint32_t l_flagsMustBeSet = 0;
@@ -72,7 +72,7 @@ void gale::openGL::lock() {
 	mutexOpenGl().lock();
 	l_matrixList.clear();
 	mat4 tmpMat;
-	l_matrixList.push_back(tmpMat);
+	l_matrixList.pushBack(tmpMat);
 	l_matrixCamera.identity();
 	l_flagsCurrent = 0;
 	l_flagsMustBeSet = 0;
@@ -84,8 +84,8 @@ void gale::openGL::unLock() {
 	mutexOpenGl().unlock();
 }
 
-static std::vector<std::thread::id>& getContextList() {
-	static std::vector<std::thread::id> g_val;
+static etk::Vector<std::thread::id>& getContextList() {
+	static etk::Vector<std::thread::id> g_val;
 	return g_val;
 }
 
@@ -106,7 +106,7 @@ void gale::openGL::threadHasContext() {
 	if (it != getContextList().end()) {
 		GALE_ERROR("set openGL context associate with threadID a second time ... ");
 	} else {
-		getContextList().push_back(std::this_thread::get_id());
+		getContextList().pushBack(std::this_thread::get_id());
 	}
 	mutexOpenGl().unlock();
 }
@@ -127,13 +127,13 @@ void gale::openGL::setBasicMatrix(const mat4& _newOne) {
 		GALE_ERROR("matrix is not corect size in the stack : " << l_matrixList.size());
 	}
 	l_matrixList.clear();
-	l_matrixList.push_back(_newOne);
+	l_matrixList.pushBack(_newOne);
 }
 
 void gale::openGL::setMatrix(const mat4& _newOne) {
 	if (l_matrixList.size() == 0) {
 		GALE_ERROR("set matrix list is not corect size in the stack : " << l_matrixList.size());
-		l_matrixList.push_back(_newOne);
+		l_matrixList.pushBack(_newOne);
 		return;
 	}
 	l_matrixList[l_matrixList.size()-1] = _newOne;
@@ -143,11 +143,11 @@ void gale::openGL::push() {
 	if (l_matrixList.size() == 0) {
 		GALE_ERROR("set matrix list is not corect size in the stack : " << l_matrixList.size());
 		mat4 tmp;
-		l_matrixList.push_back(tmp);
+		l_matrixList.pushBack(tmp);
 		return;
 	}
 	mat4 tmp = l_matrixList[l_matrixList.size()-1];
-	l_matrixList.push_back(tmp);
+	l_matrixList.pushBack(tmp);
 }
 
 void gale::openGL::pop() {
@@ -155,11 +155,11 @@ void gale::openGL::pop() {
 		GALE_ERROR("set matrix list is not corect size in the stack : " << l_matrixList.size());
 		l_matrixList.clear();
 		mat4 tmp;
-		l_matrixList.push_back(tmp);
+		l_matrixList.pushBack(tmp);
 		l_matrixCamera.identity();
 		return;
 	}
-	l_matrixList.pop_back();
+	l_matrixList.popBack();
 	l_matrixCamera.identity();
 }
 
@@ -167,7 +167,7 @@ const mat4& gale::openGL::getMatrix() {
 	if (l_matrixList.size() == 0) {
 		GALE_ERROR("set matrix list is not corect size in the stack : " << l_matrixList.size());
 		mat4 tmp;
-		l_matrixList.push_back(tmp);
+		l_matrixList.pushBack(tmp);
 	}
 	return l_matrixList[l_matrixList.size()-1];
 }
@@ -297,37 +297,37 @@ void gale::openGL::clear(uint32_t _flags) {
 	#endif
 }
 
-std::ostream& gale::openGL::operator <<(std::ostream& _os, enum gale::openGL::flag _obj) {
-	static std::vector<std::pair<enum openGL::flag, const char*>> list = {
-		std::make_pair(openGL::flag_blend, "FLAG_BLEND"),
-		std::make_pair(openGL::flag_clipDistanceI, "FLAG_CLIP_DISTANCE_I"),
-		std::make_pair(openGL::flag_colorLogigOP, "FLAG_COLOR_LOGIC_OP"),
-		std::make_pair(openGL::flag_cullFace, "FLAG_CULL_FACE"),
-		std::make_pair(openGL::flag_debugOutput, "FLAG_DEBUG_OUTPUT"),
-		std::make_pair(openGL::flag_debugOutputSynchronous, "flag_debugOutput_SYNCHRONOUS"),
-		std::make_pair(openGL::flag_depthClamp, "FLAG_DEPTH_CLAMP"),
-		std::make_pair(openGL::flag_depthTest, "FLAG_DEPTH_TEST"),
-		std::make_pair(openGL::flag_dither, "FLAG_DITHER"),
-		std::make_pair(openGL::flag_framebufferSRGB, "FLAG_FRAMEBUFFER_SRGB"),
-		std::make_pair(openGL::flag_lineSmooth, "FLAG_LINE_SMOOTH"),
-		std::make_pair(openGL::flag_multisample, "FLAG_MULTISAMPLE"),
-		std::make_pair(openGL::flag_polygonOffsetFill, "FLAG_POLYGON_OFFSET_FILL"),
-		std::make_pair(openGL::flag_polygonOffsetLine, "FLAG_POLYGON_OFFSET_LINE"),
-		std::make_pair(openGL::flag_polygonOffsetPoint, "FLAG_POLYGON_OFFSET_POINT"),
-		std::make_pair(openGL::flag_polygonSmooth, "FLAG_POLYGON_SMOOTH"),
-		std::make_pair(openGL::flag_primitiveRestart, "FLAG_PRIMITIVE_RESTART"),
-		std::make_pair(openGL::flag_primitiveRestartFixedIndex, "flag_primitiveRestart_FIXED_INDEX"),
-		std::make_pair(openGL::flag_sampleAlphaToCoverage, "FLAG_SAMPLE_ALPHA_TO_COVERAGE"),
-		std::make_pair(openGL::flag_sampleAlphaToOne, "FLAG_SAMPLE_ALPHA_TO_ONE"),
-		std::make_pair(openGL::flag_sampleCoverage, "FLAG_SAMPLE_COVERAGE"),
-		std::make_pair(openGL::flag_sampleShading, "FLAG_SAMPLE_SHADING"),
-		std::make_pair(openGL::flag_sampleMask, "FLAG_SAMPLE_MASK"),
-		std::make_pair(openGL::flag_scissorTest, "FLAG_SCISSOR_TEST"),
-		std::make_pair(openGL::flag_stencilTest, "FLAG_STENCIL_TEST"),
-		std::make_pair(openGL::flag_programPointSize, "FLAG_PROGRAM_POINT_SIZE"),
-		std::make_pair(openGL::flag_texture2D, "FLAG_TEXTURE_2D"),
-		std::make_pair(openGL::flag_alphaTest, "FLAG_ALPHA_TEST"),
-		std::make_pair(openGL::flag_fog, "FLAG_FOG")
+etk::Stream& gale::openGL::operator <<(etk::Stream& _os, enum gale::openGL::flag _obj) {
+	static etk::Vector<etk::Pair<enum openGL::flag, const char*>> list = {
+		etk::makePair(openGL::flag_blend, "FLAG_BLEND"),
+		etk::makePair(openGL::flag_clipDistanceI, "FLAG_CLIP_DISTANCE_I"),
+		etk::makePair(openGL::flag_colorLogigOP, "FLAG_COLOR_LOGIC_OP"),
+		etk::makePair(openGL::flag_cullFace, "FLAG_CULL_FACE"),
+		etk::makePair(openGL::flag_debugOutput, "FLAG_DEBUG_OUTPUT"),
+		etk::makePair(openGL::flag_debugOutputSynchronous, "flag_debugOutput_SYNCHRONOUS"),
+		etk::makePair(openGL::flag_depthClamp, "FLAG_DEPTH_CLAMP"),
+		etk::makePair(openGL::flag_depthTest, "FLAG_DEPTH_TEST"),
+		etk::makePair(openGL::flag_dither, "FLAG_DITHER"),
+		etk::makePair(openGL::flag_framebufferSRGB, "FLAG_FRAMEBUFFER_SRGB"),
+		etk::makePair(openGL::flag_lineSmooth, "FLAG_LINE_SMOOTH"),
+		etk::makePair(openGL::flag_multisample, "FLAG_MULTISAMPLE"),
+		etk::makePair(openGL::flag_polygonOffsetFill, "FLAG_POLYGON_OFFSET_FILL"),
+		etk::makePair(openGL::flag_polygonOffsetLine, "FLAG_POLYGON_OFFSET_LINE"),
+		etk::makePair(openGL::flag_polygonOffsetPoint, "FLAG_POLYGON_OFFSET_POINT"),
+		etk::makePair(openGL::flag_polygonSmooth, "FLAG_POLYGON_SMOOTH"),
+		etk::makePair(openGL::flag_primitiveRestart, "FLAG_PRIMITIVE_RESTART"),
+		etk::makePair(openGL::flag_primitiveRestartFixedIndex, "flag_primitiveRestart_FIXED_INDEX"),
+		etk::makePair(openGL::flag_sampleAlphaToCoverage, "FLAG_SAMPLE_ALPHA_TO_COVERAGE"),
+		etk::makePair(openGL::flag_sampleAlphaToOne, "FLAG_SAMPLE_ALPHA_TO_ONE"),
+		etk::makePair(openGL::flag_sampleCoverage, "FLAG_SAMPLE_COVERAGE"),
+		etk::makePair(openGL::flag_sampleShading, "FLAG_SAMPLE_SHADING"),
+		etk::makePair(openGL::flag_sampleMask, "FLAG_SAMPLE_MASK"),
+		etk::makePair(openGL::flag_scissorTest, "FLAG_SCISSOR_TEST"),
+		etk::makePair(openGL::flag_stencilTest, "FLAG_STENCIL_TEST"),
+		etk::makePair(openGL::flag_programPointSize, "FLAG_PROGRAM_POINT_SIZE"),
+		etk::makePair(openGL::flag_texture2D, "FLAG_TEXTURE_2D"),
+		etk::makePair(openGL::flag_alphaTest, "FLAG_ALPHA_TEST"),
+		etk::makePair(openGL::flag_fog, "FLAG_FOG")
 	};
 	_os << "{";
 	bool hasOne = false;
@@ -345,25 +345,25 @@ std::ostream& gale::openGL::operator <<(std::ostream& _os, enum gale::openGL::fl
 }
 
 
-std::vector<std::pair<enum gale::openGL::renderMode, std::string>>& getListRenderMode() {
-	static std::vector<std::pair<enum gale::openGL::renderMode, std::string>> list = {
-		std::make_pair(gale::openGL::renderMode::point, "POINTS"),
-		std::make_pair(gale::openGL::renderMode::line, "LINES"),
-		std::make_pair(gale::openGL::renderMode::lineStrip, "LINES_STRIP"),
-		std::make_pair(gale::openGL::renderMode::lineLoop, "LINE_LOOP"),
-		std::make_pair(gale::openGL::renderMode::triangle, "TRIANGLE"),
-		std::make_pair(gale::openGL::renderMode::triangleStrip, "TRIANGLE_STRIP"),
-		std::make_pair(gale::openGL::renderMode::triangleFan, "TRIANGLE_FAN"),
-		std::make_pair(gale::openGL::renderMode::quad, "QUAD"),
-		std::make_pair(gale::openGL::renderMode::quadStrip, "QUAD_STRIP"),
-		std::make_pair(gale::openGL::renderMode::polygon, "POLYGON"),
+etk::Vector<etk::Pair<enum gale::openGL::renderMode, etk::String>>& getListRenderMode() {
+	static etk::Vector<etk::Pair<enum gale::openGL::renderMode, etk::String>> list = {
+		etk::makePair(gale::openGL::renderMode::point, "POINTS"),
+		etk::makePair(gale::openGL::renderMode::line, "LINES"),
+		etk::makePair(gale::openGL::renderMode::lineStrip, "LINES_STRIP"),
+		etk::makePair(gale::openGL::renderMode::lineLoop, "LINE_LOOP"),
+		etk::makePair(gale::openGL::renderMode::triangle, "TRIANGLE"),
+		etk::makePair(gale::openGL::renderMode::triangleStrip, "TRIANGLE_STRIP"),
+		etk::makePair(gale::openGL::renderMode::triangleFan, "TRIANGLE_FAN"),
+		etk::makePair(gale::openGL::renderMode::quad, "QUAD"),
+		etk::makePair(gale::openGL::renderMode::quadStrip, "QUAD_STRIP"),
+		etk::makePair(gale::openGL::renderMode::polygon, "POLYGON"),
 	};
 	return list;
 }
 
 
 namespace etk {
-	template<> std::string to_string<gale::openGL::renderMode>(const gale::openGL::renderMode& _obj) {
+	template<> etk::String toString<gale::openGL::renderMode>(const gale::openGL::renderMode& _obj) {
 		for (auto &it : getListRenderMode()) {
 			if (it.first == _obj) {
 				return it.second;
@@ -372,10 +372,10 @@ namespace etk {
 		GALE_ERROR("Can not convert : " << static_cast<int32_t>(_obj) << " return UNKNOW");
 		return "UNKNOW";
 	}
-	template<> std::u32string to_u32string<gale::openGL::renderMode>(const gale::openGL::renderMode& _obj) {
-		return etk::to_u32string(etk::to_string(_obj));
+	template<> etk::UString toUString<gale::openGL::renderMode>(const gale::openGL::renderMode& _obj) {
+		return etk::toUString(etk::toString(_obj));
 	}
-	template<> bool from_string<gale::openGL::renderMode>(gale::openGL::renderMode& _variableRet, const std::string& _value) {
+	template<> bool from_string<gale::openGL::renderMode>(gale::openGL::renderMode& _variableRet, const etk::String& _value) {
 		for (auto &it : getListRenderMode()) {
 			if (it.second == _value) {
 				_variableRet = it.first;
@@ -386,13 +386,13 @@ namespace etk {
 		_variableRet = gale::openGL::renderMode::triangle;
 		return false;
 	}
-	template<> bool from_string<gale::openGL::renderMode>(gale::openGL::renderMode& _variableRet, const std::u32string& _value) {
-		return from_string(_variableRet, etk::to_string(_value));
+	template<> bool from_string<gale::openGL::renderMode>(gale::openGL::renderMode& _variableRet, const etk::UString& _value) {
+		return from_string(_variableRet, etk::toString(_value));
 	}
 };
 
-std::ostream& gale::openGL::operator <<(std::ostream& _os, enum gale::openGL::renderMode _obj) {
-	_os << etk::to_string(_obj);
+etk::Stream& gale::openGL::operator <<(etk::Stream& _os, enum gale::openGL::renderMode _obj) {
+	_os << etk::toString(_obj);
 	return _os;
 }
 
@@ -611,7 +611,7 @@ void gale::openGL::drawArrays(enum gale::openGL::renderMode _mode, int32_t _firs
 	}
 }
 
-void gale::openGL::drawElements(enum renderMode _mode, const std::vector<uint32_t>& _indices) {
+void gale::openGL::drawElements(enum renderMode _mode, const etk::Vector<uint32_t>& _indices) {
 	if (l_programId >= 0) {
 		updateAllFlags();
 		#ifdef GALE_BUILD_SIMULATION
@@ -626,7 +626,7 @@ void gale::openGL::drawElements(enum renderMode _mode, const std::vector<uint32_
 	}
 }
 
-void gale::openGL::drawElements16(enum renderMode _mode, const std::vector<uint16_t>& _indices) {
+void gale::openGL::drawElements16(enum renderMode _mode, const etk::Vector<uint16_t>& _indices) {
 	if (l_programId >= 0) {
 		updateAllFlags();
 		#ifdef GALE_BUILD_SIMULATION
@@ -640,7 +640,7 @@ void gale::openGL::drawElements16(enum renderMode _mode, const std::vector<uint1
 	}
 }
 
-void gale::openGL::drawElements8(enum renderMode _mode, const std::vector<uint8_t>& _indices) {
+void gale::openGL::drawElements8(enum renderMode _mode, const etk::Vector<uint8_t>& _indices) {
 	if (l_programId >= 0) {
 		updateAllFlags();
 		#ifdef GALE_BUILD_SIMULATION
@@ -708,7 +708,7 @@ void gale::openGL::useProgram(int32_t _id) {
 
 
 
-bool gale::openGL::genBuffers(std::vector<uint32_t>& _buffers) {
+bool gale::openGL::genBuffers(etk::Vector<uint32_t>& _buffers) {
 	if (_buffers.size() == 0) {
 		GALE_WARNING("try to generate vector buffer with size 0");
 		return true;
@@ -737,7 +737,7 @@ bool gale::openGL::genBuffers(std::vector<uint32_t>& _buffers) {
 	return hasError;
 }
 
-bool gale::openGL::deleteBuffers(std::vector<uint32_t>& _buffers) {
+bool gale::openGL::deleteBuffers(etk::Vector<uint32_t>& _buffers) {
 	if (_buffers.size() == 0) {
 		GALE_WARNING("try to delete vector buffer with size 0");
 		return true;
@@ -866,7 +866,7 @@ void gale::openGL::shader::remove(int64_t& _shader) {
 	_shader = -1;
 }
 
-bool gale::openGL::shader::compile(int64_t _shader, const std::string& _data) {
+bool gale::openGL::shader::compile(int64_t _shader, const etk::String& _data) {
 	const char* data = &_data[0];
 	#ifdef GALE_BUILD_SIMULATION
 		if (s_simulationMode == false) {
@@ -883,7 +883,7 @@ bool gale::openGL::shader::compile(int64_t _shader, const std::string& _data) {
 		l_bufferDisplayError[0] = '\0';
 		glGetShaderInfoLog(GLuint(_shader), LOG_OGL_INTERNAL_BUFFER_LEN, &infoLen, l_bufferDisplayError);
 		GALE_ERROR("Error " << l_bufferDisplayError);
-		std::vector<std::string> lines = etk::split(_data, '\n');
+		etk::Vector<etk::String> lines = etk::split(_data, '\n');
 		for (size_t iii=0; iii<lines.size(); iii++) {
 			GALE_ERROR("file " << (iii+1) << "|" << lines[iii]);
 		}
@@ -998,7 +998,7 @@ bool gale::openGL::program::compile(int64_t _prog) {
 	return true;
 }
 
-int32_t gale::openGL::program::getAttributeLocation(int64_t _prog, const std::string& _name) {
+int32_t gale::openGL::program::getAttributeLocation(int64_t _prog, const etk::String& _name) {
 	if (_prog < 0) {
 		GALE_ERROR("wrong program ID");
 		return -1;
@@ -1022,7 +1022,7 @@ int32_t gale::openGL::program::getAttributeLocation(int64_t _prog, const std::st
 	return val;
 }
 
-int32_t gale::openGL::program::getUniformLocation(int64_t _prog, const std::string& _name) {
+int32_t gale::openGL::program::getUniformLocation(int64_t _prog, const etk::String& _name) {
 	if (_prog < 0) {
 		GALE_ERROR("wrong program ID");
 		return -1;

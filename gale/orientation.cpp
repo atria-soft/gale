@@ -13,7 +13,7 @@ static const char* listValues[] = {
 	"orientation::screenPortrait"
 };
 
-std::ostream& gale::operator <<(std::ostream& _os, const enum gale::orientation _obj) {
+etk::Stream& gale::operator <<(etk::Stream& _os, const enum gale::orientation _obj) {
 	_os << listValues[int32_t(_obj)];
 	return _os;
 }

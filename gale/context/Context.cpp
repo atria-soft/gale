@@ -21,7 +21,7 @@
 #include <gale/renderer/openGL/openGL.hpp>
 #include <gale/context/Context.hpp>
 #include <gale/resource/Manager.hpp>
-#include <map>
+#include <etk/Map.hpp>
 #include <echrono/Steady.hpp>
 
 
@@ -37,17 +37,17 @@ static std::mutex& mutexInterface() {
 
 
 static std::mutex g_lockContextMap;
-static std::map<std::thread::id, gale::Context*>& getContextList() {
-	static std::map<std::thread::id, gale::Context*> g_val;
+static etk::Map<std::thread::id, gale::Context*>& getContextList() {
+	static etk::Map<std::thread::id, gale::Context*> g_val;
 	return g_val;
 }
 
 static gale::Context* lastContextSet = nullptr;
 
 gale::Context& gale::getContext() {
-	std::map<std::thread::id, gale::Context*>& list = getContextList();
+	etk::Map<std::thread::id, gale::Context*>& list = getContextList();
 	g_lockContextMap.lock();
-	std::map<std::thread::id, gale::Context*>::iterator it = list.find(std::this_thread::get_id());
+	etk::Map<std::thread::id, gale::Context*>::iterator it = list.find(std::this_thread::get_id());
 	gale::Context* out = nullptr;
 	if (it != list.end()) {
 		out = it->second;
@@ -85,15 +85,15 @@ gale::Context& gale::getContext() {
 }
 
 void gale::setContext(gale::Context* _context) {
-	std::map<std::thread::id, gale::Context*>& list = getContextList();
+	etk::Map<std::thread::id, gale::Context*>& list = getContextList();
 	//GALE_ERROR("Set context : " << std::this_thread::get_id() << " context pointer : " << uint64_t(_context));
 	g_lockContextMap.lock();
 	if (_context != nullptr) {
 		lastContextSet = _context;
 	}
-	std::map<std::thread::id, gale::Context*>::iterator it = list.find(std::this_thread::get_id());
+	etk::Map<std::thread::id, gale::Context*>::iterator it = list.find(std::this_thread::get_id());
 	if (it == list.end()) {
-		list.insert(std::pair<std::thread::id, gale::Context*>(std::this_thread::get_id(), _context));
+		list.insert(etk::Pair<std::thread::id, gale::Context*>(std::this_thread::get_id(), _context));
 	} else {
 		it->second = _context;
 	}
@@ -105,12 +105,12 @@ void gale::contextRegisterThread(std::thread* _thread) {
 		return;
 	}
 	gale::Context* context = &gale::getContext();
-	std::map<std::thread::id, gale::Context*>& list = getContextList();
+	etk::Map<std::thread::id, gale::Context*>& list = getContextList();
 	//GALE_ERROR("REGISTER Thread : " << _thread->get_id() << " context pointer : " << uint64_t(context));
 	g_lockContextMap.lock();
-	std::map<std::thread::id, gale::Context*>::iterator it = list.find(_thread->get_id());
+	etk::Map<std::thread::id, gale::Context*>::iterator it = list.find(_thread->get_id());
 	if (it == list.end()) {
-		list.insert(std::pair<std::thread::id, gale::Context*>(_thread->get_id(), context));
+		list.insert(etk::Pair<std::thread::id, gale::Context*>(_thread->get_id(), context));
 	} else {
 		it->second = context;
 	}
@@ -121,16 +121,16 @@ void gale::contextUnRegisterThread(std::thread* _thread) {
 	if (_thread == nullptr) {
 		return;
 	}
-	std::map<std::thread::id, gale::Context*>& list = getContextList();
+	etk::Map<std::thread::id, gale::Context*>& list = getContextList();
 	g_lockContextMap.lock();
-	std::map<std::thread::id, gale::Context*>::iterator it = list.find(_thread->get_id());
+	etk::Map<std::thread::id, gale::Context*>::iterator it = list.find(_thread->get_id());
 	if (it != list.end()) {
 		list.erase(it);
 	}
 	g_lockContextMap.unlock();
 }
 
-void gale::Context::setInitImage(const std::string& _fileName) {
+void gale::Context::setInitImage(const etk::String& _fileName) {
 	//m_initDisplayImageName = _fileName;
 }
 
@@ -269,7 +269,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 		if (m_commandLine.get(iii) == "--gale-fps") {
 			m_displayFps=true;
 		} else if (etk::start_with(m_commandLine.get(iii), "--gale-simulation-file=") == true) {
-			m_simulationFile.setName(std::string(m_commandLine.get(iii).begin()+23, m_commandLine.get(iii).end()) );
+			m_simulationFile.setName(etk::String(m_commandLine.get(iii).begin()+23, m_commandLine.get(iii).end()) );
 		} else if (m_commandLine.get(iii) == "--gale-simulation-record") {
 			m_simulationActive = true;
 		} else if (etk::start_with(m_commandLine.get(iii), "--gale-backend=") == true) {
@@ -345,7 +345,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 			GALE_CRITICAL("Can not create Simulation file : " << m_simulationFile);
 			m_simulationActive = false;
 		} else {
-			m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
+			m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
 			m_simulationFile.filePuts(":INIT");
 			m_simulationFile.filePuts("\n");
 		}
@@ -428,7 +428,7 @@ gale::Context::~Context() {
 
 void gale::Context::requestUpdateSize() {
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
+		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
 		m_simulationFile.filePuts(":RECALCULATE_SIZE\n");
 	}
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
@@ -445,9 +445,9 @@ void gale::Context::OS_Resize(const vec2& _size) {
 	// TODO : Better in the thread ...  ==> but generate some init error ...
 	gale::Dimension::setPixelWindowsSize(_size);
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
+		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
 		m_simulationFile.filePuts(":RESIZE:");
-		m_simulationFile.filePuts(etk::to_string(_size));
+		m_simulationFile.filePuts(etk::toString(_size));
 		m_simulationFile.filePuts("\n");
 	}
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
@@ -498,15 +498,15 @@ void gale::Context::OS_SetInput(enum gale::key::type _type,
                                 int32_t _pointerID,
                                 const vec2& _pos) {
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
+		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
 		m_simulationFile.filePuts(":INPUT:");
-		m_simulationFile.filePuts(etk::to_string(_type));
+		m_simulationFile.filePuts(etk::toString(_type));
 		m_simulationFile.filePuts(":");
-		m_simulationFile.filePuts(etk::to_string(_status));
+		m_simulationFile.filePuts(etk::toString(_status));
 		m_simulationFile.filePuts(":");
-		m_simulationFile.filePuts(etk::to_string(_pointerID));
+		m_simulationFile.filePuts(etk::toString(_pointerID));
 		m_simulationFile.filePuts(":");
-		m_simulationFile.filePuts(etk::to_string(_pos));
+		m_simulationFile.filePuts(etk::toString(_pos));
 		m_simulationFile.filePuts("\n");
 	}
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
@@ -535,15 +535,15 @@ void gale::Context::OS_setKeyboard(const gale::key::Special& _special,
 		}
 	}
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
+		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
 		m_simulationFile.filePuts(":KEYBOARD:");
-		m_simulationFile.filePuts(etk::to_string(_special));
+		m_simulationFile.filePuts(etk::toString(_special));
 		m_simulationFile.filePuts(":");
-		m_simulationFile.filePuts(etk::to_string(_type));
+		m_simulationFile.filePuts(etk::toString(_type));
 		m_simulationFile.filePuts(":");
-		m_simulationFile.filePuts(etk::to_string(_state));
+		m_simulationFile.filePuts(etk::toString(_state));
 		m_simulationFile.filePuts(":");
-		m_simulationFile.filePuts(etk::to_string(uint64_t(_char)));
+		m_simulationFile.filePuts(etk::toString(uint64_t(_char)));
 		m_simulationFile.filePuts("\n");
 	}
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
@@ -561,7 +561,7 @@ void gale::Context::OS_setKeyboard(const gale::key::Special& _special,
 
 void gale::Context::OS_Hide() {
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
+		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
 		m_simulationFile.filePuts(":VIEW:false\n");
 	}
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
@@ -582,7 +582,7 @@ void gale::Context::OS_Hide() {
 
 void gale::Context::OS_Show() {
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
+		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
 		m_simulationFile.filePuts(":VIEW:true\n");
 	}
 	m_msgSystem.post([](gale::Context& _context){
@@ -603,9 +603,9 @@ void gale::Context::OS_Show() {
 
 void gale::Context::OS_ClipBoardArrive(enum gale::context::clipBoard::clipboardListe _clipboardID) {
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
+		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
 		m_simulationFile.filePuts(":CLIPBOARD_ARRIVE:");
-		m_simulationFile.filePuts(etk::to_string(_clipboardID));
+		m_simulationFile.filePuts(etk::toString(_clipboardID));
 		m_simulationFile.filePuts("\n");
 	}
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
@@ -628,9 +628,9 @@ void gale::Context::clipBoardSet(enum gale::context::clipBoard::clipboardListe _
 
 bool gale::Context::OS_Draw(bool _displayEveryTime) {
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::to_string(echrono::Steady::now()));
+		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
 		m_simulationFile.filePuts(":DRAW:");
-		m_simulationFile.filePuts(etk::to_string(_displayEveryTime));
+		m_simulationFile.filePuts(etk::toString(_displayEveryTime));
 		m_simulationFile.filePuts("\n");
 	}
 	echrono::Steady currentTime = echrono::Steady::now();
@@ -848,7 +848,7 @@ void gale::Context::show() {
 	GALE_INFO("show: NOT implemented ...");
 }
 
-void gale::Context::setTitle(const std::string& _title) {
+void gale::Context::setTitle(const etk::String& _title) {
 	GALE_INFO("setTitle: NOT implemented ...");
 }
 
@@ -895,12 +895,12 @@ void gale::Context::keyboardHide() {
 int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 	etk::init(_argc, _argv);
 	ememory::SharedPtr<gale::Context> context;
-	std::string request = "";
+	etk::String request = "";
 	
 	// get the environement variable:
 	char * basicEnv = getenv("EWOL_BACKEND");
 	if (nullptr != basicEnv) {
-		std::string tmpVal = basicEnv;
+		etk::String tmpVal = basicEnv;
 		//TODO : Check if it leak ...
 		#if defined(__TARGET_OS__Linux)
 			if (false) { }
@@ -966,7 +966,7 @@ int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 	}
 	for(int32_t iii=0; iii<_argc; ++iii) {
 		if (etk::start_with(_argv[iii], "--gale-backend=") == true) {
-			std::string tmpVal = &(_argv[iii][15]);
+			etk::String tmpVal = &(_argv[iii][15]);
 			#if defined(__TARGET_OS__Linux)
 				if (false) { }
 				#ifdef GALE_BUILD_X11

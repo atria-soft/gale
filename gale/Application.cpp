@@ -120,23 +120,23 @@ vec2 gale::Application::getPosition() const {
 	return vec2(0,0);
 }
 
-void gale::Application::setTitle(const std::string& _title) {
+void gale::Application::setTitle(const etk::String& _title) {
 	m_title = _title;
 	gale::Context& context = gale::getContext();
 	context.setTitle(m_title);
 }
 
-std::string gale::Application::getTitle() {
+etk::String gale::Application::getTitle() {
 	return m_title;
 }
 
-void gale::Application::setIcon(const std::string& _iconFile) {
+void gale::Application::setIcon(const etk::String& _iconFile) {
 	m_iconName = _iconFile;
 	gale::Context& context = gale::getContext();
 	context.setIcon(m_iconName);
 }
 
-std::string gale::Application::getIcon() {
+etk::String gale::Application::getIcon() {
 	return m_iconName;
 }
 
@@ -150,7 +150,7 @@ enum gale::context::cursor gale::Application::getCursor() {
 	return m_cursor;
 }
 
-void gale::Application::openURL(const std::string& _url) {
+void gale::Application::openURL(const etk::String& _url) {
 	gale::Context& context = gale::getContext();
 	context.openURL(_url);
 }

@@ -32,7 +32,7 @@ namespace gale {
 			 * @param[in] _clipboardID Select the specific ID of the clipboard
 			 * @param[in] _data The string that might be send to the clipboard
 			 */
-			void set(enum gale::context::clipBoard::clipboardListe _clipboardID, const std::string& _data);
+			void set(enum gale::context::clipBoard::clipboardListe _clipboardID, const etk::String& _data);
 			/**
 			 * @brief Call system to request the current clipboard.
 			 * @note Due to some system that manage the clipboard request asynchronous (like X11) and gale managing the system with only one thread,
@@ -47,7 +47,7 @@ namespace gale {
 			 * @param[in] _clipboardID selected clipboard ID
 			 * @param[in] _data new buffer data
 			 */
-			void setSystem(enum gale::context::clipBoard::clipboardListe _clipboardID,const std::string& _data);
+			void setSystem(enum gale::context::clipBoard::clipboardListe _clipboardID,const etk::String& _data);
 			/**
 			 * @brief get the gale internal buffer of the curent clipboard. The end user can use it when he receive the event in 
 			 *        the widget : @ref onEventClipboard  == > we can nothe this function is the only one which permit it.
@@ -55,7 +55,7 @@ namespace gale {
 			 * @param[in] _clipboardID selected clipboard ID
 			 * @return the requested buffer
 			 */
-			const std::string& get(enum gale::context::clipBoard::clipboardListe _clipboardID);
+			const etk::String& get(enum gale::context::clipBoard::clipboardListe _clipboardID);
 			
 			// internal section
 			
@@ -72,5 +72,5 @@ namespace gale {
 	/**
 	 * @brief Debug operator To display the curent element in a Human redeable information
 	 */
-	std::ostream& operator <<(std::ostream& _os, const enum gale::context::clipBoard::clipboardListe _obj);
+	etk::Stream& operator <<(etk::Stream& _os, const enum gale::context::clipBoard::clipboardListe _obj);
 }

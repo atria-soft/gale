@@ -230,12 +230,12 @@ namespace gale {
 			 * @brief set the new title of the windows
 			 * @param[in] title New desired title
 			 */
-			virtual void setTitle(const std::string& _title);
+			virtual void setTitle(const etk::String& _title);
 			/**
 			 * @brief Open an URL on an eternal brother.
 			 * @param[in] _url URL to open.
 			 */
-			virtual void openURL(const std::string& _url) { };
+			virtual void openURL(const etk::String& _url) { };
 			/**
 			 * @brief force the screen orientation (availlable on portable elements ...
 			 * @param[in] _orientation Selected orientation.
@@ -261,7 +261,7 @@ namespace gale {
 			 * @brief set the Icon of the program
 			 * @param[in] _inputFile new filename icon of the curent program.
 			 */
-			virtual void setIcon(const std::string& _inputFile) { };
+			virtual void setIcon(const etk::String& _inputFile) { };
 			/**
 			 * @brief Enable or Disable the decoration on the Windows (availlable only on Desktop)
 			 * @param[in] _status "true" to enable decoration / false otherwise
@@ -289,7 +289,7 @@ namespace gale {
 			 * @brief Special for init (main) set the start image when loading data
 			 * @param[in] _fileName Name of the image to load
 			 */
-			void setInitImage(const std::string& _fileName);
+			void setInitImage(const etk::String& _fileName);
 			/**
 			 * @brief Internal API to run the processing of the event loop ...
 			 * @return The Exit value of the program

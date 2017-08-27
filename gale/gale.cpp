@@ -16,7 +16,7 @@
 #define GALE_VERSION "0.0.0"
 #endif
 
-std::string gale::getCompilationMode() {
+etk::String gale::getCompilationMode() {
 	#ifdef MODE_RELEASE
 		return "Release";
 	#else
@@ -24,7 +24,7 @@ std::string gale::getCompilationMode() {
 	#endif
 }
 
-std::string gale::getBoardType() {
+etk::String gale::getBoardType() {
 	#ifdef __TARGET_OS__Linux
 		return "Linux";
 	#elif defined(__TARGET_OS__Android)
@@ -40,7 +40,7 @@ std::string gale::getBoardType() {
 	#endif
 }
 
-std::string gale::getVersion() {
+etk::String gale::getVersion() {
 	return GALE_VERSION;
 }
 

@@ -65,7 +65,7 @@ namespace gale {
 		/**
 		 * @brief Debug operator To display the curent element in a Human redeable information
 		 */
-		std::ostream& operator <<(std::ostream& _os, const enum gale::key::keyboard _obj);
+		etk::Stream& operator <<(etk::Stream& _os, const enum gale::key::keyboard _obj);
 	}
 }
 

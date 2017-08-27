@@ -26,10 +26,10 @@
 #include <gale/renderer/openGL/openGL-include.hpp>
 
 
-static std::vector<std::string> localSplit(const std::string& _input) {
-	std::vector<std::string> out;
+static etk::Vector<etk::String> localSplit(const etk::String& _input) {
+	etk::Vector<etk::String> out;
 	char lastValue = '\0';
-	std::string tmpInput;
+	etk::String tmpInput;
 	for(auto &it : _input) {
 		if (    lastValue == ':'
 		     && it == ':') {
@@ -37,7 +37,7 @@ static std::vector<std::string> localSplit(const std::string& _input) {
 			lastValue = '\0';
 			continue;
 		} else if (lastValue == ':') {
-			out.push_back(tmpInput);
+			out.pushBack(tmpInput);
 			tmpInput = "";
 			tmpInput += it;
 		} else if (it == ':') {
@@ -49,7 +49,7 @@ static std::vector<std::string> localSplit(const std::string& _input) {
 		
 	}
 	if (tmpInput!="") {
-		out.push_back(tmpInput);
+		out.pushBack(tmpInput);
 	}
 	return out;
 }
@@ -78,7 +78,7 @@ class SimulationInterface : public gale::Context {
 				GALE_ERROR("can not open the simulation file");
 				return -1;
 			}
-			std::string action;
+			etk::String action;
 			// main cycle
 			while(m_run == true) {
 				bool lineIsOk = m_simulationFile.fileGets(action);
@@ -90,7 +90,7 @@ class SimulationInterface : public gale::Context {
 					continue;
 				}
 				GALE_VERBOSE("SIM-EVENT : '" << action << "'");
-				std::vector<std::string> pads = localSplit(action);
+				etk::Vector<etk::String> pads = localSplit(action);
 				GALE_DEBUG("    " << pads);
 				// The first is the time ...
 				if (pads.size() < 2) {
@@ -98,7 +98,7 @@ class SimulationInterface : public gale::Context {
 					continue;
 				}
 				uint64_t time = etk::string_to_uint64_t(pads[0]);
-				std::string localAction = pads[1];
+				etk::String localAction = pads[1];
 				if (localAction == "INIT") {
 					// nothing to do ...
 				} else if (localAction == "RECALCULATE_SIZE") {
@@ -191,14 +191,14 @@ class SimulationInterface : public gale::Context {
 			GALE_DEBUG("SIMU-API: Grab Events");
 		}
 		/****************************************************************************************/
-		void setIcon(const std::string& _inputFile) {
+		void setIcon(const etk::String& _inputFile) {
 			GALE_DEBUG("SIMU set icon " << _inputFile);
 		}
 		/****************************************************************************************/
-		void setTitle(const std::string& _title) {
+		void setTitle(const etk::String& _title) {
 			GALE_INFO("SIMU: set Title " << _title);
 		}
-		void openURL(const std::string& _url) {
+		void openURL(const etk::String& _url) {
 			GALE_INFO("SIMU: open URL " << _url);
 		}
 		/****************************************************************************************/

@@ -105,7 +105,7 @@ void gale::resource::Manager::update(const ememory::SharedPtr<gale::Resource>& _
 		}
 	}
 	// add it ...
-	m_resourceListToUpdate.push_back(_object);
+	m_resourceListToUpdate.pushBack(_object);
 }
 
 // Specific to load or update the data in the openGl context  == > system use only
@@ -136,14 +136,14 @@ void gale::resource::Manager::updateContext() {
 						if (tmpRessource->updateContext() == false) {
 							// Lock error ==> postponned
 							std::unique_lock<std::recursive_mutex> lock(m_mutex);
-							m_resourceListToUpdate.push_back(tmpRessource);
+							m_resourceListToUpdate.pushBack(tmpRessource);
 						}
 					}
 				}
 			}
 		}
 	} else {
-		std::vector<ememory::SharedPtr<gale::Resource>> resourceListToUpdate;
+		etk::Vector<ememory::SharedPtr<gale::Resource>> resourceListToUpdate;
 		{
 			std::unique_lock<std::recursive_mutex> lock(m_mutex);
 			resourceListToUpdate = m_resourceListToUpdate;
@@ -159,7 +159,7 @@ void gale::resource::Manager::updateContext() {
 						if (it->updateContext() == false) {
 							std::unique_lock<std::recursive_mutex> lock(m_mutex);
 							// Lock error ==> postponned
-							m_resourceListToUpdate.push_back(it);
+							m_resourceListToUpdate.pushBack(it);
 						}
 					}
 				}
@@ -187,7 +187,7 @@ void gale::resource::Manager::applicationExiting() {
 }
 
 // internal generic keeper ...
-ememory::SharedPtr<gale::Resource> gale::resource::Manager::localKeep(const std::string& _filename) {
+ememory::SharedPtr<gale::Resource> gale::resource::Manager::localKeep(const etk::String& _filename) {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	GALE_VERBOSE("KEEP (DEFAULT) : file : '" << _filename << "' in " << m_resourceList.size() << " resources");
 	for (auto &it : m_resourceList) {
@@ -213,7 +213,7 @@ void gale::resource::Manager::localAdd(const ememory::SharedPtr<gale::Resource>&
 		}
 	}
 	// add at the end if no slot is free
-	m_resourceList.push_back(_object);
+	m_resourceList.pushBack(_object);
 }
 
 // in case of error ...

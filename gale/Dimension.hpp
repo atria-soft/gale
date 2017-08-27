@@ -43,7 +43,7 @@ namespace gale {
 			 * @brief Constructor
 			 * @param[in] _config dimension configuration.
 			 */
-			Dimension(const std::string& _config) :
+			Dimension(const etk::String& _config) :
 			  m_data(0,0),
 			  m_type(gale::distance::pixel) {
 				set(_config);
@@ -65,7 +65,7 @@ namespace gale {
 			/**
 			 * @brief string cast :
 			 */
-			operator std::string() const;
+			operator etk::String() const;
 			
 			/**
 			 * @brief get the current dimention in requested type
@@ -85,7 +85,7 @@ namespace gale {
 			 * @brief set the current dimention in requested type
 			 * @param[in] _config dimension configuration.
 			 */
-			void set(std::string _config);
+			void set(etk::String _config);
 		public:
 			/**
 			 * @brief get the current dimention in pixel
@@ -199,7 +199,7 @@ namespace gale {
 		static float getWindowsDiag(enum gale::distance _type);
 		
 	};
-	std::ostream& operator <<(std::ostream& _os, enum gale::distance _obj);
-	std::ostream& operator <<(std::ostream& _os, const gale::Dimension& _obj);
+	etk::Stream& operator <<(etk::Stream& _os, enum gale::distance _obj);
+	etk::Stream& operator <<(etk::Stream& _os, const gale::Dimension& _obj);
 }
 

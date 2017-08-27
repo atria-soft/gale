@@ -123,7 +123,7 @@ public:
 		               _move,
 		               (_isDown==true?gale::key::status::down:gale::key::status::up));
 	}
-	void openURL(const std::string& _url) {
+	void openURL(const etk::String& _url) {
 		mm_openURL(_url.c_str());
 	}
 };

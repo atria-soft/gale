@@ -63,14 +63,14 @@ namespace gale {
 			 */
 			virtual void stop();
 		private:
-			std::string m_name; //!< thread Name
+			etk::String m_name; //!< thread Name
 			echrono::Steady m_lastUpdatateName;
 		public:
 			/**
 			 * @brief change name of the thread
 			 * @param[in] _name Name of the thread
 			 */
-			void setName(std::string m_name);
+			void setName(etk::String m_name);
 		private:
 			#if defined(__TARGET_OS__Android)
 				static void* threadCallback(void* _userData);

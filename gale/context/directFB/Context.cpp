@@ -86,12 +86,12 @@ static int screen_height = 600;
  * @param title New desired title
  * @return ---
  */
-void guiInterface::setTitle(std::string& title) {
+void guiInterface::setTitle(etk::String& title) {
 	// TODO : ...
 }
 
 
-void guiInterface::setIcon(std::string inputFile) {
+void guiInterface::setIcon(etk::String inputFile) {
 	// TODO : ...
 }
 

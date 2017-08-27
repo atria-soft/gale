@@ -26,16 +26,16 @@ namespace gale {
 	 * @brief get GALE version
 	 * @return The string that describe gale version
 	 */
-	std::string getVersion();
+	etk::String getVersion();
 	/**
 	 * @brief get compilation mode (release/debug)
 	 * @return the string of the mode of commpilation
 	 */
-	std::string getCompilationMode();
+	etk::String getCompilationMode();
 	/**
 	 * @brief get the board type (Android/Linux/MacOs/...)
 	 * @return the string of the mode of commpilation
 	 */
-	std::string getBoardType();
+	etk::String getBoardType();
 }
 

@@ -109,7 +109,7 @@ int32_t gale::context::InputManager::localGetDestinationId(enum gale::key::type 
 				ememory::SharedPtr<gale::Application> tmpApplication = m_eventInputSaved[iii].curentApplicationEvent.lock();
 				if (tmpApplication == _destApplication) {
 					if (iii != _realInputId) {
-						lastMinimum = std::max(lastMinimum, m_eventInputSaved[iii].destinationInputId);
+						lastMinimum = etk::max(lastMinimum, m_eventInputSaved[iii].destinationInputId);
 					}
 				}
 			}

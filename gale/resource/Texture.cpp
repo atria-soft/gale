@@ -29,7 +29,7 @@ static int32_t nextP2(int32_t _value) {
 }
 
 
-void gale::resource::Texture::init(const std::string& _filename) {
+void gale::resource::Texture::init(const etk::String& _filename) {
 	gale::Resource::init(_filename);
 }
 void gale::resource::Texture::init() {
@@ -109,7 +109,7 @@ void gale::resource::Texture::flush() {
 	getManager().update(ememory::dynamicPointerCast<gale::Resource>(sharedFromThis()));
 }
 
-void gale::resource::Texture::setTexture(const ememory::SharedPtr<std::vector<char>>& _data,
+void gale::resource::Texture::setTexture(const ememory::SharedPtr<etk::Vector<char>>& _data,
                                          const ivec2& _size,
                                          enum gale::resource::Texture::dataType _dataType,
                                          enum gale::resource::Texture::color _dataColorSpace) {

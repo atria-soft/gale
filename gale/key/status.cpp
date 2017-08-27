@@ -26,17 +26,17 @@ static const char* statusDescriptionString[] = {
 	"status::transfert"
 };
 
-std::ostream& gale::key::operator <<(std::ostream& _os, const enum gale::key::status _obj) {
+etk::Stream& gale::key::operator <<(etk::Stream& _os, const enum gale::key::status _obj) {
 	_os << statusDescriptionString[int32_t(_obj)];
 	return _os;
 }
 
 namespace etk {
-	template<> std::string to_string<enum gale::key::status>(const enum gale::key::status& _obj) {
+	template<> etk::String toString<enum gale::key::status>(const enum gale::key::status& _obj) {
 		return statusDescriptionString[int32_t(_obj)];
 	}
 	
-	template <> bool from_string<enum gale::key::status>(enum gale::key::status& _variableRet, const std::string& _value) {
+	template <> bool from_string<enum gale::key::status>(enum gale::key::status& _variableRet, const etk::String& _value) {
 		for (size_t iii=0; iii< sizeof(statusDescriptionString); ++iii) {
 			if (statusDescriptionString[iii] == _value) {
 				_variableRet = (enum gale::key::status)iii;

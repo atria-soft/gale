@@ -113,9 +113,9 @@ void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const vec3& 
 		return;
 	}
 	m_vboUsed[_id] = true;
-	m_buffer[_id].push_back(_data.x());
-	m_buffer[_id].push_back(_data.y());
-	m_buffer[_id].push_back(_data.z());
+	m_buffer[_id].pushBack(_data.x());
+	m_buffer[_id].pushBack(_data.y());
+	m_buffer[_id].pushBack(_data.z());
 }
 
 vec3 gale::resource::VirtualBufferObject::getOnBufferVec3(int32_t _id, int32_t _elementID) const {
@@ -146,8 +146,8 @@ void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const vec2& 
 		return;
 	}
 	m_vboUsed[_id] = true;
-	m_buffer[_id].push_back(_data.x());
-	m_buffer[_id].push_back(_data.y());
+	m_buffer[_id].pushBack(_data.x());
+	m_buffer[_id].pushBack(_data.y());
 }
 
 vec2 gale::resource::VirtualBufferObject::getOnBufferVec2(int32_t _id, int32_t _elementID) const {
@@ -168,7 +168,7 @@ void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const float&
 		return;
 	}
 	m_vboUsed[_id] = true;
-	m_buffer[_id].push_back(_data);
+	m_buffer[_id].pushBack(_data);
 }
 
 void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::Color<float,4>& _data) {
@@ -180,10 +180,10 @@ void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::C
 		return;
 	}
 	m_vboUsed[_id] = true;
-	m_buffer[_id].push_back(_data.r());
-	m_buffer[_id].push_back(_data.g());
-	m_buffer[_id].push_back(_data.b());
-	m_buffer[_id].push_back(_data.a());
+	m_buffer[_id].pushBack(_data.r());
+	m_buffer[_id].pushBack(_data.g());
+	m_buffer[_id].pushBack(_data.b());
+	m_buffer[_id].pushBack(_data.a());
 }
 
 void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::Color<float,3>& _data) {
@@ -195,9 +195,9 @@ void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::C
 		return;
 	}
 	m_vboUsed[_id] = true;
-	m_buffer[_id].push_back(_data.r());
-	m_buffer[_id].push_back(_data.g());
-	m_buffer[_id].push_back(_data.b());
+	m_buffer[_id].pushBack(_data.r());
+	m_buffer[_id].pushBack(_data.g());
+	m_buffer[_id].pushBack(_data.b());
 }
 
 void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::Color<float,2>& _data) {
@@ -209,8 +209,8 @@ void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::C
 		return;
 	}
 	m_vboUsed[_id] = true;
-	m_buffer[_id].push_back(_data.r());
-	m_buffer[_id].push_back(_data.g());
+	m_buffer[_id].pushBack(_data.r());
+	m_buffer[_id].pushBack(_data.g());
 }
 
 void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::Color<float,1>& _data) {
@@ -222,6 +222,6 @@ void gale::resource::VirtualBufferObject::pushOnBuffer(int32_t _id, const etk::C
 		return;
 	}
 	m_vboUsed[_id] = true;
-	m_buffer[_id].push_back(_data.r());
+	m_buffer[_id].pushBack(_data.r());
 }
 

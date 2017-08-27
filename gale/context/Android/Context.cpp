@@ -355,7 +355,7 @@ class AndroidContext : public gale::Context {
 			java_detach_current_thread(status);
 		}
 		
-		void setTitle(const std::string& _title) {
+		void setTitle(const etk::String& _title) {
 			GALE_DEBUG("C->java : send message to the java : \"" << _title << "\"");
 			if (m_javaApplicationType == appl_application) {
 				int status;
@@ -374,7 +374,7 @@ class AndroidContext : public gale::Context {
 			}
 		}
 		
-		void openURL(const std::string& _url) {
+		void openURL(const etk::String& _url) {
 			GALE_DEBUG("C->java : send message to the java : open URL'" << _url << "'");
 			int status;
 			if(!java_attach_current_thread(&status)) {
@@ -491,7 +491,7 @@ class AndroidContext : public gale::Context {
 		}
 };
 
-static std::vector<AndroidContext*> s_listInstance;
+static etk::Vector<AndroidContext*> s_listInstance;
 gale::Application* s_applicationInit = NULL;
 
 extern "C" {
@@ -559,7 +559,7 @@ extern "C" {
 			return -1;
 		}
 		// for future case : all time this ...
-		s_listInstance.push_back(tmpContext);
+		s_listInstance.pushBack(tmpContext);
 		int32_t newID = s_listInstance.size()-1;
 		return newID;
 	}

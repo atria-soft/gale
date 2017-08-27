@@ -203,7 +203,7 @@ void gale::key::Special::setInsert(bool _value) {
 	setFlag(GALE_FLAG_KEY_INSERT, _value);
 }
 
-std::ostream& gale::key::operator <<(std::ostream& _os, const gale::key::Special& _obj) {
+etk::Stream& gale::key::operator <<(etk::Stream& _os, const gale::key::Special& _obj) {
 	_os << " capLock=" << _obj.getCapsLock();
 	_os << " shift=" << _obj.getShift();
 	_os << " ctrl=" << _obj.getCtrl();
@@ -215,8 +215,8 @@ std::ostream& gale::key::operator <<(std::ostream& _os, const gale::key::Special
 }
 
 namespace etk {
-	template<> std::string to_string<gale::key::Special>(const gale::key::Special& _obj) {
-		std::string out;
+	template<> etk::String toString<gale::key::Special>(const gale::key::Special& _obj) {
+		etk::String out;
 		if (_obj.getCapsLock() == true) {
 			out += "CAPS";
 		}
@@ -278,9 +278,9 @@ namespace etk {
 		}
 		return out;
 	}
-	template <> bool from_string<gale::key::Special>(gale::key::Special& _variableRet, const std::string& _value) {
+	template <> bool from_string<gale::key::Special>(gale::key::Special& _variableRet, const etk::String& _value) {
 		gale::key::Special out;
-		std::vector<std::string> listElem = etk::split(_value, "|");
+		etk::Vector<etk::String> listElem = etk::split(_value, "|");
 		for (auto &it : listElem) {
 			if (it == "CAPS") {
 				out.setCapsLock(true);

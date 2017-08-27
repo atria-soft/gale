@@ -28,7 +28,7 @@
 	}
 
 #define DECLARE_RESOURCE_NAMED_FACTORY(className) \
-	template<typename ... GALE_TYPE> static ememory::SharedPtr<className> create(const std::string& _name, GALE_TYPE&& ... _all ) { \
+	template<typename ... GALE_TYPE> static ememory::SharedPtr<className> create(const etk::String& _name, GALE_TYPE&& ... _all ) { \
 		ememory::SharedPtr<className> resource; \
 		ememory::SharedPtr<gale::Resource> resource2; \
 		if (_name != "" && _name != "---") { \
@@ -109,7 +109,7 @@ namespace gale {
 			 */
 			void init();
 			//! @previous
-			void init(const std::string& _name);
+			void init(const etk::String& _name);
 		public:
 			//! geenric destructor
 			virtual ~Resource() {
@@ -128,7 +128,7 @@ namespace gale {
 				return m_resourceHasBeenInit;
 			}
 		private:
-			std::vector<const char*> m_listType;
+			etk::Vector<const char*> m_listType;
 		public:
 			/**
 			 * @brief get the current type of the Resource
@@ -139,13 +139,13 @@ namespace gale {
 			 * @brief Get the herarchic of the Resource type.
 			 * @return descriptive string.
 			 */
-			std::string getTypeDescription();
+			etk::String getTypeDescription();
 			/**
 			 * @brief check  if the element herited from a specific type
 			 * @param[in] _type Type to check.
 			 * @return true if the element is compatible.
 			 */
-			bool isTypeCompatible(const std::string& _type);
+			bool isTypeCompatible(const etk::String& _type);
 		protected:
 			/**
 			 * @brief Add a type of the list of Object.
@@ -153,20 +153,20 @@ namespace gale {
 			 */
 			void addResourceType(const char* _type);
 		protected:
-			std::string m_name; //!< name of the resource ...
+			etk::String m_name; //!< name of the resource ...
 		public:
 			/**
 			 * @brief get the resource name
 			 * @return The requested name
 			 */
-			const std::string& getName() const {
+			const etk::String& getName() const {
 				return m_name;
 			};
 			/**
 			 * @brief get the resource name
 			 * @param[in] _name The new name
 			 */
-			void setName(const std::string& _name) {
+			void setName(const etk::String& _name) {
 				m_name = _name;
 			};
 		protected:

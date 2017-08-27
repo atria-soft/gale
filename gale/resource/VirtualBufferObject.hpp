@@ -20,10 +20,10 @@ namespace gale {
 		class VirtualBufferObject : public gale::Resource {
 			private :
 				bool m_exist;  //!< This data is availlable in the Graphic card
-				std::vector<uint32_t> m_vbo; //!< openGl ID of this VBO
-				std::vector<bool> m_vboUsed; //!< true if the VBO is allocated or used ...
-				std::vector<std::vector<float>> m_buffer; //!< data that is availlable in the VBO system ...
-				std::vector<int8_t> m_vboSizeDataOffset; //!< Internal size of the VBO (dynamicly set)
+				etk::Vector<uint32_t> m_vbo; //!< openGl ID of this VBO
+				etk::Vector<bool> m_vboUsed; //!< true if the VBO is allocated or used ...
+				etk::Vector<etk::Vector<float>> m_buffer; //!< data that is availlable in the VBO system ...
+				etk::Vector<int8_t> m_vboSizeDataOffset; //!< Internal size of the VBO (dynamicly set)
 			protected:
 				/**
 				 * @brief Constructor of this VBO.
@@ -54,7 +54,7 @@ namespace gale {
 				 * @param[in] id Id of the buffer requested
 				 * @return A reference on the data.
 				 */
-				std::vector<float>& getRefBuffer(int32_t _id) {
+				etk::Vector<float>& getRefBuffer(int32_t _id) {
 					m_vboUsed[_id] = true;
 					return m_buffer[_id];
 				};

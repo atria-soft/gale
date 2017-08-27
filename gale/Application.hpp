@@ -145,31 +145,31 @@ namespace gale {
 			 */
 			virtual vec2 getPosition() const;
 		private:
-			std::string m_title;
+			etk::String m_title;
 		public:
 			/**
 			 * @brief Set the title of the application
 			 * @param[in] _title New title to set at the application (if possible: Android and Ios does not support it)
 			 */
-			virtual void setTitle(const std::string& _title);
+			virtual void setTitle(const etk::String& _title);
 			/**
 			 * @brief Get the current title of the application
 			 * @return Current title
 			 */
-			virtual std::string getTitle();
+			virtual etk::String getTitle();
 		private:
-			std::string m_iconName;
+			etk::String m_iconName;
 		public:
 			/**
 			 * @brief set the Icon of the application.
 			 * @param[in] _iconFile File name icon (.bmp/.png).
 			 */
-			virtual void setIcon(const std::string& _iconFile);
+			virtual void setIcon(const etk::String& _iconFile);
 			/**
 			 * @brief Get the current filename of the application.
 			 * @return Filename of the icon.
 			 */
-			virtual std::string getIcon();
+			virtual etk::String getIcon();
 		private:
 			enum gale::context::cursor m_cursor;
 		public:
@@ -188,7 +188,7 @@ namespace gale {
 			 * @brief Open an URL on an internal brother.
 			 * @param[in] _url URL to open.
 			 */
-			virtual void openURL(const std::string& _url);
+			virtual void openURL(const etk::String& _url);
 		private:
 			enum gale::orientation m_orientation;
 		public:

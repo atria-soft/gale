@@ -216,7 +216,7 @@ class WAYLANDInterface : public gale::Context {
 		gale::key::Special m_guiKeyBoardMode;
 		ivec2 m_size;
 		bool m_inputIsPressed[MAX_MANAGE_INPUT];
-		std::string m_uniqueWindowsName;
+		etk::String m_uniqueWindowsName;
 		bool m_run;
 		bool m_fullscreen;
 		bool m_configured;
@@ -326,7 +326,7 @@ class WAYLANDInterface : public gale::Context {
 			// set the DPI for the current screen: TODO : do it with real value, for now, we use a generic dpi value (most common screen)
 			gale::Dimension::setPixelRatio(vec2(75,75),gale::distance::inch);
 			
-			m_uniqueWindowsName = "GALE_" + etk::to_string(etk::tool::irand(0, 1999999999));
+			m_uniqueWindowsName = "GALE_" + etk::toString(etk::tool::irand(0, 1999999999));
 			m_run = true;
 			GALE_WARNING("WAYLAND: INIT [STOP]");
 			start2ndThreadProcessing();
@@ -518,7 +518,7 @@ class WAYLANDInterface : public gale::Context {
 					GALE_WARNING("Can not get the generic theme");
 				}
 			} else if (strcmp(_interface, "wl_data_device_manager") == 0) {
-				m_dataDeviceManagerVersion = std::min(3, int32_t(_version));
+				m_dataDeviceManagerVersion = etk::min(3, int32_t(_version));
 				m_dataDeviceManager = (struct wl_data_device_manager*)wl_registry_bind(_registry, _id, &wl_data_device_manager_interface, m_dataDeviceManagerVersion);
 			} else {
 				GALE_WARNING("    ==> Not used ... '" << _interface  << "'");
@@ -1162,7 +1162,7 @@ class WAYLANDInterface : public gale::Context {
 		}
 		void dataSourceSend(struct wl_data_source* _wl_data_source, const char* _mime_type, int _fd) {
 			GALE_VERBOSE("CALL : dataSourceSend " << _mime_type);
-			std::string data = gale::context::clipBoard::get(gale::context::clipBoard::clipboardStd);
+			etk::String data = gale::context::clipBoard::get(gale::context::clipBoard::clipboardStd);
 			if (_fd == 0) {
 				GALE_ERROR("    ==> No data availlable ...");
 				return;
@@ -1374,7 +1374,7 @@ class WAYLANDInterface : public gale::Context {
 			*/
 		}
 		/****************************************************************************************/
-		void setIcon(const std::string& _inputFile) {
+		void setIcon(const etk::String& _inputFile) {
 			/*
 			#if    defined(GALE_BUILD_EGAMI) \
 			    && !defined(__TARGET_OS__Web)
@@ -1526,7 +1526,7 @@ class WAYLANDInterface : public gale::Context {
 			*/
 		}
 		/****************************************************************************************/
-		void setTitle(const std::string& _title) {
+		void setTitle(const etk::String& _title) {
 			WAYLAND_INFO("WAYLAND: set Title (START)");
 			m_uniqueWindowsName = _title;
 			if (m_shellSurface == nullptr) {
@@ -1536,8 +1536,8 @@ class WAYLANDInterface : public gale::Context {
 			wl_shell_surface_set_title(m_shellSurface, m_uniqueWindowsName.c_str());
 			WAYLAND_INFO("WAYLAND: set Title (END)");
 		}
-		void openURL(const std::string& _url) {
-			std::string req = "xdg-open ";
+		void openURL(const etk::String& _url) {
+			etk::String req = "xdg-open ";
 			req += _url;
 			system(req.c_str());
 			return;
@@ -1564,7 +1564,7 @@ class WAYLANDInterface : public gale::Context {
 			int len = 1;
 			char buffer[4097];
 			buffer[0] = '\0';
-			std::string localBufferData;
+			etk::String localBufferData;
 			
 			struct pollfd fds;
 			fds.fd = pipe_fd[0];

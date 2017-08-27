@@ -172,7 +172,7 @@ def configure(target, my_module):
 	my_module.add_path(".")
 	
 	my_module.add_flag('c++', [
-	    "-DGALE_VERSION=\"\\\"" + tools.version_to_string(my_module.get_pkg("VERSION")) + "\\\"\""
+	    "-DGALE_VERSION=\"\\\"" + tools.version_toString(my_module.get_pkg("VERSION")) + "\\\"\""
 	    ])
 	
 	if "Web" in target.get_type():
@@ -401,7 +401,7 @@ def tool_generate_main_java_class(target, module, package_name):
 			debug.warning("Missing application 'VERSION_CODE' ==> set it at '0' (this can creata an NON update on android play store)")
 			module.set_pkg("VERSION_CODE", "0")
 		tmpFile.write( '          android:versionCode="' + str(module.get_pkg("VERSION_CODE")) + '" \n')
-		tmpFile.write( '          android:versionName="'+tools.version_to_string(module.get_pkg("VERSION"))+'"> \n')
+		tmpFile.write( '          android:versionName="'+tools.version_toString(module.get_pkg("VERSION"))+'"> \n')
 		tmpFile.write( '	<uses-feature android:glEsVersion="0x00030000" android:required="true" />\n')
 		tmpFile.write( '	<uses-sdk android:minSdkVersion="' + str(target.board_id) + '" \n')
 		tmpFile.write( '	          android:targetSdkVersion="' + str(target.board_id) + '" /> \n')

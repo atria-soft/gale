@@ -81,13 +81,13 @@ namespace gale {
 						GALE_PRINT(m_displayName << ": processTime: " << processTimeLocal);
 					}
 					if (m_drawingDone == true) {
-						m_min = std::min(m_min, processTimeLocal);
-						m_max = std::max(m_max, processTimeLocal);
+						m_min = etk::min(m_min, processTimeLocal);
+						m_max = etk::max(m_max, processTimeLocal);
 						m_avg += processTimeLocal;
 						m_drawingDone = false;
 					} else {
-						m_min_idle = std::min(m_min_idle, processTimeLocal);
-						m_max_idle = std::max(m_max_idle, processTimeLocal);
+						m_min_idle = etk::min(m_min_idle, processTimeLocal);
+						m_max_idle = etk::max(m_max_idle, processTimeLocal);
 						m_avg_idle += processTimeLocal;
 					}
 				}

@@ -55,17 +55,17 @@ static const char* keyboardDescriptionString[] = {
 	"keyboard::back",
 };
 
-std::ostream& gale::key::operator <<(std::ostream& _os, const enum gale::key::keyboard _obj) {
+etk::Stream& gale::key::operator <<(etk::Stream& _os, const enum gale::key::keyboard _obj) {
 	_os << keyboardDescriptionString[int32_t(_obj)];
 	return _os;
 }
 
 namespace etk {
-	template<> std::string to_string<enum gale::key::keyboard>(const enum gale::key::keyboard& _obj) {
+	template<> etk::String toString<enum gale::key::keyboard>(const enum gale::key::keyboard& _obj) {
 		return keyboardDescriptionString[int32_t(_obj)];
 	}
 	
-	template <> bool from_string<enum gale::key::keyboard>(enum gale::key::keyboard& _variableRet, const std::string& _value) {
+	template <> bool from_string<enum gale::key::keyboard>(enum gale::key::keyboard& _variableRet, const etk::String& _value) {
 		for (size_t iii=0; iii< sizeof(keyboardDescriptionString); ++iii) {
 			if (keyboardDescriptionString[iii] == _value) {
 				_variableRet = (enum gale::key::keyboard)iii;

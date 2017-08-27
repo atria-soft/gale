@@ -6,7 +6,7 @@
 #pragma once
 
 #include <etk/types.hpp>
-#include <vector>
+#include <etk/Vector.hpp>
 #include <etk/math/Matrix4x4.hpp>
 #include <etk/math/Vector2D.hpp>
 #include <etk/Color.hpp>
@@ -193,9 +193,9 @@ namespace gale {
 		 * @brief draw a specific array  == > this enable mode difference ...
 		 */
 		void drawArrays(enum renderMode _mode, int32_t _first, int32_t _count);
-		void drawElements  (enum renderMode _mode, const std::vector<uint32_t>& _indices);
-		void drawElements16(enum renderMode _mode, const std::vector<uint16_t>& _indices);
-		void drawElements8 (enum renderMode _mode, const std::vector<uint8_t>& _indices);
+		void drawElements  (enum renderMode _mode, const etk::Vector<uint32_t>& _indices);
+		void drawElements16(enum renderMode _mode, const etk::Vector<uint16_t>& _indices);
+		void drawElements8 (enum renderMode _mode, const etk::Vector<uint8_t>& _indices);
 		/**
 		 * @brief Use openGL program
 		 * @param[in] id Id of the program that might be used
@@ -204,8 +204,8 @@ namespace gale {
 		void reset();
 		
 		
-		bool genBuffers(std::vector<uint32_t>& _buffers);
-		bool deleteBuffers(std::vector<uint32_t>& _buffers);
+		bool genBuffers(etk::Vector<uint32_t>& _buffers);
+		bool deleteBuffers(etk::Vector<uint32_t>& _buffers);
 		bool bindBuffer(uint32_t _bufferId);
 		enum class usage {
 			streamDraw,
@@ -222,18 +222,18 @@ namespace gale {
 			};
 			int64_t create(enum gale::openGL::shader::type _type);
 			void remove(int64_t& _shader);
-			bool compile(int64_t _shader, const std::string& _data);
+			bool compile(int64_t _shader, const etk::String& _data);
 		};
 		namespace program {
 			int64_t create();
 			void remove(int64_t& _prog);
 			bool attach(int64_t _prog, int64_t _shader);
 			bool compile(int64_t _prog);
-			int32_t getAttributeLocation(int64_t _prog, const std::string& _name);
-			int32_t getUniformLocation(int64_t _prog, const std::string& _name);
+			int32_t getAttributeLocation(int64_t _prog, const etk::String& _name);
+			int32_t getUniformLocation(int64_t _prog, const etk::String& _name);
 		};
-		std::ostream& operator <<(std::ostream& _os, enum openGL::flag _obj);
-		std::ostream& operator <<(std::ostream& _os, enum openGL::renderMode _obj);
+		etk::Stream& operator <<(etk::Stream& _os, enum openGL::flag _obj);
+		etk::Stream& operator <<(etk::Stream& _os, enum openGL::renderMode _obj);
 	}
 }
 

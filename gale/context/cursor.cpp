@@ -30,7 +30,7 @@ static const char* cursorDescriptionString[] = {
 	"cursor::none"
 };
 
-std::ostream& gale::context::operator <<(std::ostream& _os, enum gale::context::cursor _obj) {
+etk::Stream& gale::context::operator <<(etk::Stream& _os, enum gale::context::cursor _obj) {
 	_os << cursorDescriptionString[int32_t(_obj)];
 	return _os;
 }

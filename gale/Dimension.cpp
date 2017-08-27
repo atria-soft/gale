@@ -80,7 +80,7 @@ gale::Dimension::Dimension(const vec2& _size, enum gale::distance _type) :
 	set(_size, _type);
 }
 
-void gale::Dimension::set(std::string _config) {
+void gale::Dimension::set(etk::String _config) {
 	m_data.setValue(0,0);
 	m_type = gale::distance::pixel;
 	enum distance type = gale::distance::pixel;
@@ -121,8 +121,8 @@ gale::Dimension::~Dimension() {
 	// nothing to do ...
 }
 
-gale::Dimension::operator std::string() const {
-	std::string str;
+gale::Dimension::operator etk::String() const {
+	etk::String str;
 	str = get(getType());
 	
 	switch(getType()) {
@@ -178,12 +178,12 @@ vec2 gale::Dimension::get(enum gale::distance _type) const {
 
 void gale::Dimension::set(const vec2& _size, enum gale::distance _type) {
 	// set min max on input to limit error : 
-	vec2 size(std::avg(0.0f,_size.x(),9999999.0f),
-	          std::avg(0.0f,_size.y(),9999999.0f));
+	vec2 size(etk::avg(0.0f,_size.x(),9999999.0f),
+	          etk::avg(0.0f,_size.y(),9999999.0f));
 	switch(_type) {
 		case gale::distance::pourcent: {
-			vec2 size2(std::avg(0.0f,_size.x(),100.0f),
-			           std::avg(0.0f,_size.y(),100.0f));
+			vec2 size2(etk::avg(0.0f,_size.x(),100.0f),
+			           etk::avg(0.0f,_size.y(),100.0f));
 			m_data = vec2(size2.x()*0.01f, size2.y()*0.01f);
 			//GALE_VERBOSE("Set % : " << size2 << "  == > " << m_data);
 			break;
@@ -259,7 +259,7 @@ vec2 gale::Dimension::getFoot() const {
 	return gale::Dimension::getMillimeter()*millimeterToFoot;
 }
 
-std::ostream& gale::operator <<(std::ostream& _os, enum gale::distance _obj) {
+etk::Stream& gale::operator <<(etk::Stream& _os, enum gale::distance _obj) {
 	switch(_obj) {
 		case gale::distance::pourcent:
 			_os << "%";
@@ -289,24 +289,24 @@ std::ostream& gale::operator <<(std::ostream& _os, enum gale::distance _obj) {
 	return _os;
 }
 
-std::ostream& gale::operator <<(std::ostream& _os, const gale::Dimension& _obj) {
+etk::Stream& gale::operator <<(etk::Stream& _os, const gale::Dimension& _obj) {
 	_os << _obj.get(_obj.getType()) << _obj.getType();
 	return _os;
 }
 
 namespace etk {
-	template<> std::string to_string<gale::Dimension>(const gale::Dimension& _obj) {
+	template<> etk::String toString<gale::Dimension>(const gale::Dimension& _obj) {
 		return _obj;
 	}
-	template<> std::u32string to_u32string<gale::Dimension>(const gale::Dimension& _obj) {
-		return etk::to_u32string(etk::to_string(_obj));
+	template<> etk::UString toUString<gale::Dimension>(const gale::Dimension& _obj) {
+		return etk::toUString(etk::toString(_obj));
 	}
-	template<> bool from_string<gale::Dimension>(gale::Dimension& _variableRet, const std::string& _value) {
+	template<> bool from_string<gale::Dimension>(gale::Dimension& _variableRet, const etk::String& _value) {
 		_variableRet = gale::Dimension(_value);
 		return true;
 	}
-	template<> bool from_string<gale::Dimension>(gale::Dimension& _variableRet, const std::u32string& _value) {
-		return from_string(_variableRet, etk::to_string(_value));
+	template<> bool from_string<gale::Dimension>(gale::Dimension& _variableRet, const etk::UString& _value) {
+		return from_string(_variableRet, etk::toString(_value));
 	}
 };
 

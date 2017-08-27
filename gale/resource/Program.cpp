@@ -25,7 +25,7 @@ gale::resource::Program::Program() :
 	m_resourceLevel = 1;
 }
 
-void gale::resource::Program::init(const std::string& _filename) {
+void gale::resource::Program::init(const etk::String& _filename) {
 	gale::Resource::init(_filename);
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	GALE_DEBUG("OGL : load PROGRAM '" << m_name << "'");
@@ -34,7 +34,7 @@ void gale::resource::Program::init(const std::string& _filename) {
 	etk::FSNode file(m_name);
 	if (file.exist() == false) {
 		GALE_DEBUG("File does not Exist : \"" << file << "\"  == > automatic load of framment and shader with same names... ");
-		std::string tmpFilename = m_name;
+		etk::String tmpFilename = m_name;
 		// remove extention ...
 		tmpFilename.erase(tmpFilename.size()-4, 4);
 		ememory::SharedPtr<gale::resource::Shader> tmpShader = gale::resource::Shader::create(tmpFilename+"vert");
@@ -43,7 +43,7 @@ void gale::resource::Program::init(const std::string& _filename) {
 			return;
 		} else {
 			GALE_DEBUG("Add shader on program : "<< tmpFilename << "vert");
-			m_shaderList.push_back(tmpShader);
+			m_shaderList.pushBack(tmpShader);
 		}
 		tmpShader = gale::resource::Shader::create(tmpFilename+"frag");
 		if (tmpShader == nullptr) {
@@ -51,10 +51,10 @@ void gale::resource::Program::init(const std::string& _filename) {
 			return;
 		} else {
 			GALE_DEBUG("Add shader on program : "<< tmpFilename << "frag");
-			m_shaderList.push_back(tmpShader);
+			m_shaderList.pushBack(tmpShader);
 		}
 	} else {
-		std::string fileExtention = file.fileGetExtention();
+		etk::String fileExtention = file.fileGetExtention();
 		if (fileExtention != "prog") {
 			GALE_ERROR("File does not have extention \".prog\" for program but : \"" << fileExtention << "\"");
 			return;
@@ -80,13 +80,13 @@ void gale::resource::Program::init(const std::string& _filename) {
 				continue;
 			}
 			// get it with relative position :
-			std::string tmpFilename = file.getRelativeFolder() + tmpData;
+			etk::String tmpFilename = file.getRelativeFolder() + tmpData;
 			ememory::SharedPtr<gale::resource::Shader> tmpShader = gale::resource::Shader::create(tmpFilename);
 			if (tmpShader == nullptr) {
 				GALE_ERROR("Error while getting a specific shader filename : " << tmpFilename);
 			} else {
 				GALE_DEBUG("Add shader on program : "<< tmpFilename);
-				m_shaderList.push_back(tmpShader);
+				m_shaderList.pushBack(tmpShader);
 			}
 			
 		}
@@ -108,7 +108,7 @@ gale::resource::Program::~Program() {
 	m_hasTexture1 = false;
 }
 
-std::ostream& gale::resource::operator <<(std::ostream& _os, const gale::resource::progAttributeElement& _obj) {
+etk::Stream& gale::resource::operator <<(etk::Stream& _os, const gale::resource::progAttributeElement& _obj) {
 	_os << "{";
 	_os << "[" << _obj.m_name << "] ";
 	_os << _obj.m_elementId << " ";
@@ -117,7 +117,7 @@ std::ostream& gale::resource::operator <<(std::ostream& _os, const gale::resourc
 	return _os;
 }
 
-std::ostream& gale::resource::operator <<(std::ostream& _os, const std::vector<gale::resource::progAttributeElement>& _obj){
+etk::Stream& gale::resource::operator <<(etk::Stream& _os, const etk::Vector<gale::resource::progAttributeElement>& _obj){
 	_os << "{";
 	for (auto &it : _obj) {
 		_os << it;
@@ -170,7 +170,7 @@ bool gale::resource::Program::checkIdValidity(int32_t _idElem) {
 	return m_elementList[_idElem].m_isLinked;
 }
 
-int32_t gale::resource::Program::getAttribute(std::string _elementName) {
+int32_t gale::resource::Program::getAttribute(etk::String _elementName) {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	// check if it exist previously :
 	for(size_t iii=0; iii<m_elementList.size(); iii++) {
@@ -199,11 +199,11 @@ int32_t gale::resource::Program::getAttribute(std::string _elementName) {
 		tmp.m_elementId = -1;
 		tmp.m_isLinked = false;
 	}
-	m_elementList.push_back(tmp);
+	m_elementList.pushBack(tmp);
 	return m_elementList.size()-1;
 }
 
-int32_t gale::resource::Program::getUniform(std::string _elementName) {
+int32_t gale::resource::Program::getUniform(etk::String _elementName) {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	// check if it exist previously :
 	for(size_t iii=0; iii<m_elementList.size(); iii++) {
@@ -232,7 +232,7 @@ int32_t gale::resource::Program::getUniform(std::string _elementName) {
 		tmp.m_elementId = -1;
 		tmp.m_isLinked = false;
 	}
-	m_elementList.push_back(tmp);
+	m_elementList.pushBack(tmp);
 	return m_elementList.size()-1;
 }
 
@@ -427,7 +427,7 @@ void gale::resource::Program::sendAttributePointer(int32_t _idElem,
 	                      (GLvoid *)_offset); // Pointer on the buffer
 	checkGlError("glVertexAttribPointer", __LINE__, _idElem);
 	glEnableVertexAttribArray(m_elementList[_idElem].m_elementId);
-	m_listOfVBOUsed.push_back(m_elementList[_idElem].m_elementId);
+	m_listOfVBOUsed.pushBack(m_elementList[_idElem].m_elementId);
 	checkGlError("glEnableVertexAttribArray", __LINE__, _idElem);
 }
 

@@ -113,7 +113,7 @@ class SDLInterface : public gale::Context {
 		bool m_positionChangeRequested; //!< the position modifiquation has been requested
 		vec2 m_curentGrabDelta; //!< the position in SDL will arrive by pool
 		bool m_inputIsPressed[MAX_MANAGE_INPUT];
-		std::string m_uniqueWindowsName;
+		etk::String m_uniqueWindowsName;
 		enum gale::context::cursor m_currentCursor; //!< select the current cursor to display :
 		char32_t m_lastKeyPressed; //!< The last element key presed...
 		SDL_Surface* m_screen;

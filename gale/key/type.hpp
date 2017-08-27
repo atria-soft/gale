@@ -21,7 +21,7 @@ namespace gale {
 		/**
 		 * @brief Debug operator To display the curent element in a Human redeable information
 		 */
-		std::ostream& operator <<(std::ostream& _os, enum gale::key::type _obj);
+		etk::Stream& operator <<(etk::Stream& _os, enum gale::key::type _obj);
 	}
 }
 

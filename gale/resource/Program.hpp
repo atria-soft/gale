@@ -23,15 +23,15 @@ namespace gale {
 		 */
 		class progAttributeElement {
 			public :
-				std::string m_name; //!< Name of the element
+				etk::String m_name; //!< Name of the element
 				int32_t m_elementId; //!< openGl Id if this element  == > can not exist ==> @ref m_isLinked
 				bool m_isAttribute; //!< true if it was an attribute element, otherwite it was an uniform
 				bool m_isLinked; //!< if this element does not exist this is false
 		};
 		//! @not_in_doc
-		std::ostream& operator <<(std::ostream& _os, const gale::resource::progAttributeElement& _obj);
+		etk::Stream& operator <<(etk::Stream& _os, const gale::resource::progAttributeElement& _obj);
 		//! @not_in_doc
-		std::ostream& operator <<(std::ostream& _os, const std::vector<gale::resource::progAttributeElement>& _obj);
+		etk::Stream& operator <<(etk::Stream& _os, const etk::Vector<gale::resource::progAttributeElement>& _obj);
 		/**
 		 * @brief Program is a compilation of some fragment Shader and vertex Shader. This construct automaticly this assiciation
 		 * The input file must have the form : "myFile.prog"
@@ -49,9 +49,9 @@ namespace gale {
 			private :
 				bool m_exist; //!< the file existed
 				int64_t m_program; //!< openGL id of the current program
-				std::vector<ememory::SharedPtr<gale::resource::Shader>> m_shaderList; //!< List of all the shader loaded
-				std::vector<gale::resource::progAttributeElement> m_elementList; //!< List of all the attribute requested by the user
-				std::vector<int32_t> m_listOfVBOUsed; //!< retain the list of VBO used to disable it when unuse program ...
+				etk::Vector<ememory::SharedPtr<gale::resource::Shader>> m_shaderList; //!< List of all the shader loaded
+				etk::Vector<gale::resource::progAttributeElement> m_elementList; //!< List of all the attribute requested by the user
+				etk::Vector<int32_t> m_listOfVBOUsed; //!< retain the list of VBO used to disable it when unuse program ...
 				bool m_hasTexture; //!< A texture has been set to the current shader
 				bool m_hasTexture1; //!< A texture has been set to the current shader
 			protected:
@@ -60,7 +60,7 @@ namespace gale {
 				 * @param[in] filename Standard file name format. see @ref etk::FSNode
 				 */
 				Program();
-				void init(const std::string& _filename);
+				void init(const etk::String& _filename);
 			public:
 				DECLARE_RESOURCE_NAMED_FACTORY(Program);
 				/**
@@ -80,7 +80,7 @@ namespace gale {
 				 * @param[in] _elementName Name of the requested attribute.
 				 * @return An abstract ID of the current attribute (this value is all time availlable, even if the program will be reloaded)
 				 */
-				int32_t getAttribute(std::string _elementName);
+				int32_t getAttribute(etk::String _elementName);
 				/**
 				 * @brief Send attribute table to the spefified ID attribure (not send if does not really exist in the openGL program).
 				 * @param[in] _idElem Id of the Attribute that might be sended.
@@ -106,16 +106,16 @@ namespace gale {
 					                   int32_t _nbElement,
 					                   const void* _pointer,
 					                   int32_t _jumpBetweenSample=0);
-					inline void sendAttribute(int32_t _idElem, const std::vector<vec2>& _data) {
+					inline void sendAttribute(int32_t _idElem, const etk::Vector<vec2>& _data) {
 						sendAttribute(_idElem, 2/*u,v / x,y*/, &_data[0]);
 					}
-					inline void sendAttribute(int32_t _idElem, const std::vector<vec3>& _data) {
+					inline void sendAttribute(int32_t _idElem, const etk::Vector<vec3>& _data) {
 						sendAttribute(_idElem, 3/*x,y,z,unused*/, &_data[0], 4*sizeof(btScalar));
 					}
-					inline void sendAttribute(int32_t _idElem, const std::vector<etk::Color<float>>& _data) {
+					inline void sendAttribute(int32_t _idElem, const etk::Vector<etk::Color<float>>& _data) {
 						sendAttribute(_idElem, 4/*r,g,b,a*/, &_data[0]);
 					}
-					inline void sendAttribute(int32_t _idElem, const std::vector<float>& _data) {
+					inline void sendAttribute(int32_t _idElem, const etk::Vector<float>& _data) {
 						sendAttribute(_idElem, 1, &_data[0]);
 					}
 				#endif
@@ -125,7 +125,7 @@ namespace gale {
 				 * @param[in] _elementName Name of the requested uniform.
 				 * @return An abstract ID of the current uniform (this value is all time availlable, even if the program will be reloaded)
 				 */
-				int32_t getUniform(std::string _elementName);
+				int32_t getUniform(etk::String _elementName);
 				/**
 				 * @brief Send a uniform element to the spefified ID (not send if does not really exist in the openGL program)
 				 * @param[in] _idElem Id of the uniform that might be sended.
