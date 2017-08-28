@@ -51,7 +51,7 @@ namespace etk {
 	
 	template <> bool from_string<enum gale::context::clipBoard::clipboardListe>(enum gale::context::clipBoard::clipboardListe& _variableRet, const etk::String& _value) {
 		for (size_t iii=0; iii< sizeof(clipboardDescriptionString); ++iii) {
-			if (clipboardDescriptionString[iii] == _value) {
+			if (_value == clipboardDescriptionString[iii]) {
 				_variableRet = (enum gale::context::clipBoard::clipboardListe)iii;
 				return true;
 			}

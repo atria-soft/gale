@@ -47,7 +47,7 @@ static gale::Context* lastContextSet = nullptr;
 gale::Context& gale::getContext() {
 	etk::Map<std::thread::id, gale::Context*>& list = getContextList();
 	g_lockContextMap.lock();
-	etk::Map<std::thread::id, gale::Context*>::iterator it = list.find(std::this_thread::get_id());
+	etk::Map<std::thread::id, gale::Context*>::Iterator it = list.find(std::this_thread::get_id());
 	gale::Context* out = nullptr;
 	if (it != list.end()) {
 		out = it->second;
@@ -91,12 +91,7 @@ void gale::setContext(gale::Context* _context) {
 	if (_context != nullptr) {
 		lastContextSet = _context;
 	}
-	etk::Map<std::thread::id, gale::Context*>::iterator it = list.find(std::this_thread::get_id());
-	if (it == list.end()) {
-		list.insert(etk::Pair<std::thread::id, gale::Context*>(std::this_thread::get_id(), _context));
-	} else {
-		it->second = _context;
-	}
+	list.set(std::this_thread::get_id(), _context);
 	g_lockContextMap.unlock();
 }
 
@@ -108,12 +103,7 @@ void gale::contextRegisterThread(std::thread* _thread) {
 	etk::Map<std::thread::id, gale::Context*>& list = getContextList();
 	//GALE_ERROR("REGISTER Thread : " << _thread->get_id() << " context pointer : " << uint64_t(context));
 	g_lockContextMap.lock();
-	etk::Map<std::thread::id, gale::Context*>::iterator it = list.find(_thread->get_id());
-	if (it == list.end()) {
-		list.insert(etk::Pair<std::thread::id, gale::Context*>(_thread->get_id(), context));
-	} else {
-		it->second = context;
-	}
+	list.set(_thread->get_id(), context);
 	g_lockContextMap.unlock();
 }
 
@@ -123,7 +113,7 @@ void gale::contextUnRegisterThread(std::thread* _thread) {
 	}
 	etk::Map<std::thread::id, gale::Context*>& list = getContextList();
 	g_lockContextMap.lock();
-	etk::Map<std::thread::id, gale::Context*>::iterator it = list.find(_thread->get_id());
+	etk::Map<std::thread::id, gale::Context*>::Iterator it = list.find(_thread->get_id());
 	if (it != list.end()) {
 		list.erase(it);
 	}
