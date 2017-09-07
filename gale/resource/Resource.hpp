@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <mutex>
+#include <ethread/Mutex.hpp>
 #include <ememory/memory.hpp>
 #include <etk/types.hpp>
 #include <gale/debug.hpp>

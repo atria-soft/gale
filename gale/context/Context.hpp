@@ -75,7 +75,7 @@ namespace gale {
 			etk::FSNode m_simulationFile;
 		private:
 			echrono::Steady m_previousDisplayTime;  // this is to limit framerate ... in case...
-			etk::Fifo<std::function<void(gale::Context& _context)> > m_msgSystem;
+			etk::Fifo<etk::Function<void(gale::Context& _context)> > m_msgSystem;
 			bool m_displayFps;
 			gale::context::Fps m_FpsSystemEvent;
 			gale::context::Fps m_FpsSystemContext;
@@ -86,7 +86,7 @@ namespace gale {
 			 */
 			void processEvents();
 		public:
-			void postAction(std::function<void(gale::Context& _context)> _action);
+			void postAction(etk::Function<void(gale::Context& _context)> _action);
 		public:
 			
 			virtual void setArchiveDir(int _mode, const char* _str, const char* _applName=nullptr);
@@ -311,11 +311,11 @@ namespace gale {
 	 * @brief When a new thread is created, it is needed to register it in the gale context interface to permit to get the context associated on it ...
 	 * @param[in] _thread generic C++11 thread handle
 	 */
-	void contextRegisterThread(std::thread* _thread);
+	void contextRegisterThread(ethread::Thread* _thread);
 	/**
 	 * @brief Remove an associated thread
 	 * @param[in] _thread generic C++11 thread handle
 	 */
-	void contextUnRegisterThread(std::thread* _thread);
+	void contextUnRegisterThread(ethread::Thread* _thread);
 }
 

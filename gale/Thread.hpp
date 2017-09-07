@@ -12,12 +12,12 @@
 #if defined(__TARGET_OS__Android)
 	#include <pthread.h>
 #else
-	#include <thread>
+	#include <ethread/Thread.hpp>
 #endif
 
 namespace gale {
 	/**
-	 * @brief We have our own thread in gale to manage gale context folowing and manage android rong management of std::thread when calling java.
+	 * @brief We have our own thread in gale to manage gale context folowing and manage android rong management of ethread::Thread when calling java.
 	 */
 	class Thread : public ememory::EnableSharedFromThis<Thread> {
 		public:
@@ -42,7 +42,7 @@ namespace gale {
 			#if defined(__TARGET_OS__Android)
 				pthread_t m_thread; //!< Current handle on the thread
 			#else
-				ememory::SharedPtr<std::thread> m_thread; //!< Current handle on the thread
+				ememory::SharedPtr<ethread::Thread> m_thread; //!< Current handle on the thread
 			#endif
 			gale::Context* m_context; //!< Copy of the gale context (permit to get current gale interface)
 		public:

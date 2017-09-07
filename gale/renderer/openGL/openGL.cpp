@@ -8,7 +8,7 @@
 #include <gale/debug.hpp>
 #include <gale/renderer/openGL/openGL.hpp>
 #include <etk/stdTools.hpp>
-#include <mutex>
+#include <ethread/Mutex.hpp>
 //#define DIRECT_MODE
 #include <gale/renderer/openGL/openGL-include.hpp>
 #include <ethread/tools.hpp>
@@ -55,8 +55,8 @@ static void checkGlError(const char* _op, int32_t _localLine) {
  * @note due ti the fact that the system can be called for multiple instance, for naw we just limit the acces to one process at a time.
  * @return the main inteface Mutex
  */
-static std::mutex& mutexOpenGl() {
-	static std::mutex s_drawMutex;
+static ethread::Mutex& mutexOpenGl() {
+	static ethread::Mutex s_drawMutex;
 	return s_drawMutex;
 }
 
@@ -84,8 +84,8 @@ void gale::openGL::unLock() {
 	mutexOpenGl().unlock();
 }
 
-static etk::Vector<std::thread::id>& getContextList() {
-	static etk::Vector<std::thread::id> g_val;
+static etk::Vector<ethread::Thread::id>& getContextList() {
+	static etk::Vector<ethread::Thread::id> g_val;
 	return g_val;
 }
 

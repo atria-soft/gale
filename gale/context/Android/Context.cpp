@@ -9,7 +9,7 @@
 #include <time.h>
 #include <cstdint>
 #include <pthread.h>
-#include <mutex>
+#include <ethread/Mutex.hpp>
 #include <gale/debug.hpp>
 #include <gale/context/Context.hpp>
 #include <gale/Dimension.hpp>
@@ -19,7 +19,7 @@
 
 // jni doc : /usr/lib/jvm/java-1.6.0-openjdk/include
 
-std::mutex g_interfaceMutex;
+ethread::Mutex g_interfaceMutex;
 
 
 class AndroidContext : public gale::Context {
@@ -502,7 +502,7 @@ extern "C" {
 	                                             jint _mode,
 	                                             jstring _myString,
 	                                             jstring _applicationName) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
 		    || nullptr == s_listInstance[_id] ) {
@@ -535,7 +535,7 @@ extern "C" {
 	                                                     jclass _classBase,
 	                                                     jobject _objCallback,
 	                                                     int _typeApplication) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		GALE_DEBUG("*******************************************");
 		GALE_DEBUG("** Creating GALE context                 **");
 		GALE_DEBUG("*******************************************");
@@ -565,7 +565,7 @@ extern "C" {
 	}
 	
 	void Java_org_gale_Gale_EWsetJavaVirtualMachineStop(JNIEnv* _env, jclass _cls, jint _id) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		GALE_DEBUG("*******************************************");
 		GALE_DEBUG("** remove JVM Pointer                    **");
 		GALE_DEBUG("*******************************************");
@@ -583,7 +583,7 @@ extern "C" {
 		s_listInstance[_id]=nullptr;
 	}
 	void Java_org_gale_Gale_EWtouchEvent(JNIEnv* _env, jobject _thiz, jint _id) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		GALE_DEBUG("  == > Touch Event");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
@@ -596,7 +596,7 @@ extern "C" {
 	}
 	
 	void Java_org_gale_Gale_EWonCreate(JNIEnv* _env, jobject _thiz, jint _id) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		GALE_DEBUG("*******************************************");
 		GALE_DEBUG("** Activity on Create                    **");
 		GALE_DEBUG("*******************************************");
@@ -612,7 +612,7 @@ extern "C" {
 	}
 	
 	void Java_org_gale_Gale_EWonStart(JNIEnv* _env, jobject _thiz, jint _id) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		GALE_DEBUG("*******************************************");
 		GALE_DEBUG("** Activity on Start                     **");
 		GALE_DEBUG("*******************************************");
@@ -627,7 +627,7 @@ extern "C" {
 		//SendSystemMessage(" testmessages ... ");
 	}
 	void Java_org_gale_Gale_EWonReStart(JNIEnv* _env, jobject _thiz, jint _id) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		GALE_DEBUG("*******************************************");
 		GALE_DEBUG("** Activity on Re-Start                  **");
 		GALE_DEBUG("*******************************************");
@@ -641,7 +641,7 @@ extern "C" {
 		s_listInstance[_id]->ANDROID_reStart();
 	}
 	void Java_org_gale_Gale_EWonResume(JNIEnv* _env, jobject _thiz, jint _id) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		GALE_DEBUG("*******************************************");
 		GALE_DEBUG("** Activity on resume                    **");
 		GALE_DEBUG("*******************************************");
@@ -655,7 +655,7 @@ extern "C" {
 		s_listInstance[_id]->OS_Resume();
 	}
 	void Java_org_gale_Gale_EWonPause(JNIEnv* _env, jobject _thiz, jint _id) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		GALE_DEBUG("*******************************************");
 		GALE_DEBUG("** Activity on pause                     **");
 		GALE_DEBUG("*******************************************");
@@ -671,7 +671,7 @@ extern "C" {
 		s_listInstance[_id]->OS_Suspend();
 	}
 	void Java_org_gale_Gale_EWonStop(JNIEnv* _env, jobject _thiz, jint _id) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		GALE_DEBUG("*******************************************");
 		GALE_DEBUG("** Activity on Stop                      **");
 		GALE_DEBUG("*******************************************");
@@ -685,7 +685,7 @@ extern "C" {
 		s_listInstance[_id]->OS_Stop();
 	}
 	void Java_org_gale_Gale_EWonDestroy(JNIEnv* _env, jobject _thiz, jint _id) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		GALE_DEBUG("*******************************************");
 		GALE_DEBUG("** Activity on Destroy                   **");
 		GALE_DEBUG("*******************************************");
@@ -711,7 +711,7 @@ extern "C" {
 	                                           jint _pointerID,
 	                                           jfloat _x,
 	                                           jfloat _y) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
 		    || nullptr == s_listInstance[_id] ) {
@@ -732,7 +732,7 @@ extern "C" {
 	                                          jboolean _isDown,
 	                                          jfloat _x,
 	                                          jfloat _y) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id < 0
 		    || s_listInstance[_id] == nullptr ) {
@@ -752,7 +752,7 @@ extern "C" {
 	                                           jint _pointerID,
 	                                           jfloat _x,
 	                                           jfloat _y) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
 		    || nullptr == s_listInstance[_id] ) {
@@ -773,7 +773,7 @@ extern "C" {
 	                                          jboolean _isDown,
 	                                          jfloat _x,
 	                                          jfloat _y) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
 		    || nullptr == s_listInstance[_id] ) {
@@ -791,7 +791,7 @@ extern "C" {
 	                                      jobject _thiz,
 	                                      jint _id,
 	                                      jint _pointerID) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
 		    || nullptr == s_listInstance[_id] ) {
@@ -807,7 +807,7 @@ extern "C" {
 	                                            jint _id,
 	                                            jint _type,
 	                                            jboolean _isdown) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
 		    || nullptr == s_listInstance[_id] ) {
@@ -824,7 +824,7 @@ extern "C" {
 	                                           jint _id,
 	                                           jint _uniChar,
 	                                           jboolean _isdown) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
 		    || nullptr == s_listInstance[_id] ) {
@@ -841,7 +841,7 @@ extern "C" {
 	                                                 jint _id,
 	                                                 jfloat _ratioX,
 	                                                 jfloat _ratioY) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
 		    || nullptr == s_listInstance[_id] ) {
@@ -859,7 +859,7 @@ extern "C" {
 	                                                 jint _id,
 	                                                 jint _keyVal,
 	                                                 jboolean _isdown) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
 		    || nullptr == s_listInstance[_id] ) {
@@ -903,7 +903,7 @@ extern "C" {
 	void Java_org_gale_Gale_EWrenderInit(JNIEnv* _env,
 	                                     jobject _thiz,
 	                                     jint _id) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		GALE_VERBOSE("Java_org_gale_Gale_EWrenderInit [BEGIN]");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
@@ -920,7 +920,7 @@ extern "C" {
 	                                       jint _id,
 	                                       jint _w,
 	                                       jint _h) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		GALE_VERBOSE("Java_org_gale_Gale_EWrenderResize [BEGIN]");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
@@ -937,7 +937,7 @@ extern "C" {
 	void Java_org_gale_Gale_EWrenderDraw(JNIEnv* _env,
 	                                     jobject _thiz,
 	                                     jint _id) {
-		std::unique_lock<std::mutex> lock(g_interfaceMutex);
+		std::unique_lock<ethread::Mutex> lock(g_interfaceMutex);
 		GALE_VERBOSE("Java_org_gale_Gale_EWrenderDraw [BEGIN]");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0

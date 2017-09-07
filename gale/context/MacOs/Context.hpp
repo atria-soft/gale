@@ -23,7 +23,7 @@ namespace MacOs	{
 	void setKeyboardMove(gale::key::Special& _keyboardMode, enum gale::key::keyboard _move, bool _isDown, bool _isAReapeateKey);
 	void stopRequested();
 	/*
-	void setRedrawCallback(const std::function<void()>& _func);
+	void setRedrawCallback(const etk::Function<void()>& _func);
 	*/
 }
 

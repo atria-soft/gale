@@ -12,7 +12,7 @@
 #include <etk/tool.hpp>
 #include <etk/os/FSNode.hpp>
 #include <ethread/tools.hpp>
-#include <mutex>
+#include <ethread/Mutex.hpp>
 
 #include <gale/gale.hpp>
 #include <gale/Dimension.hpp>
@@ -30,24 +30,24 @@
  * @note due ti the fact that the system can be called for multiple instance, for naw we just limit the acces to one process at a time.
  * @return the main inteface Mutex
  */
-static std::mutex& mutexInterface() {
-	static  std::mutex s_interfaceMutex;
+static ethread::Mutex& mutexInterface() {
+	static  ethread::Mutex s_interfaceMutex;
 	return s_interfaceMutex;
 }
 
 
-static std::mutex g_lockContextMap;
-static etk::Map<std::thread::id, gale::Context*>& getContextList() {
-	static etk::Map<std::thread::id, gale::Context*> g_val;
+static ethread::Mutex g_lockContextMap;
+static etk::Map<ethread::Thread::id, gale::Context*>& getContextList() {
+	static etk::Map<ethread::Thread::id, gale::Context*> g_val;
 	return g_val;
 }
 
 static gale::Context* lastContextSet = nullptr;
 
 gale::Context& gale::getContext() {
-	etk::Map<std::thread::id, gale::Context*>& list = getContextList();
+	etk::Map<ethread::Thread::id, gale::Context*>& list = getContextList();
 	g_lockContextMap.lock();
-	etk::Map<std::thread::id, gale::Context*>::Iterator it = list.find(std::this_thread::get_id());
+	etk::Map<ethread::Thread::id, gale::Context*>::Iterator it = list.find(std::this_thread::get_id());
 	gale::Context* out = nullptr;
 	if (it != list.end()) {
 		out = it->second;
@@ -85,7 +85,7 @@ gale::Context& gale::getContext() {
 }
 
 void gale::setContext(gale::Context* _context) {
-	etk::Map<std::thread::id, gale::Context*>& list = getContextList();
+	etk::Map<ethread::Thread::id, gale::Context*>& list = getContextList();
 	//GALE_ERROR("Set context : " << std::this_thread::get_id() << " context pointer : " << uint64_t(_context));
 	g_lockContextMap.lock();
 	if (_context != nullptr) {
@@ -95,25 +95,25 @@ void gale::setContext(gale::Context* _context) {
 	g_lockContextMap.unlock();
 }
 
-void gale::contextRegisterThread(std::thread* _thread) {
+void gale::contextRegisterThread(ethread::Thread* _thread) {
 	if (_thread == nullptr) {
 		return;
 	}
 	gale::Context* context = &gale::getContext();
-	etk::Map<std::thread::id, gale::Context*>& list = getContextList();
+	etk::Map<ethread::Thread::id, gale::Context*>& list = getContextList();
 	//GALE_ERROR("REGISTER Thread : " << _thread->get_id() << " context pointer : " << uint64_t(context));
 	g_lockContextMap.lock();
 	list.set(_thread->get_id(), context);
 	g_lockContextMap.unlock();
 }
 
-void gale::contextUnRegisterThread(std::thread* _thread) {
+void gale::contextUnRegisterThread(ethread::Thread* _thread) {
 	if (_thread == nullptr) {
 		return;
 	}
-	etk::Map<std::thread::id, gale::Context*>& list = getContextList();
+	etk::Map<ethread::Thread::id, gale::Context*>& list = getContextList();
 	g_lockContextMap.lock();
-	etk::Map<std::thread::id, gale::Context*>::Iterator it = list.find(_thread->get_id());
+	etk::Map<ethread::Thread::id, gale::Context*>::Iterator it = list.find(_thread->get_id());
 	if (it != list.end()) {
 		list.erase(it);
 	}
@@ -149,7 +149,7 @@ void gale::Context::processEvents() {
 	//GALE_DEBUG(" ********  Event");
 	while (m_msgSystem.count()>0) {
 		nbEvent++;
-		std::function<void(gale::Context& _context)> func;
+		etk::Function<void(gale::Context& _context)> func;
 		{
 			std::unique_lock<std::recursive_mutex> lock(m_mutex);
 			m_msgSystem.wait(func);
@@ -375,7 +375,7 @@ void gale::Context::start2ndThreadProcessing() {
 	unLockContext();
 }
 
-void gale::Context::postAction(std::function<void(gale::Context& _context)> _action) {
+void gale::Context::postAction(etk::Function<void(gale::Context& _context)> _action) {
 	std::unique_lock<std::recursive_mutex> lock(m_mutex);
 	m_msgSystem.post(_action);
 }
