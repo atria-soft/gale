@@ -235,13 +235,13 @@ static std::vector<std::pair<uint16_t,unichar>> g_listlasteventDown;
 	if ((bitField & flags) != 0) {
 		GALE_VERBOSE("Flag change: " << key);
 		if (guiKeyBoardMode.get(key) == false) {
-			GALE_DEBUG("    " << key << " DOWN");
+			GALE_VERBOSE("    " << key << " DOWN");
 			guiKeyBoardMode.update(key, true);
 			MacOs::setKeyboardMove(guiKeyBoardMode, key, true, false);
 		}
 	} else {
 		if (guiKeyBoardMode.get(key) == true) {
-			GALE_DEBUG("    " << key << " UP");
+			GALE_VERBOSE("    " << key << " UP");
 			guiKeyBoardMode.update(key, false);
 			MacOs::setKeyboardMove(guiKeyBoardMode, key, false, false);
 		}
@@ -311,46 +311,46 @@ static std::vector<std::pair<uint16_t,unichar>> g_listlasteventDown;
 
 -(void)mouseMoved:(NSEvent *)event {
 	NSPoint point = [event locationInWindow];
-	GALE_VERBOSE("mouseMoved : " << (float)point.x << " " << (float)point.y);
+	GALE_VERBOSE("mouseMoved : " << float(point.x) << " " << (float)point.y);
 	MacOs::setMouseMotion(0, point.x, point.y);
 }
 -(void)mouseEntered:(NSEvent *)event {
 	NSPoint point = [event locationInWindow];
-	GALE_INFO("mouseEntered : " << (float)point.x << " " << (float)point.y);
+	GALE_VERBOSE("mouseEntered : " << float(point.x) << " " << (float)point.y);
 }
 -(void)mouseExited:(NSEvent *)event {
 	NSPoint point = [event locationInWindow];
-	GALE_INFO("mouseExited : " << (float)point.x << " " << (float)point.y);
+	GALE_VERBOSE("mouseExited : " << float(point.x) << " " << float(point.y));
 }
 
 -(void)mouseDown:(NSEvent *)event {
 	NSPoint point = [event locationInWindow];
-	GALE_VERBOSE("mouseDown : " << (float)point.x << " " << (float)point.y);
+	GALE_VERBOSE("mouseDown : " << float(point.x) << " " << float(point.y));
 	MacOs::setMouseState(1, true, point.x, point.y);
 }
 -(void)mouseDragged:(NSEvent *)event {
 	NSPoint point = [event locationInWindow];
-	GALE_VERBOSE("mouseDragged : " << (float)point.x << " " << (float)point.y);
+	GALE_VERBOSE("mouseDragged : " << float(point.x) << " " << float(point.y));
 	MacOs::setMouseMotion(1, point.x, point.y);
 }
 -(void)mouseUp:(NSEvent *)event {
 	NSPoint point = [event locationInWindow];
-	GALE_VERBOSE("mouseUp : " << (float)point.x << " " << (float)point.y);
+	GALE_VERBOSE("mouseUp : " << float(point.x) << " " << float(point.y));
 	MacOs::setMouseState(1, false, point.x, point.y);
 }
 -(void)rightMouseDown:(NSEvent *)event {
 	NSPoint point = [event locationInWindow];
-	GALE_VERBOSE("rightMouseDown : " << (float)point.x << " " << (float)point.y);
+	GALE_VERBOSE("rightMouseDown : " << float(point.x) << " " << float(point.y));
 	MacOs::setMouseState(3, true, point.x, point.y);
 }
 -(void)rightMouseDragged:(NSEvent *)event {
 	NSPoint point = [event locationInWindow];
-	GALE_VERBOSE("rightMouseDragged : " << (float)point.x << " " << (float)point.y);
+	GALE_VERBOSE("rightMouseDragged : " << float(point.x) << " " << float(point.y));
 	MacOs::setMouseMotion(3, point.x, point.y);
 }
 -(void)rightMouseUp:(NSEvent *)event {
 	NSPoint point = [event locationInWindow];
-	GALE_VERBOSE("rightMouseUp : " << (float)point.x << " " << (float)point.y);
+	GALE_VERBOSE("rightMouseUp : " << float(point.x) << " " << float(point.y));
 	MacOs::setMouseState(3, false, point.x, point.y);
 }
 -(void)otherMouseDown:(NSEvent *)event {
