@@ -36,11 +36,11 @@
 #include <gale/renderer/eSystem.hpp>
 #include <gale/openGL/openGL.hpp>
 
-
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-
+extern "C" {
+	#include <stdlib.h>
+	#include <stdio.h>
+	#include <string.h>
+}
 #include <directfb.h>
 #include <directfbgl.h>
 

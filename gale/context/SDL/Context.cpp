@@ -4,10 +4,11 @@
  * @license MPL v2.0 (see license file)
  */
 
-
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
+extern "C" {
+	#include <stdlib.h>
+	#include <stdio.h>
+	#include <string.h>
+}
 
 #include <etk/types.hpp>
 #include <etk/os/FSNode.hpp>
@@ -114,7 +115,7 @@ class GLUTInterface : public gale::Context {
 			OS_Draw(true);
 			GLUT_INFO("Draw [STOP]");
 			glutSwapBuffers();
-			//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			//ethread::sleepMilliSeconds((1000));
 			return 0;
 		}
 		/****************************************************************************************/

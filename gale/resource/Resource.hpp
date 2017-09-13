@@ -6,6 +6,7 @@
 #pragma once
 
 #include <ethread/Mutex.hpp>
+#include <ethread/MutexRecursive.hpp>
 #include <ememory/memory.hpp>
 #include <etk/types.hpp>
 #include <gale/debug.hpp>
@@ -19,7 +20,7 @@
 			GALE_ERROR("Factory resource error"); \
 			return nullptr; \
 		} \
-		resource->init(std::forward<GALE_TYPE>(_all)... ); \
+		resource->init(etk::forward<GALE_TYPE>(_all)... ); \
 		if (resource->resourceHasBeenCorectlyInit() == false) { \
 			GALE_CRITICAL("resource Is not correctly init : " << #className ); \
 		} \
@@ -47,7 +48,7 @@
 			GALE_ERROR("allocation error of a resource : " << _name); \
 			return nullptr; \
 		} \
-		resource->init(_name, std::forward<GALE_TYPE>(_all)... ); \
+		resource->init(_name, etk::forward<GALE_TYPE>(_all)... ); \
 		if (resource->resourceHasBeenCorectlyInit() == false) { \
 			GALE_CRITICAL("resource Is not correctly init : " << #className ); \
 		} \
@@ -74,7 +75,7 @@
 			GALE_ERROR("allocation error of a resource : " << uniqueName); \
 			return nullptr; \
 		} \
-		resource->init(uniqueName, std::forward<GALE_TYPE>(_all)... ); \
+		resource->init(uniqueName, etk::forward<GALE_TYPE>(_all)... ); \
 		if (resource->resourceHasBeenCorectlyInit() == false) { \
 			GALE_CRITICAL("resource Is not correctly init : " << #className ); \
 		} \
@@ -97,7 +98,7 @@ namespace gale {
 	 */
 	class Resource : public ememory::EnableSharedFromThis<gale::Resource> {
 		protected:
-			mutable std::recursive_mutex m_mutex;
+			mutable ethread::MutexRecursive m_mutex;
 		protected:
 			/**
 			 * @brief generic protected contructor (use factory to create this class)

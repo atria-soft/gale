@@ -9,11 +9,7 @@
 #include <ethread/tools.hpp>
 #include <gale/context/Context.hpp>
 
-#if defined(__TARGET_OS__Android)
-	#include <pthread.h>
-#else
-	#include <ethread/Thread.hpp>
-#endif
+#include <ethread/Thread.hpp>
 
 namespace gale {
 	/**
@@ -39,11 +35,7 @@ namespace gale {
 			 */
 			enum gale::Thread::state getState();
 		private:
-			#if defined(__TARGET_OS__Android)
-				pthread_t m_thread; //!< Current handle on the thread
-			#else
-				ememory::SharedPtr<ethread::Thread> m_thread; //!< Current handle on the thread
-			#endif
+			ememory::SharedPtr<ethread::Thread> m_thread; //!< Current handle on the thread
 			gale::Context* m_context; //!< Copy of the gale context (permit to get current gale interface)
 		public:
 			/**
@@ -72,9 +64,6 @@ namespace gale {
 			 */
 			void setName(etk::String m_name);
 		private:
-			#if defined(__TARGET_OS__Android)
-				static void* threadCallback(void* _userData);
-			#endif
 			/**
 			 * @brief Internal periodic call of the thead
 			 */

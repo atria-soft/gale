@@ -23,7 +23,7 @@ gale::resource::Shader::Shader() :
 }
 
 void gale::resource::Shader::init(const etk::String& _filename) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	gale::Resource::init(_filename);
 	GALE_DEBUG("OGL : load SHADER '" << _filename << "'");
 	// load data from file "all the time ..."
@@ -40,15 +40,15 @@ void gale::resource::Shader::init(const etk::String& _filename) {
 }
 
 gale::resource::Shader::~Shader() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	m_fileData.clear();
 	gale::openGL::shader::remove(m_shader);
 	m_exist = false;
 }
 
 bool gale::resource::Shader::updateContext() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex, std::defer_lock);
-	if (lock.try_lock() == false) {
+	ethread::RecursiveLock lock(m_mutex);
+	if (lock.tryLock() == false) {
 		//Lock error ==> try later ...
 		return false;
 	}
@@ -83,7 +83,7 @@ bool gale::resource::Shader::updateContext() {
 }
 
 void gale::resource::Shader::removeContext() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (true == m_exist) {
 		gale::openGL::shader::remove(m_shader);
 		m_exist = false;
@@ -91,13 +91,13 @@ void gale::resource::Shader::removeContext() {
 }
 
 void gale::resource::Shader::removeContextToLate() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	m_exist = false;
 	m_shader = 0;
 }
 
 void gale::resource::Shader::reload() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	etk::FSNode file(m_name);
 	if (false == file.exist()) {
 		GALE_CRITICAL("File does not Exist : '" << file << "' : '" << file.getFileSystemName() << "'");

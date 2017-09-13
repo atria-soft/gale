@@ -20,7 +20,7 @@ gale::resource::Manager::Manager() :
 }
 
 gale::resource::Manager::~Manager() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	bool hasError = false;
 	if (m_resourceListToUpdate.size()!=0) {
 		GALE_ERROR("Must not have anymore resources to update !!!");
@@ -37,7 +37,7 @@ gale::resource::Manager::~Manager() {
 }
 
 void gale::resource::Manager::unInit() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	display();
 	m_resourceListToUpdate.clear();
 	// remove all resources ...
@@ -58,7 +58,7 @@ void gale::resource::Manager::unInit() {
 void gale::resource::Manager::display() {
 	GALE_INFO("Resources loaded : ");
 	// remove all resources ...
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	for (auto &it : m_resourceList) {
 		ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
 		if (tmpRessource != nullptr) {
@@ -74,7 +74,7 @@ void gale::resource::Manager::display() {
 void gale::resource::Manager::reLoadResources() {
 	GALE_INFO("-------------  Resources re-loaded  -------------");
 	// remove all resources ...
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_resourceList.size() != 0) {
 		for (size_t jjj=0; jjj<MAX_RESOURCE_LEVEL; jjj++) {
 			GALE_INFO("    Reload level : " << jjj << "/" << (MAX_RESOURCE_LEVEL-1));
@@ -96,7 +96,7 @@ void gale::resource::Manager::reLoadResources() {
 
 void gale::resource::Manager::update(const ememory::SharedPtr<gale::Resource>& _object) {
 	// chek if not added before
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	for (auto &it : m_resourceListToUpdate) {
 		if (    it != nullptr
 		     && it == _object) {
@@ -118,9 +118,9 @@ void gale::resource::Manager::updateContext() {
 	if (m_contextHasBeenRemoved == true) {
 		// need to update all ...
 		m_contextHasBeenRemoved = false;
-		std::list<ememory::WeakPtr<gale::Resource>> resourceList;
+		etk::Vector<ememory::WeakPtr<gale::Resource>> resourceList;
 		{
-			std::unique_lock<std::recursive_mutex> lock(m_mutex);
+			ethread::RecursiveLock lock(m_mutex);
 			// Clean the update list
 			m_resourceListToUpdate.clear();
 			resourceList = m_resourceList;
@@ -135,7 +135,7 @@ void gale::resource::Manager::updateContext() {
 						//GALE_DEBUG("Update context named : " << l_resourceList[iii]->getName());
 						if (tmpRessource->updateContext() == false) {
 							// Lock error ==> postponned
-							std::unique_lock<std::recursive_mutex> lock(m_mutex);
+							ethread::RecursiveLock lock(m_mutex);
 							m_resourceListToUpdate.pushBack(tmpRessource);
 						}
 					}
@@ -145,7 +145,7 @@ void gale::resource::Manager::updateContext() {
 	} else {
 		etk::Vector<ememory::SharedPtr<gale::Resource>> resourceListToUpdate;
 		{
-			std::unique_lock<std::recursive_mutex> lock(m_mutex);
+			ethread::RecursiveLock lock(m_mutex);
 			resourceListToUpdate = m_resourceListToUpdate;
 			// Clean the update list
 			m_resourceListToUpdate.clear();
@@ -157,7 +157,7 @@ void gale::resource::Manager::updateContext() {
 					if (    it != nullptr
 					     && jjj == it->getResourceLevel()) {
 						if (it->updateContext() == false) {
-							std::unique_lock<std::recursive_mutex> lock(m_mutex);
+							ethread::RecursiveLock lock(m_mutex);
 							// Lock error ==> postponned
 							m_resourceListToUpdate.pushBack(it);
 						}
@@ -170,7 +170,7 @@ void gale::resource::Manager::updateContext() {
 
 // in this case, it is really too late ...
 void gale::resource::Manager::contextHasBeenDestroyed() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	for (auto &it : m_resourceList) {
 		ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
 		if (tmpRessource != nullptr) {
@@ -188,7 +188,7 @@ void gale::resource::Manager::applicationExiting() {
 
 // internal generic keeper ...
 ememory::SharedPtr<gale::Resource> gale::resource::Manager::localKeep(const etk::String& _filename) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	GALE_VERBOSE("KEEP (DEFAULT) : file : '" << _filename << "' in " << m_resourceList.size() << " resources");
 	for (auto &it : m_resourceList) {
 		ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
@@ -203,7 +203,7 @@ ememory::SharedPtr<gale::Resource> gale::resource::Manager::localKeep(const etk:
 
 // internal generic keeper ...
 void gale::resource::Manager::localAdd(const ememory::SharedPtr<gale::Resource>& _object) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	//Add ... find empty slot
 	for (auto &it : m_resourceList) {
 		ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
@@ -218,7 +218,7 @@ void gale::resource::Manager::localAdd(const ememory::SharedPtr<gale::Resource>&
 
 // in case of error ...
 void gale::resource::Manager::cleanInternalRemoved() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	//GALE_INFO("remove object in Manager");
 	updateContext();
 	for (auto it(m_resourceList.begin()); it!=m_resourceList.end(); ++it) {

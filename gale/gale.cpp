@@ -10,7 +10,6 @@
 #include <gale/context/commandLine.hpp>
 #include <etk/os/FSNode.hpp>
 #include <gale/Dimension.hpp>
-#include <chrono>
 
 #ifndef GALE_VERSION
 #define GALE_VERSION "0.0.0"

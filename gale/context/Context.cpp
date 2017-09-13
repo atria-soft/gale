@@ -37,23 +37,23 @@ static ethread::Mutex& mutexInterface() {
 
 
 static ethread::Mutex g_lockContextMap;
-static etk::Map<ethread::Thread::id, gale::Context*>& getContextList() {
-	static etk::Map<ethread::Thread::id, gale::Context*> g_val;
+static etk::Map<uint64_t, gale::Context*>& getContextList() {
+	static etk::Map<uint64_t, gale::Context*> g_val;
 	return g_val;
 }
 
 static gale::Context* lastContextSet = nullptr;
 
 gale::Context& gale::getContext() {
-	etk::Map<ethread::Thread::id, gale::Context*>& list = getContextList();
+	etk::Map<uint64_t, gale::Context*>& list = getContextList();
 	g_lockContextMap.lock();
-	etk::Map<ethread::Thread::id, gale::Context*>::Iterator it = list.find(std::this_thread::get_id());
+	etk::Map<uint64_t, gale::Context*>::Iterator it = list.find(ethread::getId());
 	gale::Context* out = nullptr;
 	if (it != list.end()) {
 		out = it->second;
 	}
 	
-	g_lockContextMap.unlock();
+	g_lockContextMap.unLock();
 	if (out == nullptr) {
 		for (auto &it2 : list) {
 			if (out == nullptr) {
@@ -85,14 +85,14 @@ gale::Context& gale::getContext() {
 }
 
 void gale::setContext(gale::Context* _context) {
-	etk::Map<ethread::Thread::id, gale::Context*>& list = getContextList();
-	//GALE_ERROR("Set context : " << std::this_thread::get_id() << " context pointer : " << uint64_t(_context));
+	etk::Map<uint64_t, gale::Context*>& list = getContextList();
+	//GALE_ERROR("Set context : " << ethread::getId() << " context pointer : " << uint64_t(_context));
 	g_lockContextMap.lock();
 	if (_context != nullptr) {
 		lastContextSet = _context;
 	}
-	list.set(std::this_thread::get_id(), _context);
-	g_lockContextMap.unlock();
+	list.set(ethread::getId(), _context);
+	g_lockContextMap.unLock();
 }
 
 void gale::contextRegisterThread(ethread::Thread* _thread) {
@@ -100,24 +100,24 @@ void gale::contextRegisterThread(ethread::Thread* _thread) {
 		return;
 	}
 	gale::Context* context = &gale::getContext();
-	etk::Map<ethread::Thread::id, gale::Context*>& list = getContextList();
+	etk::Map<uint64_t, gale::Context*>& list = getContextList();
 	//GALE_ERROR("REGISTER Thread : " << _thread->get_id() << " context pointer : " << uint64_t(context));
 	g_lockContextMap.lock();
-	list.set(_thread->get_id(), context);
-	g_lockContextMap.unlock();
+	list.set(_thread->getId(), context);
+	g_lockContextMap.unLock();
 }
 
 void gale::contextUnRegisterThread(ethread::Thread* _thread) {
 	if (_thread == nullptr) {
 		return;
 	}
-	etk::Map<ethread::Thread::id, gale::Context*>& list = getContextList();
+	etk::Map<uint64_t, gale::Context*>& list = getContextList();
 	g_lockContextMap.lock();
-	etk::Map<ethread::Thread::id, gale::Context*>::Iterator it = list.find(_thread->get_id());
+	etk::Map<uint64_t, gale::Context*>::Iterator it = list.find(_thread->getId());
 	if (it != list.end()) {
 		list.erase(it);
 	}
-	g_lockContextMap.unlock();
+	g_lockContextMap.unLock();
 }
 
 void gale::Context::setInitImage(const etk::String& _fileName) {
@@ -141,7 +141,7 @@ void gale::Context::lockContext() {
  */
 void gale::Context::unLockContext() {
 	setContext(nullptr);
-	mutexInterface().unlock();
+	mutexInterface().unLock();
 }
 
 void gale::Context::processEvents() {
@@ -151,7 +151,7 @@ void gale::Context::processEvents() {
 		nbEvent++;
 		etk::Function<void(gale::Context& _context)> func;
 		{
-			std::unique_lock<std::recursive_mutex> lock(m_mutex);
+			ethread::RecursiveLock lock(m_mutex);
 			m_msgSystem.wait(func);
 		}
 		if (func == nullptr) {
@@ -193,10 +193,10 @@ namespace gale {
 		public:
 			PeriodicThread(gale::Context* _context):
 			  m_context(_context) {
-				setName("GaleThread 2");
+				setName("Galethread 2");
 			}
 			bool onThreadCall() override {
-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				ethread::sleepMilliSeconds((10));
 				#if 0
 					m_context->lockContext();
 				#else
@@ -210,7 +210,7 @@ namespace gale {
 				#if 0
 					m_context->unLockContext();
 				#else
-					mutexInterface().unlock();
+					mutexInterface().unLock();
 				#endif
 				return false;
 			}
@@ -370,13 +370,13 @@ void gale::Context::start2ndThreadProcessing() {
 	// set the curent interface:
 	lockContext();
 	m_periodicThread->start();
-	std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	ethread::sleepMilliSeconds((1));
 	// release the curent interface:
 	unLockContext();
 }
 
 void gale::Context::postAction(etk::Function<void(gale::Context& _context)> _action) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post(_action);
 }
 
@@ -421,7 +421,7 @@ void gale::Context::requestUpdateSize() {
 		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
 		m_simulationFile.filePuts(":RECALCULATE_SIZE\n");
 	}
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([](gale::Context& _context){
 		//GALE_DEBUG("Receive MSG : THREAD_RESIZE");
 		_context.forceRedrawAll();
@@ -440,7 +440,7 @@ void gale::Context::OS_Resize(const vec2& _size) {
 		m_simulationFile.filePuts(etk::toString(_size));
 		m_simulationFile.filePuts("\n");
 	}
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([_size](gale::Context& _context){
 		GALE_DEBUG("Receive MSG : THREAD_RESIZE : " << _context.m_windowsSize << " ==> " << _size);
 		_context.m_windowsSize = _size;
@@ -462,7 +462,7 @@ void gale::Context::OS_Move(const vec2& _pos) {
 	if (m_windowsPos == _pos) {
 		return;
 	}
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([_pos](gale::Context& _context){
 		GALE_DEBUG("Receive MSG : THREAD_MOVE : " << _context.m_windowsPos << " ==> " << _pos);
 		_context.m_windowsPos = _pos;
@@ -499,7 +499,7 @@ void gale::Context::OS_SetInput(enum gale::key::type _type,
 		m_simulationFile.filePuts(etk::toString(_pos));
 		m_simulationFile.filePuts("\n");
 	}
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([_type, _status, _pointerID, _pos](gale::Context& _context){
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
 		if (appl == nullptr) {
@@ -536,7 +536,7 @@ void gale::Context::OS_setKeyboard(const gale::key::Special& _special,
 		m_simulationFile.filePuts(etk::toString(uint64_t(_char)));
 		m_simulationFile.filePuts("\n");
 	}
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([_special, _type, _state, _char](gale::Context& _context){
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
 		if (appl == nullptr) {
@@ -554,7 +554,7 @@ void gale::Context::OS_Hide() {
 		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
 		m_simulationFile.filePuts(":VIEW:false\n");
 	}
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([](gale::Context& _context){
 		/*
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
@@ -598,7 +598,7 @@ void gale::Context::OS_ClipBoardArrive(enum gale::context::clipBoard::clipboardL
 		m_simulationFile.filePuts(etk::toString(_clipboardID));
 		m_simulationFile.filePuts("\n");
 	}
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([_clipboardID](gale::Context& _context){
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
 		if (appl != nullptr) {
@@ -629,7 +629,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 	#if (    !defined(__TARGET_OS__Windows) \
 	      && !defined(__TARGET_OS__Android))
 	if(currentTime - m_previousDisplayTime < echrono::milliseconds(8)) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		ethread::sleepMilliSeconds((1));
 		return false;
 	}
 	#endif

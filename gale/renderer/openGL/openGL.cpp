@@ -9,6 +9,7 @@
 #include <gale/renderer/openGL/openGL.hpp>
 #include <etk/stdTools.hpp>
 #include <ethread/Mutex.hpp>
+#include <etk/Pair.hpp>
 //#define DIRECT_MODE
 #include <gale/renderer/openGL/openGL-include.hpp>
 #include <ethread/tools.hpp>
@@ -81,45 +82,45 @@ void gale::openGL::lock() {
 }
 
 void gale::openGL::unLock() {
-	mutexOpenGl().unlock();
+	mutexOpenGl().unLock();
 }
 
-static etk::Vector<ethread::Thread::id>& getContextList() {
-	static etk::Vector<ethread::Thread::id> g_val;
+static etk::Vector<uint64_t>& getContextList() {
+	static etk::Vector<uint64_t> g_val;
 	return g_val;
 }
 
 bool gale::openGL::hasContext() {
 	bool ret = false;
 	mutexOpenGl().lock();
-	auto it = std::find(getContextList().begin(), getContextList().end(), std::this_thread::get_id());
+	auto it = etk::find(getContextList().begin(), getContextList().end(), ethread::getId());
 	if (it != getContextList().end()) {
 		ret = true;
 	}
-	mutexOpenGl().unlock();
+	mutexOpenGl().unLock();
 	return ret;
 }
 
 void gale::openGL::threadHasContext() {
 	mutexOpenGl().lock();
-	auto it = std::find(getContextList().begin(), getContextList().end(), std::this_thread::get_id());
+	auto it = etk::find(getContextList().begin(), getContextList().end(), ethread::getId());
 	if (it != getContextList().end()) {
 		GALE_ERROR("set openGL context associate with threadID a second time ... ");
 	} else {
-		getContextList().pushBack(std::this_thread::get_id());
+		getContextList().pushBack(ethread::getId());
 	}
-	mutexOpenGl().unlock();
+	mutexOpenGl().unLock();
 }
 
 void gale::openGL::threadHasNoMoreContext() {
 	mutexOpenGl().lock();
-	auto it = std::find(getContextList().begin(), getContextList().end(), std::this_thread::get_id());
+	auto it = etk::find(getContextList().begin(), getContextList().end(), ethread::getId());
 	if (it != getContextList().end()) {
 		getContextList().erase(it);
 	} else {
 		GALE_ERROR("rm openGL context associate with threadID that is not registered.");
 	}
-	mutexOpenGl().unlock();
+	mutexOpenGl().unLock();
 }
 
 void gale::openGL::setBasicMatrix(const mat4& _newOne) {

@@ -27,7 +27,7 @@ gale::resource::Program::Program() :
 
 void gale::resource::Program::init(const etk::String& _filename) {
 	gale::Resource::init(_filename);
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	GALE_DEBUG("OGL : load PROGRAM '" << m_name << "'");
 	// load data from file "all the time ..."
 	
@@ -162,7 +162,7 @@ static char l_bufferDisplayError[LOG_OGL_INTERNAL_BUFFER_LEN] = "";
 
 
 bool gale::resource::Program::checkIdValidity(int32_t _idElem) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (    _idElem < 0
 	     || (size_t)_idElem > m_elementList.size()) {
 		return false;
@@ -171,7 +171,7 @@ bool gale::resource::Program::checkIdValidity(int32_t _idElem) {
 }
 
 int32_t gale::resource::Program::getAttribute(etk::String _elementName) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	// check if it exist previously :
 	for(size_t iii=0; iii<m_elementList.size(); iii++) {
 		if (m_elementList[iii].m_name == _elementName) {
@@ -204,7 +204,7 @@ int32_t gale::resource::Program::getAttribute(etk::String _elementName) {
 }
 
 int32_t gale::resource::Program::getUniform(etk::String _elementName) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	// check if it exist previously :
 	for(size_t iii=0; iii<m_elementList.size(); iii++) {
 		if (m_elementList[iii].m_name == _elementName) {
@@ -237,8 +237,8 @@ int32_t gale::resource::Program::getUniform(etk::String _elementName) {
 }
 
 bool gale::resource::Program::updateContext() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex, std::defer_lock);
-	if (lock.try_lock() == false) {
+	ethread::RecursiveLock lock(m_mutex, true);
+	if (lock.tryLock() == false) {
 		//Lock error ==> try later ...
 		return false;
 	}
@@ -302,7 +302,7 @@ bool gale::resource::Program::updateContext() {
 }
 
 void gale::resource::Program::removeContext() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == true) {
 		gale::openGL::program::remove(m_program);
 		m_program = 0;
@@ -315,7 +315,7 @@ void gale::resource::Program::removeContext() {
 }
 
 void gale::resource::Program::removeContextToLate() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	m_exist = false;
 	m_program = 0;
 }
@@ -365,7 +365,7 @@ void gale::resource::Program::sendAttribute(int32_t _idElem,
                                             int32_t _nbElement,
                                             const void* _pointer,
                                             int32_t _jumpBetweenSample) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -394,7 +394,7 @@ void gale::resource::Program::sendAttributePointer(int32_t _idElem,
                                                    int32_t _index,
                                                    int32_t _jumpBetweenSample,
                                                    int32_t _offset) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -434,7 +434,7 @@ void gale::resource::Program::sendAttributePointer(int32_t _idElem,
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 void gale::resource::Program::uniformMatrix(int32_t _idElem, const mat4& _matrix, bool _transpose) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -461,7 +461,7 @@ void gale::resource::Program::uniformMatrix(int32_t _idElem, const mat4& _matrix
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 void gale::resource::Program::uniform1f(int32_t _idElem, float _value1) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -476,7 +476,7 @@ void gale::resource::Program::uniform1f(int32_t _idElem, float _value1) {
 	checkGlError("glUniform1f", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform2f(int32_t _idElem, float  _value1, float _value2) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -491,7 +491,7 @@ void gale::resource::Program::uniform2f(int32_t _idElem, float  _value1, float _
 	checkGlError("glUniform2f", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform3f(int32_t _idElem, float _value1, float _value2, float _value3) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -506,7 +506,7 @@ void gale::resource::Program::uniform3f(int32_t _idElem, float _value1, float _v
 	checkGlError("glUniform3f", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform4f(int32_t _idElem, float _value1, float _value2, float _value3, float _value4) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -524,7 +524,7 @@ void gale::resource::Program::uniform4f(int32_t _idElem, float _value1, float _v
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 void gale::resource::Program::uniform1i(int32_t _idElem, int32_t _value1) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -539,7 +539,7 @@ void gale::resource::Program::uniform1i(int32_t _idElem, int32_t _value1) {
 	checkGlError("glUniform1i", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform2i(int32_t _idElem, int32_t _value1, int32_t _value2) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -554,7 +554,7 @@ void gale::resource::Program::uniform2i(int32_t _idElem, int32_t _value1, int32_
 	checkGlError("glUniform2i", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform3i(int32_t _idElem, int32_t _value1, int32_t _value2, int32_t _value3) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -569,7 +569,7 @@ void gale::resource::Program::uniform3i(int32_t _idElem, int32_t _value1, int32_
 	checkGlError("glUniform3i", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform4i(int32_t _idElem, int32_t _value1, int32_t _value2, int32_t _value3, int32_t _value4) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -588,7 +588,7 @@ void gale::resource::Program::uniform4i(int32_t _idElem, int32_t _value1, int32_
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 void gale::resource::Program::uniform1fv(int32_t _idElem, int32_t _nbElement, const float *_value) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -612,7 +612,7 @@ void gale::resource::Program::uniform1fv(int32_t _idElem, int32_t _nbElement, co
 	checkGlError("glUniform1fv", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform2fv(int32_t _idElem, int32_t _nbElement, const float *_value) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -636,7 +636,7 @@ void gale::resource::Program::uniform2fv(int32_t _idElem, int32_t _nbElement, co
 	checkGlError("glUniform2fv", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform3fv(int32_t _idElem, int32_t _nbElement, const float *_value) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -661,7 +661,7 @@ void gale::resource::Program::uniform3fv(int32_t _idElem, int32_t _nbElement, co
 	checkGlError("glUniform3fv", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform4fv(int32_t _idElem, int32_t _nbElement, const float *_value) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -689,7 +689,7 @@ void gale::resource::Program::uniform4fv(int32_t _idElem, int32_t _nbElement, co
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 void gale::resource::Program::uniform1iv(int32_t _idElem, int32_t _nbElement, const int32_t *_value) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -713,7 +713,7 @@ void gale::resource::Program::uniform1iv(int32_t _idElem, int32_t _nbElement, co
 	checkGlError("glUniform1iv", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform2iv(int32_t _idElem, int32_t _nbElement, const int32_t *_value) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -737,7 +737,7 @@ void gale::resource::Program::uniform2iv(int32_t _idElem, int32_t _nbElement, co
 	checkGlError("glUniform2iv", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform3iv(int32_t _idElem, int32_t _nbElement, const int32_t *_value) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -761,7 +761,7 @@ void gale::resource::Program::uniform3iv(int32_t _idElem, int32_t _nbElement, co
 	checkGlError("glUniform3iv", __LINE__, _idElem);
 }
 void gale::resource::Program::uniform4iv(int32_t _idElem, int32_t _nbElement, const int32_t *_value) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -805,7 +805,7 @@ void gale::resource::Program::use() {
 
 
 void gale::resource::Program::setTexture0(int32_t _idElem, int64_t _textureOpenGlID) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -832,7 +832,7 @@ void gale::resource::Program::setTexture0(int32_t _idElem, int64_t _textureOpenG
 }
 
 void gale::resource::Program::setTexture1(int32_t _idElem, int64_t _textureOpenGlID) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}
@@ -861,7 +861,7 @@ void gale::resource::Program::setTexture1(int32_t _idElem, int64_t _textureOpenG
 
 void gale::resource::Program::unUse() {
 	GALE_VERBOSE("Will UN-use program : " << m_program);
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (m_exist == false) {
 		return;
 	}

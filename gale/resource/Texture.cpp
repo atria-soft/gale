@@ -51,8 +51,8 @@ gale::resource::Texture::~Texture() {
 }
 
 bool gale::resource::Texture::updateContext() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex, std::defer_lock);
-	if (lock.try_lock() == false) {
+	ethread::RecursiveLock lock(m_mutex);
+	if (lock.tryLock() == false) {
 		//Lock error ==> try later ...
 		return false;
 	}
@@ -88,7 +88,7 @@ bool gale::resource::Texture::updateContext() {
 }
 
 void gale::resource::Texture::removeContext() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	if (true == m_loaded) {
 		// Request remove texture ...
 		GALE_INFO("TEXTURE: Rm [" << getId() << "] texId=" << m_texId);
@@ -98,13 +98,13 @@ void gale::resource::Texture::removeContext() {
 }
 
 void gale::resource::Texture::removeContextToLate() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	m_loaded = false;
 	m_texId=0;
 }
 
 void gale::resource::Texture::flush() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	// request to the manager to be call at the next update ...
 	getManager().update(ememory::dynamicPointerCast<gale::Resource>(sharedFromThis()));
 }
@@ -113,7 +113,7 @@ void gale::resource::Texture::setTexture(const ememory::SharedPtr<etk::Vector<ch
                                          const ivec2& _size,
                                          enum gale::resource::Texture::dataType _dataType,
                                          enum gale::resource::Texture::color _dataColorSpace) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex);
 	m_data = _data;
 	m_size = _size;
 	m_endPointSize = _size;

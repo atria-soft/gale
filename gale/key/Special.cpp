@@ -280,7 +280,7 @@ namespace etk {
 	}
 	template <> bool from_string<gale::key::Special>(gale::key::Special& _variableRet, const etk::String& _value) {
 		gale::key::Special out;
-		etk::Vector<etk::String> listElem = etk::split(_value, "|");
+		etk::Vector<etk::String> listElem = _value.split('|');
 		for (auto &it : listElem) {
 			if (it == "CAPS") {
 				out.setCapsLock(true);

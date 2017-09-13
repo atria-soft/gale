@@ -20,6 +20,7 @@
 #include <gale/orientation.hpp>
 #include <gale/context/clipBoard.hpp>
 #include <ethread/tools.hpp>
+#include <ethread/MutexRecursive.hpp>
 #include <echrono/Steady.hpp>
 
 #define MAX_MANAGE_INPUT (15)
@@ -30,7 +31,7 @@ namespace gale {
 	class Context {
 		friend class gale::PeriodicThread;
 		protected:
-			std::recursive_mutex m_mutex;
+			ethread::MutexRecursive m_mutex;
 			ememory::SharedPtr<gale::Thread> m_periodicThread;
 		private:
 			ememory::SharedPtr<gale::Application> m_application; //!< Application handle

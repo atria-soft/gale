@@ -11,11 +11,12 @@
 #include <math.h>
 #include <assert.h>
 #include <signal.h>
-
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-
+extern "C" {
+	#include <stdlib.h>
+	#include <stdio.h>
+	#include <string.h>
+	#include <errno.h>
+}
 #include <etk/types.hpp>
 #include <etk/os/FSNode.hpp>
 #include <etk/tool.hpp>

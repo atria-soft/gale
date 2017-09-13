@@ -96,9 +96,8 @@ int mm_main(int _argc, const char* _argv[]) {
 }
 
 int mm_run(void) {
-	//MacOs::setRedrawCallback(std::bind(callbackSomeThingToDo));
-    GALE_ERROR("Start to run");
-    [NSApp run];
+	GALE_ERROR("Start to run");
+	[NSApp run];
 	GALE_DEBUG("END of application");
 	// return no error
 	return 0;

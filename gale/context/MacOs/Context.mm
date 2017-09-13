@@ -102,8 +102,8 @@ class MacOSInterface : public gale::Context {
 								bool _isAReapeateKey) {
 			OS_setKeyboard(_special, _move, (_isDown==true?gale::key::status::down:gale::key::status::up), _isAReapeateKey);
 		}
-		void openURL(const std::string& _url) {
-			std::string req = "open " + _url;
+		void openURL(const etk::String& _url) {
+			etk::String req = "open " + _url;
 			system(req.c_str());
 		}
 		void MAC_Stop() {
@@ -116,7 +116,7 @@ class MacOSInterface : public gale::Context {
 			if (_clipboardID == gale::context::clipBoard::clipboardStd) {
 				NSPasteboard* myPasteboard = [NSPasteboard generalPasteboard];
 				NSString* myString = [myPasteboard stringForType:NSPasteboardTypeString];
-				std::string val([myString UTF8String]);
+				etk::String val([myString UTF8String]);
 				gale::context::clipBoard::setSystem(_clipboardID, val);
 				if (val.size() != 0) {
 					OS_ClipBoardArrive(_clipboardID);
@@ -198,7 +198,7 @@ void MacOs::stopRequested() {
 	interface->MAC_Stop();
 }
 /*
-void MacOs::setRedrawCallback(const std::function<void()>& _func) {
+void MacOs::setRedrawCallback(const etk::Function<void()>& _func) {
 	if (interface == nullptr) {
 		return;
 	}

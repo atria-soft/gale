@@ -72,7 +72,7 @@
 
 static gale::key::Special guiKeyBoardMode;
 
-static std::vector<std::pair<uint16_t,unichar>> g_listlasteventDown;
+static etk::Vector<etk::Pair<uint16_t,unichar>> g_listlasteventDown;
 
 -(void)localKeyEvent:(NSEvent*)theEvent isDown:(bool)_isDown {
 	bool thisIsAReapeateKey = false;
@@ -202,7 +202,7 @@ static std::vector<std::pair<uint16_t,unichar>> g_listlasteventDown;
 							break;
 						}
 					}
-					g_listlasteventDown.push_back(std::make_pair(keycode, c));
+					g_listlasteventDown.push_back(etk::makePair(keycode, c));
 				}
 				MacOs::setKeyboard(guiKeyBoardMode, c, _isDown, thisIsAReapeateKey);
 				if (thisIsAReapeateKey == true) {
@@ -250,7 +250,7 @@ static std::vector<std::pair<uint16_t,unichar>> g_listlasteventDown;
 
 - (void)flagsChanged:(NSEvent *)theEvent {
 	uint32_t bitField = [theEvent modifierFlags];
-	GALE_VERBOSE("flagsChanged : " << std::hex << [theEvent modifierFlags]);
+	GALE_VERBOSE("flagsChanged : " << etk::toBin([theEvent modifierFlags], 32));
 	#ifdef __MAC_10_12
 		[self flagsUpdate:bitField: NSEventModifierFlagCapsLock: gale::key::keyboard::capLock];
 	#else

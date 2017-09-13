@@ -8,23 +8,9 @@
 
 #include <gale/context/Context.hpp>
 
-#if defined(__TARGET_OS__Android)
-	void* gale::Thread::threadCallback(void* _userData) {
-		gale::Thread* threadHandle = static_cast<gale::Thread*>(_userData);
-		if (threadHandle != nullptr) {
-			threadHandle->threadCall();
-		}
-		return nullptr;
-	}
-#endif
-
-
 gale::Thread::Thread() :
   m_state(state::stop),
-  #if !defined(__TARGET_OS__Android)
-  	m_thread(nullptr),
-  #endif
-  m_context(nullptr) {
+  m_context(0) {
 	GALE_INFO("Create new Thread");
 }
 
@@ -39,16 +25,11 @@ void gale::Thread::start() {
 		GALE_DEBUG("Allocate ethread::Thread [START]");
 		m_state = state::starting;
 		m_context = &gale::getContext();
-		#if defined(__TARGET_OS__Android)
-			pthread_create(&m_thread, nullptr, &gale::Thread::threadCallback, this);
-		#else
-			m_thread = ememory::makeShared<ethread::Thread>(&gale::Thread::threadCall, this);
-			if (m_thread == nullptr) {
-				GALE_ERROR("Can not create thread ...");
-				return;
-			}
-		#endif
-		//m_thread->detach();
+		m_thread = ememory::makeShared<ethread::Thread>([=](){this->threadCall();}, "galeThread");
+		if (m_thread == nullptr) {
+			GALE_ERROR("Can not create thread ...");
+			return;
+		}
 		GALE_DEBUG("Allocate ethread::Thread [Set priority]");
 		// set priority
 		
@@ -72,22 +53,13 @@ void gale::Thread::stop() {
 	        || m_state == state::starting) {
 		// requesting a stop ...
 		GALE_INFO("wait Thread stopping");
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		ethread::sleepMilliSeconds((100));
 	}
 	GALE_DEBUG("stop ethread::Thread [START]");
-	#if defined(__TARGET_OS__Android)
-		void* ret = nullptr;
-		int val = pthread_join(m_thread, &ret);
-	#else
-		m_thread->join();
-	#endif
+	m_thread->join();
 	//gale::contextUnRegisterThread(m_thread);
 	GALE_DEBUG("stop ethread::Thread [delete]");
-	#if defined(__TARGET_OS__Android)
-		
-	#else
-		m_thread.reset();
-	#endif
+	m_thread.reset();
 	GALE_DEBUG("stop ethread::Thread [set state]");
 	m_state = state::stop;
 	GALE_INFO("stop ethread::Thread [STOP]");
@@ -103,7 +75,7 @@ void gale::Thread::threadCall() {
 	while (m_state != state::stopping) {
 		if (m_state == state::starting) {
 			GALE_DEBUG("run ethread::Thread [NOTHING to do]");
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			ethread::sleepMilliSeconds((1));
 			continue;
 		}
 		if (m_name != "") {

@@ -5,9 +5,9 @@
  */
 #pragma once
 
-#include <list>
 #include <etk/Vector.hpp>
 #include <etk/types.hpp>
+#include <ethread/MutexRecursive.hpp>
 #include <gale/debug.hpp>
 #include <gale/resource/Resource.hpp>
 
@@ -15,11 +15,11 @@ namespace gale {
 	namespace resource {
 		class Manager{
 			private:
-				std::list<ememory::WeakPtr<gale::Resource>> m_resourceList;
+				etk::Vector<ememory::WeakPtr<gale::Resource>> m_resourceList;
 				etk::Vector<ememory::SharedPtr<gale::Resource>> m_resourceListToUpdate;
 				bool m_contextHasBeenRemoved;
 				bool m_exiting;
-				std::recursive_mutex m_mutex;
+				ethread::MutexRecursive m_mutex;
 			public:
 				/**
 				 * @brief initialize the internal variable
