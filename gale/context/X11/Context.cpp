@@ -26,22 +26,31 @@ extern "C" {
 
 #if defined(__TARGET_OS__Linux)
 	#if defined(__TARGET_OS__Web)
-		#include <X11/Xlibint.h>
-		#include <X11/Xutil.h>
+		extern "C" {
+			#include <X11/Xlibint.h>
+			#include <X11/Xutil.h>
+		}
 		#include <gale/renderer/openGL/openGL.hpp>
 		#include <gale/renderer/openGL/openGL-include.hpp>
-		#include <GL/glext.h>
-		#include <GL/glfw.h>
+		extern "C" {
+			#include <GL/glext.h>
+			#include <GL/glfw.h>
+		}
 	#else
-		#include <GL/glx.h>
+		extern "C" {
+			#include <GL/glx.h>
+		}
 	#endif
 #elif defined(__TARGET_OS__MacOs)
-	#include <OpenGL/glx.h>
+	extern "C" {
+		#include <OpenGL/glx.h>
+	}
 #endif
 
-#include <X11/Xatom.h>
-#include <sys/times.h>
-
+extern "C" {
+	#include <X11/Xatom.h>
+	#include <sys/times.h>
+}
 /*
 #define GUI_LOCK()          XLockDisplay(m_display)
 #define GUI_UNLOCK()        XUnlockDisplay(m_display)
@@ -168,7 +177,7 @@ class X11Interface : public gale::Context {
 	public:
 		X11Interface(gale::Application* _application, int32_t _argc, const char* _argv[]) :
 		  gale::Context(_application, _argc, _argv),
-		  m_display(nullptr),
+		  m_display(NULL),
 		  m_originX(0),
 		  m_originY(0),
 		  m_cursorEventX(0),
@@ -176,7 +185,7 @@ class X11Interface : public gale::Context {
 		  m_currentHeight(0),
 		  m_currentWidth(0),
 		  #if !defined(__TARGET_OS__Web)
-		  	m_visual(nullptr),
+		  	m_visual(NULL),
 		  #endif
 		  m_doubleBuffered(0),
 		  m_run(false),
@@ -272,10 +281,10 @@ class X11Interface : public gale::Context {
 								char * atomNameTarget = XGetAtomName(m_display, req->target);
 								GALE_INFO("X11    property: \"" << atomNameProperty << "\"");
 								GALE_INFO("X11    target:   \"" << atomNameTarget << "\"");
-								if (atomNameProperty != nullptr) {
+								if (atomNameProperty != NULL) {
 									XFree(atomNameProperty);
 								}
-								if (atomNameTarget != nullptr) {
+								if (atomNameTarget != NULL) {
 									XFree(atomNameTarget);
 								}
 							}
@@ -329,15 +338,15 @@ class X11Interface : public gale::Context {
 							XSelectionRequestEvent *req=&(event.xselectionrequest);
 							#ifdef DEBUG_X11_EVENT
 							{
-								if (req->property == 0) {
+								if (req->property == NULL) {
 									GALE_ERROR("Get nullptr ATOM ... property");
 									break;
 								}
-								if (req->selection == 0) {
+								if (req->selection == NULL) {
 									GALE_ERROR("Get nullptr ATOM ... selection");
 									break;
 								}
-								if (req->target == 0) {
+								if (req->target == NULL) {
 									GALE_ERROR("Get nullptr ATOM ... target");
 									break;
 								}
@@ -345,9 +354,15 @@ class X11Interface : public gale::Context {
 								char * atomNameSelection = XGetAtomName(m_display, req->selection);
 								char * atomNameTarget = XGetAtomName(m_display, req->target);
 								GALE_INFO("    from: " << atomNameProperty << "  request=" << atomNameSelection << " in " << atomNameTarget);
-								if (atomNameProperty != nullptr) { XFree(atomNameProperty); }
-								if (atomNameSelection != nullptr) { XFree(atomNameSelection); }
-								if (atomNameTarget != nullptr) { XFree(atomNameTarget); }
+								if (atomNameProperty != NULL) {
+									XFree(atomNameProperty);
+								}
+								if (atomNameSelection != NULL) {
+									XFree(atomNameSelection);
+								}
+								if (atomNameTarget != NULL) {
+									XFree(atomNameTarget);
+								}
 							}
 							#endif
 							
@@ -824,6 +839,7 @@ class X11Interface : public gale::Context {
 						#endif
 						XSync(m_display,0);
 					}
+					//specialEventThatNeedARedraw = true;
 					// draw after switch the previous windows ...
 					if (specialEventThatNeedARedraw == true) {
 						X11_INFO("specialEventThatNeedARedraw = " << specialEventThatNeedARedraw);
@@ -1091,8 +1107,8 @@ class X11Interface : public gale::Context {
 			static char *title = (char*)"Gale";
 			
 			// Connect to the X server
-			m_display = XOpenDisplay(nullptr);
-			if(m_display == nullptr) {
+			m_display = XOpenDisplay(NULL);
+			if(m_display == NULL) {
 				GALE_CRITICAL("Could not open display X.");
 				exit(-1);
 			} else {
@@ -1106,7 +1122,7 @@ class X11Interface : public gale::Context {
 			#if !defined(__TARGET_OS__Web)
 				// get an appropriate visual
 				m_visual = glXChooseVisual(m_display, Xscreen, attrListDbl);
-				if (m_visual == nullptr) {
+				if (m_visual == NULL) {
 					m_visual = glXChooseVisual(m_display, Xscreen, attrListSgl);
 					m_doubleBuffered = false;
 					GALE_ERROR("GL-X singlebuffered rendering will be used, no doublebuffering available");
@@ -1131,8 +1147,8 @@ class X11Interface : public gale::Context {
 			// Create a colormap - only needed on some X clients, eg. IRIX
 			Window Xroot = RootWindow(m_display, Xscreen);
 			#if !defined(__TARGET_OS__Web)
-				if (    m_display != nullptr
-				     && m_visual != nullptr) {
+				if (    m_display != NULL
+				     && m_visual != NULL) {
 					attr.colormap = XCreateColormap(m_display, Xroot, m_visual->visual, AllocNone);
 				}
 			#endif
@@ -1206,10 +1222,10 @@ class X11Interface : public gale::Context {
 			StartupState->flags = StateHint;
 			
 			XSetWMProperties(m_display, m_WindowHandle,&textprop, &textprop,/* Window title/icon title*/
-			                 nullptr, 0,/* Argv[], argc for program*/
+			                 NULL, 0,/* Argv[], argc for program*/
 			                 &hints, /* Start position/size*/
 			                 StartupState,/* Iconised/not flag   */
-			                 nullptr);
+			                 NULL);
 			
 			XFree(StartupState);
 			
@@ -1218,15 +1234,15 @@ class X11Interface : public gale::Context {
 			//XIfEvent(m_display, &event, WaitForMapNotify, (char*)&m_WindowHandle);
 			
 			
-			m_xim = XOpenIM(m_display, nullptr, NULL, NULL);
-			if (m_xim == nullptr) {
+			m_xim = XOpenIM(m_display, NULL, NULL, NULL);
+			if (m_xim == NULL) {
 				GALE_ERROR("Could not open input method");
 				return false;
 			}
 			/*
-			XIMStyles *styles=nullptr;
-			char* failed_arg = XGetIMValues(m_xim, XNQueryInputStyle, &styles, nullptr);
-			if (failed_arg != nullptr) {
+			XIMStyles *styles=NULL;
+			char* failed_arg = XGetIMValues(m_xim, XNQueryInputStyle, &styles, NULL);
+			if (failed_arg != NULL) {
 				GALE_ERROR("XIM Can't get styles");
 				return false;
 			}
@@ -1234,8 +1250,8 @@ class X11Interface : public gale::Context {
 				GALE_INFO("style " << styles->supported_styles[iii]);
 			}
 			*/
-			m_xic = XCreateIC(m_xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, m_WindowHandle, nullptr);
-			if (m_xic == nullptr) {
+			m_xic = XCreateIC(m_xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, m_WindowHandle, NULL);
+			if (m_xic == NULL) {
 				GALE_ERROR("Could not open IC");
 				return false;
 			}
@@ -1280,7 +1296,7 @@ class X11Interface : public gale::Context {
 						return;
 				}
 				char* tmpVal = new char[4*dataImage.getWidth()*dataImage.getHeight()];
-				if (nullptr == tmpVal) {
+				if (tmpVal == NULL) {
 					GALE_CRITICAL("Allocation error ...");
 					return;
 				}
@@ -1323,8 +1339,8 @@ class X11Interface : public gale::Context {
 					default:
 						return;
 				}
-				if (    m_display == nullptr
-				     || m_visual == nullptr) {
+				if (    m_display == NULL
+				     || m_visual == NULL) {
 					GALE_ERROR("X11 Can not create Image Icon ==> nullptr on m_display or m_visual");
 					return;
 				}
@@ -1385,7 +1401,7 @@ class X11Interface : public gale::Context {
 				}
 				// allocate a WM hints structure.
 				XWMHints* win_hints = XAllocWMHints();
-				if (win_hints == nullptr) {
+				if (win_hints == NULL) {
 					GALE_ERROR("XAllocWMHints - out of memory");
 					return;
 				}

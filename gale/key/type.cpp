@@ -6,7 +6,8 @@
 
 #include <gale/key/type.hpp>
 #include <etk/stdTools.hpp>
-
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(enum gale::key::type);
 
 static const char* typeDescriptionString[] = {
 	"type::unknow",

@@ -7,7 +7,8 @@
 #include <etk/types.hpp>
 #include <gale/Application.hpp>
 #include <gale/context/Context.hpp>
-
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(gale::Application);
 
 gale::Application::Application() :
   m_canDraw(false),

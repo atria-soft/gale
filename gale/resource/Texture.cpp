@@ -10,6 +10,8 @@
 #include <gale/resource/Manager.hpp>
 #include <gale/resource/Texture.hpp>
 #include <gale/renderer/openGL/openGL-include.hpp>
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(gale::resource::Texture);
 
 /**
  * @brief get the next power 2 if the input
@@ -51,7 +53,7 @@ gale::resource::Texture::~Texture() {
 }
 
 bool gale::resource::Texture::updateContext() {
-	ethread::RecursiveLock lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex, true);
 	if (lock.tryLock() == false) {
 		//Lock error ==> try later ...
 		return false;

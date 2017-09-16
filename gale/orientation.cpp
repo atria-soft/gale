@@ -6,6 +6,9 @@
 
 #include <etk/types.hpp>
 #include <gale/orientation.hpp>
+#include <etk/String.hpp>
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(enum gale::orientation);
 
 static const char* listValues[] = {
 	"orientation::screenAuto",

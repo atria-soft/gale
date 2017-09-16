@@ -6,7 +6,9 @@
 
 #include <gale/Dimension.hpp>
 #include <gale/debug.hpp>
-
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(gale::distance);
+ETK_DECLARE_TYPE(gale::Dimension);
 // TODO : set this in a super class acced in a statin fuction...
 // ratio in milimeter :
 static bool isInit = false;

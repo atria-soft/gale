@@ -287,11 +287,6 @@ namespace gale {
 			static int main(int _argc, const char *_argv[]);
 		public:
 			/**
-			 * @brief Special for init (main) set the start image when loading data
-			 * @param[in] _fileName Name of the image to load
-			 */
-			void setInitImage(const etk::String& _fileName);
-			/**
 			 * @brief Internal API to run the processing of the event loop ...
 			 * @return The Exit value of the program
 			 * @note INTERNAL API

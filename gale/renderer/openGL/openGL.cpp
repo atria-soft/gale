@@ -28,8 +28,8 @@ static void checkGlError(const char* _op, int32_t _localLine) {
 	}
 	#endif
 }
-#define CHECK_GL_ERROR(cmd,line) do { } while (false)
-//#define CHECK_GL_ERROR(cmd,line) checkGlError(cmd,line)
+//#define CHECK_GL_ERROR(cmd,line) do { } while (false)
+#define CHECK_GL_ERROR(cmd,line) checkGlError(cmd,line)
 
 #define OPENGL_ERROR(data) do { } while (false)
 //#define OPENGL_ERROR(data) GALE_ERROR(data)
@@ -330,6 +330,7 @@ etk::Stream& gale::openGL::operator <<(etk::Stream& _os, enum gale::openGL::flag
 		etk::makePair(openGL::flag_alphaTest, "FLAG_ALPHA_TEST"),
 		etk::makePair(openGL::flag_fog, "FLAG_FOG")
 	};
+	
 	_os << "{";
 	bool hasOne = false;
 	for (auto &it : list) {
@@ -473,7 +474,7 @@ void gale::openGL::reset() {
 }
 
 void gale::openGL::enable(enum gale::openGL::flag _flagID) {
-	//GALE_INFO("Enable : " <GALE_ERROR< _flagID);
+	OPENGL_INFO("Enable : " << _flagID);
 	#ifdef DIRECT_MODE
 		#ifdef GALE_BUILD_SIMULATION
 			if (s_simulationMode == false) {
@@ -495,7 +496,7 @@ void gale::openGL::enable(enum gale::openGL::flag _flagID) {
 }
 
 void gale::openGL::disable(enum gale::openGL::flag _flagID) {
-	//GALE_INFO("Disable : " << _flagID);
+	OPENGL_INFO("Disable : " << _flagID);
 	#ifdef DIRECT_MODE
 		for (int32_t iii=0; iii<basicFlagCount ; iii++) {
 			if (basicFlag[iii].curentFlag == (uint32_t)_flagID) {
@@ -872,7 +873,7 @@ bool gale::openGL::shader::compile(int64_t _shader, const etk::String& _data) {
 	#ifdef GALE_BUILD_SIMULATION
 		if (s_simulationMode == false) {
 	#endif
-	glShaderSource(GLuint(_shader), 1, (const char**)&data, nullptr);
+	glShaderSource(GLuint(_shader), 1, (const char**)&data, NULL);
 	CHECK_GL_ERROR("glShaderSource", __LINE__);
 	glCompileShader(GLuint(_shader));
 	CHECK_GL_ERROR("glCompileShader", __LINE__);

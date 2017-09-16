@@ -5,6 +5,8 @@
  */
 
 #include <gale/context/cursor.hpp>
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(gale::context::cursor);
 
 static const char* cursorDescriptionString[] = {
 	"cursor::arrow",

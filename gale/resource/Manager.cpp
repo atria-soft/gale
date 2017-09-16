@@ -11,7 +11,8 @@
 #include <gale/renderer/openGL/openGL.hpp>
 #include <gale/context/Context.hpp>
 
-
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(gale::resource::Manager);
 
 gale::resource::Manager::Manager() :
   m_contextHasBeenRemoved(true),

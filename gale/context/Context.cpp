@@ -23,7 +23,8 @@
 #include <gale/resource/Manager.hpp>
 #include <etk/Map.hpp>
 #include <echrono/Steady.hpp>
-
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(gale::Context);
 
 /**
  * @brief get the main gale mutex (event or periodic call mutex).
@@ -120,11 +121,6 @@ void gale::contextUnRegisterThread(ethread::Thread* _thread) {
 	g_lockContextMap.unLock();
 }
 
-void gale::Context::setInitImage(const etk::String& _fileName) {
-	//m_initDisplayImageName = _fileName;
-}
-
-
 
 /**
  * @brief set the curent interface.
@@ -146,9 +142,10 @@ void gale::Context::unLockContext() {
 
 void gale::Context::processEvents() {
 	int32_t nbEvent = 0;
-	//GALE_DEBUG(" ********  Event");
-	while (m_msgSystem.count()>0) {
+	//GALE_DEBUG(" ********  Event " << m_msgSystem.count());
+	while (m_msgSystem.count() > 0) {
 		nbEvent++;
+		GALE_DEBUG("    [" << nbEvent << "] event ...");
 		etk::Function<void(gale::Context& _context)> func;
 		{
 			ethread::RecursiveLock lock(m_mutex);
@@ -290,7 +287,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 				#ifdef GALE_BUILD_SIMULATION
 				GALE_PRINT("                'simulation'   For simulation backend");
 				#endif
-				GALE_PRINT("                can be set with environement variable 'export EWOL_BACKEND=xxx'");
+				GALE_PRINT("                can be set with environement variable 'export GALE_BACKEND=xxx'");
 			#endif
 			#if defined(__TARGET_OS__Windows)
 				GALE_PRINT("        --gale-backend=XXX");
@@ -298,7 +295,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 				#ifdef GALE_BUILD_SIMULATION
 				GALE_PRINT("                'simulation'   For simulation backend");
 				#endif
-				GALE_PRINT("                can be set with environement variable 'export EWOL_BACKEND=xxx'");
+				GALE_PRINT("                can be set with environement variable 'export GALE_BACKEND=xxx'");
 			#endif
 			#if defined(__TARGET_OS__MacOs)
 				GALE_PRINT("        --gale-backend=XXX");
@@ -306,7 +303,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 				#ifdef GALE_BUILD_SIMULATION
 				GALE_PRINT("                'simulation'   For simulation backend");
 				#endif
-				GALE_PRINT("                can be set with environement variable 'export EWOL_BACKEND=xxx'");
+				GALE_PRINT("                can be set with environement variable 'export GALE_BACKEND=xxx'");
 			#endif
 			GALE_PRINT("        -h/--help");
 			GALE_PRINT("                Display this help");
@@ -623,15 +620,17 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		m_simulationFile.filePuts(etk::toString(_displayEveryTime));
 		m_simulationFile.filePuts("\n");
 	}
+	//GALE_VERBOSE("Call draw");
 	echrono::Steady currentTime = echrono::Steady::now();
+	//GALE_WARNING("Time = " << currentTime);
 	// TODO : Review this ...
 	// this is to prevent the multiple display at the a high frequency ...
 	#if (    !defined(__TARGET_OS__Windows) \
 	      && !defined(__TARGET_OS__Android))
-	if(currentTime - m_previousDisplayTime < echrono::milliseconds(8)) {
-		ethread::sleepMilliSeconds((1));
-		return false;
-	}
+		if(currentTime - m_previousDisplayTime < echrono::milliseconds(8)) {
+			ethread::sleepMilliSeconds((1));
+			return false;
+		}
 	#endif
 	m_previousDisplayTime = currentTime;
 	
@@ -658,6 +657,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		*/
 		if (m_application != nullptr) {
 			// Redraw all needed elements
+			GALE_DEBUG("Regenerate Display");
 			m_application->onRegenerateDisplay(*this);
 			needRedraw = m_application->isDrawingNeeded();
 		}
@@ -678,6 +678,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		}
 		if(    needRedraw == true
 		    || _displayEveryTime == true) {
+			GALE_DEBUG("  ==> real Draw");
 			lockContext();
 			m_resourceManager.updateContext();
 			unLockContext();
@@ -888,7 +889,7 @@ int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 	etk::String request = "";
 	
 	// get the environement variable:
-	char * basicEnv = getenv("EWOL_BACKEND");
+	char * basicEnv = getenv("GALE_BACKEND");
 	if (nullptr != basicEnv) {
 		etk::String tmpVal = basicEnv;
 		//TODO : Check if it leak ...
@@ -951,7 +952,7 @@ int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 				request = tmpVal;
 			}
 		#else
-			GALE_ERROR("Unsupported environement variable 'EWOL_BACKEND' in this mode");
+			GALE_ERROR("Unsupported environement variable 'GALE_BACKEND' in this mode");
 		#endif
 	}
 	for(int32_t iii=0; iii<_argc; ++iii) {
@@ -1016,7 +1017,7 @@ int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 					request = tmpVal;
 				}
 			#else
-				GALE_ERROR("Unsupported environement variable 'EWOL_BACKEND' in this mode");
+				GALE_ERROR("Unsupported environement variable 'GALE_BACKEND' in this mode");
 			#endif
 		}
 	}

@@ -7,6 +7,8 @@
 #include <gale/debug.hpp>
 
 #include <gale/context/Context.hpp>
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(gale::Thread);
 
 gale::Thread::Thread() :
   m_state(state::stop),

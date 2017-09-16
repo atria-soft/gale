@@ -45,7 +45,6 @@ class MainApplication : public gale::Application {
 			}
 			// TO facilitate some debugs we add a name of the VBO:
 			m_verticesVBO->setName("[VBO] of basic SAMPLE");
-			
 			m_verticesVBO->pushOnBuffer(GALE_SAMPLE_VBO_VERTICES, vec3(-0.5,-0.5,0));
 			m_verticesVBO->pushOnBuffer(GALE_SAMPLE_VBO_VERTICES, vec3(0,0.5,0));
 			m_verticesVBO->pushOnBuffer(GALE_SAMPLE_VBO_VERTICES, vec3(0.5,-0.5,0));
@@ -58,6 +57,7 @@ class MainApplication : public gale::Application {
 		}
 		void onDraw(gale::Context& _context) override {
 			m_angle += 0.01;
+			TEST_INFO("==> appl Draw ...");
 			ivec2 size = getSize();
 			// set the basic openGL view port: (position drawed in the windows)
 			gale::openGL::setViewPort(ivec2(0,0),size);

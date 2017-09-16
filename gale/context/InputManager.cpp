@@ -11,7 +11,10 @@
 #include <gale/context/InputManager.hpp>
 #include <gale/Application.hpp>
 
-
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(gale::context::InputManager);
+ETK_DECLARE_TYPE(gale::context::InputPoperty);
+ETK_DECLARE_TYPE(gale::context::InputLimit);
 
 #define EVENT_DEBUG  GALE_VERBOSE
 //#define EVENT_DEBUG  GALE_DEBUG

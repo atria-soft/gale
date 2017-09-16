@@ -10,7 +10,9 @@
 #include <gale/resource/Manager.hpp>
 #include <gale/gale.hpp>
 #include <gale/context/Context.hpp>
+#include <etk/typeInfo.hpp>
 
+ETK_DECLARE_TYPE(gale::Resource);
 
 gale::Resource::Resource() :
   m_id(0),

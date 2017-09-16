@@ -6,6 +6,8 @@
 
 #include <gale/key/status.hpp>
 #include <etk/stdTools.hpp>
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(enum gale::key::status);
 
 static const char* statusDescriptionString[] = {
 	"status::unknow",

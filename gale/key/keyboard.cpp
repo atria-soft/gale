@@ -6,6 +6,8 @@
 
 #include <gale/key/keyboard.hpp>
 #include <etk/stdTools.hpp>
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(enum gale::key::keyboard);
 
 static const char* keyboardDescriptionString[] = {
 	"keyboard::unknow",

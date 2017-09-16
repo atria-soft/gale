@@ -12,6 +12,9 @@
 
 #include <gale/renderer/openGL/openGL-include.hpp>
 
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(gale::resource::Shader);
+
 gale::resource::Shader::Shader() :
   gale::Resource(),
   m_exist(false),
@@ -47,7 +50,7 @@ gale::resource::Shader::~Shader() {
 }
 
 bool gale::resource::Shader::updateContext() {
-	ethread::RecursiveLock lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex, true);
 	if (lock.tryLock() == false) {
 		//Lock error ==> try later ...
 		return false;

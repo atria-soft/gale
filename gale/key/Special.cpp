@@ -6,6 +6,8 @@
 
 #include <gale/key/Special.hpp>
 #include <etk/stdTools.hpp>
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(gale::key::Special);
 
 #define GALE_FLAG_KEY_CAPS_LOCK   0x00000001
 #define GALE_FLAG_KEY_SHIFT       0x00000030

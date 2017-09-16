@@ -125,7 +125,7 @@ namespace gale {
 				 * @param[in] _elementName Name of the requested uniform.
 				 * @return An abstract ID of the current uniform (this value is all time availlable, even if the program will be reloaded)
 				 */
-				int32_t getUniform(etk::String _elementName);
+				int32_t getUniform(const etk::String& _elementName);
 				/**
 				 * @brief Send a uniform element to the spefified ID (not send if does not really exist in the openGL program)
 				 * @param[in] _idElem Id of the uniform that might be sended.

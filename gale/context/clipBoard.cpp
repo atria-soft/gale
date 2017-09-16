@@ -9,6 +9,8 @@
 #include <gale/debug.hpp>
 #include <gale/context/clipBoard.hpp>
 #include <gale/context/Context.hpp>
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(gale::context::clipBoard::clipboardListe);
 
 /*
 note: copy id data :

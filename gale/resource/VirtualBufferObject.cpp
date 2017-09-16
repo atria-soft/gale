@@ -9,6 +9,8 @@
 #include <gale/resource/Manager.hpp>
 #include <gale/resource/VirtualBufferObject.hpp>
 #include <gale/renderer/openGL/openGL-include.hpp>
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(gale::resource::VirtualBufferObject);
 
 void gale::resource::VirtualBufferObject::init(int32_t _number) {
 	gale::Resource::init();
@@ -49,12 +51,14 @@ void gale::resource::VirtualBufferObject::retreiveData() {
 
 bool gale::resource::VirtualBufferObject::updateContext() {
 	GALE_VERBOSE(" Start: [" << getId() << "] '" << getName() << "' (size=" << m_buffer[0].size() << ")");
-	ethread::RecursiveLock lock(m_mutex);
+	ethread::RecursiveLock lock(m_mutex, true);
 	if (lock.tryLock() == false) {
 		//Lock error ==> try later ...
+		GALE_WARNING("     ==> Lock error on VBO");
 		return false;
 	}
 	if (m_exist == false) {
+		GALE_DEBUG("     ==> ALLOCATE new handle");
 		// Allocate and assign a Vertex Array Object to our handle
 		gale::openGL::genBuffers(m_vbo);
 	}
@@ -63,9 +67,10 @@ bool gale::resource::VirtualBufferObject::updateContext() {
 		GALE_VERBOSE("VBO    : add [" << getId() << "]=" << m_buffer[iii].size() << "*sizeof(float) OGl_Id=" << m_vbo[iii]);
 		if (m_vboUsed[iii] == true) {
 			// select the buffer to set data inside it ...
-			if (m_buffer[iii].size()>0) {
+			if (m_buffer[iii].size() > 0) {
 				gale::openGL::bindBuffer(m_vbo[iii]);
-				gale::openGL::bufferData(sizeof(float)*m_buffer[iii].size(), &((m_buffer[iii])[0]), gale::openGL::usage::streamDraw);
+				float* bufferPonter =&(m_buffer[iii][0]);
+				gale::openGL::bufferData(sizeof(float)*m_buffer[iii].size(), bufferPonter, gale::openGL::usage::streamDraw);
 			}
 		}
 	}

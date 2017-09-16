@@ -8,6 +8,9 @@
 #include <gale/context/commandLine.hpp>
 #include <etk/Vector.hpp>
 
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(gale::context::CommandLine);
+
 void gale::context::CommandLine::parse(int32_t _argc, const char* _argv[]) {
 	for (int32_t i=1 ; i<_argc; i++) {
 		GALE_INFO("commandLine : \"" << _argv[i] << "\"" );

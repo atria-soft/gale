@@ -11,6 +11,8 @@
 #include <etk/os/FSNode.hpp>
 #include <gale/gale.hpp>
 #include <gale/renderer/openGL/openGL-include.hpp>
+#include <etk/typeInfo.hpp>
+ETK_DECLARE_TYPE(gale::resource::Program);
 
 //#define LOCAL_DEBUG  GALE_VERBOSE
 #define LOCAL_DEBUG  GALE_DEBUG
@@ -203,7 +205,7 @@ int32_t gale::resource::Program::getAttribute(etk::String _elementName) {
 	return m_elementList.size()-1;
 }
 
-int32_t gale::resource::Program::getUniform(etk::String _elementName) {
+int32_t gale::resource::Program::getUniform(const etk::String& _elementName) {
 	ethread::RecursiveLock lock(m_mutex);
 	// check if it exist previously :
 	for(size_t iii=0; iii<m_elementList.size(); iii++) {
