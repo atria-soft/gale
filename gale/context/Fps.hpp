@@ -105,14 +105,14 @@ namespace gale {
 					if (m_display == true) {
 						if (m_nbDisplayTime > 0) {
 							GALE_PRINT(m_displayName << " : Active : "
-							                         << m_min << " "
-							                         << m_avg / m_nbDisplayTime << "ms "
+							                         << m_min << "    |    "
+							                         << m_avg / m_nbDisplayTime << "    |    "
 							                         << m_max << " ");
 						}
 						if (m_nbCallTime-m_nbDisplayTime>0) {
 							GALE_PRINT(m_displayName << " : idle   : "
-							                         << m_min_idle << " "
-							                         << m_avg_idle / (m_nbCallTime-m_nbDisplayTime) << "ms "
+							                         << m_min_idle << "    |    "
+							                         << m_avg_idle / (m_nbCallTime-m_nbDisplayTime) << "    |    "
 							                         << m_max_idle << " ");
 						}
 						if (m_displayFPS == true) {

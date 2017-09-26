@@ -23,6 +23,7 @@
 #include <gale/resource/Manager.hpp>
 #include <etk/Map.hpp>
 #include <echrono/Steady.hpp>
+#include <echrono/Time.hpp>
 #include <etk/typeInfo.hpp>
 ETK_DECLARE_TYPE(gale::Context);
 
@@ -145,7 +146,7 @@ void gale::Context::processEvents() {
 	//GALE_DEBUG(" ********  Event " << m_msgSystem.count());
 	while (m_msgSystem.count() > 0) {
 		nbEvent++;
-		GALE_DEBUG("    [" << nbEvent << "] event ...");
+		//GALE_VERBOSE("    [" << nbEvent << "] event ...");
 		etk::Function<void(gale::Context& _context)> func;
 		{
 			ethread::RecursiveLock lock(m_mutex);
@@ -622,7 +623,8 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 	}
 	//GALE_VERBOSE("Call draw");
 	echrono::Steady currentTime = echrono::Steady::now();
-	//GALE_WARNING("Time = " << currentTime);
+	//echrono::Time currentTime2 = echrono::Time::now();
+	//GALE_WARNING("Time = " << currentTime << "         " << currentTime2);
 	// TODO : Review this ...
 	// this is to prevent the multiple display at the a high frequency ...
 	#if (    !defined(__TARGET_OS__Windows) \
@@ -657,7 +659,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		*/
 		if (m_application != nullptr) {
 			// Redraw all needed elements
-			GALE_DEBUG("Regenerate Display");
+			//GALE_DEBUG("Regenerate Display");
 			m_application->onRegenerateDisplay(*this);
 			needRedraw = m_application->isDrawingNeeded();
 		}
@@ -678,7 +680,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		}
 		if(    needRedraw == true
 		    || _displayEveryTime == true) {
-			GALE_DEBUG("  ==> real Draw");
+			//GALE_DEBUG("  ==> real Draw");
 			lockContext();
 			m_resourceManager.updateContext();
 			unLockContext();

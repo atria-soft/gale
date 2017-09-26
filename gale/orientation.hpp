@@ -5,6 +5,9 @@
  */
 #pragma once
 
+#include <etk/types.hpp>
+#include <etk/Stream.hpp>
+
 namespace gale {
 	enum class orientation {
 		screenAuto = 0,
