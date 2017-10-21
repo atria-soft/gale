@@ -147,7 +147,7 @@ class MainApplication : public gale::Application {
  * @return std IO
  */
 int main(int _argc, const char *_argv[]) {
-	return gale::run(new MainApplication(), _argc, _argv);
+	return gale::run(ETK_NEW(appl::MainApplication)(), _argc, _argv);
 }
 //! [gale_declare_main]
 

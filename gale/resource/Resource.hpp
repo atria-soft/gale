@@ -15,7 +15,7 @@
 
 #define DECLARE_RESOURCE_FACTORY(className) \
 	template<typename ... GALE_TYPE> static ememory::SharedPtr<className> create( GALE_TYPE&& ... _all ) { \
-		ememory::SharedPtr<className> resource(new className()); \
+		ememory::SharedPtr<className> resource(ETK_NEW(className)); \
 		if (resource == nullptr) { \
 			GALE_ERROR("Factory resource error"); \
 			return nullptr; \
@@ -43,7 +43,7 @@
 			} \
 			return resource; \
 		} \
-		resource = ememory::SharedPtr<className>(new className()); \
+		resource = ememory::SharedPtr<className>(ETK_NEW(className)); \
 		if (resource == nullptr) { \
 			GALE_ERROR("allocation error of a resource : " << _name); \
 			return nullptr; \
@@ -70,7 +70,7 @@
 		if (resource != nullptr) { \
 			return resource; \
 		} \
-		resource = ememory::SharedPtr<className>(new className()); \
+		resource = ememory::SharedPtr<className>(ETK_NEW(className)); \
 		if (resource == nullptr) { \
 			GALE_ERROR("allocation error of a resource : " << uniqueName); \
 			return nullptr; \
@@ -150,7 +150,7 @@ namespace gale {
 		protected:
 			/**
 			 * @brief Add a type of the list of Object.
-			 * @param[in] _type new type to add.
+			 * @param[in] _type Type to add.
 			 */
 			void addResourceType(const char* _type);
 		protected:
@@ -165,7 +165,7 @@ namespace gale {
 			};
 			/**
 			 * @brief get the resource name
-			 * @param[in] _name The new name
+			 * @param[in] _name The name to set.
 			 */
 			void setName(const etk::String& _name) {
 				m_name = _name;

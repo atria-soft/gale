@@ -251,9 +251,9 @@ int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 void IOs::createInterface() {
 	etk::init(l_argc, l_argv);
 	GALE_INFO("Create new interface");
-	interface = new MacOSInterface(l_application, l_argc, l_argv);
+	interface = ETK_NEW(MacOSInterface, l_application, l_argc, l_argv);
 	l_application = nullptr;
-	if (nullptr == interface) {
+	if (interface == nullptr) {
 		GALE_CRITICAL("Can not create the X11 interface ... MEMORY allocation error");
 		return;
 	}
@@ -263,7 +263,7 @@ void IOs::releaseInterface() {
 	if (interface != nullptr) {
 		GALE_INFO("Remove interface");
 	}
-	delete(interface);
+	ETK_DELETE(MacOSInterface, interface);
 	interface = nullptr;
 }
 

@@ -25,6 +25,7 @@
 #include <echrono/Steady.hpp>
 #include <echrono/Time.hpp>
 #include <etk/typeInfo.hpp>
+#include <etk/Allocator.hpp>
 ETK_DECLARE_TYPE(gale::Context);
 
 /**
@@ -620,6 +621,13 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		m_simulationFile.filePuts(":DRAW:");
 		m_simulationFile.filePuts(etk::toString(_displayEveryTime));
 		m_simulationFile.filePuts("\n");
+	}
+	{
+		static int32_t countMemeCheck = 0;
+		if (countMemeCheck++ >= 10*16) {
+			countMemeCheck = 0;
+			ETK_MEM_SHOW_LOG(true);
+		}
 	}
 	//GALE_VERBOSE("Call draw");
 	echrono::Steady currentTime = echrono::Steady::now();

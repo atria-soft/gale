@@ -545,18 +545,18 @@ extern "C" {
 		s_applicationInit = NULL;
 		gale::Application* localApplication = NULL;
 		// call the basic init of all application (that call us ...)
-		main(0,NULL);
+		main(0, NULL);
 		localApplication = s_applicationInit;
 		s_applicationInit = NULL;
 		if (org_gale_GaleConstants_GALE_APPL_TYPE_ACTIVITY == _typeApplication) {
-			tmpContext = new AndroidContext(localApplication, _env, _classBase, _objCallback, AndroidContext::appl_application);
+			tmpContext = ETK_NEW(AndroidContext, localApplication, _env, _classBase, _objCallback, AndroidContext::appl_application);
 		} else if (org_gale_GaleConstants_GALE_APPL_TYPE_WALLPAPER == _typeApplication) {
-			tmpContext = new AndroidContext(localApplication, _env, _classBase, _objCallback, AndroidContext::appl_wallpaper);
+			tmpContext = ETK_NEW(AndroidContext, localApplication, _env, _classBase, _objCallback, AndroidContext::appl_wallpaper);
 		} else {
 			GALE_CRITICAL(" try to create an instance with no apply type: " << _typeApplication);
 			return -1;
 		}
-		if (nullptr == tmpContext) {
+		if (tmpContext == nullptr) {
 			GALE_ERROR("Can not allocate the main context instance _id=" << (s_listInstance.size()-1));
 			return -1;
 		}
@@ -572,24 +572,24 @@ extern "C" {
 		GALE_DEBUG("** remove JVM Pointer                    **");
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
-		    || _id<0) {
+		    || _id < 0) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			return;
 		}
-		if (nullptr == s_listInstance[_id]) {
+		if (s_listInstance[_id] == nullptr) {
 			GALE_ERROR("the requested instance _id=" << (int32_t)_id << " is already removed ...");
 			return;
 		}
 		s_listInstance[_id]->unInit(_env);
-		delete(s_listInstance[_id]);
+		ETK_DELETE(AndroidContext, s_listInstance[_id]);
 		s_listInstance[_id]=nullptr;
 	}
 	void Java_org_gale_Gale_EWtouchEvent(JNIEnv* _env, jobject _thiz, jint _id) {
 		ethread::UniqueLock lock(g_interfaceMutex);
 		GALE_DEBUG("  == > Touch Event");
 		if(    _id >= (int32_t)s_listInstance.size()
-		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || _id < 0
+		    || s_listInstance[_id] == nullptr) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -603,8 +603,8 @@ extern "C" {
 		GALE_DEBUG("** Activity on Create                    **");
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
-		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || _id < 0
+		    || s_listInstance[_id] == nullptr) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -619,8 +619,8 @@ extern "C" {
 		GALE_DEBUG("** Activity on Start                     **");
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
-		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || _id < 0
+		    || s_listInstance[_id]== nullptr) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -634,8 +634,8 @@ extern "C" {
 		GALE_DEBUG("** Activity on Re-Start                  **");
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
-		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || _id < 0
+		    || s_listInstance[_id] == nullptr) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -648,8 +648,8 @@ extern "C" {
 		GALE_DEBUG("** Activity on resume                    **");
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
-		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || _id < 0
+		    || s_listInstance[_id] == nullptr) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -662,8 +662,8 @@ extern "C" {
 		GALE_DEBUG("** Activity on pause                     **");
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
-		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || _id < 0
+		    || s_listInstance[_id] == nullptr) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -678,8 +678,8 @@ extern "C" {
 		GALE_DEBUG("** Activity on Stop                      **");
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
-		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || _id < 0
+		    || s_listInstance[_id] == nullptr) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -692,8 +692,8 @@ extern "C" {
 		GALE_DEBUG("** Activity on Destroy                   **");
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
-		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || _id < 0
+		    || s_listInstance[_id] == nullptr) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -715,8 +715,8 @@ extern "C" {
 	                                           jfloat _y) {
 		ethread::UniqueLock lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
-		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || _id < 0
+		    || s_listInstance[_id] == nullptr) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;

@@ -45,7 +45,7 @@ gale::resource::Texture::Texture() :
   m_size(0,0),
   m_dataType(gale::resource::Texture::dataType::int16),
   m_dataColorSpace(gale::resource::Texture::color::mono) {
-	addResourceType("gale::compositing::Texture");
+	addResourceType("gale::resource::Texture");
 }
 
 gale::resource::Texture::~Texture() {
@@ -58,7 +58,7 @@ bool gale::resource::Texture::updateContext() {
 		//Lock error ==> try later ...
 		return false;
 	}
-	if (false == m_loaded) {
+	if (m_loaded == false) {
 		// Request a new texture at openGl :
 		glGenTextures(1, &m_texId);
 	}
@@ -94,7 +94,8 @@ void gale::resource::Texture::removeContext() {
 	if (true == m_loaded) {
 		// Request remove texture ...
 		GALE_INFO("TEXTURE: Rm [" << getId() << "] texId=" << m_texId);
-		//glDeleteTextures(1, &m_texId);
+		// TODO: Check if we are in the correct thread
+		glDeleteTextures(1, &m_texId);
 		m_loaded = false;
 	}
 }

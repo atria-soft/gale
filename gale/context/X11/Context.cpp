@@ -1295,12 +1295,13 @@ class X11Interface : public gale::Context {
 						GALE_CRITICAL("Unknow thys type of bitDepth : " << depth);
 						return;
 				}
-				char* tmpVal = new char[4*dataImage.getWidth()*dataImage.getHeight()];
+				etk::Vector<char> tmpVal;
+				tmpVal.resize(4*dataImage.getWidth()*dataImage.getHeight(), 0);
 				if (tmpVal == NULL) {
 					GALE_CRITICAL("Allocation error ...");
 					return;
 				}
-				char* tmpPointer = tmpVal;
+				char* tmpPointer = &tmpVal[0];
 				switch(depth) {
 					case 16:
 						for(ivec2 pos(0,0); pos.y()<dataImage.getHeight(); pos.setY(pos.y()+1)) {
@@ -1349,7 +1350,7 @@ class X11Interface : public gale::Context {
 				                               depth,
 				                               ZPixmap,
 				                               0,
-				                               (char*)tmpVal,
+				                               (char*)&tmpVal[0],
 				                               dataImage.getWidth(),
 				                               dataImage.getHeight(),
 				                               32,
@@ -1420,7 +1421,6 @@ class X11Interface : public gale::Context {
 				
 				myImage->data = nullptr;
 				XDestroyImage(myImage);
-				delete[] tmpVal;
 			#endif
 		}
 		/****************************************************************************************/

@@ -341,11 +341,11 @@ void gale::resource::Program::reload() {
 	}
 	// remove previous data ...
 	if (m_fileData != nullptr) {
-		delete[] m_fileData;
+		del ete[] m_fileData;
 		m_fileData = 0;
 	}
 	// allocate data
-	m_fileData = new char[fileSize+5];
+	m_fileData = ne w char[fileSize+5];
 	if (m_fileData == nullptr) {
 		GALE_ERROR("Error Memory allocation size=" << fileSize);
 		return;

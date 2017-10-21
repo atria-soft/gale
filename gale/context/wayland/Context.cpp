@@ -1401,12 +1401,9 @@ class WAYLANDInterface : public gale::Context {
 						GALE_CRITICAL("Unknow thys type of bitDepth : " << depth);
 						return;
 				}
-				char* tmpVal = new char[4*dataImage.getWidth()*dataImage.getHeight()];
-				if (nullptr == tmpVal) {
-					GALE_CRITICAL("Allocation error ...");
-					return;
-				}
-				char* tmpPointer = tmpVal;
+				etk::Vector<char> tmpVal
+				tmpVal.resize(4*dataImage.getWidth()*dataImage.getHeight(), 0);
+				char* tmpPointer = &tmpVal[0];
 				switch(depth) {
 					case 16:
 						for(ivec2 pos(0,0); pos.y()<dataImage.getHeight(); pos.setY(pos.y()+1)) {
@@ -1522,7 +1519,6 @@ class WAYLANDInterface : public gale::Context {
 				
 				myImage->data = nullptr;
 				XDestroyImage(myImage);
-				delete[] tmpVal;
 			#endif
 			*/
 		}
