@@ -29,7 +29,7 @@ static etk::String GetLastErrorAsString() {
 	if(errorMessageID == 0) {
 		return etk::String(); //No error message has been recorded
 	}
-	LPSTR messageBuffer = nullptr;
+	LPSTR messageBuffer = null;
 	size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 	                             NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
 	etk::String message(messageBuffer, size);
@@ -40,7 +40,7 @@ static etk::String GetLastErrorAsString() {
 
 class WindowsContext;
 // This is a bad hook to get the wurrent windows pointer (it is unique ...):
-static WindowsContext * galeWindowsContext = nullptr;
+static WindowsContext * galeWindowsContext = null;
 
 // Window Procedure
 static LRESULT CALLBACK WndProc(HWND _hWnd, UINT _message, WPARAM _wParam, LPARAM _lParam);
@@ -62,7 +62,7 @@ class WindowsContext : public gale::Context {
 		  gale::Context(_application, _argc, _argv),
 		  m_run(true),
 		  m_clipBoardOwnerStd(false),
-		  m_hInstance(GetModuleHandle(nullptr)),
+		  m_hInstance(GetModuleHandle(null)),
 		  m_hWnd(0),
 		  m_hDC(0),
 		  m_hRC(0) {
@@ -75,7 +75,7 @@ class WindowsContext : public gale::Context {
 		}
 		
 		~WindowsContext() {
-			galeWindowsContext = nullptr;
+			galeWindowsContext = null;
 			release();
 		}
 		
@@ -118,12 +118,12 @@ class WindowsContext : public gale::Context {
 			                        ,                      // The style of the window being created.
 			                        10, 10,                // start position
 			                        800, 600,              // start size
-			                        nullptr,               // A handle to the parent or owner window of the window being created
-			                        nullptr,               // A handle to a menu, or specifies a child-window identifier, depending on the window style
+			                        null,               // A handle to the parent or owner window of the window being created
+			                        null,               // A handle to a menu, or specifies a child-window identifier, depending on the window style
 			                        m_hInstance,             // A handle to the instance of the module to be associated with the window.
-			                        nullptr                //A pointer to a value to be passed to the window through the CREATESTRUCT structure
+			                        null                //A pointer to a value to be passed to the window through the CREATESTRUCT structure
 			                        );
-			if(m_hWnd == nullptr) {
+			if(m_hWnd == null) {
 				GALE_ERROR("Can not create windows '" << GetLastErrorAsString() << "'" );
 				MessageBox(m_hWnd, "Error creating window\n(gale internal error #45211)", "Error", MB_ICONEXCLAMATION);
 				PostQuitMessage(0);
@@ -177,7 +177,7 @@ class WindowsContext : public gale::Context {
 			// program main loop
 			while(m_run == true) {
 				// check for messages
-				if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+				if (PeekMessage(&msg, null, 0, 0, PM_REMOVE)) {
 					// handle or dispatch messages
 					if (msg.message == WM_QUIT) {
 						m_run = false;
@@ -233,7 +233,7 @@ class WindowsContext : public gale::Context {
 				case gale::context::clipBoard::clipboardStd:
 					// TODO : never done reset at false ...
 					if (m_clipBoardOwnerStd == false) {
-						char* buffer = nullptr;
+						char* buffer = null;
 						if(OpenClipboard(m_hWnd)) {
 							buffer = (char*)GetClipboardData(CF_TEXT);
 							etk::String tmpppp((char*)buffer);
@@ -304,7 +304,7 @@ class WindowsContext : public gale::Context {
 			// create and enable the render context(RC)
 			*_hRC = wglCreateContext(*_hDC);
 			wglMakeCurrent(*_hDC, *_hRC);
-			if (wglGetCurrentContext() == nullptr) {
+			if (wglGetCurrentContext() == null) {
 				GALE_ERROR("can not create OPEN gL context...");
 				MessageBox(_hWnd, "Error initilizing open GL\n openGL context creation error...\n(gale internal error #3526)", "Error", MB_ICONEXCLAMATION);
 				PostQuitMessage(0);
@@ -314,7 +314,7 @@ class WindowsContext : public gale::Context {
 		
 		// disable openGL (fisnish application ...
 		void disableOpenGL(HWND _hWnd, HDC _hDC, HGLRC _hRC) {
-			wglMakeCurrent(nullptr, nullptr);
+			wglMakeCurrent(null, null);
 			wglDeleteContext(_hRC);
 			ReleaseDC(_hWnd, _hDC);
 		}
@@ -359,7 +359,7 @@ class WindowsContext : public gale::Context {
 				*/
 				case WM_WINDOWPOSCHANGING: {
 					WINDOWPOS* tmpVal = (WINDOWPOS*)_lParam;
-					if (tmpVal == nullptr) {
+					if (tmpVal == null) {
 						break;
 					}
 					GALE_VERBOSE("WM_WINDOWPOSCHANGING : : (" << tmpVal->x << "," << tmpVal->y << ") ( " << tmpVal->cx << "," << tmpVal->cy << ")");
@@ -620,7 +620,7 @@ class WindowsContext : public gale::Context {
 
 static LRESULT CALLBACK WndProc(HWND _hWnd, UINT _message, WPARAM _wParam, LPARAM _lParam) {
 	// TODO : set this function really work...
-	if (galeWindowsContext == nullptr) {
+	if (galeWindowsContext == null) {
 		return 0;
 	}
 	return galeWindowsContext->WndProcReal(_hWnd, _message, _wParam, _lParam);

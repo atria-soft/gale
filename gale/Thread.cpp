@@ -28,7 +28,7 @@ void gale::Thread::start() {
 		m_state = state::starting;
 		m_context = &gale::getContext();
 		m_thread = ememory::makeShared<ethread::Thread>([=](){this->threadCall();}, "galeThread");
-		if (m_thread == nullptr) {
+		if (m_thread == null) {
 			GALE_ERROR("Can not create thread ...");
 			return;
 		}
@@ -93,7 +93,7 @@ void gale::Thread::threadCall() {
 		}
 	}
 	GALE_DEBUG("THREAD MAIN [STOP]");
-	gale::setContext(nullptr);
+	gale::setContext(null);
 	m_state = state::stopping;
 }
 

@@ -21,7 +21,7 @@ namespace gale {
 	 * @param[in] _argv Standard argv
 	 * @return normal error int for the application error management
 	 */
-	int32_t run(gale::Application* _application, int32_t _argc = 0, const char* _argv[] = nullptr);
+	int32_t run(gale::Application* _application, int32_t _argc = 0, const char* _argv[] = null);
 	/**
 	 * @brief get GALE version
 	 * @return The string that describe gale version

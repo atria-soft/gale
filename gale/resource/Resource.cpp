@@ -40,7 +40,7 @@ const char * const gale::Resource::getType() {
 }
 
 void gale::Resource::addResourceType(const char* _type) {
-	if (_type == nullptr) {
+	if (_type == null) {
 		GALE_ERROR(" try to add a type with no value...");
 		return;
 	}

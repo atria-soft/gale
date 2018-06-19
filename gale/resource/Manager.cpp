@@ -45,7 +45,7 @@ void gale::resource::Manager::unInit() {
 	auto it(m_resourceList.begin());
 	while(it != m_resourceList.end()) {
 		ememory::SharedPtr<gale::Resource> tmpRessource = (*it).lock();
-		if (tmpRessource != nullptr) {
+		if (tmpRessource != null) {
 			GALE_WARNING("Find a resource that is not removed : [" << tmpRessource->getId() << "]"
 			             << "=\"" << tmpRessource->getName() << "\" "
 			             << tmpRessource.useCount() << " elements");
@@ -62,7 +62,7 @@ void gale::resource::Manager::display() {
 	ethread::RecursiveLock lock(m_mutex);
 	for (auto &it : m_resourceList) {
 		ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
-		if (tmpRessource != nullptr) {
+		if (tmpRessource != null) {
 			GALE_INFO("    [" << tmpRessource->getId() << "]"
 			          << tmpRessource->getType()
 			          << "=\"" << tmpRessource->getName() << "\" "
@@ -81,7 +81,7 @@ void gale::resource::Manager::reLoadResources() {
 			GALE_INFO("    Reload level : " << jjj << "/" << (MAX_RESOURCE_LEVEL-1));
 			for (auto &it : m_resourceList) {
 				ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
-				if(tmpRessource != nullptr) {
+				if(tmpRessource != null) {
 					if (jjj == tmpRessource->getResourceLevel()) {
 						tmpRessource->reload();
 						GALE_INFO("        [" << tmpRessource->getId() << "]="<< tmpRessource->getType());
@@ -99,7 +99,7 @@ void gale::resource::Manager::update(const ememory::SharedPtr<gale::Resource>& _
 	// chek if not added before
 	ethread::RecursiveLock lock(m_mutex);
 	for (auto &it : m_resourceListToUpdate) {
-		if (    it != nullptr
+		if (    it != null
 		     && it == _object) {
 			// just prevent some double add ...
 			return;
@@ -131,7 +131,7 @@ void gale::resource::Manager::updateContext() {
 				GALE_VERBOSE("    updateContext level (D) : " << jjj << "/" << (MAX_RESOURCE_LEVEL-1));
 				for (auto &it : resourceList) {
 					ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
-					if(    tmpRessource != nullptr
+					if(    tmpRessource != null
 					    && jjj == tmpRessource->getResourceLevel()) {
 						//GALE_DEBUG("Update context named : " << l_resourceList[iii]->getName());
 						if (tmpRessource->updateContext() == false) {
@@ -155,7 +155,7 @@ void gale::resource::Manager::updateContext() {
 			for (size_t jjj=0; jjj<MAX_RESOURCE_LEVEL; jjj++) {
 				GALE_VERBOSE("    updateContext level (U) : " << jjj << "/" << (MAX_RESOURCE_LEVEL-1));
 				for (auto &it : resourceListToUpdate) {
-					if (    it != nullptr
+					if (    it != null
 					     && jjj == it->getResourceLevel()) {
 						if (it->updateContext() == false) {
 							ethread::RecursiveLock lock(m_mutex);
@@ -174,7 +174,7 @@ void gale::resource::Manager::contextHasBeenDestroyed() {
 	ethread::RecursiveLock lock(m_mutex);
 	for (auto &it : m_resourceList) {
 		ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
-		if (tmpRessource != nullptr) {
+		if (tmpRessource != null) {
 			tmpRessource->removeContextToLate();
 		}
 	}
@@ -193,13 +193,13 @@ ememory::SharedPtr<gale::Resource> gale::resource::Manager::localKeep(const etk:
 	GALE_VERBOSE("KEEP (DEFAULT) : file : '" << _filename << "' in " << m_resourceList.size() << " resources");
 	for (auto &it : m_resourceList) {
 		ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
-		if (tmpRessource != nullptr) {
+		if (tmpRessource != null) {
 			if (tmpRessource->getName() == _filename) {
 				return tmpRessource;
 			}
 		}
 	}
-	return nullptr;
+	return null;
 }
 
 // internal generic keeper ...
@@ -208,7 +208,7 @@ void gale::resource::Manager::localAdd(const ememory::SharedPtr<gale::Resource>&
 	//Add ... find empty slot
 	for (auto &it : m_resourceList) {
 		ememory::SharedPtr<gale::Resource> tmpRessource = it.lock();
-		if (tmpRessource == nullptr) {
+		if (tmpRessource == null) {
 			it = _object;
 			return;
 		}

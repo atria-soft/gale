@@ -268,7 +268,7 @@ class GLUTInterface : public gale::Context {
 		}
 };
 
-GLUTInterface* g_interface = nullptr;
+GLUTInterface* g_interface = null;
 
 static void gale_glut_idle() {
 	glutPostRedisplay();

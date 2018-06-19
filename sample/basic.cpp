@@ -32,14 +32,14 @@ namespace appl {
 				setSize(vec2(800, 600));
 				m_angle = 0.0f;
 				m_GLprogram = gale::resource::Program::create("DATA:basic.prog");
-				if (m_GLprogram != nullptr) {
+				if (m_GLprogram != null) {
 					m_GLPosition = m_GLprogram->getAttribute("EW_coord3d");
 					m_GLColor    = m_GLprogram->getAttribute("EW_color");
 					m_GLMatrix   = m_GLprogram->getUniform("EW_MatrixTransformation");
 				}
 				// this is the properties of the buffer requested : "r"/"w" + "-" + buffer type "f"=flaot "i"=integer
 				m_verticesVBO = gale::resource::VirtualBufferObject::create(5);
-				if (m_verticesVBO == nullptr) {
+				if (m_verticesVBO == null) {
 					TEST_ERROR("can not instanciate VBO ...");
 					return;
 				}
@@ -87,7 +87,7 @@ namespace appl {
 					                               etk::color::blue
 					                             };
 				#endif
-				if (m_GLprogram == nullptr) {
+				if (m_GLprogram == null) {
 					TEST_INFO("No shader ...");
 					return;
 				}

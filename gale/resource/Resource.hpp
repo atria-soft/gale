@@ -16,9 +16,9 @@
 #define DECLARE_RESOURCE_FACTORY(className) \
 	template<typename ... GALE_TYPE> static ememory::SharedPtr<className> create( GALE_TYPE&& ... _all ) { \
 		ememory::SharedPtr<className> resource(ETK_NEW(className)); \
-		if (resource == nullptr) { \
+		if (resource == null) { \
 			GALE_ERROR("Factory resource error"); \
-			return nullptr; \
+			return null; \
 		} \
 		resource->init(etk::forward<GALE_TYPE>(_all)... ); \
 		if (resource->resourceHasBeenCorectlyInit() == false) { \
@@ -35,18 +35,18 @@
 		if (_name != "" && _name != "---") { \
 			resource2 = getManager().localKeep(_name); \
 		} \
-		if (resource2 != nullptr) { \
+		if (resource2 != null) { \
 			resource = ememory::dynamicPointerCast<className>(resource2); \
-			if (resource == nullptr) { \
+			if (resource == null) { \
 				GALE_CRITICAL("Request resource file : '" << _name << "' With the wrong type (dynamic cast error)"); \
-				return nullptr; \
+				return null; \
 			} \
 			return resource; \
 		} \
 		resource = ememory::SharedPtr<className>(ETK_NEW(className)); \
-		if (resource == nullptr) { \
+		if (resource == null) { \
 			GALE_ERROR("allocation error of a resource : " << _name); \
-			return nullptr; \
+			return null; \
 		} \
 		resource->init(_name, etk::forward<GALE_TYPE>(_all)... ); \
 		if (resource->resourceHasBeenCorectlyInit() == false) { \
@@ -60,20 +60,20 @@
 	template<typename ... GALE_TYPE> static ememory::SharedPtr<className> create(GALE_TYPE&& ... _all ) { \
 		ememory::SharedPtr<className> resource; \
 		ememory::SharedPtr<gale::Resource> resource2 = getManager().localKeep(uniqueName); \
-		if (resource2 != nullptr) { \
+		if (resource2 != null) { \
 			resource = ememory::dynamicPointerCast<className>(resource2); \
-			if (resource == nullptr) { \
+			if (resource == null) { \
 				GALE_CRITICAL("Request resource file : '" << uniqueName << "' With the wrong type (dynamic cast error)"); \
-				return nullptr; \
+				return null; \
 			} \
 		} \
-		if (resource != nullptr) { \
+		if (resource != null) { \
 			return resource; \
 		} \
 		resource = ememory::SharedPtr<className>(ETK_NEW(className)); \
-		if (resource == nullptr) { \
+		if (resource == null) { \
 			GALE_ERROR("allocation error of a resource : " << uniqueName); \
-			return nullptr; \
+			return null; \
 		} \
 		resource->init(uniqueName, etk::forward<GALE_TYPE>(_all)... ); \
 		if (resource->resourceHasBeenCorectlyInit() == false) { \

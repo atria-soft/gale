@@ -45,26 +45,26 @@ static etk::Map<uint64_t, gale::Context*>& getContextList() {
 	return g_val;
 }
 
-static gale::Context* lastContextSet = nullptr;
+static gale::Context* lastContextSet = null;
 
 gale::Context& gale::getContext() {
 	etk::Map<uint64_t, gale::Context*>& list = getContextList();
 	g_lockContextMap.lock();
 	etk::Map<uint64_t, gale::Context*>::Iterator it = list.find(ethread::getId());
-	gale::Context* out = nullptr;
+	gale::Context* out = null;
 	if (it != list.end()) {
 		out = it->second;
 	}
 	
 	g_lockContextMap.unLock();
-	if (out == nullptr) {
+	if (out == null) {
 		for (auto &it2 : list) {
-			if (out == nullptr) {
-				if (it2.second != nullptr) {
+			if (out == null) {
+				if (it2.second != null) {
 					out = it2.second;
 				}
 			} else {
-				if (it2.second == nullptr) {
+				if (it2.second == null) {
 					continue;
 				} else if (it2.second == out) {
 					continue;
@@ -73,8 +73,8 @@ gale::Context& gale::getContext() {
 				}
 			}
 		}
-		if (out == nullptr) {
-			if (lastContextSet != nullptr) {
+		if (out == null) {
+			if (lastContextSet != null) {
 				GALE_ERROR("[CRITICAL] try acces at an empty context interface && fallback on the last context SET ==> you must correct yout implementation");
 				out = lastContextSet;
 			} else {
@@ -91,7 +91,7 @@ void gale::setContext(gale::Context* _context) {
 	etk::Map<uint64_t, gale::Context*>& list = getContextList();
 	//GALE_ERROR("Set context : " << ethread::getId() << " context pointer : " << uint64_t(_context));
 	g_lockContextMap.lock();
-	if (_context != nullptr) {
+	if (_context != null) {
 		lastContextSet = _context;
 	}
 	list.set(ethread::getId(), _context);
@@ -99,7 +99,7 @@ void gale::setContext(gale::Context* _context) {
 }
 
 void gale::contextRegisterThread(ethread::Thread* _thread) {
-	if (_thread == nullptr) {
+	if (_thread == null) {
 		return;
 	}
 	gale::Context* context = &gale::getContext();
@@ -111,7 +111,7 @@ void gale::contextRegisterThread(ethread::Thread* _thread) {
 }
 
 void gale::contextUnRegisterThread(ethread::Thread* _thread) {
-	if (_thread == nullptr) {
+	if (_thread == null) {
 		return;
 	}
 	etk::Map<uint64_t, gale::Context*>& list = getContextList();
@@ -134,11 +134,11 @@ void gale::Context::lockContext() {
 }
 
 /**
- * @brief set the curent interface at nullptr.
+ * @brief set the curent interface at null.
  * @note this un-lock the main mutex
  */
 void gale::Context::unLockContext() {
-	setContext(nullptr);
+	setContext(null);
 	mutexInterface().unLock();
 }
 
@@ -153,7 +153,7 @@ void gale::Context::processEvents() {
 			ethread::RecursiveLock lock(m_mutex);
 			m_msgSystem.wait(func);
 		}
-		if (func == nullptr) {
+		if (func == null) {
 			continue;
 		}
 		func(*this);
@@ -203,7 +203,7 @@ namespace gale {
 				#endif
 				m_context->processEvents();
 				// call all the application for periodic request (the application manage multiple instance )...
-				if (m_context->m_application != nullptr) {
+				if (m_context->m_application != null) {
 					m_context->m_application->onPeriod(echrono::Steady::now());
 				}
 				#if 0
@@ -238,7 +238,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
   m_windowsSize(320,480) {
 	// set a basic 
 	ethread::setName("galeThread");
-	if (m_application == nullptr) {
+	if (m_application == null) {
 		GALE_CRITICAL("Can not start context with no Application ==> rtfm ...");
 	}
 	m_commandLine.parse(_argc, _argv);
@@ -349,7 +349,7 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	
 	m_msgSystem.post([](gale::Context& _context){
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
-		if (appl == nullptr) {
+		if (appl == null) {
 			return;
 		}
 		appl->onCreate(_context);
@@ -466,7 +466,7 @@ void gale::Context::OS_Move(const vec2& _pos) {
 		GALE_DEBUG("Receive MSG : THREAD_MOVE : " << _context.m_windowsPos << " ==> " << _pos);
 		_context.m_windowsPos = _pos;
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
-		if (appl == nullptr) {
+		if (appl == null) {
 			return;
 		}
 		appl->onMovePosition(_context.m_windowsPos);
@@ -501,7 +501,7 @@ void gale::Context::OS_SetInput(enum gale::key::type _type,
 	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([_type, _status, _pointerID, _pos](gale::Context& _context){
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
-		if (appl == nullptr) {
+		if (appl == null) {
 			return;
 		}
 		appl->onPointer(_type,
@@ -538,7 +538,7 @@ void gale::Context::OS_setKeyboard(const gale::key::Special& _special,
 	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([_special, _type, _state, _char](gale::Context& _context){
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
-		if (appl == nullptr) {
+		if (appl == null) {
 			return;
 		}
 		appl->onKeyboard(_special,
@@ -557,7 +557,7 @@ void gale::Context::OS_Hide() {
 	m_msgSystem.post([](gale::Context& _context){
 		/*
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
-		if (appl == nullptr) {
+		if (appl == null) {
 			return;
 		}
 		appl->onKeyboard(_special,
@@ -577,7 +577,7 @@ void gale::Context::OS_Show() {
 	m_msgSystem.post([](gale::Context& _context){
 		/*
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
-		if (appl == nullptr) {
+		if (appl == null) {
 			return;
 		}
 		appl->onKeyboard(_special,
@@ -600,7 +600,7 @@ void gale::Context::OS_ClipBoardArrive(enum gale::context::clipBoard::clipboardL
 	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([_clipboardID](gale::Context& _context){
 		ememory::SharedPtr<gale::Application> appl = _context.getApplication();
-		if (appl != nullptr) {
+		if (appl != null) {
 			appl->onClipboardEvent(_clipboardID);
 		}
 	});
@@ -665,7 +665,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 		Release the event processing
 		
 		*/
-		if (m_application != nullptr) {
+		if (m_application != null) {
 			// Redraw all needed elements
 			//GALE_DEBUG("Regenerate Display");
 			m_application->onRegenerateDisplay(*this);
@@ -700,7 +700,7 @@ bool gale::Context::OS_Draw(bool _displayEveryTime) {
 			m_FpsSystemContext.toc();
 			m_FpsSystem.tic();
 		}
-		if (m_application != nullptr) {
+		if (m_application != null) {
 			if(    needRedraw == true
 			    || _displayEveryTime == true) {
 				m_FpsSystem.incrementCounter();
@@ -763,7 +763,7 @@ void gale::Context::OS_OpenGlContextDestroy() {
 }
 
 void gale::Context::forceRedrawAll() {
-	if (m_application == nullptr) {
+	if (m_application == null) {
 		return;
 	}
 	m_application->onResize(m_windowsSize);
@@ -773,7 +773,7 @@ void gale::Context::OS_Stop() {
 	// set the curent interface :
 	lockContext();
 	GALE_INFO("OS_Stop...");
-	if (m_application == nullptr) {
+	if (m_application == null) {
 		stop();
 		return;
 	}
@@ -788,7 +788,7 @@ void gale::Context::OS_Suspend() {
 	GALE_INFO("OS_Suspend...");
 	m_previousDisplayTime = echrono::Steady();
 	#if 0
-	if (m_windowsCurrent != nullptr) {
+	if (m_windowsCurrent != null) {
 		m_windowsCurrent->onStateSuspend();
 	}
 	#endif
@@ -803,7 +803,7 @@ void gale::Context::OS_Resume() {
 	m_previousDisplayTime = echrono::Steady::now();
 	// TODO : m_objectManager.timeCallResume(m_previousDisplayTime);
 	#if 0
-	if (m_windowsCurrent != nullptr) {
+	if (m_windowsCurrent != null) {
 		m_windowsCurrent->onStateResume();
 	}
 	#endif
@@ -815,7 +815,7 @@ void gale::Context::OS_Foreground() {
 	lockContext();
 	GALE_INFO("OS_Foreground...");
 	#if 0
-	if (m_windowsCurrent != nullptr) {
+	if (m_windowsCurrent != null) {
 		m_windowsCurrent->onStateForeground();
 	}
 	#endif
@@ -828,7 +828,7 @@ void gale::Context::OS_Background() {
 	lockContext();
 	GALE_INFO("OS_Background...");
 	#if 0
-	if (m_windowsCurrent != nullptr) {
+	if (m_windowsCurrent != null) {
 		m_windowsCurrent->onStateBackground();
 	}
 	#endif
@@ -900,7 +900,7 @@ int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 	
 	// get the environement variable:
 	char * basicEnv = getenv("GALE_BACKEND");
-	if (nullptr != basicEnv) {
+	if (null != basicEnv) {
 		etk::String tmpVal = basicEnv;
 		//TODO : Check if it leak ...
 		#if defined(__TARGET_OS__Linux)
@@ -1150,7 +1150,7 @@ int gale::run(gale::Application* _application, int _argc, const char *_argv[]) {
 		}
 	#endif
 	
-	if (context == nullptr) {
+	if (context == null) {
 		GALE_ERROR("Can not allocate the interface of the GUI ...");
 		return -1;
 	}

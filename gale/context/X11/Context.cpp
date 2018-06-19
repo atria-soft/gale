@@ -270,11 +270,11 @@ class X11Interface : public gale::Context {
 							{
 								XSelectionRequestEvent *req=&(event.xselectionrequest);
 								if (req->property == 0) {
-									GALE_ERROR("Get nullptr ATOM ... property");
+									GALE_ERROR("Get null ATOM ... property");
 									break;
 								}
 								if (req->target == 0) {
-									GALE_ERROR("Get nullptr ATOM ... target");
+									GALE_ERROR("Get null ATOM ... target");
 									break;
 								}
 								char * atomNameProperty = XGetAtomName(m_display, req->property);
@@ -339,15 +339,15 @@ class X11Interface : public gale::Context {
 							#ifdef DEBUG_X11_EVENT
 							{
 								if (req->property == NULL) {
-									GALE_ERROR("Get nullptr ATOM ... property");
+									GALE_ERROR("Get null ATOM ... property");
 									break;
 								}
 								if (req->selection == NULL) {
-									GALE_ERROR("Get nullptr ATOM ... selection");
+									GALE_ERROR("Get null ATOM ... selection");
 									break;
 								}
 								if (req->target == NULL) {
-									GALE_ERROR("Get nullptr ATOM ... target");
+									GALE_ERROR("Get null ATOM ... target");
 									break;
 								}
 								char * atomNameProperty = XGetAtomName(m_display, req->property);
@@ -1342,7 +1342,7 @@ class X11Interface : public gale::Context {
 				}
 				if (    m_display == NULL
 				     || m_visual == NULL) {
-					GALE_ERROR("X11 Can not create Image Icon ==> nullptr on m_display or m_visual");
+					GALE_ERROR("X11 Can not create Image Icon ==> null on m_display or m_visual");
 					return;
 				}
 				XImage* myImage = XCreateImage(m_display,
@@ -1419,7 +1419,7 @@ class X11Interface : public gale::Context {
 				// Note when we free the pixmap ... the icon is removed ...  == > this is a real memory leek ...
 				//XFreePixmap(m_display, tmpPixmap);
 				
-				myImage->data = nullptr;
+				myImage->data = null;
 				XDestroyImage(myImage);
 			#endif
 		}

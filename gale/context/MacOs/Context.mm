@@ -143,20 +143,20 @@ class MacOSInterface : public gale::Context {
 };
 
 
-MacOSInterface* interface = nullptr;
+MacOSInterface* interface = null;
 
 
 
 bool MacOs::draw(bool _displayEveryTime) {
     GALE_VERBOSE("draw request " << uint64_t(interface) << "  "  << _displayEveryTime);
-    if (interface == nullptr) {
+    if (interface == null) {
 		return false;
 	}
 	return interface->MAC_Draw(_displayEveryTime);
 }
 
 void MacOs::resize(float _x, float _y) {
-	if (interface == nullptr) {
+	if (interface == null) {
 		return;
 	}
 	interface->MAC_Resize(_x, _y);
@@ -164,42 +164,42 @@ void MacOs::resize(float _x, float _y) {
 
 
 void MacOs::setMouseState(int32_t _id, bool _isDown, float _x, float _y) {
-	if (interface == nullptr) {
+	if (interface == null) {
 		return;
 	}
 	interface->MAC_SetMouseState(_id, _isDown, _x, _y);
 }
 
 void MacOs::setMouseMotion(int32_t _id, float _x, float _y) {
-	if (interface == nullptr) {
+	if (interface == null) {
 		return;
 	}
 	interface->MAC_SetMouseMotion(_id, _x, _y);
 }
 
 void MacOs::setKeyboard(gale::key::Special _keyboardMode, int32_t _unichar, bool _isDown, bool _isAReapeateKey) {
-	if (interface == nullptr) {
+	if (interface == null) {
 		return;
 	}
 	interface->MAC_SetKeyboard(_keyboardMode, _unichar, _isDown, _isAReapeateKey);
 }
 
 void MacOs::setKeyboardMove(gale::key::Special& _keyboardMode, enum gale::key::keyboard _move, bool _isDown, bool _isAReapeateKey) {
-	if (interface == nullptr) {
+	if (interface == null) {
 		return;
 	}
 	interface->MAC_SetKeyboardMove(_keyboardMode, _move, _isDown, _isAReapeateKey);
 }
 
 void MacOs::stopRequested() {
-	if (interface == nullptr) {
+	if (interface == null) {
 		return;
 	}
 	interface->MAC_Stop();
 }
 /*
 void MacOs::setRedrawCallback(const etk::Function<void()>& _func) {
-	if (interface == nullptr) {
+	if (interface == null) {
 		return;
 	}
 	interface->getWidgetManager().setCallbackonRedrawNeeded(_func);

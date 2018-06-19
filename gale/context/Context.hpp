@@ -52,7 +52,7 @@ namespace gale {
 				return m_resourceManager;
 			};
 		public:
-			Context(gale::Application* _application, int32_t _argc=0, const char* _argv[]=nullptr);
+			Context(gale::Application* _application, int32_t _argc=0, const char* _argv[]=null);
 			virtual ~Context();
 			/**
 			 * @brief StartProcessing (2nd thread).
@@ -66,7 +66,7 @@ namespace gale {
 			 */
 			void lockContext();
 			/**
-			 * @brief set the curent interface at nullptr.
+			 * @brief set the curent interface at null.
 			 * @note this un-lock the main mutex
 			 */
 			void unLockContext();
@@ -90,7 +90,7 @@ namespace gale {
 			void postAction(etk::Function<void(gale::Context& _context)> _action);
 		public:
 			
-			virtual void setArchiveDir(int _mode, const char* _str, const char* _applName=nullptr);
+			virtual void setArchiveDir(int _mode, const char* _str, const char* _applName=null);
 			
 			virtual void OS_SetInput(enum gale::key::type _type,
 			                         enum gale::key::status _status,

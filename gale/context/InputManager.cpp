@@ -37,7 +37,7 @@ bool gale::context::InputManager::localEventInput(enum gale::key::type _type,
                                                   int32_t _IdInput,
                                                   enum gale::key::status _status,
                                                   vec2 _pos) {
-	if (nullptr != _destApplication) {
+	if (null != _destApplication) {
 		if (_type == gale::key::typeMouse || _type == gale::key::typeFinger) {
 			// create the system Event :
 			gale::event::InputSystem tmpEventSystem(_type, _status, _IdInput, _pos, _destApplication, 0, m_specialKey); // TODO : set the real ID ...
@@ -53,7 +53,7 @@ bool gale::context::InputManager::localEventInput(enum gale::key::type _type,
 void gale::context::InputManager::abortElement(InputPoperty *_eventTable,
                                                int32_t _idInput,
                                                enum gale::key::type _type) {
-	if (nullptr == _eventTable) {
+	if (null == _eventTable) {
 		return;
 	}
 	if (_eventTable[_idInput].isUsed == true) {
@@ -67,7 +67,7 @@ void gale::context::InputManager::abortElement(InputPoperty *_eventTable,
 
 void gale::context::InputManager::cleanElement(InputPoperty *_eventTable,
                                                int32_t _idInput) {
-	if (nullptr == _eventTable) {
+	if (null == _eventTable) {
 		return;
 	}
 	//GALE_INFO("CleanElement[" << idInput << "] = @" << (int64_t)eventTable);
@@ -131,7 +131,7 @@ void gale::context::InputManager::motion(enum gale::key::type _type,
 		// reject pointer  == > out of IDs...
 		return;
 	}
-	InputPoperty *eventTable = nullptr;
+	InputPoperty *eventTable = null;
 	if (_type == gale::key::typeMouse) {
 		eventTable = m_eventMouseSaved;
 	} else if (_type == gale::key::typeFinger) {
@@ -151,11 +151,11 @@ void gale::context::InputManager::motion(enum gale::key::type _type,
 		// this event is all time on the good Application ... and manage the enter and leave ...
 		// NOTE : the "layer Application" force us to get the Application at the specific position all the time :
 		ememory::SharedPtr<gale::Application> tmpApplication;
-		if (m_grabApplication.lock() != nullptr) {
+		if (m_grabApplication.lock() != null) {
 			// grab all events ...
 			tmpApplication = m_grabApplication.lock();
 		} else {
-			if (nullptr != tmpWindows) {
+			if (null != tmpWindows) {
 				tmpApplication = tmpWindows->getApplicationAtPos(_pos);
 			}
 		}
@@ -179,7 +179,7 @@ void gale::context::InputManager::motion(enum gale::key::type _type,
 			eventTable[_pointerID].isInside = true;
 			// get destination Application :
 			eventTable[_pointerID].curentApplicationEvent = tmpApplication;
-			if (tmpApplication == nullptr) {
+			if (tmpApplication == null) {
 				eventTable[_pointerID].isInside = false;
 			} else {
 				eventTable[_pointerID].origin = tmpApplication->getOrigin();
@@ -262,7 +262,7 @@ void gale::context::InputManager::state(enum gale::key::type _type,
 	}
 	EVENT_DEBUG("event pointerId=" << _pointerID);
 	// convert position in open-GL coordonates ...
-	InputPoperty *eventTable = nullptr;
+	InputPoperty *eventTable = null;
 	InputLimit   localLimit;
 	if (_type == gale::key::typeMouse) {
 		eventTable = m_eventMouseSaved;
@@ -320,8 +320,8 @@ void gale::context::InputManager::state(enum gale::key::type _type,
 			eventTable[_pointerID].isInside = true;
 			ememory::SharedPtr<gale::Application> tmpApplication = m_grabApplication.lock();
 			// get destination Application :
-			if(nullptr != tmpWindows) {
-				if (    tmpApplication != nullptr
+			if(null != tmpWindows) {
+				if (    tmpApplication != null
 				     && _type == gale::key::typeMouse) {
 					eventTable[_pointerID].curentApplicationEvent = tmpApplication;
 				} else {
@@ -331,7 +331,7 @@ void gale::context::InputManager::state(enum gale::key::type _type,
 				eventTable[_pointerID].curentApplicationEvent.reset();
 			}
 			tmpApplication = eventTable[_pointerID].curentApplicationEvent.lock();
-			if (tmpApplication != nullptr) {
+			if (tmpApplication != null) {
 				eventTable[_pointerID].origin = tmpApplication->getOrigin();
 				eventTable[_pointerID].size = tmpApplication->getSize();
 				eventTable[_pointerID].destinationInputId = localGetDestinationId(_type, tmpApplication, _pointerID);
@@ -381,14 +381,14 @@ void gale::context::InputManager::state(enum gale::key::type _type,
 				// save start time
 				eventTable[_pointerID].lastTimeEvent = currentTime;
 				int32_t nbClickMax = 0;
-				if(tmpApplication != nullptr) {
+				if(tmpApplication != null) {
 					nbClickMax = tmpApplication->getMouseLimit();
 					if (nbClickMax>5) {
 						nbClickMax = 5;
 					}
 				}
 				// in grab mode the single to quinte event are not generated ....
-				if(    (    m_grabApplication.lock() == nullptr
+				if(    (    m_grabApplication.lock() == null
 				         || _type != gale::key::typeMouse )
 				    && eventTable[_pointerID].nbClickEvent < nbClickMax) {
 					// generate event SINGLE :

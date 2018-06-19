@@ -53,10 +53,10 @@ class AndroidContext : public gale::Context {
 	private:
 		bool safeInitMethodID(jmethodID& _mid, jclass& _cls, const char* _name, const char* _sign) {
 			_mid = m_JavaVirtualMachinePointer->GetMethodID(_cls, _name, _sign);
-			if(_mid == nullptr) {
+			if(_mid == null) {
 				GALE_ERROR("C->java : Can't find the method " << _name);
 				/* remove access on the virtual machine : */
-				m_JavaVirtualMachinePointer = nullptr;
+				m_JavaVirtualMachinePointer = null;
 				return false;
 			}
 			return true;
@@ -65,7 +65,7 @@ class AndroidContext : public gale::Context {
 		AndroidContext(gale::Application* _application, JNIEnv* _env, jclass _classBase, jobject _objCallback, enum application _typeAPPL) :
 		  gale::Context(_application),
 		  m_javaApplicationType(_typeAPPL),
-		  m_JavaVirtualMachinePointer(nullptr),
+		  m_JavaVirtualMachinePointer(null),
 		  m_javaClassGale(0),
 		  m_javaClassGaleCallback(0),
 		  m_javaObjectGaleCallback(0),
@@ -89,21 +89,21 @@ class AndroidContext : public gale::Context {
 			GALE_DEBUG("*******************************************");
 			m_JavaVirtualMachinePointer = _env;
 			// get default needed all time elements : 
-			if (nullptr != m_JavaVirtualMachinePointer) {
+			if (null != m_JavaVirtualMachinePointer) {
 				GALE_DEBUG("C->java : try load org/gale/Gale class");
 				m_javaClassGale = m_JavaVirtualMachinePointer->FindClass("org/gale/Gale" );
 				if (m_javaClassGale == 0) {
 					GALE_ERROR("C->java : Can't find org/gale/Gale class");
 					// remove access on the virtual machine : 
-					m_JavaVirtualMachinePointer = nullptr;
+					m_JavaVirtualMachinePointer = null;
 					return;
 				}
 				/* The object field extends Activity and implement GaleCallback */
 				m_javaClassGaleCallback = m_JavaVirtualMachinePointer->GetObjectClass(_objCallback);
-				if(m_javaClassGaleCallback == nullptr) {
+				if(m_javaClassGaleCallback == null) {
 					GALE_ERROR("C->java : Can't find org/gale/GaleCallback class");
 					// remove access on the virtual machine : 
-					m_JavaVirtualMachinePointer = nullptr;
+					m_JavaVirtualMachinePointer = null;
 					return;
 				}
 				bool functionCallbackIsMissing = false;
@@ -189,7 +189,7 @@ class AndroidContext : public gale::Context {
 				
 				m_javaObjectGaleCallback = _env->NewGlobalRef(_objCallback);
 				//javaObjectGaleCallbackAndActivity = objCallback;
-				if (m_javaObjectGaleCallback == nullptr) {
+				if (m_javaObjectGaleCallback == null) {
 					functionCallbackIsMissing = true;
 				}
 				
@@ -197,7 +197,7 @@ class AndroidContext : public gale::Context {
 				if (m_javaDefaultClassString == 0) {
 					GALE_ERROR("C->java : Can't find java/lang/String" );
 					// remove access on the virtual machine : 
-					m_JavaVirtualMachinePointer = nullptr;
+					m_JavaVirtualMachinePointer = null;
 					functionCallbackIsMissing = true;
 				}
 				if (functionCallbackIsMissing == true) {
@@ -212,7 +212,7 @@ class AndroidContext : public gale::Context {
 		
 		void unInit(JNIEnv* _env) {
 			_env->DeleteGlobalRef(m_javaObjectGaleCallback);
-			m_javaObjectGaleCallback = nullptr;
+			m_javaObjectGaleCallback = null;
 		}
 		
 		int32_t run() {
@@ -291,9 +291,9 @@ class AndroidContext : public gale::Context {
 	private:
 		bool java_attach_current_thread(int *_rstatus) {
 			GALE_DEBUG("C->java : call java");
-			if (jvm_basics::getJavaVM() == nullptr) {
+			if (jvm_basics::getJavaVM() == null) {
 				GALE_ERROR("C->java : JVM not initialised");
-				m_JavaVirtualMachinePointer = nullptr;
+				m_JavaVirtualMachinePointer = null;
 				return false;
 			}
 			*_rstatus = jvm_basics::getJavaVM()->GetEnv((void **) &m_JavaVirtualMachinePointer, JNI_VERSION_1_6);
@@ -301,12 +301,12 @@ class AndroidContext : public gale::Context {
 				JavaVMAttachArgs lJavaVMAttachArgs;
 				lJavaVMAttachArgs.version = JNI_VERSION_1_6;
 				lJavaVMAttachArgs.name = "GaleNativeThread";
-				lJavaVMAttachArgs.group = nullptr; 
+				lJavaVMAttachArgs.group = null; 
 				int status = jvm_basics::getJavaVM()->AttachCurrentThread(&m_JavaVirtualMachinePointer, &lJavaVMAttachArgs);
 				jvm_basics::checkExceptionJavaVM(m_JavaVirtualMachinePointer);
 				if (status != JNI_OK) {
 					GALE_ERROR("C->java : AttachCurrentThread failed : " << status);
-					m_JavaVirtualMachinePointer = nullptr;
+					m_JavaVirtualMachinePointer = null;
 					return false;
 				}
 			}
@@ -316,7 +316,7 @@ class AndroidContext : public gale::Context {
 		void java_detach_current_thread(int _status) {
 			if(_status == JNI_EDETACHED) {
 				jvm_basics::getJavaVM()->DetachCurrentThread();
-				m_JavaVirtualMachinePointer = nullptr;
+				m_JavaVirtualMachinePointer = null;
 			}
 		}
 		
@@ -398,7 +398,7 @@ class AndroidContext : public gale::Context {
 				return;
 			}
 			GALE_DEBUG("C->java : 222");
-			if (nullptr == _dataString) {
+			if (null == _dataString) {
 				GALE_ERROR("C->java : No data to send ...");
 				return;
 			}
@@ -507,7 +507,7 @@ extern "C" {
 		ethread::UniqueLock lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || null == s_listInstance[_id] ) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -522,12 +522,12 @@ extern "C" {
 		if (isCopy == JNI_TRUE) {
 			// from here str is reset ...
 			_env->ReleaseStringUTFChars(_myString, str);
-			str = nullptr;
+			str = null;
 		}
 		if (isCopy2 == JNI_TRUE) {
 			// from here str is reset ...
 			_env->ReleaseStringUTFChars(_applicationName, str2);
-			str2 = nullptr;
+			str2 = null;
 		}
 	}
 	
@@ -541,7 +541,7 @@ extern "C" {
 		GALE_DEBUG("*******************************************");
 		GALE_DEBUG("** Creating GALE context                 **");
 		GALE_DEBUG("*******************************************");
-		AndroidContext* tmpContext = nullptr;
+		AndroidContext* tmpContext = null;
 		s_applicationInit = NULL;
 		gale::Application* localApplication = NULL;
 		// call the basic init of all application (that call us ...)
@@ -556,7 +556,7 @@ extern "C" {
 			GALE_CRITICAL(" try to create an instance with no apply type: " << _typeApplication);
 			return -1;
 		}
-		if (tmpContext == nullptr) {
+		if (tmpContext == null) {
 			GALE_ERROR("Can not allocate the main context instance _id=" << (s_listInstance.size()-1));
 			return -1;
 		}
@@ -576,20 +576,20 @@ extern "C" {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			return;
 		}
-		if (s_listInstance[_id] == nullptr) {
+		if (s_listInstance[_id] == null) {
 			GALE_ERROR("the requested instance _id=" << (int32_t)_id << " is already removed ...");
 			return;
 		}
 		s_listInstance[_id]->unInit(_env);
 		ETK_DELETE(AndroidContext, s_listInstance[_id]);
-		s_listInstance[_id]=nullptr;
+		s_listInstance[_id]=null;
 	}
 	void Java_org_gale_Gale_EWtouchEvent(JNIEnv* _env, jobject _thiz, jint _id) {
 		ethread::UniqueLock lock(g_interfaceMutex);
 		GALE_DEBUG("  == > Touch Event");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id < 0
-		    || s_listInstance[_id] == nullptr) {
+		    || s_listInstance[_id] == null) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -604,7 +604,7 @@ extern "C" {
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id < 0
-		    || s_listInstance[_id] == nullptr) {
+		    || s_listInstance[_id] == null) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -620,7 +620,7 @@ extern "C" {
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id < 0
-		    || s_listInstance[_id]== nullptr) {
+		    || s_listInstance[_id]== null) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -635,7 +635,7 @@ extern "C" {
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id < 0
-		    || s_listInstance[_id] == nullptr) {
+		    || s_listInstance[_id] == null) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -649,7 +649,7 @@ extern "C" {
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id < 0
-		    || s_listInstance[_id] == nullptr) {
+		    || s_listInstance[_id] == null) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -663,7 +663,7 @@ extern "C" {
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id < 0
-		    || s_listInstance[_id] == nullptr) {
+		    || s_listInstance[_id] == null) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -679,7 +679,7 @@ extern "C" {
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id < 0
-		    || s_listInstance[_id] == nullptr) {
+		    || s_listInstance[_id] == null) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -693,7 +693,7 @@ extern "C" {
 		GALE_DEBUG("*******************************************");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id < 0
-		    || s_listInstance[_id] == nullptr) {
+		    || s_listInstance[_id] == null) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -716,7 +716,7 @@ extern "C" {
 		ethread::UniqueLock lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id < 0
-		    || s_listInstance[_id] == nullptr) {
+		    || s_listInstance[_id] == null) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -737,7 +737,7 @@ extern "C" {
 		ethread::UniqueLock lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id < 0
-		    || s_listInstance[_id] == nullptr ) {
+		    || s_listInstance[_id] == null ) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -757,7 +757,7 @@ extern "C" {
 		ethread::UniqueLock lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || null == s_listInstance[_id] ) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -778,7 +778,7 @@ extern "C" {
 		ethread::UniqueLock lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || null == s_listInstance[_id] ) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -796,7 +796,7 @@ extern "C" {
 		ethread::UniqueLock lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || null == s_listInstance[_id] ) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -812,7 +812,7 @@ extern "C" {
 		ethread::UniqueLock lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || null == s_listInstance[_id] ) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -829,7 +829,7 @@ extern "C" {
 		ethread::UniqueLock lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || null == s_listInstance[_id] ) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -846,7 +846,7 @@ extern "C" {
 		ethread::UniqueLock lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || null == s_listInstance[_id] ) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -864,7 +864,7 @@ extern "C" {
 		ethread::UniqueLock lock(g_interfaceMutex);
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || null == s_listInstance[_id] ) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return false;
@@ -909,7 +909,7 @@ extern "C" {
 		GALE_VERBOSE("Java_org_gale_Gale_EWrenderInit [BEGIN]");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || null == s_listInstance[_id] ) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -926,7 +926,7 @@ extern "C" {
 		GALE_VERBOSE("Java_org_gale_Gale_EWrenderResize [BEGIN]");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || null == s_listInstance[_id] ) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;
@@ -943,7 +943,7 @@ extern "C" {
 		GALE_VERBOSE("Java_org_gale_Gale_EWrenderDraw [BEGIN]");
 		if(    _id >= (int32_t)s_listInstance.size()
 		    || _id<0
-		    || nullptr == s_listInstance[_id] ) {
+		    || null == s_listInstance[_id] ) {
 			GALE_ERROR("Call C With an incorrect instance _id=" << (int32_t)_id);
 			// TODO : generate error in java to stop the current instance
 			return;

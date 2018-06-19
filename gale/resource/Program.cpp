@@ -40,7 +40,7 @@ void gale::resource::Program::init(const etk::String& _filename) {
 		// remove extention ...
 		tmpFilename.erase(tmpFilename.size()-4, 4);
 		ememory::SharedPtr<gale::resource::Shader> tmpShader = gale::resource::Shader::create(tmpFilename+"vert");
-		if (tmpShader == nullptr) {
+		if (tmpShader == null) {
 			GALE_ERROR("Error while getting a specific shader filename : " << tmpFilename);
 			return;
 		} else {
@@ -48,7 +48,7 @@ void gale::resource::Program::init(const etk::String& _filename) {
 			m_shaderList.pushBack(tmpShader);
 		}
 		tmpShader = gale::resource::Shader::create(tmpFilename+"frag");
-		if (tmpShader == nullptr) {
+		if (tmpShader == null) {
 			GALE_ERROR("Error while getting a specific shader filename : " << tmpFilename);
 			return;
 		} else {
@@ -67,7 +67,7 @@ void gale::resource::Program::init(const etk::String& _filename) {
 		}
 		#define MAX_LINE_SIZE   (2048)
 		char tmpData[MAX_LINE_SIZE];
-		while (file.fileGets(tmpData, MAX_LINE_SIZE) != nullptr) {
+		while (file.fileGets(tmpData, MAX_LINE_SIZE) != null) {
 			int32_t len = strlen(tmpData);
 			if(    tmpData[len-1] == '\n'
 				|| tmpData[len-1] == '\r') {
@@ -84,7 +84,7 @@ void gale::resource::Program::init(const etk::String& _filename) {
 			// get it with relative position :
 			etk::String tmpFilename = file.getRelativeFolder() + tmpData;
 			ememory::SharedPtr<gale::resource::Shader> tmpShader = gale::resource::Shader::create(tmpFilename);
-			if (tmpShader == nullptr) {
+			if (tmpShader == null) {
 				GALE_ERROR("Error while getting a specific shader filename : " << tmpFilename);
 			} else {
 				GALE_DEBUG("Add shader on program : "<< tmpFilename);
@@ -255,14 +255,14 @@ bool gale::resource::Program::updateContext() {
 		}
 		// first attach vertex shader, and after fragment shader
 		for (size_t iii=0; iii<m_shaderList.size(); iii++) {
-			if (m_shaderList[iii] != nullptr) {
+			if (m_shaderList[iii] != null) {
 				if (m_shaderList[iii]->getShaderType() == gale::openGL::shader::type::vertex) {
 					gale::openGL::program::attach(m_program, m_shaderList[iii]->getGL_ID());
 				}
 			}
 		}
 		for (size_t iii=0; iii<m_shaderList.size(); iii++) {
-			if (m_shaderList[iii] != nullptr) {
+			if (m_shaderList[iii] != null) {
 				if (m_shaderList[iii]->getShaderType() == gale::openGL::shader::type::fragment) {
 					gale::openGL::program::attach(m_program, m_shaderList[iii]->getGL_ID());
 				}
@@ -340,13 +340,13 @@ void gale::resource::Program::reload() {
 		return;
 	}
 	// remove previous data ...
-	if (m_fileData != nullptr) {
+	if (m_fileData != null) {
 		del ete[] m_fileData;
 		m_fileData = 0;
 	}
 	// allocate data
 	m_fileData = ne w char[fileSize+5];
-	if (m_fileData == nullptr) {
+	if (m_fileData == null) {
 		GALE_ERROR("Error Memory allocation size=" << fileSize);
 		return;
 	}
@@ -606,8 +606,8 @@ void gale::resource::Program::uniform1fv(int32_t _idElem, int32_t _nbElement, co
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (_value == nullptr) {
-		GALE_ERROR("nullptr Input pointer to send at open GL ...");
+	if (_value == null) {
+		GALE_ERROR("null Input pointer to send at open GL ...");
 		return;
 	}
 	glUniform1fv(m_elementList[_idElem].m_elementId, _nbElement, _value);
@@ -630,8 +630,8 @@ void gale::resource::Program::uniform2fv(int32_t _idElem, int32_t _nbElement, co
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (_value == nullptr) {
-		GALE_ERROR("nullptr Input pointer to send at open GL ...");
+	if (_value == null) {
+		GALE_ERROR("null Input pointer to send at open GL ...");
 		return;
 	}
 	glUniform2fv(m_elementList[_idElem].m_elementId, _nbElement, _value);
@@ -654,8 +654,8 @@ void gale::resource::Program::uniform3fv(int32_t _idElem, int32_t _nbElement, co
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (_value == nullptr) {
-		GALE_ERROR("nullptr Input pointer to send at open GL ...");
+	if (_value == null) {
+		GALE_ERROR("null Input pointer to send at open GL ...");
 		return;
 	}
 	GALE_VERBOSE("[" << m_elementList[_idElem].m_name << "] send " << _nbElement << " vec3");
@@ -679,8 +679,8 @@ void gale::resource::Program::uniform4fv(int32_t _idElem, int32_t _nbElement, co
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (_value == nullptr) {
-		GALE_ERROR("nullptr Input pointer to send at open GL ...");
+	if (_value == null) {
+		GALE_ERROR("null Input pointer to send at open GL ...");
 		return;
 	}
 	GALE_VERBOSE("[" << m_elementList[_idElem].m_name << "] send " << _nbElement << " vec4");
@@ -707,8 +707,8 @@ void gale::resource::Program::uniform1iv(int32_t _idElem, int32_t _nbElement, co
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (_value == nullptr) {
-		GALE_ERROR("nullptr Input pointer to send at open GL ...");
+	if (_value == null) {
+		GALE_ERROR("null Input pointer to send at open GL ...");
 		return;
 	}
 	glUniform1iv(m_elementList[_idElem].m_elementId, _nbElement, _value);
@@ -731,8 +731,8 @@ void gale::resource::Program::uniform2iv(int32_t _idElem, int32_t _nbElement, co
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (_value == nullptr) {
-		GALE_ERROR("nullptr Input pointer to send at open GL ...");
+	if (_value == null) {
+		GALE_ERROR("null Input pointer to send at open GL ...");
 		return;
 	}
 	glUniform2iv(m_elementList[_idElem].m_elementId, _nbElement, _value);
@@ -755,8 +755,8 @@ void gale::resource::Program::uniform3iv(int32_t _idElem, int32_t _nbElement, co
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (_value == nullptr) {
-		GALE_ERROR("nullptr Input pointer to send at open GL ...");
+	if (_value == null) {
+		GALE_ERROR("null Input pointer to send at open GL ...");
 		return;
 	}
 	glUniform3iv(m_elementList[_idElem].m_elementId, _nbElement, _value);
@@ -779,8 +779,8 @@ void gale::resource::Program::uniform4iv(int32_t _idElem, int32_t _nbElement, co
 		GALE_ERROR("No element to send at open GL ...");
 		return;
 	}
-	if (_value == nullptr) {
-		GALE_ERROR("nullptr Input pointer to send at open GL ...");
+	if (_value == null) {
+		GALE_ERROR("null Input pointer to send at open GL ...");
 		return;
 	}
 	glUniform4iv(m_elementList[_idElem].m_elementId, _nbElement, _value);
