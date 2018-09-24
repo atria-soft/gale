@@ -9,6 +9,7 @@
 #include <ethread/MutexRecursive.hpp>
 #include <ememory/memory.hpp>
 #include <etk/types.hpp>
+#include <etk/uri/uri.hpp>
 #include <gale/debug.hpp>
 
 #define MAX_RESOURCE_LEVEL (5)
@@ -32,7 +33,7 @@
 	template<typename ... GALE_TYPE> static ememory::SharedPtr<className> create(const etk::String& _name, GALE_TYPE&& ... _all ) { \
 		ememory::SharedPtr<className> resource; \
 		ememory::SharedPtr<gale::Resource> resource2; \
-		if (_name != "" && _name != "---") { \
+		if (_name.isEmpty() == false && _name != "---") { \
 			resource2 = getManager().localKeep(_name); \
 		} \
 		if (resource2 != null) { \
@@ -49,6 +50,35 @@
 			return null; \
 		} \
 		resource->init(_name, etk::forward<GALE_TYPE>(_all)... ); \
+		if (resource->resourceHasBeenCorectlyInit() == false) { \
+			GALE_CRITICAL("resource Is not correctly init : " << #className ); \
+		} \
+		getManager().localAdd(resource); \
+		return resource; \
+	}
+
+#define DECLARE_RESOURCE_URI_FACTORY(className) \
+	template<typename ... GALE_TYPE> static ememory::SharedPtr<className> create(const etk::Uri& _uri, GALE_TYPE&& ... _all ) { \
+		ememory::SharedPtr<className> resource; \
+		ememory::SharedPtr<gale::Resource> resource2; \
+		etk::String name = _uri.get(); \
+		if (name.isEmpty() == false && name != "---") { \
+			resource2 = getManager().localKeep(name); \
+		} \
+		if (resource2 != null) { \
+			resource = ememory::dynamicPointerCast<className>(resource2); \
+			if (resource == null) { \
+				GALE_CRITICAL("Request resource file : '" << name << "' With the wrong type (dynamic cast error)"); \
+				return null; \
+			} \
+			return resource; \
+		} \
+		resource = ememory::SharedPtr<className>(ETK_NEW(className)); \
+		if (resource == null) { \
+			GALE_ERROR("allocation error of a resource : " << name); \
+			return null; \
+		} \
+		resource->init(_uri, etk::forward<GALE_TYPE>(_all)... ); \
 		if (resource->resourceHasBeenCorectlyInit() == false) { \
 			GALE_CRITICAL("resource Is not correctly init : " << #className ); \
 		} \
@@ -107,10 +137,13 @@ namespace gale {
 			/**
 			 * @brief Initialisation of the class and previous classes.
 			 * @param[in] _name Name of the resource.
+			 * @param[in] _uri Uri of the resource.
 			 */
 			void init();
 			//! @previous
 			void init(const etk::String& _name);
+			//! @previous
+			void init(const etk::Uri& _uri);
 		public:
 			//! geenric destructor
 			virtual ~Resource() {

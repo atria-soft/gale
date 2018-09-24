@@ -5,7 +5,7 @@
  */
 
 #include <etk/types.hpp>
-#include <etk/os/FSNode.hpp>
+#include <etk/uri/uri.hpp>
 #include <gale/debug.hpp>
 #include <gale/resource/Shader.hpp>
 #include <gale/resource/Manager.hpp>
@@ -25,18 +25,18 @@ gale::resource::Shader::Shader() :
 	m_resourceLevel = 0;
 }
 
-void gale::resource::Shader::init(const etk::String& _filename) {
+void gale::resource::Shader::init(const etk::Uri& _uri) {
 	ethread::RecursiveLock lock(m_mutex);
-	gale::Resource::init(_filename);
-	GALE_DEBUG("OGL : load SHADER '" << _filename << "'");
+	gale::Resource::init(_uri.get());
+	GALE_DEBUG("OGL : load SHADER '" << _uri << "'");
 	// load data from file "all the time ..."
 	
-	if (etk::end_with(m_name, ".frag") == true) {
+	if (_uri.getPath().getExtention() == "frag") {
 		m_type = gale::openGL::shader::type::fragment;
-	} else if (etk::end_with(m_name, ".vert") == true) {
+	} else if (_uri.getPath().getExtention() == "vert") {
 		m_type = gale::openGL::shader::type::vertex;
 	} else {
-		GALE_ERROR("File does not have extention \".vert\" for Vertex Shader or \".frag\" for Fragment Shader. but : \"" << m_name << "\"");
+		GALE_ERROR("File does not have extention \".vert\" for Vertex Shader or \".frag\" for Fragment Shader. but : \"" << _uri << "\"");
 		return;
 	}
 	reload();
@@ -101,27 +101,13 @@ void gale::resource::Shader::removeContextToLate() {
 
 void gale::resource::Shader::reload() {
 	ethread::RecursiveLock lock(m_mutex);
-	etk::FSNode file(m_name);
-	if (false == file.exist()) {
-		GALE_CRITICAL("File does not Exist : '" << file << "' : '" << file.getFileSystemName() << "'");
+	etk::Uri uri = m_name;
+	if (etk::uri::exist(uri)) {
+		GALE_CRITICAL("File does not Exist : '" << uri << "' : path='" << uri.getPath() << "'");
 		return;
 	}
-	
-	int64_t fileSize = file.fileSize();
-	if (0 == fileSize) {
-		GALE_CRITICAL("This file is empty : " << file);
-		return;
-	}
-	if (false == file.fileOpenRead()) {
-		GALE_CRITICAL("Can not open the file : " << file);
-		return;
-	}
-	m_fileData = file.fileReadAllString();
-	// close the file:
-	file.fileClose();
-	
+	etk::uri::readAll(uri, m_fileData);
 	// now change the OGL context ...
-	
 	if (gale::openGL::hasContext() == true) {
 		GALE_DEBUG("OGL : load SHADER '" << m_name << "' ==> call update context (direct)");
 		removeContext();

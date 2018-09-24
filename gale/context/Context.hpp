@@ -6,7 +6,7 @@
 #pragma once
 
 #include <etk/os/Fifo.hpp>
-#include <etk/os/FSNode.hpp>
+#include <etk/uri/uri.hpp>
 #include <gale/debug.hpp>
 #include <gale/gale.hpp>
 #include <gale/key/key.hpp>
@@ -73,7 +73,8 @@ namespace gale {
 		protected:
 			// simulation area:
 			bool m_simulationActive;
-			etk::FSNode m_simulationFile;
+			etk::Uri m_simulationUri;
+			ememory::SharedPtr<etk::io::Interface> m_simulationFile;
 		private:
 			echrono::Steady m_previousDisplayTime;  // this is to limit framerate ... in case...
 			etk::Fifo<etk::Function<void(gale::Context& _context)> > m_msgSystem;

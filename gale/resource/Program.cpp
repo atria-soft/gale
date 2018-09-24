@@ -8,7 +8,7 @@
 #include <gale/debug.hpp>
 #include <gale/resource/Program.hpp>
 #include <gale/resource/Manager.hpp>
-#include <etk/os/FSNode.hpp>
+#include <etk/uri/uri.hpp>
 #include <gale/gale.hpp>
 #include <gale/renderer/openGL/openGL-include.hpp>
 #include <etk/typeInfo.hpp>
@@ -27,50 +27,49 @@ gale::resource::Program::Program() :
 	m_resourceLevel = 1;
 }
 
-void gale::resource::Program::init(const etk::String& _filename) {
-	gale::Resource::init(_filename);
+void gale::resource::Program::init(const etk::Uri& _uri) {
+	gale::Resource::init(_uri.get());
 	ethread::RecursiveLock lock(m_mutex);
-	GALE_DEBUG("OGL : load PROGRAM '" << m_name << "'");
+	GALE_DEBUG("OGL : load PROGRAM '" << _uri << "'");
 	// load data from file "all the time ..."
 	
-	etk::FSNode file(m_name);
-	if (file.exist() == false) {
-		GALE_DEBUG("File does not Exist : \"" << file << "\"  == > automatic load of framment and shader with same names... ");
-		etk::String tmpFilename = m_name;
-		// remove extention ...
-		tmpFilename.erase(tmpFilename.size()-4, 4);
-		ememory::SharedPtr<gale::resource::Shader> tmpShader = gale::resource::Shader::create(tmpFilename+"vert");
+	if (etk::uri::exist(_uri) == false) {
+		GALE_DEBUG("File does not Exist : \"" << _uri << "\"  == > automatic load of framment and shader with same names... ");
+		etk::Uri tmpUri = _uri;
+		tmpUri.setPath(_uri.getPath().getExtentionRemoved() + ".vert");
+		ememory::SharedPtr<gale::resource::Shader> tmpShader = gale::resource::Shader::create(tmpUri.get());
 		if (tmpShader == null) {
-			GALE_ERROR("Error while getting a specific shader filename : " << tmpFilename);
+			GALE_ERROR("Error while getting a specific shader filename : " << tmpUri);
 			return;
 		} else {
-			GALE_DEBUG("Add shader on program : "<< tmpFilename << "vert");
+			GALE_DEBUG("Add shader on program : "<< tmpUri << "vert");
 			m_shaderList.pushBack(tmpShader);
 		}
-		tmpShader = gale::resource::Shader::create(tmpFilename+"frag");
+		tmpUri.setPath(_uri.getPath().getExtentionRemoved() + ".frag");
+		tmpShader = gale::resource::Shader::create(tmpUri.get());
 		if (tmpShader == null) {
-			GALE_ERROR("Error while getting a specific shader filename : " << tmpFilename);
+			GALE_ERROR("Error while getting a specific shader filename : " << tmpUri);
 			return;
 		} else {
-			GALE_DEBUG("Add shader on program : "<< tmpFilename << "frag");
+			GALE_DEBUG("Add shader on program : "<< tmpUri << "frag");
 			m_shaderList.pushBack(tmpShader);
 		}
 	} else {
-		etk::String fileExtention = file.fileGetExtention();
-		if (fileExtention != "prog") {
-			GALE_ERROR("File does not have extention \".prog\" for program but : \"" << fileExtention << "\"");
+		if (_uri.getPath().getExtention() != "prog") {
+			GALE_ERROR("File does not have extention \".prog\" for program but : \"" << _uri.getPath() << "\"");
 			return;
 		}
-		if (file.fileOpenRead() == false) {
-			GALE_ERROR("Can not open the file : \"" << file << "\"");
+		auto fileIO = etk::uri::get(_uri);
+		if (    fileIO == null
+		     || fileIO->open(etk::io::OpenMode::Read) == false) {
+			GALE_ERROR("Can not open the file : \"" << _uri << "\"");
 			return;
 		}
-		#define MAX_LINE_SIZE   (2048)
-		char tmpData[MAX_LINE_SIZE];
-		while (file.fileGets(tmpData, MAX_LINE_SIZE) != null) {
-			int32_t len = strlen(tmpData);
+		etk::String tmpData;
+		while (fileIO->gets(tmpData) != false) {
+			int32_t len = tmpData.size();
 			if(    tmpData[len-1] == '\n'
-				|| tmpData[len-1] == '\r') {
+			    || tmpData[len-1] == '\r') {
 				tmpData[len-1] = '\0';
 				len--;
 			}
@@ -81,19 +80,19 @@ void gale::resource::Program::init(const etk::String& _filename) {
 			if (tmpData[0] == '#') {
 				continue;
 			}
-			// get it with relative position :
-			etk::String tmpFilename = file.getRelativeFolder() + tmpData;
-			ememory::SharedPtr<gale::resource::Shader> tmpShader = gale::resource::Shader::create(tmpFilename);
+			// get it with relative position:
+			etk::Uri tmpUri = _uri;
+			tmpUri.setPath(_uri.getPath().getParent() / tmpData);
+			ememory::SharedPtr<gale::resource::Shader> tmpShader = gale::resource::Shader::create(tmpUri.get());
 			if (tmpShader == null) {
-				GALE_ERROR("Error while getting a specific shader filename : " << tmpFilename);
+				GALE_ERROR("Error while getting a specific shader filename : " << tmpUri);
 			} else {
-				GALE_DEBUG("Add shader on program : "<< tmpFilename);
+				GALE_DEBUG("Add shader on program : "<< tmpUri);
 				m_shaderList.pushBack(tmpShader);
 			}
-			
 		}
 		// close the file:
-		file.fileClose();
+		fileIO->close();
 	}
 	if (gale::openGL::hasContext() == true) {
 		updateContext();

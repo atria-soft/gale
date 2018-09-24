@@ -12,6 +12,7 @@
 #include <gale/resource/Shader.hpp>
 #include <gale/resource/VirtualBufferObject.hpp>
 #include <etk/Color.hpp>
+#include <etk/uri/uri.hpp>
 
 namespace gale {
 	namespace resource {
@@ -57,10 +58,10 @@ namespace gale {
 			protected:
 				/**
 				 * @brief Contructor of an opengl Program.
-				 * @param[in] filename Standard file name format. see @ref etk::FSNode
+				 * @param[in] _uri Uri of the file
 				 */
 				Program();
-				void init(const etk::String& _filename);
+				void init(const etk::Uri& _uri);
 			public:
 				DECLARE_RESOURCE_NAMED_FACTORY(Program);
 				/**

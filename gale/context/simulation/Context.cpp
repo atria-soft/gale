@@ -11,7 +11,7 @@ extern "C" {
 }
 
 #include <etk/types.hpp>
-#include <etk/os/FSNode.hpp>
+#include <etk/uri/uri.hpp>
 #include <etk/tool.hpp>
 
 #include <gale/debug.hpp>
@@ -75,15 +75,17 @@ class SimulationInterface : public gale::Context {
 		}
 		
 		int32_t run() {
+			m_simulationFile = etk::uri::get(m_simulationUri);
 			// Try to open the file of simulation:
-			if (m_simulationFile.fileOpenRead() == false) {
+			if (    m_simulationFile == null
+			     || m_simulationFile->open(etk::io::OpenMode::Read) == false) {
 				GALE_ERROR("can not open the simulation file");
 				return -1;
 			}
 			etk::String action;
 			// main cycle
 			while(m_run == true) {
-				bool lineIsOk = m_simulationFile.fileGets(action);
+				bool lineIsOk = m_simulationFile->gets(action);
 				if (lineIsOk == false) {
 					// reach end of simulation file;
 					return 0;
@@ -156,7 +158,7 @@ class SimulationInterface : public gale::Context {
 					GALE_ERROR("unknow event : '" << localAction << "'");
 				}
 			}
-			m_simulationFile.fileClose();
+			m_simulationFile->close();
 			return 0;
 		}
 		/****************************************************************************************/

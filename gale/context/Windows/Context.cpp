@@ -7,7 +7,7 @@
 #include <gale/gale.hpp>
 #include <gale/Dimension.hpp>
 #include <etk/types.hpp>
-#include <etk/os/FSNode.hpp>
+#include <etk/uri/uri.hpp>
 
 #include <etk/math/Vector2D.hpp>
 #include <etk/math/Vector3D.hpp>

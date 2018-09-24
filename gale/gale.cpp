@@ -8,7 +8,7 @@
 #include <gale/context/Context.hpp>
 
 #include <gale/context/commandLine.hpp>
-#include <etk/os/FSNode.hpp>
+#include <etk/uri/uri.hpp>
 #include <gale/Dimension.hpp>
 
 #ifndef GALE_VERSION

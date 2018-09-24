@@ -11,7 +11,7 @@
 #include <gale/context/commandLine.hpp>
 #include <gale/context/clipBoard.hpp>
 #include <etk/types.hpp>
-#include <etk/os/FSNode.hpp>
+#include <etk/uri/uri.hpp>
 
 #include <gale/resource/Manager.hpp>
 #include <gale/context/Context.hpp>

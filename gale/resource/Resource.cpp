@@ -32,6 +32,11 @@ void gale::Resource::init(const etk::String& _name) {
 	m_name = _name;
 }
 
+void gale::Resource::init(const etk::Uri& _uri) {
+	m_resourceHasBeenInit=true;
+	m_name = _uri.get();
+}
+
 const char * const gale::Resource::getType() {
 	if (m_listType.size() == 0) {
 		return "gale::Resource";

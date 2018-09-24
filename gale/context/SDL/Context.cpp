@@ -11,7 +11,7 @@ extern "C" {
 }
 
 #include <etk/types.hpp>
-#include <etk/os/FSNode.hpp>
+#include <etk/uri/uri.hpp>
 #include <etk/tool.hpp>
 
 #include <gale/debug.hpp>

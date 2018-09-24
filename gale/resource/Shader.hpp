@@ -9,6 +9,7 @@
 #include <gale/debug.hpp>
 #include <gale/renderer/openGL/openGL.hpp>
 #include <gale/resource/Resource.hpp>
+#include <etk/uri/uri.hpp>
 
 namespace gale {
 	namespace resource {
@@ -28,7 +29,7 @@ namespace gale {
 				 */
 				Shader();
 			public:
-				void init(const etk::String& _filename);
+				void init(const etk::Uri& _uri);
 				DECLARE_RESOURCE_NAMED_FACTORY(Shader);
 				/**
 				 * @brief Destructor, remove the current Shader

@@ -10,7 +10,7 @@
 #include <etk/etk.hpp>
 
 #include <etk/tool.hpp>
-#include <etk/os/FSNode.hpp>
+#include <etk/uri/uri.hpp>
 #include <ethread/tools.hpp>
 #include <ethread/Mutex.hpp>
 
@@ -26,6 +26,9 @@
 #include <echrono/Time.hpp>
 #include <etk/typeInfo.hpp>
 #include <etk/Allocator.hpp>
+#include <etk/uri/provider/ProviderFile.hpp>
+#include <etk/theme/theme.hpp>
+
 ETK_DECLARE_TYPE(gale::Context);
 
 /**
@@ -165,18 +168,19 @@ void gale::Context::setArchiveDir(int _mode, const char* _str, const char* _appl
 	switch(_mode) {
 		case 0:
 			GALE_DEBUG("Directory APK : path=" << _str);
-			etk::setBaseFolderData(_str, _applName);
+			etk::uri::provider::add("DATA", ememory::makeShared<etk::uri::provider::ProviderFile>(_str));
 			break;
 		case 1:
 			GALE_DEBUG("Directory mode=FILE path=" << _str);
-			etk::setBaseFolderDataUser(_str);
+			etk::uri::provider::add("USER_DATA", ememory::makeShared<etk::uri::provider::ProviderFile>(_str));
 			break;
 		case 2:
 			GALE_DEBUG("Directory mode=CACHE path=" << _str);
-			etk::setBaseFolderCache(_str);
+			etk::uri::provider::add("CACHE", ememory::makeShared<etk::uri::provider::ProviderFile>(_str));
 			break;
 		case 3:
 			GALE_DEBUG("Directory mode=EXTERNAL_CACHE path=" << _str);
+			etk::uri::provider::add("EXTERNAL_CACHE", ememory::makeShared<etk::uri::provider::ProviderFile>(_str));
 			break;
 		default:
 			GALE_DEBUG("Directory mode=???? path=" << _str);
@@ -216,13 +220,10 @@ namespace gale {
 	};
 }
 
-
-
-
 gale::Context::Context(gale::Application* _application, int32_t _argc, const char* _argv[]) :
   m_application(_application),
   m_simulationActive(false),
-  m_simulationFile("gale.gsim"),
+  m_simulationUri(etk::Path("gale.gsim")),
   //m_objectManager(*this),
   m_previousDisplayTime(),
   // TODO : m_input(*this),
@@ -253,12 +254,13 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	// By default we set 2 themes (1 color and 1 shape ...) :
 	etk::theme::setNameDefault("GUI", "shape/square/");
 	etk::theme::setNameDefault("COLOR", "color/black/");
+	
 	// parse the debug level:
 	for(int32_t iii=0; iii<m_commandLine.size(); ++iii) {
 		if (m_commandLine.get(iii) == "--gale-fps") {
 			m_displayFps=true;
 		} else if (etk::start_with(m_commandLine.get(iii), "--gale-simulation-file=") == true) {
-			m_simulationFile.setName(etk::String(m_commandLine.get(iii).begin()+23, m_commandLine.get(iii).end()) );
+			m_simulationUri = etk::Path(etk::String(m_commandLine.get(iii).begin()+23, m_commandLine.get(iii).end()) );
 		} else if (m_commandLine.get(iii) == "--gale-simulation-record") {
 			m_simulationActive = true;
 		} else if (etk::start_with(m_commandLine.get(iii), "--gale-backend=") == true) {
@@ -330,13 +332,17 @@ gale::Context::Context(gale::Application* _application, int32_t _argc, const cha
 	// request the init of the application in the main context of openGL ...
 	if (m_simulationActive == true) {
 		// in simulation case:
-		if (m_simulationFile.fileOpenWrite() == false) {
-			GALE_CRITICAL("Can not create Simulation file : " << m_simulationFile);
+		m_simulationFile = etk::uri::get(m_simulationUri);
+		if (m_simulationFile == null) {
+			GALE_CRITICAL("Can not create Simulation file : " << m_simulationUri);
+		}
+		if (m_simulationFile->open(etk::io::OpenMode::Write) == false) {
+			GALE_CRITICAL("Can not create Simulation file : " << m_simulationUri);
 			m_simulationActive = false;
 		} else {
-			m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
-			m_simulationFile.filePuts(":INIT");
-			m_simulationFile.filePuts("\n");
+			m_simulationFile->puts(etk::toString(echrono::Steady::now()));
+			m_simulationFile->puts(":INIT");
+			m_simulationFile->puts("\n");
 		}
 	}
 	#if defined(__GALE_ANDROID_ORIENTATION_LANDSCAPE__)
@@ -411,14 +417,14 @@ gale::Context::~Context() {
 	GALE_INFO(" == > Gale system Un-Init (END)");
 	if (m_simulationActive == true) {
 		// in simulation case:
-		m_simulationFile.fileClose();
+		m_simulationFile->close();
 	}
 }
 
 void gale::Context::requestUpdateSize() {
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
-		m_simulationFile.filePuts(":RECALCULATE_SIZE\n");
+		m_simulationFile->puts(etk::toString(echrono::Steady::now()));
+		m_simulationFile->puts(":RECALCULATE_SIZE\n");
 	}
 	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([](gale::Context& _context){
@@ -434,10 +440,10 @@ void gale::Context::OS_Resize(const vec2& _size) {
 	// TODO : Better in the thread ...  ==> but generate some init error ...
 	gale::Dimension::setPixelWindowsSize(_size);
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
-		m_simulationFile.filePuts(":RESIZE:");
-		m_simulationFile.filePuts(etk::toString(_size));
-		m_simulationFile.filePuts("\n");
+		m_simulationFile->puts(etk::toString(echrono::Steady::now()));
+		m_simulationFile->puts(":RESIZE:");
+		m_simulationFile->puts(etk::toString(_size));
+		m_simulationFile->puts("\n");
 	}
 	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([_size](gale::Context& _context){
@@ -487,16 +493,16 @@ void gale::Context::OS_SetInput(enum gale::key::type _type,
                                 int32_t _pointerID,
                                 const vec2& _pos) {
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
-		m_simulationFile.filePuts(":INPUT:");
-		m_simulationFile.filePuts(etk::toString(_type));
-		m_simulationFile.filePuts(":");
-		m_simulationFile.filePuts(etk::toString(_status));
-		m_simulationFile.filePuts(":");
-		m_simulationFile.filePuts(etk::toString(_pointerID));
-		m_simulationFile.filePuts(":");
-		m_simulationFile.filePuts(etk::toString(_pos));
-		m_simulationFile.filePuts("\n");
+		m_simulationFile->puts(etk::toString(echrono::Steady::now()));
+		m_simulationFile->puts(":INPUT:");
+		m_simulationFile->puts(etk::toString(_type));
+		m_simulationFile->puts(":");
+		m_simulationFile->puts(etk::toString(_status));
+		m_simulationFile->puts(":");
+		m_simulationFile->puts(etk::toString(_pointerID));
+		m_simulationFile->puts(":");
+		m_simulationFile->puts(etk::toString(_pos));
+		m_simulationFile->puts("\n");
 	}
 	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([_type, _status, _pointerID, _pos](gale::Context& _context){
@@ -524,16 +530,16 @@ void gale::Context::OS_setKeyboard(const gale::key::Special& _special,
 		}
 	}
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
-		m_simulationFile.filePuts(":KEYBOARD:");
-		m_simulationFile.filePuts(etk::toString(_special));
-		m_simulationFile.filePuts(":");
-		m_simulationFile.filePuts(etk::toString(_type));
-		m_simulationFile.filePuts(":");
-		m_simulationFile.filePuts(etk::toString(_state));
-		m_simulationFile.filePuts(":");
-		m_simulationFile.filePuts(etk::toString(uint64_t(_char)));
-		m_simulationFile.filePuts("\n");
+		m_simulationFile->puts(etk::toString(echrono::Steady::now()));
+		m_simulationFile->puts(":KEYBOARD:");
+		m_simulationFile->puts(etk::toString(_special));
+		m_simulationFile->puts(":");
+		m_simulationFile->puts(etk::toString(_type));
+		m_simulationFile->puts(":");
+		m_simulationFile->puts(etk::toString(_state));
+		m_simulationFile->puts(":");
+		m_simulationFile->puts(etk::toString(uint64_t(_char)));
+		m_simulationFile->puts("\n");
 	}
 	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([_special, _type, _state, _char](gale::Context& _context){
@@ -550,8 +556,8 @@ void gale::Context::OS_setKeyboard(const gale::key::Special& _special,
 
 void gale::Context::OS_Hide() {
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
-		m_simulationFile.filePuts(":VIEW:false\n");
+		m_simulationFile->puts(etk::toString(echrono::Steady::now()));
+		m_simulationFile->puts(":VIEW:false\n");
 	}
 	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([](gale::Context& _context){
@@ -571,8 +577,8 @@ void gale::Context::OS_Hide() {
 
 void gale::Context::OS_Show() {
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
-		m_simulationFile.filePuts(":VIEW:true\n");
+		m_simulationFile->puts(etk::toString(echrono::Steady::now()));
+		m_simulationFile->puts(":VIEW:true\n");
 	}
 	m_msgSystem.post([](gale::Context& _context){
 		/*
@@ -592,10 +598,10 @@ void gale::Context::OS_Show() {
 
 void gale::Context::OS_ClipBoardArrive(enum gale::context::clipBoard::clipboardListe _clipboardID) {
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
-		m_simulationFile.filePuts(":CLIPBOARD_ARRIVE:");
-		m_simulationFile.filePuts(etk::toString(_clipboardID));
-		m_simulationFile.filePuts("\n");
+		m_simulationFile->puts(etk::toString(echrono::Steady::now()));
+		m_simulationFile->puts(":CLIPBOARD_ARRIVE:");
+		m_simulationFile->puts(etk::toString(_clipboardID));
+		m_simulationFile->puts("\n");
 	}
 	ethread::RecursiveLock lock(m_mutex);
 	m_msgSystem.post([_clipboardID](gale::Context& _context){
@@ -617,10 +623,10 @@ void gale::Context::clipBoardSet(enum gale::context::clipBoard::clipboardListe _
 
 bool gale::Context::OS_Draw(bool _displayEveryTime) {
 	if (m_simulationActive == true) {
-		m_simulationFile.filePuts(etk::toString(echrono::Steady::now()));
-		m_simulationFile.filePuts(":DRAW:");
-		m_simulationFile.filePuts(etk::toString(_displayEveryTime));
-		m_simulationFile.filePuts("\n");
+		m_simulationFile->puts(etk::toString(echrono::Steady::now()));
+		m_simulationFile->puts(":DRAW:");
+		m_simulationFile->puts(etk::toString(_displayEveryTime));
+		m_simulationFile->puts("\n");
 	}
 	{
 		static int32_t countMemeCheck = 0;
