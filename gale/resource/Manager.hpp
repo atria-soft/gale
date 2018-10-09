@@ -40,7 +40,7 @@ namespace gale {
 				void display();
 				/**
 				 * @brief Reload all resources from files, and send there in openGL card if needed.
-				 * @note If file is reference at THEME:XXX:filename if the Theme change the file will reload the newOne
+				 * @note If file is reference at THEME_XXX:///filename if the Theme change the file will reload the newOne
 				 */
 				void reLoadResources();
 				/**

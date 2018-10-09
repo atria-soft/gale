@@ -31,7 +31,7 @@ namespace appl {
 			void onCreate(gale::Context& _context) override {
 				setSize(vec2(800, 600));
 				m_angle = 0.0f;
-				m_GLprogram = gale::resource::Program::create("DATA:basic.prog");
+				m_GLprogram = gale::resource::Program::create("DATA:///basic.prog");
 				if (m_GLprogram != null) {
 					m_GLPosition = m_GLprogram->getAttribute("EW_coord3d");
 					m_GLColor    = m_GLprogram->getAttribute("EW_color");

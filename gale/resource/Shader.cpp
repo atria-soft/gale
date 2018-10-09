@@ -102,11 +102,12 @@ void gale::resource::Shader::removeContextToLate() {
 void gale::resource::Shader::reload() {
 	ethread::RecursiveLock lock(m_mutex);
 	etk::Uri uri = m_name;
-	if (etk::uri::exist(uri)) {
+	if (etk::uri::exist(uri) == false) {
 		GALE_CRITICAL("File does not Exist : '" << uri << "' : path='" << uri.getPath() << "'");
 		return;
 	}
 	etk::uri::readAll(uri, m_fileData);
+	GALE_VERBOSE("load shader:\n-----------------------------------------------------------------\n" << m_fileData << "\n-----------------------------------------------------------------");
 	// now change the OGL context ...
 	if (gale::openGL::hasContext() == true) {
 		GALE_DEBUG("OGL : load SHADER '" << m_name << "' ==> call update context (direct)");
@@ -115,8 +116,8 @@ void gale::resource::Shader::reload() {
 	} else {
 		GALE_DEBUG("OGL : load SHADER '" << m_name << "' ==> tagged has update context needed");
 		// TODO : Check this, this is a leek ==> in the GPU ... really bad ...
-			m_exist = false;
-			m_shader = 0;
+		m_exist = false;
+		m_shader = 0;
 		getManager().update(ememory::dynamicPointerCast<gale::Resource>(sharedFromThis()));
 	}
 }

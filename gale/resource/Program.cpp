@@ -66,7 +66,9 @@ void gale::resource::Program::init(const etk::Uri& _uri) {
 			return;
 		}
 		etk::String tmpData;
+		GALE_DEBUG("===========================================================");
 		while (fileIO->gets(tmpData) != false) {
+			GALE_DEBUG("data: " << tmpData);
 			int32_t len = tmpData.size();
 			if(    tmpData[len-1] == '\n'
 			    || tmpData[len-1] == '\r') {
@@ -83,6 +85,11 @@ void gale::resource::Program::init(const etk::Uri& _uri) {
 			// get it with relative position:
 			etk::Uri tmpUri = _uri;
 			tmpUri.setPath(_uri.getPath().getParent() / tmpData);
+			GALE_VERBOSE("base path: " << _uri);
+			GALE_VERBOSE("base path: " << _uri.getPath());
+			GALE_VERBOSE("base path: " << _uri.getPath().getParent());
+			GALE_VERBOSE("new path: " << _uri.getPath().getParent() / tmpData);
+			GALE_VERBOSE("create shader: " << tmpUri);
 			ememory::SharedPtr<gale::resource::Shader> tmpShader = gale::resource::Shader::create(tmpUri.get());
 			if (tmpShader == null) {
 				GALE_ERROR("Error while getting a specific shader filename : " << tmpUri);
@@ -91,6 +98,7 @@ void gale::resource::Program::init(const etk::Uri& _uri) {
 				m_shaderList.pushBack(tmpShader);
 			}
 		}
+		GALE_DEBUG("===========================================================");
 		// close the file:
 		fileIO->close();
 	}
