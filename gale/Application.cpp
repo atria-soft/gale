@@ -131,13 +131,13 @@ etk::String gale::Application::getTitle() {
 	return m_title;
 }
 
-void gale::Application::setIcon(const etk::String& _iconFile) {
+void gale::Application::setIcon(const etk::Uri& _iconFile) {
 	m_iconName = _iconFile;
 	gale::Context& context = gale::getContext();
 	context.setIcon(m_iconName);
 }
 
-etk::String gale::Application::getIcon() {
+const etk::Uri& gale::Application::getIcon() {
 	return m_iconName;
 }
 

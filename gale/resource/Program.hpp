@@ -63,7 +63,7 @@ namespace gale {
 				Program();
 				void init(const etk::Uri& _uri);
 			public:
-				DECLARE_RESOURCE_NAMED_FACTORY(Program);
+				DECLARE_RESOURCE_URI_FACTORY(Program);
 				/**
 				 * @brief Destructor, remove the current Program.
 				 */

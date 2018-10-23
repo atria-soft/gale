@@ -35,6 +35,12 @@ public class GaleSurfaceViewGL extends GLSurfaceView implements GaleConstants {
 		m_galeNative = _galeInstance;
 		/*
 		  List of the Android API :
+		  Android 9.0                 28  Pie
+		  Android 8.0 - 8.1           26  Oreo
+		  Android 7.0 - 7.1.2         24  Nougat
+		  Android 6.0 - 6.0.1         23  Marshmallow
+		  Android 5.0 - 5.1.1         21  LOLIPOP
+		  Android 4.4 - 4.4.4         19  KIT-KAT
 		  Android 4.1, 4.1.1          16  JELLY_BEAN               Platform Highlights
 		  Android 4.0.3, 4.0.4        15  ICE_CREAM_SANDWICH_MR1   Platform Highlights
 		  Android 4.0, 4.0.1, 4.0.2   14  ICE_CREAM_SANDWICH

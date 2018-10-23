@@ -263,7 +263,7 @@ namespace gale {
 			 * @brief set the Icon of the program
 			 * @param[in] _inputFile new filename icon of the curent program.
 			 */
-			virtual void setIcon(const etk::String& _inputFile) { };
+			virtual void setIcon(const etk::Uri& _inputFile) { };
 			/**
 			 * @brief Enable or Disable the decoration on the Windows (availlable only on Desktop)
 			 * @param[in] _status "true" to enable decoration / false otherwise

@@ -1269,7 +1269,7 @@ class X11Interface : public gale::Context {
 			return true;
 		}
 		/****************************************************************************************/
-		void setIcon(const etk::String& _inputFile) {
+		void setIcon(const etk::Uri& _inputFile) {
 			X11_FUNC();
 			#if    defined(GALE_BUILD_EGAMI) \
 			    && !defined(__TARGET_OS__Web)

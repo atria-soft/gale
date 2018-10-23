@@ -7,6 +7,7 @@
 
 #include <ememory/memory.hpp>
 #include <etk/types.hpp>
+#include <etk/uri/uri.hpp>
 #include <etk/math/Vector2D.hpp>
 #include <gale/orientation.hpp>
 #include <gale/key/status.hpp>
@@ -158,18 +159,18 @@ namespace gale {
 			 */
 			virtual etk::String getTitle();
 		private:
-			etk::String m_iconName;
+			etk::Uri m_iconName;
 		public:
 			/**
 			 * @brief set the Icon of the application.
 			 * @param[in] _iconFile File name icon (.bmp/.png).
 			 */
-			virtual void setIcon(const etk::String& _iconFile);
+			virtual void setIcon(const etk::Uri& _iconFile);
 			/**
 			 * @brief Get the current filename of the application.
 			 * @return Filename of the icon.
 			 */
-			virtual etk::String getIcon();
+			virtual const etk::Uri& getIcon();
 		private:
 			enum gale::context::cursor m_cursor;
 		public:
