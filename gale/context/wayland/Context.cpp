@@ -52,6 +52,14 @@ extern "C" {
 	#include <poll.h>
 }
 
+#define XDG_INTERFACE 1
+
+#ifdef XDG_INTERFACE
+	extern "C" {
+		#include <xdg-shell-client-protocol.h>
+	}
+#endif
+
 #include <gale/renderer/openGL/openGL-include.hpp>
 
 static bool hasDisplay = false;
@@ -101,14 +109,31 @@ static void configure_callback(void* _data, struct wl_callback* _callback, uint3
 static struct wl_callback_listener configure_callback_listener = {
     configure_callback,
 };
-static void handle_ping(void* _data, struct wl_shell_surface* _shellSurface, uint32_t _serial);
-static void handle_configure(void* _data, struct wl_shell_surface* _shellSurface, uint32_t _edges, int32_t _width, int32_t _height);
-static void handle_popup_done(void* _data, struct wl_shell_surface* _shellSurface);
-static const struct wl_shell_surface_listener shell_surface_listener = {
-	handle_ping,
-	handle_configure,
-	handle_popup_done
-};
+#if O
+	static void handle_ping(void* _data, struct wl_shell_surface* _shellSurface, uint32_t _serial);
+	static void handle_configure(void* _data, struct wl_shell_surface* _shellSurface, uint32_t _edges, int32_t _width, int32_t _height);
+	static void handle_popup_done(void* _data, struct wl_shell_surface* _shellSurface);
+	static const struct wl_shell_surface_listener shell_surface_listener = {
+		handle_ping,
+		handle_configure,
+		handle_popup_done
+	};
+#else
+	static void handle_ping(void* _data, struct xdg_wm_base* _wdgWmBase, uint32_t _serial);
+	static const struct xdg_wm_base_listener wm_base_listener = {
+		handle_ping,
+	};
+	static void xdg_surface_handle_configure(void* _data, struct xdg_surface* _xdgSurface, uint32_t _serial);
+	static const struct xdg_surface_listener xdg_surface_listener = {
+		xdg_surface_handle_configure,
+	};
+	static void xdg_toplevel_handle_configure(void* _data, struct xdg_toplevel* _xdgToplevel, int32_t _width, int32_t _height, struct wl_array* _states);
+	static void xdg_toplevel_handle_close(void* _data, struct xdg_toplevel* _xdgToplevel);
+	static const struct xdg_toplevel_listener xdg_toplevel_listener = {
+		xdg_toplevel_handle_configure,
+		xdg_toplevel_handle_close,
+	};
+#endif
 static void keyboard_handle_keymap(void* _data, struct wl_keyboard* _keyboard, uint32_t _format, int _fd, uint32_t _size);
 static void keyboard_handle_enter(void* _data, struct wl_keyboard* _keyboard, uint32_t _serial, struct wl_surface* _surface, struct wl_array* _keys);
 static void keyboard_handle_leave(void* _data, struct wl_keyboard* _keyboard, uint32_t _serial, struct wl_surface* _surface);
@@ -215,90 +240,60 @@ static const struct wl_data_source_listener data_source_listener = {
 class WAYLANDInterface : public gale::Context {
 	private:
 		gale::key::Special m_guiKeyBoardMode;
-		ivec2 m_size;
+		ivec2 m_size = ivec2(800,600);
 		bool m_inputIsPressed[MAX_MANAGE_INPUT];
 		etk::String m_uniqueWindowsName;
-		bool m_run;
-		bool m_fullscreen;
-		bool m_configured;
-		bool m_opaque;
-		enum gale::context::cursor m_cursorCurrent; //!< curent cursor
-		vec2 m_cursorCurrentPosition;
-		char32_t m_lastKeyPressed;
+		bool m_run = false;
+		bool m_fullscreen = false;
+		bool m_configured = false;
+		bool m_opaque = false;
+		enum gale::context::cursor m_cursorCurrent = gale::context::cursor::leftArrow; //!< curent cursor
+		vec2 m_cursorCurrentPosition = vec2(0,0);
+		char32_t m_lastKeyPressed = 0;
 		
 		// Wayland interface
-		struct wl_display* m_display;
-		struct wl_registry* m_registry;
-		struct wl_compositor* m_compositor;
-		struct wl_shell* m_shell;
-		struct wl_seat* m_seat;
-		struct wl_pointer* m_pointer;
-		struct wl_keyboard* m_keyboard;
-		struct wl_shm* m_shm;
-		struct wl_cursor_theme* m_cursorTheme;
-		struct wl_cursor* m_cursorDefault;
-		struct wl_surface* m_cursorSurface;
-		struct wl_egl_window *m_eglWindow;
-		struct wl_surface *m_surface;
-		struct wl_shell_surface *m_shellSurface;
-		struct wl_callback *m_callback;
-		struct wl_data_device_manager* m_dataDeviceManager;
-		int32_t m_dataDeviceManagerVersion;
-		struct wl_data_device *m_dataDevice;
-		int32_t m_serial; //!< Unique ID of the serial element (based on the enter time)
-		bool m_offerIsInside; //!< Offer request in inside the windows
-		bool m_offerInternalCopy; //!< The windows own th copy buffer
-		struct wl_data_offer* m_offerCopy;
-		struct wl_data_source* m_dataSource;
+		struct wl_display* m_display = null;
+		struct wl_registry* m_registry = null;
+		struct wl_compositor* m_compositor = null;
+		#if 0
+			struct wl_shell* m_shell = null;
+			struct wl_shell_surface *m_shellSurface = null;
+		#else
+			struct xdg_wm_base* m_xdgWmBase = null;
+			struct xdg_surface* m_xdgSurface = null;
+			struct xdg_toplevel* m_xdgTopLevel = null;
+		#endif
+		struct wl_seat* m_seat = null;
+		struct wl_pointer* m_pointer = null;
+		struct wl_keyboard* m_keyboard = null;
+		struct wl_shm* m_shm = null;
+		struct wl_surface *m_surface = null;
+		struct wl_cursor_theme* m_cursorTheme = null;
+		struct wl_cursor* m_cursorDefault = null;
+		struct wl_surface* m_cursorSurface = null;
+		struct wl_egl_window *m_eglWindow = null;
+		struct wl_callback *m_callback = null;
+		struct wl_data_device_manager* m_dataDeviceManager = null;
+		int32_t m_dataDeviceManagerVersion = 0;
+		struct wl_data_device *m_dataDevice = null;
+		int32_t m_serial = 0; //!< Unique ID of the serial element (based on the enter time)
+		bool m_offerIsInside = false; //!< Offer request in inside the windows
+		bool m_offerInternalCopy = false; //!< The windows own th copy buffer
+		struct wl_data_offer* m_offerCopy = null;
+		struct wl_data_source* m_dataSource = null;
 		// EGL interface:
 		EGLDisplay m_eglDisplay;
 		EGLContext m_eglContext;
 		EGLConfig m_eglConfig;
 		EGLSurface m_eglSurface;
 		#ifdef GALE_XKB_WRAPPER_INPUT
-			struct xkb_context* m_XKBContext;
-			struct xkb_keymap* m_XKBKeymap;
-			struct xkb_state* m_XKBState;
+			struct xkb_context* m_XKBContext = null;
+			struct xkb_keymap* m_XKBKeymap = null;
+			struct xkb_state* m_XKBState = null;
 		#endif
 	public:
 		WAYLANDInterface(gale::Application* _application, int32_t _argc, const char* _argv[]) :
-		  gale::Context(_application, _argc, _argv),
-		  m_size(800,600),
-		  m_run(false),
-		  m_fullscreen(false),
-		  m_configured(false),
-		  m_opaque(false),
-		  m_cursorCurrent(gale::context::cursor::leftArrow),
-		  m_lastKeyPressed(0),
-		  m_display(null),
-		  m_registry(null),
-		  m_compositor(null),
-		  m_shell(null),
-		  m_seat(null),
-		  m_pointer(null),
-		  m_keyboard(null),
-		  m_shm(null),
-		  m_cursorTheme(null),
-		  m_cursorDefault(null),
-		  m_cursorSurface(null),
-		  m_eglWindow(null),
-		  m_surface(null),
-		  m_shellSurface(null),
-		  m_callback(null),
-		  m_dataDeviceManager(null),
-		  m_dataDeviceManagerVersion(0),
-		  m_dataDevice(null),
-		  m_serial(0),
-		  m_offerIsInside(false),
-		  m_offerInternalCopy(false),
-		  m_offerCopy(null),
-		  m_dataSource(null)
-		#ifdef GALE_XKB_WRAPPER_INPUT
-		  ,m_XKBContext(null),
-		  m_XKBKeymap(null),
-		  m_XKBState(null)
-		#endif
-		  {
+		  gale::Context(_application, _argc, _argv) {
 			// in case ...
 			GALE_WARNING("WAYLAND: INIT [START]");
 			for (int32_t iii=0; iii<MAX_MANAGE_INPUT; iii++) {
@@ -311,23 +306,36 @@ class WAYLANDInterface : public gale::Context {
 					GALE_CRITICAL("Couldn't create xkb context");
 				}
 			#endif
+			GALE_WARNING("WAYLAND: INIT [step 1]");
 			m_display = wl_display_connect(null);
 			assert(m_display);
+			
+			GALE_WARNING("WAYLAND: INIT [step 2]");
 			
 			m_registry = wl_display_get_registry(m_display);
 			wl_registry_add_listener(m_registry, &registry_listener, this);
 			
+			GALE_WARNING("WAYLAND: INIT [step 3]");
+			
 			wl_display_dispatch(m_display);
+			wl_display_roundtrip(m_display);
 			initEgl(m_opaque);
+			GALE_WARNING("WAYLAND: INIT [step 4]");
 			
 			createSurface();
 			
+			GALE_WARNING("WAYLAND: INIT [step 5]");
+			
 			m_cursorSurface = wl_compositor_create_surface(m_compositor);
+			if (m_cursorSurface == null) {
+				GALE_CRITICAL("Can not create surface for the windows");
+			}
 			
 			// set the DPI for the current screen: TODO : do it with real value, for now, we use a generic dpi value (most common screen)
 			gale::Dimension::setPixelRatio(vec2(75,75),gale::distance::inch);
 			
 			m_uniqueWindowsName = "GALE_" + etk::toString(etk::tool::irand(0, 1999999999));
+			GALE_INFO("Start a windows name : '" << m_uniqueWindowsName << "'");
 			m_run = true;
 			GALE_WARNING("WAYLAND: INIT [STOP]");
 			start2ndThreadProcessing();
@@ -355,10 +363,17 @@ class WAYLANDInterface : public gale::Context {
 				wl_cursor_theme_destroy(m_cursorTheme);
 				m_cursorTheme = null;
 			}
-			if (m_shell != null) {
-				wl_shell_destroy(m_shell);
-				m_shell = null;
-			}
+			#if 0
+				if (m_shell != null) {
+					wl_shell_destroy(m_shell);
+					m_shell = null;
+				}
+			#else
+				if (m_xdgWmBase != null) {
+					xdg_wm_base_destroy(m_xdgWmBase);
+					m_xdgWmBase = null;
+				}
+			#endif
 			if (m_compositor != null) {
 				wl_compositor_destroy(m_compositor);
 				m_compositor = null;
@@ -378,7 +393,7 @@ class WAYLANDInterface : public gale::Context {
 			}
 		}
 		/****************************************************************************************/
-		int32_t run() {
+		int32_t run() override {
 			int ret = 0;
 			while (    m_run == true
 			        && ret != -1) {
@@ -419,22 +434,23 @@ class WAYLANDInterface : public gale::Context {
 				GALE_CRITICAL("Can't initialise Bind");
 				return;
 			}
-			EGLint nnn;
+			EGLint nnn = 0;
 			EGLBoolean ret = eglChooseConfig(m_eglDisplay, config_attribs, &m_eglConfig, 1, &nnn);
-			/*
-			EGLint count = 0;
-			eglGetConfigs(m_egl_display, null, 0, &count);
-			GALE_INFO("EGL has " << count << " configs");
-			EGLConfig* configs = (EGLConfig*)calloc(count, sizeof *configs);
-			GALE_INFO("Display all configs:");
-			for (int32_t iii=0; iii<nnn; ++iii) {
-				EGLint size = 0;
-				EGLint sizeRed = 0;
-				eglGetConfigAttrib(m_eglDisplay, configs[iii], EGL_BUFFER_SIZE, &size);
-				eglGetConfigAttrib(m_eglDisplay, configs[iii], EGL_RED_SIZE, &sizeRed);
-				GALE_INFO("    " << iii << "     BufferSize=" << size << "     red size=" << sizeRed);
-			}
-			*/
+			GALE_WARNING("get openGL config ret=" << ret);
+			#if 1
+				EGLint count = 0;
+				eglGetConfigs(m_eglDisplay, null, 0, &count);
+				GALE_INFO("EGL has " << count << " configs");
+				EGLConfig* configs = (EGLConfig*)calloc(count, sizeof(EGLConfig));
+				GALE_INFO("Display all configs:");
+				for (int32_t iii=0; iii<nnn; ++iii) {
+					EGLint size = 0;
+					EGLint sizeRed = 0;
+					eglGetConfigAttrib(m_eglDisplay, configs[iii], EGL_BUFFER_SIZE, &size);
+					eglGetConfigAttrib(m_eglDisplay, configs[iii], EGL_RED_SIZE, &sizeRed);
+					GALE_INFO("    " << iii << "     BufferSize=" << size << "     red size=" << sizeRed);
+				}
+			#endif
 			//assert(ret && n == 1);
 			
 			m_eglContext = eglCreateContext(m_eglDisplay, m_eglConfig, EGL_NO_CONTEXT, context_attribs);
@@ -451,26 +467,64 @@ class WAYLANDInterface : public gale::Context {
 			GALE_INFO("un-Init EGL [STOP]");
 		}
 		
-		
 		void createSurface() {
 			GALE_INFO("CRATE the SURFACE [START]");
 			EGLBoolean ret;
 			m_surface = wl_compositor_create_surface(m_compositor);
-			m_shellSurface = wl_shell_get_shell_surface(m_shell, m_surface);
-			wl_shell_surface_add_listener(m_shellSurface, &shell_surface_listener, this);
+			if (m_surface == null) {
+				GALE_CRITICAL("WAYLAND: Can not create compositor surface");
+			}
+			#if 0
+				if (m_shell == null) {
+					GALE_ERROR("Try to get a shell surface without the shekk interface ==> might crash");
+				}
+				m_shellSurface = wl_shell_get_shell_surface(m_shell, m_surface);
+				if (m_shellSurface == null) {
+					GALE_CRITICAL("WAYLAND: Can not get the shell surface");
+				}
+				wl_shell_surface_add_listener(m_shellSurface, &shell_surface_listener, this);
+			#else
+				if (m_xdgWmBase == null) {
+					GALE_ERROR("Try to get a shell surface without the shekk interface ==> might crash");
+				}
+				m_xdgSurface = xdg_wm_base_get_xdg_surface(m_xdgWmBase, m_surface);
+				if (m_xdgSurface == null) {
+					GALE_CRITICAL("WAYLAND: Can not get the XDG surface");
+				}
+				xdg_wm_base_add_listener(m_xdgWmBase, &wm_base_listener, this);
+				m_xdgTopLevel= xdg_surface_get_toplevel(m_xdgSurface);
+				if (m_xdgTopLevel == null) {
+					GALE_CRITICAL("WAYLAND: Can not get top level element");
+				}
+				xdg_surface_add_listener(m_xdgSurface, &xdg_surface_listener, this);
+				xdg_toplevel_add_listener(m_xdgTopLevel, &xdg_toplevel_listener, this);
+				
+			#endif
 			m_eglWindow = wl_egl_window_create(m_surface, m_size.x(), m_size.y());
+			wl_surface_commit(m_surface);
+			wl_display_roundtrip(m_display);
 			m_eglSurface = eglCreateWindowSurface(m_eglDisplay, m_eglConfig, m_eglWindow, null);
-			wl_shell_surface_set_title(m_shellSurface, m_uniqueWindowsName.c_str());
+			#if 0
+				wl_shell_surface_set_title(m_shellSurface, m_uniqueWindowsName.c_str());
+			#else
+				xdg_toplevel_set_title(m_xdgTopLevel, m_uniqueWindowsName.c_str());
+				xdg_toplevel_set_app_id(m_xdgTopLevel, m_uniqueWindowsName.c_str());
+			#endif
 			ret = eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface, m_eglContext);
 			assert(ret == EGL_TRUE);
 			toggleFullscreen();
-			GALE_INFO("CRATE the SURFACE [STOP]");
+			GALE_INFO("CREATE the SURFACE [STOP]");
 		}
 		
 		void destroySurface() {
 			GALE_INFO("DESTROY the SURFACE [START]");
 			wl_egl_window_destroy(m_eglWindow);
-			wl_shell_surface_destroy(m_shellSurface);
+			#if 0
+				wl_shell_surface_destroy(m_shellSurface);
+			#else
+				xdg_surface_destroy(m_xdgSurface);
+				xdg_toplevel_destroy(m_xdgTopLevel);
+			#endif
 			wl_surface_destroy(m_surface);
 			if (m_callback) {
 				wl_callback_destroy(m_callback);
@@ -482,10 +536,18 @@ class WAYLANDInterface : public gale::Context {
 			GALE_INFO("toggleFullscreen [START]");
 			m_configured = false;
 			if (m_fullscreen) {
-				wl_shell_surface_set_fullscreen(m_shellSurface, WL_SHELL_SURFACE_FULLSCREEN_METHOD_DEFAULT, 0, null);
+				#if 0
+					wl_shell_surface_set_fullscreen(m_shellSurface, WL_SHELL_SURFACE_FULLSCREEN_METHOD_DEFAULT, 0, null);
+				#else
+					// TODO:
+				#endif
 			} else {
-				wl_shell_surface_set_toplevel(m_shellSurface);
-				handleConfigure(m_shellSurface, 0, m_size);
+				#if 0
+					wl_shell_surface_set_toplevel(m_shellSurface);
+					handleConfigure(m_shellSurface, 0, m_size);
+				#else
+					// TODO:
+				#endif
 			}
 			struct wl_callback *callback = wl_display_sync(m_display);
 			wl_callback_add_listener(callback, &configure_callback_listener, this);
@@ -496,12 +558,27 @@ class WAYLANDInterface : public gale::Context {
 		// recorder on elements ...
 		
 		void registryHandler(struct wl_registry* _registry, uint32_t _id, const char* _interface, uint32_t _version) {
-			GALE_DEBUG("Got a registry event for '" << _interface  << "' id=" << _id);
-			if (strcmp(_interface, "wl_compositor") == 0) {
+			GALE_INFO("Got a registry event for '" << _interface  << "' id=" << _id);
+			if (strcmp(_interface, wl_compositor_interface.name) == 0) {
+				GALE_INFO("Get INTERFACE " << wl_compositor_interface.name); 
 				m_compositor = (struct wl_compositor *)wl_registry_bind(_registry, _id, &wl_compositor_interface, 1);
+			#if 0
 			} else if (strcmp(_interface, "wl_shell") == 0) {
-				m_shell = (struct wl_shell*)wl_registry_bind(_registry, _id, &wl_shell_interface, 1);
-			} else if (strcmp(_interface, "wl_seat") == 0) {
+				GALE_INFO("Get INTERFACE wl_shell");
+					m_shell = (struct wl_shell*)wl_registry_bind(_registry, _id, &wl_shell_interface, 1);
+					if (m_shell == null) {
+						GALE_ERROR("Can not get the shell surfaces...");
+					}
+			#else
+			} else if (strcmp(_interface, xdg_wm_base_interface.name) == 0) {
+				GALE_INFO("Get INTERFACE" << xdg_wm_base_interface.name);
+				m_xdgWmBase = (struct xdg_wm_base *)wl_registry_bind(_registry, _id, &xdg_wm_base_interface, 1);
+				if (m_xdgWmBase == null) {
+					GALE_ERROR("Can not get the shell surfaces...");
+				}
+			#endif
+			} else if (strcmp(_interface, wl_seat_interface.name) == 0) {
+				GALE_INFO("Get INTERFACE " << wl_seat_interface.name);
 				m_seat = (struct wl_seat*)wl_registry_bind(_registry, _id, &wl_seat_interface, 1);
 				wl_seat_add_listener(m_seat, &seat_listener, this);
 				if (m_dataDeviceManager != null) {
@@ -510,7 +587,8 @@ class WAYLANDInterface : public gale::Context {
 					m_dataSource = wl_data_device_manager_create_data_source(m_dataDeviceManager);
 					wl_data_source_add_listener(m_dataSource, &data_source_listener, this);
 				}
-			} else if (strcmp(_interface, "wl_shm") == 0) {
+			} else if (strcmp(_interface, wl_shm_interface.name) == 0) {
+				GALE_INFO("Get INFERFACE " << wl_shm_interface.name);
 				m_shm = (struct wl_shm*)wl_registry_bind(_registry, _id, &wl_shm_interface, 1);
 				m_cursorTheme = wl_cursor_theme_load(null, 32, m_shm);
 				if (m_cursorTheme != null) {
@@ -519,6 +597,7 @@ class WAYLANDInterface : public gale::Context {
 					GALE_WARNING("Can not get the generic theme");
 				}
 			} else if (strcmp(_interface, "wl_data_device_manager") == 0) {
+				GALE_INFO("Get INTERFACE wl_data_device_manager");
 				m_dataDeviceManagerVersion = etk::min(3, int32_t(_version));
 				m_dataDeviceManager = (struct wl_data_device_manager*)wl_registry_bind(_registry, _id, &wl_data_device_manager_interface, m_dataDeviceManagerVersion);
 			} else {
@@ -526,7 +605,9 @@ class WAYLANDInterface : public gale::Context {
 			}
 			GALE_DEBUG("registry_handle_global [STOP]");
 		}
-		
+	
+	
+	
 		void registryRemover(struct wl_registry* _registry, uint32_t _id) {
 			GALE_WARNING("Got a registry losing event for " << _id);
 		}
@@ -701,24 +782,47 @@ class WAYLANDInterface : public gale::Context {
 		}
 		
 		/****************************************************************************************/
-		void handlePing(struct wl_shell_surface* _shell_surface, uint32_t _serial) {
-			wl_shell_surface_pong(_shell_surface, _serial);
-			GALE_WARNING("Ping ==> pong");
-		}
-		
-		void handleConfigure(struct wl_shell_surface* _shell_surface, uint32_t _edges, ivec2 _size) {
-			GALE_WARNING("configure surface : _edges=" << _edges << " size=" << _size);
-			if (m_eglWindow != null) {
-				wl_egl_window_resize(m_eglWindow, _size.x(), _size.y(), 0, 0);
+		#if 0
+			void handlePing(struct wl_shell_surface* _shell_surface, uint32_t _serial) {
+				wl_shell_surface_pong(_shell_surface, _serial);
+				GALE_WARNING("Ping ==> pong");
 			}
-			m_size = _size;
-			OS_Resize(vec2(m_size.x(), m_size.y()));
-			GALE_WARNING("configure [STOP]");
-		}
-		
-		void handlePopupDone(struct wl_shell_surface* _shell_surface) {
-			GALE_WARNING("Pop-up done");
-		}
+			
+			void handleConfigure(struct wl_shell_surface* _shell_surface, uint32_t _edges, ivec2 _size) {
+				GALE_WARNING("configure surface : _edges=" << _edges << " size=" << _size);
+				if (m_eglWindow != null) {
+					wl_egl_window_resize(m_eglWindow, _size.x(), _size.y(), 0, 0);
+				}
+				m_size = _size;
+				OS_Resize(vec2(m_size.x(), m_size.y()));
+				GALE_WARNING("configure [STOP]");
+			}
+			
+			void handlePopupDone(struct wl_shell_surface* _shell_surface) {
+				GALE_WARNING("Pop-up done");
+			}
+		#else
+			void handlePing(struct xdg_wm_base* _wdgWmBase, uint32_t _serial) {
+				xdg_wm_base_pong(_wdgWmBase, _serial);
+				GALE_WARNING("Ping ==> pong");
+			}
+			
+			void xdgSurfaceHandleConfigure(struct xdg_surface* _xdgSurface, uint32_t _serial) {
+				GALE_ERROR("configure the surface ****************************************************");
+				xdg_surface_ack_configure(_xdgSurface, _serial);
+			}
+			void xdgToplevelHandleConfigure(struct xdg_toplevel* _xdgToplevel, ivec2 _size, struct wl_array* _states) {
+				GALE_ERROR("Top Level configure configure: " << _size);
+				if (m_eglWindow != null) {
+					wl_egl_window_resize(m_eglWindow, _size.x(), _size.y(), 0, 0);
+				}
+				m_size = _size;
+				OS_Resize(vec2(m_size.x(), m_size.y()));
+			}
+			void xdgToplevelHandleClose(struct xdg_toplevel* _xdgToplevel) {
+				GALE_ERROR("Top Level CLOSE ==> requested ...");
+			}
+		#endif
 		/****************************************************************************************/
 		void keyboardKeymap(struct wl_keyboard* _keyboard, enum wl_keyboard_keymap_format _format, int _fd, uint32_t _size) {
 			//GALE_INFO("KEY MAP : '" << _format << "'");
@@ -942,7 +1046,7 @@ class WAYLANDInterface : public gale::Context {
 							find = true;
 							switch(sym) {
 								case XKB_KEY_dead_circumflex: m_lastKeyPressed = '^'; break;
-								case XKB_KEY_dead_diaeresis: m_lastKeyPressed = '"'; break;
+								case XKB_KEY_dead_diaeresis: m_lastKeyPressed = '"'; break; //"
 								//case XKB_KEY_ISO_Level3_Shif: m_lastKeyPressed = '~'; break;
 								//case XKB_KEY_: m_lastKeyPressed = ''; break;
 								default:
@@ -1179,12 +1283,12 @@ class WAYLANDInterface : public gale::Context {
 		}
 		
 		/****************************************************************************************/
-		virtual void stop() {
+		virtual void stop() override {
 			WAYLAND_INFO("WAYLAND-API: Stop");
 			m_run = false;
 		}
 		/****************************************************************************************/
-		virtual void setSize(const vec2& _size) {
+		virtual void setSize(const vec2& _size) override {
 			WAYLAND_INFO("WAYLAND-API: changeSize=" << _size);
 			/*
 			m_currentHeight = _size.y();
@@ -1193,14 +1297,14 @@ class WAYLANDInterface : public gale::Context {
 			*/
 		}
 		/****************************************************************************************/
-		void setFullScreen(bool _status) {
+		void setFullScreen(bool _status) override {
 			WAYLAND_INFO("WAYLAND-API: changeFullscreen=" << _status);
 			m_fullscreen = _status;
 			toggleFullscreen();
 			// TODO : Grab all event from keyborad
 		}
 		/****************************************************************************************/
-		virtual void grabKeyboardEvents(bool _status) {
+		virtual void grabKeyboardEvents(bool _status) override {
 			GALE_WARNING("grabKeyboardEvents [START]");
 			/*
 			if (_status == true) {
@@ -1218,7 +1322,7 @@ class WAYLANDInterface : public gale::Context {
 			GALE_WARNING("grabKeyboardEvents [STOP]");
 		}
 		/****************************************************************************************/
-		virtual void setWindowsDecoration(bool _status) {
+		virtual void setWindowsDecoration(bool _status) override {
 			WAYLAND_INFO("WAYLAND-API: setWindows Decoration :" << _status);
 			/*
 			// Remove/set decoration
@@ -1237,7 +1341,7 @@ class WAYLANDInterface : public gale::Context {
 			*/
 		};
 		/****************************************************************************************/
-		virtual void setPos(const vec2& _pos) {
+		virtual void setPos(const vec2& _pos) override {
 			WAYLAND_INFO("WAYLAND-API: changePos=" << _pos);
 			/*
 			m_windowsPos = _pos;
@@ -1257,7 +1361,7 @@ class WAYLANDInterface : public gale::Context {
 		}
 		*/
 		/****************************************************************************************/
-		virtual void setCursor(enum gale::context::cursor _newCursor) {
+		virtual void setCursor(enum gale::context::cursor _newCursor) override {
 			if (m_cursorCurrent == _newCursor) {
 				return;
 			}
@@ -1326,7 +1430,7 @@ class WAYLANDInterface : public gale::Context {
 			}
 		}
 		/****************************************************************************************/
-		void grabPointerEvents(bool _status, const vec2& _forcedPosition) {
+		void grabPointerEvents(bool _status, const vec2& _forcedPosition) override {
 			/*
 			if (_status == true) {
 				WAYLAND_DEBUG("WAYLAND-API: Grab Events");
@@ -1375,7 +1479,7 @@ class WAYLANDInterface : public gale::Context {
 			*/
 		}
 		/****************************************************************************************/
-		void setIcon(const etk::String& _inputFile) {
+		void setIcon(const etk::Uri& _inputFile) override {
 			/*
 			#if    defined(GALE_BUILD_EGAMI) \
 			    && !defined(__TARGET_OS__Web)
@@ -1523,17 +1627,25 @@ class WAYLANDInterface : public gale::Context {
 			*/
 		}
 		/****************************************************************************************/
-		void setTitle(const etk::String& _title) {
+		void setTitle(const etk::String& _title) override {
 			WAYLAND_INFO("WAYLAND: set Title (START)");
 			m_uniqueWindowsName = _title;
-			if (m_shellSurface == null) {
-				GALE_ERROR("WAYLAND: set Title (END) ==> missing surface pointer");
-				return;
-			}
-			wl_shell_surface_set_title(m_shellSurface, m_uniqueWindowsName.c_str());
+			#if 0
+				if (m_shellSurface == null) {
+					GALE_ERROR("WAYLAND: set Title (END) ==> missing surface pointer");
+					return;
+				}
+				wl_shell_surface_set_title(m_shellSurface, m_uniqueWindowsName.c_str());
+			#else
+				if (m_xdgTopLevel == null) {
+					GALE_ERROR("WAYLAND: set Title (END) ==> missing top-level pointer");
+					return;
+				}
+				xdg_toplevel_set_title(m_xdgTopLevel, m_uniqueWindowsName.c_str());
+			#endif
 			WAYLAND_INFO("WAYLAND: set Title (END)");
 		}
-		void openURL(const etk::String& _url) {
+		void openURL(const etk::String& _url) override {
 			etk::String req = "xdg-open ";
 			req += _url;
 			system(req.c_str());
@@ -1594,7 +1706,7 @@ class WAYLANDInterface : public gale::Context {
 			return false;
 		}
 		/****************************************************************************************/
-		void clipBoardGet(enum gale::context::clipBoard::clipboardListe _clipboardID) {
+		void clipBoardGet(enum gale::context::clipBoard::clipboardListe _clipboardID) override {
 			switch (_clipboardID) {
 				case gale::context::clipBoard::clipboardSelection:
 					OS_ClipBoardArrive(_clipboardID);
@@ -1613,7 +1725,7 @@ class WAYLANDInterface : public gale::Context {
 			}
 		}
 		/****************************************************************************************/
-		void clipBoardSet(enum gale::context::clipBoard::clipboardListe _clipboardID) {
+		void clipBoardSet(enum gale::context::clipBoard::clipboardListe _clipboardID) override {
 			switch (_clipboardID) {
 				case gale::context::clipBoard::clipboardSelection:
 					// Use internal middle button ...
@@ -1746,6 +1858,7 @@ static void configure_callback(void* _data, struct wl_callback* _callback, uint3
 	interface->configureCallback(_callback, _time);
 }
 
+#if 0
 static void handle_ping(void* _data, struct wl_shell_surface* _shellSurface, uint32_t _serial) {
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == null) {
@@ -1771,7 +1884,42 @@ static void handle_popup_done(void* _data, struct wl_shell_surface* _shellSurfac
 	}
 	interface->handlePopupDone(_shellSurface);
 }
+#else
+static void handle_ping(void* _data, struct xdg_wm_base* _wdgWmBase, uint32_t _serial) {
+	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
+	if (interface == null) {
+		GALE_ERROR("    ==> null");
+		return;
+	}
+	interface->handlePing(_wdgWmBase, _serial);
+}
 
+static void xdg_surface_handle_configure(void* _data, struct xdg_surface* _xdgSurface, uint32_t _serial) {
+	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
+	if (interface == null) {
+		GALE_ERROR("    ==> null");
+		return;
+	}
+	interface->xdgSurfaceHandleConfigure(_xdgSurface, _serial);
+}
+
+static void xdg_toplevel_handle_configure(void* _data, struct xdg_toplevel* _xdgToplevel, int32_t _width, int32_t _height, struct wl_array* _states) {
+	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
+	if (interface == null) {
+		GALE_ERROR("    ==> null");
+		return;
+	}
+	interface->xdgToplevelHandleConfigure(_xdgToplevel, ivec2(_width, _height), _states);
+}
+static void xdg_toplevel_handle_close(void* _data, struct xdg_toplevel* _xdgToplevel) {
+	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
+	if (interface == null) {
+		GALE_ERROR("    ==> null");
+		return;
+	}
+	interface->xdgToplevelHandleClose(_xdgToplevel);
+}
+#endif
 static void keyboard_handle_keymap(void* _data, struct wl_keyboard* _keyboard, uint32_t _format, int _fd, uint32_t _size) {
 	WAYLANDInterface* interface = (WAYLANDInterface*)_data;
 	if (interface == null) {

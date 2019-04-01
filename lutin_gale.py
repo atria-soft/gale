@@ -186,6 +186,7 @@ def configure(target, my_module):
 		    'gles2',
 		    'xkbcommon'
 		    ])
+		my_module.add_action(tool_generate_wayland_protocol, data={})
 	elif "Android" in target.get_type():
 		my_module.add_depend(["SDK", "jvm-basics"])
 		# add tre creator of the basic java class ...
@@ -210,6 +211,54 @@ def configure(target, my_module):
 	
 	return True
 
+
+
+##################################################################
+##
+## Wayland specific section
+##
+##################################################################
+def tool_generate_wayland_protocol(target, module, package_name):
+	file_list = []
+	debug.warning("------------------------------------------------------------------------")
+	debug.warning("Generate wayland back elements... '" + str(module) + "'" )
+	debug.warning("------------------------------------------------------------------------")
+	cmd = ["pkg-config", "wayland-protocols", "--variable=pkgdatadir"]
+	ret = lutinMultiprocess.run_command_direct(tools.list_to_str(cmd))
+	if ret == False:
+		debug.error("Can not execute protocol extraction...")
+	WAYLAND_PROTOCOLS_DIR = ret
+	debug.warning("WAYLAND_PROTOCOLS_DIR = " + str(WAYLAND_PROTOCOLS_DIR))
+	cmd = ["pkg-config", "--variable=wayland_scanner", "wayland-scanner"]
+	ret = lutinMultiprocess.run_command_direct(tools.list_to_str(cmd))
+	if ret == False:
+		debug.error("Can not execute protocol extraction...")
+	WAYLAND_SCANNER = ret
+	debug.warning("WAYLAND_SCANNER = " + str(WAYLAND_SCANNER))
+	XDG_SHELL_PROTOCOL = os.path.join(WAYLAND_PROTOCOLS_DIR, "stable", "xdg-shell", "xdg-shell.xml")
+	debug.warning("XDG_SHELL_PROTOCOL = " + str(XDG_SHELL_PROTOCOL))
+	client_protocol_header = "xdg-shell-client-protocol.h"
+	client_protocol = "xdg-shell-protocol.c"
+	# create files
+	
+	debug.warning("Generate file = " + client_protocol_header)
+	tmp_file = "/tmp/gale_wayland.tmp"
+	cmd = [WAYLAND_SCANNER, "client-header", XDG_SHELL_PROTOCOL, tmp_file]
+	ret = lutinMultiprocess.run_command_direct(tools.list_to_str(cmd))
+	if ret == False:
+		debug.error("error in generate wayland header code")
+	tmp_file_data = tools.file_read_data(tmp_file)
+	module.add_generated_header_file(tmp_file_data, client_protocol_header)
+	
+	
+	debug.warning("Generate file = " + client_protocol)
+	cmd = [WAYLAND_SCANNER, "private-code", XDG_SHELL_PROTOCOL, tmp_file]
+	ret = lutinMultiprocess.run_command_direct(tools.list_to_str(cmd))
+	if ret == False:
+		debug.error("Error in wayland generation code of private header protocole")
+	
+	tmp_file_data = tools.file_read_data(tmp_file)
+	module.add_generated_src_file(tmp_file_data, client_protocol)
 
 
 ##################################################################
