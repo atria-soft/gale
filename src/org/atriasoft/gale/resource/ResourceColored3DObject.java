@@ -15,9 +15,6 @@ import org.lwjgl.BufferUtils;
 public class ResourceColored3DObject extends Resource {
 	public static ResourceColored3DObject create() {
 		final ResourceColored3DObject resource = new ResourceColored3DObject();
-		if (resource.resourceHasBeenCorectlyInit() == false) {
-			Log.critical("resource Is not correctly init: ResourceColored3DObject");
-		}
 		getManager().localAdd(resource);
 		return resource;
 	}
@@ -31,7 +28,6 @@ public class ResourceColored3DObject extends Resource {
 	
 	protected ResourceColored3DObject() {
 		super();
-		addResourceType("ResourceColored3DObject");
 		// get the shader resource :
 		this.oGLPosition = 0;
 		this.program = ResourceProgram.create(new Uri("DATA_EGE", "simple3D.vert"), new Uri("DATA_EGE", "simple3D.frag"));
@@ -153,7 +149,7 @@ public class ResourceColored3DObject extends Resource {
 	}
 	
 	public void drawCapsule(final float radius, final float size, int lats, final int longs, final Matrix4f transformationMatrix, final Color tmpColor) {
-		final List<Vector3f> tmpVertices = new ArrayList<Vector3f>();
+		final List<Vector3f> tmpVertices = new ArrayList<>();
 		lats = lats / 2 * 2;
 		
 		// center to border (TOP)
@@ -249,7 +245,7 @@ public class ResourceColored3DObject extends Resource {
 	}
 	
 	public void drawCone(final float radius, final float size, final int lats, final int longs, final Matrix4f transformationMatrix, final Color tmpColor) {
-		final List<Vector3f> tmpVertices = new ArrayList<Vector3f>();
+		final List<Vector3f> tmpVertices = new ArrayList<>();
 		// center to border (TOP)
 		for (int jjj = 0; jjj < longs; ++jjj) {
 			float lng = 2.0f * (float) Math.PI * (jjj - 1) / longs;
@@ -289,7 +285,7 @@ public class ResourceColored3DObject extends Resource {
 	}
 	
 	public void drawCubeLine(final Vector3f min, final Vector3f max, final Color color, final Matrix4f transformationMatrix, final boolean updateDepthBuffer, final boolean depthtest) {
-		final List<Vector3f> vertices = new ArrayList<Vector3f>();
+		final List<Vector3f> vertices = new ArrayList<>();
 		vertices.add(new Vector3f(min.x, min.y, min.z));
 		vertices.add(new Vector3f(max.x, min.y, min.z));
 		
@@ -329,7 +325,7 @@ public class ResourceColored3DObject extends Resource {
 	}
 	
 	public void drawCylinder(final float radius, final float size, final int lats, final int longs, final Matrix4f transformationMatrix, final Color tmpColor) {
-		final List<Vector3f> tmpVertices = new ArrayList<Vector3f>();
+		final List<Vector3f> tmpVertices = new ArrayList<>();
 		// center to border (TOP)
 		
 		// center to border (TOP)
@@ -443,7 +439,7 @@ public class ResourceColored3DObject extends Resource {
 	}
 	
 	public void drawSphere(final float radius, final int lats, final int longs, final Matrix4f transformationMatrix, final Color tmpColor) {
-		final List<Vector3f> tmpVertices = new ArrayList<Vector3f>();
+		final List<Vector3f> tmpVertices = new ArrayList<>();
 		for (int iii = 0; iii <= lats; ++iii) {
 			final float lat0 = (float) Math.PI * (-0.5f + (float) (iii - 1) / lats);
 			final float z0 = radius * (float) Math.sin(lat0);
@@ -479,7 +475,7 @@ public class ResourceColored3DObject extends Resource {
 	}
 	
 	public void drawSquare(final Vector3f size, final Matrix4f transformationMatrix, final Color tmpColor) {
-		final List<Vector3f> tmpVertices = new ArrayList<Vector3f>();
+		final List<Vector3f> tmpVertices = new ArrayList<>();
 		final int[] indices = { 0, 1, 2, 3, 2, 1, 4, 0, 6, 6, 0, 2, 5, 1, 4, 4, 1, 0, 7, 3, 1, 7, 1, 5, 5, 4, 7, 7, 4, 6, 7, 2, 3, 7, 6, 2 };
 		final Vector3f[] vertices = { new Vector3f(size.x, size.y, size.z), new Vector3f(-size.x, size.y, size.z), new Vector3f(size.x, -size.y, size.z), new Vector3f(-size.x, -size.y, size.z),
 				new Vector3f(size.x, size.y, -size.z), new Vector3f(-size.x, size.y, -size.z), new Vector3f(size.x, -size.y, -size.z), new Vector3f(-size.x, -size.y, -size.z) };
@@ -500,7 +496,7 @@ public class ResourceColored3DObject extends Resource {
 	}
 	
 	public void drawTriangles(final List<Vector3f> vertex, final List<Integer> indice, final Matrix4f transformationMatrix, final Color tmpColor, final Vector3f offset) {
-		final List<Vector3f> tmpVertices = new ArrayList<Vector3f>();
+		final List<Vector3f> tmpVertices = new ArrayList<>();
 		for (int iii = 0; iii < indice.size() / 3; ++iii) {
 			tmpVertices.add(vertex.get(indice.get(iii * 3 + 0)).addNew(offset));
 			tmpVertices.add(vertex.get(indice.get(iii * 3 + 1)).addNew(offset));

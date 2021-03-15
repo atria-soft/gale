@@ -8,9 +8,9 @@ open module org.atriasoft.gale {
 	exports org.atriasoft.gale.context;
 	//exports org.atriasoft.gale.context.JOGL;
 	exports org.atriasoft.gale.context.LWJG_AWT;
-	exports org.atriasoft.gale.event;
 	exports org.atriasoft.gale.key;
 	exports org.atriasoft.gale.resource;
+	
 	requires transitive org.atriasoft.etk;
 	
 	//requires transitive vecmath;
@@ -20,8 +20,8 @@ open module org.atriasoft.gale {
 	requires transitive org.lwjgl.glfw.natives;
 	requires transitive org.lwjgl.assimp;
 	requires transitive org.lwjgl.assimp.natives;
-//	requires transitive org.lwjgl.openal;
-//	requires transitive org.lwjgl.openal.natives;
+	//	requires transitive org.lwjgl.openal;
+	//	requires transitive org.lwjgl.openal.natives;
 	requires transitive org.lwjgl.stb;
 	requires transitive org.lwjgl.stb.natives;
 	requires transitive org.lwjgl.jawt;
@@ -29,9 +29,9 @@ open module org.atriasoft.gale {
 	requires transitive org.lwjgl.opengl;
 	requires transitive org.lwjgl.opengl.natives;
 	//requires org.lwjgl.openvr;
-
+	
 	//requires transitive jogamp.fat;
-
+	
 	requires transitive java.desktop;
 	requires transitive pngdecoder;
 	requires transitive lwjgl3.awt;
