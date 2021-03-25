@@ -32,7 +32,7 @@ public class ResourceTexture extends Resource {
 		ResourceTexture resource;
 		Resource resource2;
 		final String name = uriTexture.getValue();
-		if (name.isEmpty() == false && name != "---") {
+		if (!name.isEmpty() && !name.equals("---")) {
 			resource2 = getManager().localKeep(name);
 		} else {
 			Log.error("Can not create a shader without a filaname");
@@ -48,14 +48,14 @@ public class ResourceTexture extends Resource {
 		}
 		resource = new ResourceTexture(uriTexture, textureUnit);
 		final ImageRawData decodedData = ImageLoader.decodePngFile(uriTexture);
-		resource.setTexture(decodedData.getBuffer(), new Vector2i(decodedData.getWidth(), decodedData.getHeight()), (decodedData.isHasAlpha() == true ? TextureColorMode.rgba : TextureColorMode.rgb),
+		resource.setTexture(decodedData.getBuffer(), new Vector2i(decodedData.getWidth(), decodedData.getHeight()), (decodedData.isHasAlpha() ? TextureColorMode.rgba : TextureColorMode.rgb),
 				textureUnit);
 		resource.flush();
 		return resource;
 	}
 	
 	/**
-	 * @brief get the next power 2 if the input
+	 * get the next power 2 if the input
 	 * @param value Value that we want the next power of 2
 	 * @return result value
 	 */
@@ -105,7 +105,7 @@ public class ResourceTexture extends Resource {
 	}
 	
 	public void bindForRendering(final int idTexture) {
-		if (this.loaded == false) {
+		if (!this.loaded) {
 			return;
 		}
 		GL13.glActiveTexture(textureIdBinding[idTexture]);
@@ -142,7 +142,7 @@ public class ResourceTexture extends Resource {
 	
 	@Override
 	public synchronized void removeContext() {
-		if (this.loaded == true) {
+		if (this.loaded) {
 			// Request remove texture ...
 			Log.info("TEXTURE: Rm [" + getId() + "] texId=" + this.texId);
 			// TODO Check if we are in the correct thread
@@ -161,14 +161,13 @@ public class ResourceTexture extends Resource {
 		this.data = data;
 		this.size = size;
 		this.textureUnit = textureUnit;
-		this.endPointSize.x = size.x;
-		this.endPointSize.y = size.y;
+		this.endPointSize = new Vector2f(size.x(), size.y());
 		this.dataColorSpace = dataColorSpace;
 		flush();
 	}
 	
 	public void unBindForRendering() {
-		if (this.loaded == false) {
+		if (!this.loaded) {
 			return;
 		}
 		if (this.dataColorSpace == TextureColorMode.rgb) {
@@ -180,7 +179,7 @@ public class ResourceTexture extends Resource {
 	// Gale internal API:
 	@Override
 	public boolean updateContext() {
-		if (this.loaded == true) {
+		if (this.loaded) {
 			return true;
 		}
 		// Request a new texture at openGl :
@@ -192,9 +191,9 @@ public class ResourceTexture extends Resource {
 		GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
 		Log.info("TEXTURE: add [" + getId() + "]=" + this.size + " OGlId=" + this.texId);
 		if (this.dataColorSpace == TextureColorMode.rgb) {
-			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, this.size.x, this.size.y, 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, this.data);
+			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, this.size.x(), this.size.y(), 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, this.data);
 		} else {
-			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, this.size.x, this.size.y, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, this.data);
+			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, this.size.x(), this.size.y(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, this.data);
 		}
 		// generate multi-texture mapping
 		GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);

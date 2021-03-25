@@ -92,10 +92,6 @@ public class Sample2Application extends Application {
 		};
 		// this is the properties of the buffer requested : "r"/"w" + "-" + buffer type "f"=float "i"=integer
 		this.verticesVBO = ResourceVirtualArrayObject.create(vertices, textureCoords, null, indices);
-		if (this.verticesVBO == null) {
-			Log.error("can not instanciate VBO ...");
-			return;
-		}
 		// TO facilitate some debugs we add a name of the VBO:
 		this.verticesVBO.setName("[VBO] of basic SAMPLE");
 		// update all the VBO elements ...
@@ -119,7 +115,7 @@ public class Sample2Application extends Application {
 		// set the basic openGL view port: (position drawed in the windows)
 		OpenGL.setViewPort(new Vector2f(0,0), size);
 		// Clear all the stacked matrix ...
-		OpenGL.setBasicMatrix(Matrix4f.identity());
+		OpenGL.setBasicMatrix(Matrix4f.IDENTITY);
 		// clear background
 		Color bgColor = new Color(0.0f, 1.0f, 1.0f, 0.75f);
 		OpenGL.enable(OpenGL.Flag.flag_depthTest);
@@ -143,12 +139,12 @@ public class Sample2Application extends Application {
 		
 		// set Matrix : translation/positionMatrix
 		Matrix4f projectionMatrix = tmpProjection; //OpenGL.getMatrix();
-		Matrix4f transforamtionMatrix = Matrix4f.identity();
-		transforamtionMatrix.multiply(Matrix4f.createMatrixTranslate(new Vector3f(0,0,-1)));
-		transforamtionMatrix.multiply(Matrix4f.createMatrixRotate(new Vector3f(1,0,0),this.angleX));
-		transforamtionMatrix.multiply(Matrix4f.createMatrixRotate(new Vector3f(0,1,0),this.angleY));
-		transforamtionMatrix.multiply(Matrix4f.createMatrixRotate(new Vector3f(0,0,1),this.angleZ));
-		Matrix4f viewMatrix = OpenGL.getCameraMatrix().multiplyNew(Matrix4f.createMatrixTranslate(new Vector3f(0,0,-2)));
+		Matrix4f transforamtionMatrix = Matrix4f.IDENTITY;
+		transforamtionMatrix = transforamtionMatrix.multiply(Matrix4f.createMatrixTranslate(new Vector3f(0,0,-1)));
+		transforamtionMatrix = transforamtionMatrix.multiply(Matrix4f.createMatrixRotate(new Vector3f(1,0,0),this.angleX));
+		transforamtionMatrix = transforamtionMatrix.multiply(Matrix4f.createMatrixRotate(new Vector3f(0,1,0),this.angleY));
+		transforamtionMatrix = transforamtionMatrix.multiply(Matrix4f.createMatrixRotate(new Vector3f(0,0,1),this.angleZ));
+		Matrix4f viewMatrix = OpenGL.getCameraMatrix().multiply(Matrix4f.createMatrixTranslate(new Vector3f(0,0,-2)));
 		//Matrix4f tmpMatrix = projMatrix * camMatrix;
 		this.verticesVBO.bindForRendering();
 		this.oGLprogram.uniformMatrix(this.oGLMatrixView, viewMatrix);

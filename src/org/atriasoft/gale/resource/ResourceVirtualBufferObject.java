@@ -5,6 +5,8 @@
  */
 package org.atriasoft.gale.resource;
 
+import java.util.Arrays;
+
 import org.atriasoft.etk.Color;
 import org.atriasoft.etk.math.Vector2f;
 import org.atriasoft.etk.math.Vector3f;
@@ -13,7 +15,7 @@ import org.atriasoft.gale.backend3d.OpenGL.Usage;
 import org.atriasoft.gale.internal.Log;
 
 /**
- * @brief ResourceVirtualBufferObject is a specific resources for opengl, this load the data directly in the graphic card ad keep these inside
+ * ResourceVirtualBufferObject is a specific resources for opengl, this load the data directly in the graphic card ad keep these inside
  */
 public class ResourceVirtualBufferObject extends Resource {
 	
@@ -26,14 +28,14 @@ public class ResourceVirtualBufferObject extends Resource {
 	private final Object[] buffer; //!< data that is availlable in the VBO system ...
 	
 	/**
-	 * @brief Constructor of this VBO.
-	 * @param[in] accesMode Acces mode : ???
+	 * Constructor of this VBO.
+	 * @param accesMode Acces mode : ???
 	 */
-	protected ResourceVirtualBufferObject(final int _number) {
+	protected ResourceVirtualBufferObject(final int number) {
 		super();
-		this.vbo = new int[_number]; // 0
-		this.buffer = new Object[_number];
-		Log.debug("OGL : load VBO count=\"" + _number + "\"");
+		this.vbo = new int[number]; // 0
+		this.buffer = new Object[number];
+		Log.debug("OGL : load VBO count=\"" + number + "\"");
 		this.resourceLevel = 3;
 	}
 	
@@ -63,18 +65,16 @@ public class ResourceVirtualBufferObject extends Resource {
 	}
 	
 	/**
-	 * @brief clear buffers
+	 * clear buffers
 	 */
 	public void clear() {
 		Log.verbose(" Clear: [" + getId() + "] '" + getName() + "' (size=" + this.buffer.length + ")");
 		// DO not clear the this.vbo indexed in the graphic cards ...
-		for (int iii = 0; iii < this.buffer.length; iii++) {
-			this.buffer[iii] = null;
-		}
+		Arrays.fill(this.buffer, null);
 	}
 	
 	/**
-	 * @brief Send the data to the graphic card.
+	 * Send the data to the graphic card.
 	 */
 	public synchronized void flush() {
 		// request to the manager to be call at the next update ...
@@ -103,15 +103,15 @@ public class ResourceVirtualBufferObject extends Resource {
 	}
 	
 	/**
-	 * @brief get the real openGL ID.
+	 * get the real openGL ID.
 	 * @return the Ogl id reference of this VBO.
 	 */
-	public int getGL_ID(final int _id) {
-		return this.vbo[_id];
+	public int getOpenGlId(final int id) {
+		return this.vbo[id];
 	}
 	
 	/**
-	 * @brief Relode the shader from the file. used when a request of resouces reload is done.
+	 * Relode the shader from the file. used when a request of resouces reload is done.
 	 * @note this is really usefull when we tested the new themes or shader developpements.
 	 */
 	@Override
@@ -121,29 +121,27 @@ public class ResourceVirtualBufferObject extends Resource {
 	}
 	
 	/**
-	 * @brief remove the data from the opengl context.
+	 * remove the data from the opengl context.
 	 */
 	@Override
 	public synchronized void removeContext() {
-		if (this.exist == true) {
+		if (this.exist) {
 			OpenGL.deleteBuffers(this.vbo);
 			this.exist = false;
 		}
 	}
 	
 	/**
-	 * @brief Special android spec! It inform us that all context is removed and after notify us...
+	 * Special android spec! It inform us that all context is removed and after notify us...
 	 */
 	@Override
 	public synchronized void removeContextToLate() {
 		this.exist = false;
-		for (int iii = 0; iii < this.vbo.length; iii++) {
-			this.vbo[iii] = 0;
-		}
+		Arrays.fill(this.vbo, 0);
 	}
 	
 	/**
-	 * @brief get the data from the graphic card.
+	 * get the data from the graphic card.
 	 */
 	public void retreiveData() {
 		Log.error("TODO ... ");
@@ -170,7 +168,7 @@ public class ResourceVirtualBufferObject extends Resource {
 	}
 	
 	/**
-	 * @brief This load/reload the data in the opengl context, needed when removed previously.
+	 * This load/reload the data in the opengl context, needed when removed previously.
 	 */
 	@Override
 	public synchronized boolean updateContext() {
@@ -182,7 +180,7 @@ public class ResourceVirtualBufferObject extends Resource {
 			return false;
 		}
 		*/
-		if (this.exist == false) {
+		if (!this.exist) {
 			Log.debug("     ==> ALLOCATE new handle");
 			// Allocate and assign a Vertex Array Object to our handle
 			OpenGL.genBuffers(this.vbo);

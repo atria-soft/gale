@@ -76,10 +76,6 @@ public class ResourceVirtualArrayObject extends Resource {
 	
 	int vertexCount = -1;
 	
-	/**
-	 * @brief ructor of this VBO.
-	 * @param accesMode Acces mode : ???
-	 */
 	protected ResourceVirtualArrayObject(final float[] positions, final float[] colors, final float[] textureCoordinates, final float[] normals, final int[] indices, final int vertexCount) {
 		super();
 		this.resourceLevel = 3;
@@ -93,7 +89,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 	
 	public void bindForRendering() {
-		if (this.exist == false) {
+		if (!this.exist) {
 			return;
 		}
 		GL30.glBindVertexArray(this.vaoID);
@@ -113,7 +109,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 	
 	private void bindIndicesBuffer(final int[] indices) {
-		final int vboId = OpenGL.glGenBuffers();
+		final int vboId = OpenGL.genBuffers();
 		this.vbo.add(vboId);
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
 		final IntBuffer buffer = storeDataInIntBuffer(indices);
@@ -121,7 +117,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 	
 	/**
-	 * @brief Destructor of this VBO.
+	 * Destructor of this VBO.
 	 */
 	@Override
 	public void cleanUp() {
@@ -129,7 +125,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 	
 	/**
-	 * @brief clear buffers
+	 * clear buffers
 	 */
 	public void clear() {
 		//Log.verbose(" Clear: [" + getId() + "] '" + getName() + "' (size=" + this.buffer.get(0).length + ")");
@@ -143,7 +139,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 	
 	/**
-	 * @brief Send the data to the graphic card.
+	 * Send the data to the graphic card.
 	 */
 	public void flush() {
 		// request to the manager to be call at the next update ...
@@ -152,7 +148,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 	
 	/**
-	 * @brief get the real openGL ID.
+	 * get the real openGL ID.
 	 * @return the Ogl id reference of this VBO.
 	 */
 	public int getGLID() {
@@ -185,7 +181,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 	
 	/**
-	 * @brief Relode the shader from the file. used when a request of resouces reload is done.
+	 * Relode the shader from the file. used when a request of resouces reload is done.
 	 * @note this is really usefull when we tested the new themes or shader developpements.
 	 */
 	@Override
@@ -195,23 +191,21 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 	
 	/**
-	 * @brief remove the data from the opengl context.
+	 * remove the data from the opengl context.
 	 */
 	@Override
 	public void removeContext() {
-		
-		if (this.exist == true) {
+		if (this.exist) {
 			// OpenGL.deleteBuffers(this.vbo);
 			this.exist = false;
 		}
 	}
 	
 	/**
-	 * @brief Special android spec! It inform us that all context is removed and after notify us...
+	 * Special android spec! It inform us that all context is removed and after notify us...
 	 */
 	@Override
 	public void removeContextToLate() {
-		
 		this.exist = false;
 		//		for (int iii=0; iii<this.vbo.length; iii++) {
 		//			this.vbo[iii] = 0;
@@ -233,7 +227,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 	
 	public void unBindForRendering() {
-		if (this.exist == false) {
+		if (!this.exist) {
 			return;
 		}
 		if (this.positions != null) {
@@ -256,12 +250,12 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 	
 	/**
-	 * @brief This load/reload the data in the opengl context, needed when removed previously.
+	 * This load/reload the data in the opengl context, needed when removed previously.
 	 */
 	@Override
 	public boolean updateContext() {
 		//Log.verbose(" Start: [" + getId() + "] '" + getName() + "' (size=" + this.indices.length + ") ********************************");
-		if (this.exist == false) {
+		if (!this.exist) {
 			Log.debug("     ==> ALLOCATE new handle");
 			// Allocate and assign a Vertex Array Object to our handle
 			loadToVAO();

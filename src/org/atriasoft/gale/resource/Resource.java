@@ -10,7 +10,7 @@ public abstract class Resource {
 	private static int idGenerated = 10;
 	
 	/**
-	 * @brief Get the current resource Manager
+	 * Get the current resource Manager
 	 */
 	protected static ResourceManager getManager() {
 		return Context.getContext().getResourcesManager();
@@ -22,7 +22,7 @@ public abstract class Resource {
 	protected String name = NO_NAME_RESOURCE; //!< name of the resource ...
 	
 	/**
-	 * @brief generic protected contructor (use factory to create this class)
+	 * generic protected contructor (use factory to create this class)
 	 */
 	protected Resource() {
 		this.uid = idGenerated++;
@@ -50,7 +50,7 @@ public abstract class Resource {
 	}
 	
 	/**
-	 * @brief get the resource name
+	 * get the resource name
 	 * @return The requested name
 	 */
 	public String getName() {
@@ -58,7 +58,7 @@ public abstract class Resource {
 	}
 	
 	/**
-	 * @brief Get the current resource level;
+	 * Get the current resource level;
 	 * @return value in [0..5]
 	 */
 	public int getResourceLevel() {
@@ -77,21 +77,21 @@ public abstract class Resource {
 	}
 	
 	/**
-	 * @brief User request the reload of all resources (usefull when the file depend on DATA:GUI:xxx ...
+	 * User request the reload of all resources (usefull when the file depend on DATA:GUI:xxx ...
 	 */
 	public void reload() {
 		Log.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
 	};
 	
 	/**
-	 * @brief The current OpenGl context is removing ==> remove yout own system data
+	 * The current OpenGl context is removing ==> remove yout own system data
 	 */
 	public void removeContext() {
 		Log.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
 	}
 	
 	/**
-	 * @brief The notification of the Context removing is too late, we have no more acces on the OpenGl context (thank you Android).
+	 * The notification of the Context removing is too late, we have no more acces on the OpenGl context (thank you Android).
 	 * Just update your internal state
 	 */
 	public void removeContextToLate() {
@@ -99,7 +99,7 @@ public abstract class Resource {
 	}
 	
 	/**
-	 * @brief get the resource name
+	 * get the resource name
 	 * @param name The name to set.
 	 */
 	public void setName(final String name) {
@@ -107,7 +107,7 @@ public abstract class Resource {
 	}
 	
 	/**
-	 * @brief Call when need to send data on the harware (openGL)
+	 * Call when need to send data on the harware (openGL)
 	 * @note This is done asynchronously with the create of the Resource.
 	 * @return true The context is updated
 	 * @return false The context is not updated

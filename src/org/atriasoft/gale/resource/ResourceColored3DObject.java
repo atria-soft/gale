@@ -30,7 +30,7 @@ public class ResourceColored3DObject extends Resource {
 		super();
 		// get the shader resource :
 		this.oGLPosition = 0;
-		this.program = ResourceProgram.create(new Uri("DATA_EGE", "simple3D.vert"), new Uri("DATA_EGE", "simple3D.frag"));
+		this.program = ResourceProgram.create(new Uri("DATA", "simple3D.vert", "gale"), new Uri("DATA", "simple3D.frag", "gale"));
 		if (this.program != null) {
 			this.oGLMatrixTransformation = this.program.getUniform("in_matrixTransformation");
 			this.oGLMatrixProjection = this.program.getUniform("in_matrixProjection");
@@ -49,9 +49,9 @@ public class ResourceColored3DObject extends Resource {
 	private float[] convertInFloat(final List<Vector3f> data) {
 		final float[] out = new float[data.size() * 3];
 		for (int iii = 0; iii < data.size(); iii++) {
-			out[iii * 3] = data.get(iii).x;
-			out[iii * 3 + 1] = data.get(iii).y;
-			out[iii * 3 + 2] = data.get(iii).z;
+			out[iii * 3] = data.get(iii).x();
+			out[iii * 3 + 1] = data.get(iii).y();
+			out[iii * 3 + 2] = data.get(iii).z();
 		}
 		return out;
 	}
@@ -64,9 +64,9 @@ public class ResourceColored3DObject extends Resource {
 			Log.error("No shader ...");
 			return;
 		}
-		if (true == depthtest) {
+		if (depthtest) {
 			OpenGL.enable(OpenGL.Flag.flag_depthTest);
-			if (false == updateDepthBuffer) {
+			if (!updateDepthBuffer) {
 				OpenGL.setDeathMask(false);
 			}
 		}
@@ -74,7 +74,7 @@ public class ResourceColored3DObject extends Resource {
 		this.program.use();
 		final Matrix4f projectionMatrix = OpenGL.getMatrix();
 		final Matrix4f viewMatrix = OpenGL.getCameraMatrix();
-		final Matrix4f transformationMatrix = Matrix4f.identity();
+		final Matrix4f transformationMatrix = Matrix4f.IDENTITY;
 		this.program.uniformMatrix(this.oGLMatrixView, viewMatrix);
 		this.program.uniformMatrix(this.oGLMatrixProjection, projectionMatrix);
 		this.program.uniformMatrix(this.oGLMatrixTransformation, transformationMatrix);
@@ -83,20 +83,20 @@ public class ResourceColored3DObject extends Resource {
 		// position :
 		final FloatBuffer buffer = storeDataInFloatBuffer(convertInFloat(vertices));
 		this.program.sendAttribute(this.oGLPosition, 3, buffer, 3);
-		if (color.a < 1.0f) {
+		if (color.a() < 1.0f) {
 			OpenGL.enable(OpenGL.Flag.flag_blend);
 		}
 		// Request the draw of the elements: 
 		OpenGL.drawArrays(OpenGL.RenderMode.triangle, 0, vertices.size());
-		if (color.a < 1.0f) {
+		if (color.a() < 1.0f) {
 			OpenGL.disable(OpenGL.Flag.flag_blend);
 		}
 		this.program.unUse();
 		// Request the draw od the elements: 
 		//glDrawArrays(oGLLINES, 0, vertices.size());
 		//this.oGLprogram.UnUse();
-		if (true == depthtest) {
-			if (false == updateDepthBuffer) {
+		if (depthtest) {
+			if (!updateDepthBuffer) {
 				OpenGL.setDeathMask(true);
 			}
 			OpenGL.disable(OpenGL.Flag.flag_depthTest);
@@ -111,9 +111,9 @@ public class ResourceColored3DObject extends Resource {
 			Log.error("No shader ...");
 			return;
 		}
-		if (true == depthtest) {
+		if (depthtest) {
 			OpenGL.enable(OpenGL.Flag.flag_depthTest);
-			if (false == updateDepthBuffer) {
+			if (!updateDepthBuffer) {
 				OpenGL.setDeathMask(false);
 			}
 		}
@@ -131,17 +131,17 @@ public class ResourceColored3DObject extends Resource {
 		// color :
 		//Log.info("color= " + color + " " + this.oGLPosition);
 		this.program.uniformColor(this.oGLColor, color);
-		if (color.a < 1.0f) {
+		if (color.a() < 1.0f) {
 			OpenGL.enable(OpenGL.Flag.flag_blend);
 		}
 		// Request the draw of the elements: 
 		OpenGL.drawArrays(OpenGL.RenderMode.triangle, 0, vertices.size());
-		if (color.a < 1.0f) {
+		if (color.a() < 1.0f) {
 			OpenGL.disable(OpenGL.Flag.flag_blend);
 		}
 		this.program.unUse();
-		if (true == depthtest) {
-			if (false == updateDepthBuffer) {
+		if (depthtest) {
+			if (!updateDepthBuffer) {
 				OpenGL.setDeathMask(true);
 			}
 			OpenGL.disable(OpenGL.Flag.flag_depthTest);
@@ -286,41 +286,41 @@ public class ResourceColored3DObject extends Resource {
 	
 	public void drawCubeLine(final Vector3f min, final Vector3f max, final Color color, final Matrix4f transformationMatrix, final boolean updateDepthBuffer, final boolean depthtest) {
 		final List<Vector3f> vertices = new ArrayList<>();
-		vertices.add(new Vector3f(min.x, min.y, min.z));
-		vertices.add(new Vector3f(max.x, min.y, min.z));
+		vertices.add(new Vector3f(min.x(), min.y(), min.z()));
+		vertices.add(new Vector3f(max.x(), min.y(), min.z()));
 		
-		vertices.add(new Vector3f(max.x, min.y, min.z));
-		vertices.add(new Vector3f(max.x, min.y, max.z));
+		vertices.add(new Vector3f(max.x(), min.y(), min.z()));
+		vertices.add(new Vector3f(max.x(), min.y(), max.z()));
 		
-		vertices.add(new Vector3f(max.x, min.y, max.z));
-		vertices.add(new Vector3f(min.x, min.y, max.z));
+		vertices.add(new Vector3f(max.x(), min.y(), max.z()));
+		vertices.add(new Vector3f(min.x(), min.y(), max.z()));
 		
-		vertices.add(new Vector3f(min.x, min.y, max.z));
-		vertices.add(new Vector3f(min.x, min.y, min.z));
+		vertices.add(new Vector3f(min.x(), min.y(), max.z()));
+		vertices.add(new Vector3f(min.x(), min.y(), min.z()));
 		
-		vertices.add(new Vector3f(min.x, max.y, min.z));
-		vertices.add(new Vector3f(max.x, max.y, min.z));
+		vertices.add(new Vector3f(min.x(), max.y(), min.z()));
+		vertices.add(new Vector3f(max.x(), max.y(), min.z()));
 		
-		vertices.add(new Vector3f(max.x, max.y, min.z));
-		vertices.add(new Vector3f(max.x, max.y, max.z));
+		vertices.add(new Vector3f(max.x(), max.y(), min.z()));
+		vertices.add(new Vector3f(max.x(), max.y(), max.z()));
 		
-		vertices.add(new Vector3f(max.x, max.y, max.z));
-		vertices.add(new Vector3f(min.x, max.y, max.z));
+		vertices.add(new Vector3f(max.x(), max.y(), max.z()));
+		vertices.add(new Vector3f(min.x(), max.y(), max.z()));
 		
-		vertices.add(new Vector3f(min.x, max.y, max.z));
-		vertices.add(new Vector3f(min.x, max.y, min.z));
+		vertices.add(new Vector3f(min.x(), max.y(), max.z()));
+		vertices.add(new Vector3f(min.x(), max.y(), min.z()));
 		
-		vertices.add(new Vector3f(min.x, min.y, min.z));
-		vertices.add(new Vector3f(min.x, max.y, min.z));
+		vertices.add(new Vector3f(min.x(), min.y(), min.z()));
+		vertices.add(new Vector3f(min.x(), max.y(), min.z()));
 		
-		vertices.add(new Vector3f(max.x, min.y, min.z));
-		vertices.add(new Vector3f(max.x, max.y, min.z));
+		vertices.add(new Vector3f(max.x(), min.y(), min.z()));
+		vertices.add(new Vector3f(max.x(), max.y(), min.z()));
 		
-		vertices.add(new Vector3f(max.x, min.y, max.z));
-		vertices.add(new Vector3f(max.x, max.y, max.z));
+		vertices.add(new Vector3f(max.x(), min.y(), max.z()));
+		vertices.add(new Vector3f(max.x(), max.y(), max.z()));
 		
-		vertices.add(new Vector3f(min.x, min.y, max.z));
-		vertices.add(new Vector3f(min.x, max.y, max.z));
+		vertices.add(new Vector3f(min.x(), min.y(), max.z()));
+		vertices.add(new Vector3f(min.x(), max.y(), max.z()));
 		drawLine(vertices, color, transformationMatrix, updateDepthBuffer, depthtest);
 	}
 	
@@ -402,9 +402,9 @@ public class ResourceColored3DObject extends Resource {
 			Log.error("No shader ...");
 			return;
 		}
-		if (true == depthtest) {
+		if (depthtest) {
 			OpenGL.enable(OpenGL.Flag.flag_depthTest);
-			if (false == updateDepthBuffer) {
+			if (!updateDepthBuffer) {
 				OpenGL.setDeathMask(false);
 			}
 		}
@@ -421,17 +421,17 @@ public class ResourceColored3DObject extends Resource {
 		this.program.sendAttribute(this.oGLPosition, 3, buffer, 3);
 		// color :
 		this.program.uniformColor(this.oGLColor, color);
-		if (color.a < 1.0f) {
+		if (color.a() < 1.0f) {
 			OpenGL.enable(OpenGL.Flag.flag_blend);
 		}
 		// Request the draw od the elements: 
 		OpenGL.drawArrays(OpenGL.RenderMode.line, 0, vertices.size());
-		if (color.a < 1.0f) {
+		if (color.a() < 1.0f) {
 			OpenGL.disable(OpenGL.Flag.flag_blend);
 		}
 		this.program.unUse();
-		if (true == depthtest) {
-			if (false == updateDepthBuffer) {
+		if (depthtest) {
+			if (!updateDepthBuffer) {
 				OpenGL.setDeathMask(true);
 			}
 			OpenGL.disable(OpenGL.Flag.flag_depthTest);
@@ -477,8 +477,9 @@ public class ResourceColored3DObject extends Resource {
 	public void drawSquare(final Vector3f size, final Matrix4f transformationMatrix, final Color tmpColor) {
 		final List<Vector3f> tmpVertices = new ArrayList<>();
 		final int[] indices = { 0, 1, 2, 3, 2, 1, 4, 0, 6, 6, 0, 2, 5, 1, 4, 4, 1, 0, 7, 3, 1, 7, 1, 5, 5, 4, 7, 7, 4, 6, 7, 2, 3, 7, 6, 2 };
-		final Vector3f[] vertices = { new Vector3f(size.x, size.y, size.z), new Vector3f(-size.x, size.y, size.z), new Vector3f(size.x, -size.y, size.z), new Vector3f(-size.x, -size.y, size.z),
-				new Vector3f(size.x, size.y, -size.z), new Vector3f(-size.x, size.y, -size.z), new Vector3f(size.x, -size.y, -size.z), new Vector3f(-size.x, -size.y, -size.z) };
+		final Vector3f[] vertices = { new Vector3f(size.x(), size.y(), size.z()), new Vector3f(-size.x(), size.y(), size.z()), new Vector3f(size.x(), -size.y(), size.z()),
+				new Vector3f(-size.x(), -size.y(), size.z()), new Vector3f(size.x(), size.y(), -size.z()), new Vector3f(-size.x(), size.y(), -size.z()), new Vector3f(size.x(), -size.y(), -size.z()),
+				new Vector3f(-size.x(), -size.y(), -size.z()) };
 		tmpVertices.clear();
 		for (int iii = 0; iii < 36; iii += 3) {
 			// normal calculation :
@@ -498,9 +499,9 @@ public class ResourceColored3DObject extends Resource {
 	public void drawTriangles(final List<Vector3f> vertex, final List<Integer> indice, final Matrix4f transformationMatrix, final Color tmpColor, final Vector3f offset) {
 		final List<Vector3f> tmpVertices = new ArrayList<>();
 		for (int iii = 0; iii < indice.size() / 3; ++iii) {
-			tmpVertices.add(vertex.get(indice.get(iii * 3 + 0)).addNew(offset));
-			tmpVertices.add(vertex.get(indice.get(iii * 3 + 1)).addNew(offset));
-			tmpVertices.add(vertex.get(indice.get(iii * 3 + 2)).addNew(offset));
+			tmpVertices.add(vertex.get(indice.get(iii * 3 + 0)).add(offset));
+			tmpVertices.add(vertex.get(indice.get(iii * 3 + 1)).add(offset));
+			tmpVertices.add(vertex.get(indice.get(iii * 3 + 2)).add(offset));
 			//Log.info("  indices " << indice[iii*3 + 0] << " " << indice[iii*3 + 1] << " " << indice[iii*3 + 2]);
 			//Log.info(" triangle " << vertex[indice[iii*3 + 0]] << " " << vertex[indice[iii*3 + 1]] << " " << vertex[indice[iii*3 + 2]]);
 		}

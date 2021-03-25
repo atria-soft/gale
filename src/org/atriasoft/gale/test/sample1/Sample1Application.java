@@ -51,10 +51,6 @@ public class Sample1Application extends Application {
 		};
 		// this is the properties of the buffer requested : "r"/"w" + "-" + buffer type "f"=float "i"=integer
 		this.verticesVBO = ResourceVirtualArrayObject.create(vertices, colors, indices);
-		if (this.verticesVBO == null) {
-			Log.error("can not instanciate VBO ...");
-			return;
-		}
 		// TO facilitate some debugs we add a name of the VBO:
 		this.verticesVBO.setName("[VBO] of basic SAMPLE");
 		// update all the VBO elements ...
@@ -69,7 +65,7 @@ public class Sample1Application extends Application {
 		// set the basic openGL view port: (position drawed in the windows)
 		OpenGL.setViewPort(new Vector2f(0,0), size);
 		// Clear all the stacked matrix ...
-		OpenGL.setBasicMatrix(Matrix4f.identity());
+		OpenGL.setBasicMatrix(Matrix4f.IDENTITY);
 		// clear background
 		Color bgColor = new Color(0.0f, 1.0f, 1.0f, 0.75f);
 		OpenGL.clearColor(bgColor);

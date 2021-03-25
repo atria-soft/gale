@@ -14,14 +14,14 @@ public class ResourceManager {
 	private boolean exiting = false;
 	
 	/**
-	 * @brief initialize the internal variable
+	 * initialize the internal variable
 	 */
 	public ResourceManager() {
 		
 	}
 	
 	/**
-	 * @brief special end of application
+	 * special end of application
 	 */
 	public void applicationExiting() {
 		contextHasBeenDestroyed();
@@ -41,7 +41,7 @@ public class ResourceManager {
 	}
 	
 	/**
-	 * @brief This is to inform the resources manager that we have no more openGl context ...
+	 * This is to inform the resources manager that we have no more openGl context ...
 	 */
 	public void contextHasBeenDestroyed() {
 		for (final Resource it : this.resourceList) {
@@ -54,7 +54,7 @@ public class ResourceManager {
 	}
 	
 	/**
-	 * @brief display in the log all the resources loaded ...
+	 * display in the log all the resources loaded ...
 	 */
 	public void display() {
 		Log.info("Resources loaded : ");
@@ -97,7 +97,7 @@ public class ResourceManager {
 	}
 	
 	/**
-	 * @brief Reload all resources from files, and send there in openGL card if needed.
+	 * Reload all resources from files, and send there in openGL card if needed.
 	 * @note If file is reference at THEMEXXX:///filename if the Theme change the file will reload the newOne
 	 */
 	public void reLoadResources() {
@@ -120,12 +120,12 @@ public class ResourceManager {
 	}
 	
 	/**
-	 * @brief Uninitiamize the resource manager, free all resources previously requested
+	 * Uninitiamize the resource manager, free all resources previously requested
 	 * @note when not free  == > generate warning, because the segfault can appear after...
 	 */
 	//public ~Manager();
 	/**
-	 * @brief remove all resources (un-init) out of the destructor (due to the system implementation)
+	 * remove all resources (un-init) out of the destructor (due to the system implementation)
 	 */
 	public void unInit() {
 		display();
@@ -138,7 +138,7 @@ public class ResourceManager {
 	}
 	
 	/**
-	 * @brief Call by the system to send all the needed data on the graphic card chen they change ...
+	 * Call by the system to send all the needed data on the graphic card chen they change ...
 	 * @param object The resources that might be updated
 	 */
 	public void update(final Resource object) {
@@ -154,15 +154,15 @@ public class ResourceManager {
 	}
 	
 	/**
-	 * @brief Call by the system chen the openGL Context has been unexpectially removed  == > This reload all the texture, VBO and other ....
+	 * Call by the system chen the openGL Context has been unexpectially removed  == > This reload all the texture, VBO and other ....
 	 */
 	public void updateContext() {
-		if (this.exiting == true) {
+		if (this.exiting) {
 			Log.error("Request update after application EXIT ...");
 			return;
 		}
 		// TODO Check the number of call this ... Log.info("update open-gl context ... ");
-		if (this.contextHasBeenRemoved == true) {
+		if (this.contextHasBeenRemoved) {
 			// need to update all ...
 			this.contextHasBeenRemoved = false;
 			this.resourceListToUpdate.clear();
@@ -173,7 +173,7 @@ public class ResourceManager {
 						for (final Resource it : this.resourceList) {
 							if (jjj == it.getResourceLevel()) {
 								//Log.debug("Update context named : " + lresourceList[iii].getName());
-								if (it.updateContext() == false) {
+								if (!it.updateContext()) {
 									// Lock error ==> postponned
 									this.resourceListToUpdate.add(it);
 								}
@@ -193,7 +193,7 @@ public class ResourceManager {
 					Log.verbose("    updateContext level (U) : " + jjj + "/" + (MAX_RESOURCE_LEVEL - 1));
 					for (final Resource it : resourceListToUpdate) {
 						if (jjj == it.getResourceLevel()) {
-							if (it.updateContext() == false) {
+							if (!it.updateContext()) {
 								// Lock error ==> postponned
 								this.resourceListToUpdate.add(it);
 							}

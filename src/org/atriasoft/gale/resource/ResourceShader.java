@@ -11,7 +11,7 @@ public class ResourceShader extends Resource {
 		ResourceShader resource;
 		Resource resource2;
 		final String name = uriShader.getValue();
-		if (name.isEmpty() == false && name != "---") {
+		if (!name.isEmpty() && !name.equals("---")) {
 			resource2 = getManager().localKeep(name);
 		} else {
 			Log.error("Can not create a shader without a filaname");
@@ -26,23 +26,18 @@ public class ResourceShader extends Resource {
 			return null;
 		}
 		resource = new ResourceShader(uriShader);
-		if (resource == null) {
-			Log.error("allocation error of a resource : " + name);
-			return null;
-		}
 		getManager().localAdd(resource);
 		return resource;
 	}
 	
 	private boolean exist = false; //!< The shader file existed and has been loaded
-	private final String fileData = ""; //!< A copy of the data loaded from the file (usefull only when opengl context is removed)
 	private int shader = -1; //!< opengl id of this element
 	private final ShaderType type; //!< Type of the current shader(vertex/fragment)
 	private final Uri uri;
 	
 	/**
-	 * @brief Contructor of an opengl Shader
-	 * @param filename Standard file name format. see @ref etk::FSNode
+	 * Constructor of an opengl Shader
+	 * @param uri Standard file name format. see @ref etk::FSNode
 	 */
 	protected ResourceShader(final Uri uri) {
 		super(uri);
@@ -64,7 +59,7 @@ public class ResourceShader extends Resource {
 	}
 	
 	/**
-	 * @brief Destructor, remove the current Shader
+	 * Destructor, remove the current Shader
 	 */
 	@Override
 	public void cleanUp() {
@@ -73,7 +68,7 @@ public class ResourceShader extends Resource {
 	};
 	
 	/**
-	 * @brief get the opengl reference id of this shader.
+	 * get the opengl reference id of this shader.
 	 * @return The opengl id.
 	 */
 	public int getGLID() {
@@ -81,7 +76,7 @@ public class ResourceShader extends Resource {
 	};
 	
 	/**
-	 * @brief get the opengl type of this shader.
+	 * get the opengl type of this shader.
 	 * @return The type of this loaded shader.
 	 */
 	public ShaderType getShaderType() {
@@ -89,14 +84,16 @@ public class ResourceShader extends Resource {
 	}
 	
 	/**
-	 * @brief Relode the shader from the file. used when a request of resouces reload is done.
-	 * @note this is really usefull when we tested the new themes or shader developpements.
+	 * Reloaded the shader from the file. used when a request of resources reload is done.
+	 * @note this is really useful when we tested the new themes or shader developments.
 	 */
 	@Override
 	public void reload() {
-		Log.verbose("load shader:\n-----------------------------------------------------------------\n" + this.fileData + "\n-----------------------------------------------------------------");
+		//!< A copy of the data loaded from the file (useful only when opengl context is removed)
+		String fileData = "";
+		Log.verbose("load shader:\n-----------------------------------------------------------------\n" + fileData + "\n-----------------------------------------------------------------");
 		// now change the OGL context ...
-		if (OpenGL.hasContext() == true) {
+		if (OpenGL.hasContext()) {
 			Log.debug("OGL : load SHADER '" + this.name + "' ==> call update context (direct)");
 			removeContext();
 			updateContext();
@@ -110,11 +107,11 @@ public class ResourceShader extends Resource {
 	}
 	
 	/**
-	 * @brief remove the data from the opengl context.
+	 * remove the data from the opengl context.
 	 */
 	@Override
 	public void removeContext() {
-		if (true == this.exist) {
+		if (this.exist) {
 			OpenGL.shaderRemove(this.shader);
 			this.shader = -1;
 			this.exist = false;
@@ -122,7 +119,7 @@ public class ResourceShader extends Resource {
 	}
 	
 	/**
-	 * @brief Special android spec! It inform us that all context is removed and after notify us...
+	 * Special android spec! It inform us that all context is removed and after notify us...
 	 */
 	@Override
 	public void removeContextToLate() {
@@ -131,14 +128,12 @@ public class ResourceShader extends Resource {
 	}
 	
 	/**
-	 * @brief This load/reload the data in the opengl context, needed when removed previously.
+	 * This load/reload the data in the opengl context, needed when removed previously.
 	 */
 	@Override
 	public boolean updateContext() {
-		if (this.exist == true) {
-			// Do nothing  == > too dangerous ...
-		} else {
-			this.shader = OpenGL.shaderLoad(this.uri.get(), this.type);
+		if (!this.exist) {
+			this.shader = OpenGL.shaderLoad(this.uri, this.type);
 			// create the Shader
 			if (this.shader < 0) {
 				return true;

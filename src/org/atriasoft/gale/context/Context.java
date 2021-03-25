@@ -28,7 +28,7 @@ public abstract class Context {
 	private static int countMemeCheck = 0;
 	
 	/**
-	 * @brief From everyware in the program, we can get the context inteface.
+	 * From everyware in the program, we can get the context inteface.
 	 * @return current reference on the instance.
 	 */
 	public static Context getContext() {
@@ -78,13 +78,13 @@ public abstract class Context {
 		//				this.displayFps=true;
 		//			} else if (    this.commandLine.get(iii) == "-h"
 		//			            || this.commandLine.get(iii) == "--help"
-		//			            || start_with(this.commandLine.get(iii), "--gale")) {
+		//			            || startwith(this.commandLine.get(iii), "--gale")) {
 		//				Log.print("gale - help : ");
 		//				Log.print("        --gale-fps");
 		//				Log.print("                Display the current fps of the display");
 		//				Log.print("        -h/--help");
 		//				Log.print("                Display this help");
-		//				if (start_with(this.commandLine.get(iii), "--gale")) {
+		//				if (startwith(this.commandLine.get(iii), "--gale")) {
 		//					Log.error("gale unknow element in parameter: '" << this.commandLine.get(iii) << "'");
 		//					// remove parameter ...
 		//				} else {
@@ -101,14 +101,14 @@ public abstract class Context {
 		
 		Log.info("GALE v:" + Gale.getVersion());
 		forceOrientation(Orientation.screenAuto);
-		postAction((_context) -> {
-			final Application appl = _context.getApplication();
+		postAction((context) -> {
+			final Application appl = context.getApplication();
 			if (appl == null) {
 				return;
 			}
-			appl.onCreate(_context);
-			appl.onStart(_context);
-			appl.onResume(_context);
+			appl.onCreate(context);
+			appl.onStart(context);
+			appl.onResume(context);
 			appl.canDraw = true;
 		});
 		
@@ -118,8 +118,8 @@ public abstract class Context {
 	}
 	
 	/**
-	 * @brief Inform the Gui that we want to have a copy of the clipboard
-	 * @param _clipboardID ID of the clipboard (STD/SELECTION) only apear here
+	 * Inform the Gui that we want to have a copy of the clipboard
+	 * @param clipboardID ID of the clipboard (STD/SELECTION) only apear here
 	 */
 	public void clipBoardGet(final ClipboardList clipboardID) {
 		// just transmit an event , we have the data in the system
@@ -127,21 +127,21 @@ public abstract class Context {
 	}
 	
 	/**
-	 * @brief Inform the Gui that we are the new owner of the clipboard
-	 * @param _clipboardID ID of the clipboard (STD/SELECTION) only apear here
+	 * Inform the Gui that we are the new owner of the clipboard
+	 * @param clipboardID ID of the clipboard (STD/SELECTION) only apear here
 	 */
 	public void clipBoardSet(final ClipboardList clipboardID) {
 		// nothing to do, data is already copyed in the GALE clipborad center
 	}
 	
 	/**
-	 * @brief force the screen orientation (availlable on portable elements ...
-	 * @param _orientation Selected orientation.
+	 * force the screen orientation (availlable on portable elements ...
+	 * @param orientation Selected orientation.
 	 */
 	public void forceOrientation(final Orientation orientation) {}
 	
 	/**
-	 * @brief Redraw all the windows
+	 * Redraw all the windows
 	 */
 	public void forceRedrawAll() {
 		if (this.application == null) {
@@ -180,7 +180,7 @@ public abstract class Context {
 	}
 	
 	/**
-	 * @brief The Application request the current position of the windows.
+	 * The Application request the current position of the windows.
 	 * @return Turrent position of the Windows.
 	 */
 	public Vector2f getPos() {
@@ -192,7 +192,7 @@ public abstract class Context {
 	}
 	
 	/**
-	 * @brief get the current windows size
+	 * get the current windows size
 	 * @return the current size ...
 	 */
 	public Vector2f getSize() {
@@ -200,20 +200,20 @@ public abstract class Context {
 	}
 	
 	/**
-	 * @brief get all Keyboard event from the X system (like many time use of META)
-	 * @param _status "true" if all the event will be get, false if we want only ours.
+	 * get all Keyboard event from the X system (like many time use of META)
+	 * @param status "true" if all the event will be get, false if we want only ours.
 	 */
 	public void grabKeyboardEvents(final boolean status) {}
 	
 	/**
-	 * @brief get all Mouse/Touch events from the X system
-	 * @param _status "true" if all the event will be get, false if we want only ours.
-	 * @param _forcedPosition the position where the mouse might be reset at  every events ...
+	 * get all Mouse/Touch events from the X system
+	 * @param status "true" if all the event will be get, false if we want only ours.
+	 * @param forcedPosition the position where the mouse might be reset at  every events ...
 	 */
 	public void grabPointerEvents(final boolean status, final Vector2f forcedPosition) {}
 	
 	/**
-	 * @brief The Application request that the Windows will be Hidden.
+	 * The Application request that the Windows will be Hidden.
 	 */
 	public void hide() {
 		Log.info("hide: NOT implemented ...");
@@ -224,14 +224,14 @@ public abstract class Context {
 	}
 	
 	/**
-	 * @brief Hide the virtal keyboard (for touch system only)
+	 * Hide the virtal keyboard (for touch system only)
 	 */
 	public void keyboardHide() {
 		Log.info("keyboardHide: NOT implemented ...");
 	}
 	
 	/**
-	 * @brief display the virtal keyboard (for touch system only)
+	 * display the virtal keyboard (for touch system only)
 	 */
 	public void keyboardShow() {
 		Log.info("keyboardShow: NOT implemented ...");
@@ -242,13 +242,13 @@ public abstract class Context {
 	}
 	
 	/**
-	 * @brief Open an URL on an eternal brother.
-	 * @param _url URL to open.
+	 * Open an URL on an eternal brother.
+	 * @param url URL to open.
 	 */
 	public void openURL(final String url) {}
 	
 	/**
-	 * @brief The current context is set in background (framerate is slowing down (max fps)/5 # 4fps)
+	 * The current context is set in background (framerate is slowing down (max fps)/5 # 4fps)
 	 */
 	public void operatingSystemBackground() {
 		// set the current interface :
@@ -262,8 +262,8 @@ public abstract class Context {
 	}
 	
 	/**
-	 * @brief Call by the OS when a clipboard arrive to US (previously requested by a widget)
-	 * @param Id of the clipboard
+	 * Call by the OS when a clipboard arrive to US (previously requested by a widget)
+	 * @param clipboardID of the clipboard
 	 */
 	public void operatingSystemClipBoardArrive(final ClipboardList clipboardID) {
 		postAction((context) -> {
@@ -297,7 +297,7 @@ public abstract class Context {
 		OpenGL.threadHasContext();
 		OpenGL.resetFlagState();
 		// process the events
-		if (this.displayFps == true) {
+		if (this.displayFps) {
 			this.fpsSystemEvent.tic();
 		}
 		boolean needRedraw = false;
@@ -333,52 +333,52 @@ public abstract class Context {
 		{
 			// Lock openGl context:
 			OpenGL.lock();
-			if (this.displayFps == true) {
+			if (this.displayFps) {
 				this.fpsSystemContext.tic();
 			}
-			if (needRedraw = true || displayEveryTime == true) {
+			if (needRedraw || displayEveryTime) {
 				//Log.debug("  ==> real Draw");
 				lockContext();
 				this.resourceManager.updateContext();
 				unLockContext();
-				if (this.displayFps == true) {
+				if (this.displayFps) {
 					this.fpsSystemContext.incrementCounter();
 				}
 			}
-			if (this.displayFps == true) {
+			if (this.displayFps) {
 				this.fpsSystemContext.toc();
 				this.fpsSystem.tic();
 			}
 			if (this.application != null) {
-				if (needRedraw == true || displayEveryTime == true) {
+				if (needRedraw || displayEveryTime) {
 					this.fpsSystem.incrementCounter();
 					// set the current interface :
 					lockContext();
-					if (this.application.canDraw == true) {
+					if (this.application.canDraw) {
 						this.application.onDraw(this);
 					}
 					unLockContext();
 					hasDisplayDone = true;
 				}
 			}
-			if (this.displayFps == true) {
+			if (this.displayFps) {
 				this.fpsSystem.toc();
 				this.fpsFlush.tic();
 			}
-			if (hasDisplayDone == true) {
-				//Log.info("lklklklklk " << _displayEveryTime);
-				if (this.displayFps == true) {
+			if (hasDisplayDone) {
+				//Log.info("lklklklklk " << displayEveryTime);
+				if (this.displayFps) {
 					this.fpsFlush.incrementCounter();
 				}
 				OpenGL.flush();
 			}
-			if (this.displayFps == true) {
+			if (this.displayFps) {
 				this.fpsFlush.toc();
 			}
 			// release open GL Context
 			OpenGL.unLock();
 		}
-		if (this.displayFps == true) {
+		if (this.displayFps) {
 			this.fpsSystemEvent.draw();
 			this.fpsSystemContext.draw();
 			this.fpsSystem.draw();
@@ -403,7 +403,7 @@ public abstract class Context {
 	};
 	
 	/**
-	 * @brief The current context is set in foreground (framerate is maximum speed)
+	 * The current context is set in foreground (framerate is maximum speed)
 	 */
 	public void operatingSystemForeground() {
 		// set the current interface :
@@ -418,35 +418,35 @@ public abstract class Context {
 	}
 	
 	/**
-	 * @brief The OS inform that the Windows is now Hidden.
+	 * The OS inform that the Windows is now Hidden.
 	 */
 	public void operatingSystemHide() {
 		postAction((context) -> {
 			/*
-			Application> appl = _context.getApplication();
+			Application> appl = context.getApplication();
 			if (appl == null) {
 				return;
 			}
-			appl.onKeyboard(_special,
-			                 _type,
-			                 _char,
-			                 _state);
+			appl.onKeyboard(special,
+			                 type,
+			                 char,
+			                 state);
 			*/
 			Log.todo("HIDE ... ");
 		});
 	};
 	
 	/**
-	 * @brief The OS inform that the current windows has change his position.
-	 * @param _pos New position of the Windows.
+	 * The OS inform that the current windows has change his position.
+	 * @param pos New position of the Windows.
 	 */
-	public void operatingSystemMove(final Vector2f _pos) {
-		if (this.windowsPos.isEqual(_pos)) {
+	public void operatingSystemMove(final Vector2f pos) {
+		if (this.windowsPos.isEqual(pos)) {
 			return;
 		}
 		postAction((context) -> {
-			Log.debug("Receive MSG : THREAD_MOVE : " + context.windowsPos + " ==> " + _pos);
-			context.windowsPos = _pos;
+			Log.debug("Receive MSG : THREADMOVE : " + context.windowsPos + " ==> " + pos);
+			context.windowsPos = pos;
 			final Application appl = context.getApplication();
 			if (appl == null) {
 				return;
@@ -456,26 +456,26 @@ public abstract class Context {
 	}
 	
 	/**
-	 * @brief The OS inform that the openGL ext has been destroy  == > use to automaticly reload the texture and other thinks ...
+	 * The OS inform that the openGL ext has been destroy  == > use to automaticly reload the texture and other thinks ...
 	 */
 	public void operatingSystemOpenGlContextDestroy() {
 		this.resourceManager.contextHasBeenDestroyed();
 	};
 	
 	/**
-	 * @brief The OS inform that the current windows has change his size.
-	 * @param _size new size of the windows.
+	 * The OS inform that the current windows has change his size.
+	 * @param size new size of the windows.
 	 */
-	public void operatingSystemResize(final Vector2f _size) {
-		if (this.windowsSize == _size) {
+	public void operatingSystemResize(final Vector2f size) {
+		if (this.windowsSize == size) {
 			return;
 		}
 		// TODO Better in the thread ...  ==> but generate some init error ...
-		//gale::Dimension::setPixelWindowsSize(_size);
+		//gale::Dimension::setPixelWindowsSize(size);
 		postAction((context) -> {
-			Log.debug("Receive MSG : THREAD_RESIZE : " + context.windowsSize + " ==> " + _size);
-			context.windowsSize = _size;
-			//gale::Dimension::setPixelWindowsSize(_context.windowsSize);
+			Log.debug("Receive MSG : THREADRESIZE : " + context.windowsSize + " ==> " + size);
+			context.windowsSize = size;
+			//gale::Dimension::setPixelWindowsSize(context.windowsSize);
 			final Application tmpAppl = context.getApplication();
 			if (tmpAppl != null) {
 				tmpAppl.onResize(context.windowsSize);
@@ -486,7 +486,7 @@ public abstract class Context {
 	};
 	
 	/**
-	 * @brief The current context is resumed
+	 * The current context is resumed
 	 */
 	public void operatingSystemResume() {
 		// set the current interface :
@@ -517,11 +517,11 @@ public abstract class Context {
 	
 	public void operatingSystemsetKeyboard(final KeySpecial special, final KeyKeyboard type, final KeyStatus state, final boolean isARepeateKey, final Character charValue) {
 		KeyStatus tmpState = state;
-		if (isARepeateKey == true) {
+		if (isARepeateKey) {
 			if (tmpState == KeyStatus.down) {
-				tmpState = KeyStatus.downRepeate;
+				tmpState = KeyStatus.downRepeat;
 			} else {
-				tmpState = KeyStatus.upRepeate;
+				tmpState = KeyStatus.upRepeat;
 			}
 		}
 		operatingSystemsetKeyboard2(special, type, state, charValue);
@@ -538,26 +538,26 @@ public abstract class Context {
 	}
 	
 	/**
-	 * @brief The OS inform that the Windows is now visible.
+	 * The OS inform that the Windows is now visible.
 	 */
 	public void operatingSystemShow() {
 		postAction((context) -> {
 			/*
-			Application> appl = _context.getApplication();
+			Application> appl = context.getApplication();
 			if (appl == null) {
 				return;
 			}
-			appl.onKeyboard(_special,
-			                 _type,
-			                 _char,
-			                 _state);
+			appl.onKeyboard(special,
+			                 type,
+			                 char,
+			                 state);
 			*/
 			Log.todo("SHOW ... ");
 		});
 	};
 	
 	/**
-	 * @brief The OS Inform that the Window has been killed
+	 * The OS Inform that the Window has been killed
 	 */
 	public void operatingSystemStop() {
 		// set the current interface :
@@ -573,7 +573,7 @@ public abstract class Context {
 	}
 	
 	/**
-	 * @brief The current context is suspended
+	 * The current context is suspended
 	 */
 	public void operatingSystemSuspend() {
 		// set the current interface :
@@ -595,7 +595,7 @@ public abstract class Context {
 	}
 	
 	/**
-	 * @brief Processing all the event arrived ... (commoly called in draw function)
+	 * Processing all the event arrived ... (commoly called in draw function)
 	 */
 	public void processEvents() {
 		int nbEvent = 0;
@@ -648,63 +648,63 @@ public abstract class Context {
 	//	}
 	public void requestUpdateSize() {
 		postAction((context) -> {
-			//Log.debug("Receive MSG : THREAD_RESIZE");
+			//Log.debug("Receive MSG : THREADRESIZE");
 			context.forceRedrawAll();
 		});
 	}
 	
 	/**
-	 * @brief reset event management for the IO like Input ou Mouse or keyborad
+	 * reset event management for the IO like Input ou Mouse or keyborad
 	 */
 	public void resetIOEvent() {
 		// TODO this.input.newLayerSet();
 	}
 	
 	/**
-	 * @brief Internal API to run the processing of the event loop ...
+	 * Internal API to run the processing of the event loop ...
 	 * @return The Exit value of the program
 	 * @note INTERNAL API
 	 */
 	public abstract int run();
 	
 	/**
-	 * @brief set the cursor display type.
-	 * @param NewCursor selected new cursor.
+	 * set the cursor display type.
+	 * @param newCursor selected new cursor.
 	 */
 	public void setCursor(final Cursor newCursor) {}
 	
 	/**
-	 * @brief The application request a change of his current size force the fullscreen mode.
-	 * @param _status status of the fullscreen mode.
+	 * The application request a change of his current size force the fullscreen mode.
+	 * @param status status of the fullscreen mode.
 	 */
 	public void setFullScreen(final boolean status) {
 		this.fullscreen = status;
 	}
 	
 	/**
-	 * @brief set the Icon of the program
-	 * @param _inputFile new filename icon of the current program.
+	 * set the Icon of the program
+	 * @param inputFile new filename icon of the current program.
 	 */
 	public void setIcon(final Uri inputFile) {};
 	
 	/**
-	 * @brief The Application request that the current windows will change his position.
-	 * @param _pos New position of the Windows requested.
+	 * The Application request that the current windows will change his position.
+	 * @param pos New position of the Windows requested.
 	 */
 	public void setPos(final Vector2f pos) {
 		Log.info("setPos: NOT implemented ...");
 	};
 	
 	/**
-	 * @brief The application request a change of his current size.
-	 * @param _size new Requested size of the windows.
+	 * The application request a change of his current size.
+	 * @param size new Requested size of the windows.
 	 */
 	public void setSize(final Vector2f size) {
 		Log.info("setSize: NOT implemented ...");
 	}
 	
 	/**
-	 * @brief set the new title of the windows
+	 * set the new title of the windows
 	 * @param title New desired title
 	 */
 	public void setTitle(final String title) {
@@ -712,20 +712,20 @@ public abstract class Context {
 	};
 	
 	/**
-	 * @brief Enable or Disable the decoration on the Windows (availlable only on Desktop)
-	 * @param _status "true" to enable decoration / false otherwise
+	 * Enable or Disable the decoration on the Windows (availlable only on Desktop)
+	 * @param status "true" to enable decoration / false otherwise
 	 */
 	public void setWindowsDecoration(final boolean status) {};
 	
 	/**
-	 * @brief The Application request that the Windows will be visible.
+	 * The Application request that the Windows will be visible.
 	 */
 	public void show() {
 		Log.info("show: NOT implemented ...");
 	};
 	
 	/**
-	 * @brief StartProcessing (2nd thread).
+	 * StartProcessing (2nd thread).
 	 * @note to call when all the Context is started
 	 */
 	public void start2ndThreadProcessing() {
@@ -743,7 +743,7 @@ public abstract class Context {
 	};
 	
 	/**
-	 * @brief The application request that the Window will be killed
+	 * The application request that the Window will be killed
 	 */
 	public void stop() {
 		Log.warning("stop: NOT implemented for this platform...");
