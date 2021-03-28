@@ -2,6 +2,7 @@ package org.atriasoft.gale.context;
 
 import java.util.Vector;
 
+import org.atriasoft.etk.Color;
 import org.atriasoft.etk.ThreadAbstract;
 import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2f;
@@ -20,6 +21,10 @@ import org.atriasoft.gale.resource.ResourceManager;
 interface ActionToDoInAsyncLoop {
 	public void run(Context context);
 }
+
+enum ApplicationState {
+	UNDEFINED, CREATE, RUNNING, DIED
+};
 
 public abstract class Context {
 	protected static final int MAX_MANAGE_INPUT = 15;
@@ -41,6 +46,7 @@ public abstract class Context {
 	
 	protected ThreadAbstract periodicThread;;
 	protected Application application; //!< Application handle
+	protected ApplicationState applicationState = ApplicationState.UNDEFINED; // state of the application
 	private final CommandLine commandLine = new CommandLine(); //!< Start command line information;
 	private final ResourceManager resourceManager = new ResourceManager(); //!< global resources Manager
 	// simulation area:
@@ -58,6 +64,7 @@ public abstract class Context {
 	public Context(final Application application, final String[] args) {
 		// set a basic
 		this.application = application;
+		this.applicationState = ApplicationState.CREATE;
 		setContext(this);
 		Thread.currentThread().setName("galeThread");
 		if (this.application == null) {
@@ -104,12 +111,13 @@ public abstract class Context {
 		postAction((context) -> {
 			final Application appl = context.getApplication();
 			if (appl == null) {
+				this.applicationState = ApplicationState.UNDEFINED;
 				return;
 			}
 			appl.onCreate(context);
 			appl.onStart(context);
 			appl.onResume(context);
-			appl.canDraw = true;
+			this.applicationState = ApplicationState.RUNNING;
 		});
 		
 		// force a recalculation
@@ -278,7 +286,7 @@ public abstract class Context {
 		if (countMemeCheck++ >= 10 * 16) {
 			countMemeCheck = 0;
 		}
-		//Log.verbose("Call draw");
+		Log.verbose("Call draw");
 		final long currentTime = System.currentTimeMillis();
 		//echrono::Time currentTime2 = echrono::Time::now();
 		//Log.warning("Time = " << currentTime << "         " << currentTime2);
@@ -316,10 +324,14 @@ public abstract class Context {
 			
 			*/
 			if (this.application != null) {
-				// Redraw all needed elements
-				//Log.debug("Regenerate Display");
-				this.application.onRegenerateDisplay(this);
-				needRedraw = this.application.isDrawingNeeded();
+				if (this.applicationState == ApplicationState.RUNNING) {
+					// Redraw all needed elements
+					//Log.debug("Regenerate Display");
+					this.application.onRegenerateDisplay(this);
+					needRedraw = this.application.isDrawingNeeded();
+				} else {
+					needRedraw = true;
+				}
 			}
 			if (this.displayFps) {
 				this.fpsSystemEvent.incrementCounter();
@@ -354,8 +366,13 @@ public abstract class Context {
 					this.fpsSystem.incrementCounter();
 					// set the current interface :
 					lockContext();
-					if (this.application.canDraw) {
+					if (this.applicationState == ApplicationState.RUNNING) {
 						this.application.onDraw(this);
+					} else {
+						OpenGL.setViewPort(new Vector2f(0, 0), this.application.getSize());
+						final Color bgColor = new Color(0.8f, 0.5f, 0.8f, 1.0f);
+						OpenGL.clearColor(bgColor);
+						Log.info("==> appl clear ==> not created ...");
 					}
 					unLockContext();
 					hasDisplayDone = true;

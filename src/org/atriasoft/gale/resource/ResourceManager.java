@@ -23,12 +23,12 @@ public class ResourceManager {
 	/**
 	 * special end of application
 	 */
-	public void applicationExiting() {
+	public synchronized void applicationExiting() {
 		contextHasBeenDestroyed();
 		this.exiting = true;
 	}
 	
-	public void cleanInternalRemoved() {
+	public synchronized void cleanInternalRemoved() {
 		//Log.info("remove object in Manager");
 		updateContext();
 		// TODO ...
@@ -43,7 +43,7 @@ public class ResourceManager {
 	/**
 	 * This is to inform the resources manager that we have no more openGl context ...
 	 */
-	public void contextHasBeenDestroyed() {
+	public synchronized void contextHasBeenDestroyed() {
 		for (final Resource it : this.resourceList) {
 			if (it.getCount() > 0) {
 				it.removeContextToLate();
@@ -56,7 +56,7 @@ public class ResourceManager {
 	/**
 	 * display in the log all the resources loaded ...
 	 */
-	public void display() {
+	public synchronized void display() {
 		Log.info("Resources loaded : ");
 		// remove all resources ...
 		for (final Resource it : this.resourceList) {
@@ -65,13 +65,13 @@ public class ResourceManager {
 		Log.info("Resources ---");
 	}
 	
-	public void localAdd(final Resource object) {
+	public synchronized void localAdd(final Resource object) {
 		// add at the end if no slot is free
 		this.resourceList.add(object);
 	}
 	
 	// internal API to extent eResources in extern Soft
-	public Resource localKeep(final String filename) {
+	public synchronized Resource localKeep(final String filename) {
 		Log.verbose("KEEP (DEFAULT) : file : '" + filename + "' in " + this.resourceList.size() + " resources");
 		for (final Resource it : this.resourceList) {
 			if (it == null) {
@@ -91,7 +91,7 @@ public class ResourceManager {
 		return null;
 	}
 	
-	public Resource localKeep(final Uri uri) {
+	public synchronized Resource localKeep(final Uri uri) {
 		// TODO Auto-generated method stub
 		return localKeep(uri.toString());
 	}
@@ -100,7 +100,7 @@ public class ResourceManager {
 	 * Reload all resources from files, and send there in openGL card if needed.
 	 * @note If file is reference at THEMEXXX:///filename if the Theme change the file will reload the newOne
 	 */
-	public void reLoadResources() {
+	public synchronized void reLoadResources() {
 		Log.info("-------------  Resources re-loaded  -------------");
 		// remove all resources ...
 		for (long jjj = 0; jjj < MAX_RESOURCE_LEVEL; jjj++) {
@@ -127,7 +127,7 @@ public class ResourceManager {
 	/**
 	 * remove all resources (un-init) out of the destructor (due to the system implementation)
 	 */
-	public void unInit() {
+	public synchronized void unInit() {
 		display();
 		this.resourceListToUpdate.clear();
 		// remove all resources ...
@@ -141,7 +141,7 @@ public class ResourceManager {
 	 * Call by the system to send all the needed data on the graphic card chen they change ...
 	 * @param object The resources that might be updated
 	 */
-	public void update(final Resource object) {
+	public synchronized void update(final Resource object) {
 		// check if not added before
 		for (final Resource it : this.resourceListToUpdate) {
 			if (it == object) {
@@ -156,7 +156,7 @@ public class ResourceManager {
 	/**
 	 * Call by the system chen the openGL Context has been unexpectially removed  == > This reload all the texture, VBO and other ....
 	 */
-	public void updateContext() {
+	public synchronized void updateContext() {
 		if (this.exiting) {
 			Log.error("Request update after application EXIT ...");
 			return;

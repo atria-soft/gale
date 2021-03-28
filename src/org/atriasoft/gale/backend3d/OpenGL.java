@@ -575,6 +575,7 @@ public class OpenGL {
 	 *  remove the current matrix and get the last one from the matrix stack.
 	 */
 	public static void pop() {
+		Log.verbose("Pop OpenGl Matrix: " + MATRIX_LIST.size());
 		if (MATRIX_LIST.size() <= 1) {
 			Log.error("set matrix list is not corect size in the stack : " + MATRIX_LIST.size());
 			MATRIX_LIST.clear();
@@ -851,6 +852,7 @@ public class OpenGL {
 	 *  store current matrix in the matrix stack.
 	 */
 	public static void push() {
+		Log.verbose("push OpenGl Matrix: " + MATRIX_LIST.size());
 		if (MATRIX_LIST.size() == 0) {
 			Log.error("set matrix list is not corect size in the stack : " + MATRIX_LIST.size());
 			MATRIX_LIST.add(Matrix4f.IDENTITY);
@@ -870,9 +872,7 @@ public class OpenGL {
 			}
 			reader.close();
 		} catch (final IOException e) {
-			Log.error("Could not read the file!");
-			e.printStackTrace();
-			System.exit(-1);
+			Log.critical("Could not read the file!");
 		}
 		return fileSource;
 	}
@@ -882,8 +882,7 @@ public class OpenGL {
 		try {
 			final InputStream inputStream = Uri.getStream(name);
 			if (inputStream == null) {
-				Log.error("Could not read the file! " + name);
-				System.exit(-1);
+				Log.critical("Could not read the file! " + name);
 			}
 			final Reader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName(StandardCharsets.UTF_8.name())));
 			int c = 0;

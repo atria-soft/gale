@@ -12,7 +12,6 @@ import org.atriasoft.gale.key.KeyStatus;
 import org.atriasoft.gale.key.KeyType;
 
 public class Application {
-	public boolean canDraw = false;
 	private boolean needRedraw = true;
 	private String title = "gale";
 	private Uri iconName = null;
