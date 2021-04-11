@@ -41,9 +41,7 @@ public class OpenGL {
 	
 	// We map all the flag, but not all is supported by all platform...
 	public static enum Flag {
-		flag_blend, // !< If enabled, blend the computed fragment color values with the values in
-		// the color buffers.
-		// See glBlendFunc.
+		flag_blend, // !< If enabled, blend the computed fragment color values with the values in the color buffers. See glBlendFunc.
 		flag_clipDistanceI, // !< If enabled, clip geometry against user-defined half space i.
 		flag_colorLogigOP, // !< If enabled, apply the currently selected logical operation to the computed
 		// fragment color and color buffer values. See glLogicOp.
@@ -62,10 +60,8 @@ public class OpenGL {
 		// glDepthRange.
 		flag_depthTest, // !< If enabled, do depth comparisons and update the depth buffer. Note that
 		// even if the depth buffer exists and the depth mask is non-zero, the depth
-		// buffer is not updated if the depth test is disabled. See glDepthFunc and
-		// glDepthRange.
-		flag_dither, // !< If enabled, dither color components or indices before they are written to
-		// the color buffer.
+		// buffer is not updated if the depth test is disabled. See glDepthFunc and glDepthRange.
+		flag_dither, // !< If enabled, dither color components or indices before they are written to the color buffer.
 		flag_framebufferSRGB, // !< If enabled and the value of GLFRAMEBUFFERATTACHMENTCOLORENCODING for the
 		// framebuffer attachment corresponding to the destination buffer is GLSRGB, the
 		// R, G, and B destination color values (after conversion from fixed-point to
@@ -438,6 +434,10 @@ public class OpenGL {
 		GL11.glDrawElements(CONVERT_RENDER_MODE.get(mode), vertexCount, GL11.GL_UNSIGNED_INT, 0);
 	}
 	
+	public static void drawTriangleRed(final Vector3f aaa, final Vector3f bbb, final Vector3f ccc) {
+		GL11.glFinish();
+	}
+	
 	/**
 	 *  enable a flag on the system
 	 * @param flagID The flag requested
@@ -526,7 +526,11 @@ public class OpenGL {
 	}
 	
 	public static void glTexImage2D(final int level, final int internalFormat, final int width, final int height, final int border, final int format, final int sizeObject, final byte[] data) {
-		final ByteBuffer dataBuffer = ByteBuffer.wrap(data);
+		final ByteBuffer dataBuffer = ByteBuffer.allocateDirect(data.length);
+		for (int iii = 0; iii < data.length; iii++) {
+			dataBuffer.put(data[iii]);
+		}
+		dataBuffer.flip();
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, level, internalFormat, width, height, border, format, sizeObject, dataBuffer);
 	}
 	
@@ -535,7 +539,11 @@ public class OpenGL {
 	}
 	
 	public static void glTexSubImage2D(final int level, final int xOffset, final int yOffset, final int width, final int height, final int format, final int sizeObject, final byte[] data) {
-		final ByteBuffer dataBuffer = ByteBuffer.wrap(data);
+		final ByteBuffer dataBuffer = ByteBuffer.allocateDirect(data.length);
+		for (int iii = 0; iii < data.length; iii++) {
+			dataBuffer.put(data[iii]);
+		}
+		dataBuffer.flip();
 		GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, level, xOffset, yOffset, width, height, format, sizeObject, dataBuffer);
 	}
 	

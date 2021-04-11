@@ -87,7 +87,17 @@
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" kind="src" path="/atriasoft-etk">
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/atriasoft-egami">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/atriasoft-etk">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/atriasoft-io-gami">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>

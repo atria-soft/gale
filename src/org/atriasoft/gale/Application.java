@@ -17,7 +17,7 @@ public class Application {
 	private Uri iconName = null;
 	private final Cursor cursor = Cursor.arrow;
 	private Orientation orientation = Orientation.screenAuto;
-	Vector2f windowsSize = new Vector2f(800, 600);
+	private Vector2f windowsSize = new Vector2f(800, 600);
 	
 	public Application() {
 		Log.verbose("Constructor Gale Application");
@@ -286,6 +286,9 @@ public class Application {
 	 * @return 
 	 */
 	public void setSize(final Vector2f size) {
+		if (size.x() <= 0 || size.y() <= 0) {
+			Log.error("Wrong windows size: " + size);
+		}
 		this.windowsSize = size;
 		final Context context = Gale.getContext();
 		if (context == null) {

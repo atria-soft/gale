@@ -26,6 +26,8 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import io.scenarium.logger.Logger;
+
 import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2f;
 import org.atriasoft.gale.Application;
@@ -173,6 +175,9 @@ public class ContextLWJGLAWT extends Context implements MouseListener, MouseMoti
 				}
 				operatingSystemDraw(true);
 				swapBuffers();
+				if (Logger.isCriticalOccured()) {
+					ContextLWJGLAWT.this.frame.dispose();
+				}
 			}
 		}, BorderLayout.CENTER);
 		this.frame.pack();

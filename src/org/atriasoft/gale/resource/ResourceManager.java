@@ -141,22 +141,24 @@ public class ResourceManager {
 	 * Call by the system to send all the needed data on the graphic card chen they change ...
 	 * @param object The resources that might be updated
 	 */
-	public synchronized void update(final Resource object) {
-		// check if not added before
-		for (final Resource it : this.resourceListToUpdate) {
-			if (it == object) {
-				// just prevent some double add ...
-				return;
+	public void update(final Resource object) {
+		synchronized (this.resourceListToUpdate) {
+			// check if not added before
+			for (final Resource it : this.resourceListToUpdate) {
+				if (it == object) {
+					// just prevent some double add ...
+					return;
+				}
 			}
+			// add it ...
+			this.resourceListToUpdate.add(object);
 		}
-		// add it ...
-		this.resourceListToUpdate.add(object);
 	}
 	
 	/**
 	 * Call by the system chen the openGL Context has been unexpectially removed  == > This reload all the texture, VBO and other ....
 	 */
-	public synchronized void updateContext() {
+	public void updateContext() {
 		if (this.exiting) {
 			Log.error("Request update after application EXIT ...");
 			return;
@@ -165,7 +167,9 @@ public class ResourceManager {
 		if (this.contextHasBeenRemoved) {
 			// need to update all ...
 			this.contextHasBeenRemoved = false;
-			this.resourceListToUpdate.clear();
+			synchronized (this.resourceListToUpdate) {
+				this.resourceListToUpdate.clear();
+			}
 			synchronized (this.resourceList) {
 				if (this.resourceList.size() != 0) {
 					for (long jjj = 0; jjj < MAX_RESOURCE_LEVEL; jjj++) {
@@ -175,7 +179,9 @@ public class ResourceManager {
 								//Log.debug("Update context named : " + lresourceList[iii].getName());
 								if (!it.updateContext()) {
 									// Lock error ==> postponned
-									this.resourceListToUpdate.add(it);
+									synchronized (this.resourceListToUpdate) {
+										this.resourceListToUpdate.add(it);
+									}
 								}
 							}
 						}

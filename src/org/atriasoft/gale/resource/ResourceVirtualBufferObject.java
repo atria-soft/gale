@@ -172,7 +172,7 @@ public class ResourceVirtualBufferObject extends Resource {
 	 */
 	@Override
 	public synchronized boolean updateContext() {
-		Log.verbose(" Start: [" + getId() + "] '" + getName() + "' (size=" + this.buffer.length + ")");
+		Log.warning("updateContext (VBO Start: [" + getId() + "] '" + getName() + "' (size=" + this.buffer.length + ")");
 		/*
 		if (lock.tryLock() == false) {
 			//Lock error ==> try later ...
@@ -187,8 +187,8 @@ public class ResourceVirtualBufferObject extends Resource {
 		}
 		this.exist = true;
 		for (int iii = 0; iii < this.vbo.length; iii++) {
-			Log.verbose("VBO    : add [" + getId() + "]=" + this.buffer[iii].getClass().getCanonicalName() + "*sizeof(float) OGl_Id=" + this.vbo[iii]);
 			if (this.buffer[iii] != null) {
+				Log.verbose("VBO    : add [" + getId() + "]=" + this.buffer[iii].getClass().getCanonicalName() + "*sizeof(float) OGl_Id=" + this.vbo[iii]);
 				OpenGL.bindBuffer(this.vbo[iii]);
 				// select the buffer to set data inside it ...
 				if (this.buffer[iii] instanceof float[]) {

@@ -2,8 +2,8 @@ package org.atriasoft.gale.resource;
 
 import java.nio.ByteBuffer;
 
+import org.atriasoft.egami.Image;
 import org.atriasoft.etk.Uri;
-import org.atriasoft.etk.math.Vector2f;
 import org.atriasoft.etk.math.Vector2i;
 import org.atriasoft.gale.backend3d.OpenGL;
 import org.atriasoft.gale.internal.Log;
@@ -48,8 +48,30 @@ public class ResourceTexture extends Resource {
 		}
 		resource = new ResourceTexture(uriTexture, textureUnit);
 		final ImageRawData decodedData = ImageLoader.decodePngFile(uriTexture);
-		resource.setTexture(decodedData.getBuffer(), new Vector2i(decodedData.getWidth(), decodedData.getHeight()), (decodedData.isHasAlpha() ? TextureColorMode.rgba : TextureColorMode.rgb),
-				textureUnit);
+		Image img = new Image(decodedData.getWidth(), decodedData.getHeight());
+		ByteBuffer mlklmklm = decodedData.getBuffer();
+		byte[] elemData = new byte[mlklmklm.remaining()];
+		mlklmklm.get(elemData);
+		if (decodedData.isHasAlpha()) {
+			for (int yyy = 0; yyy < decodedData.getHeight(); yyy++) {
+				for (int xxx = 0; xxx < decodedData.getWidth(); xxx++) {
+					img.setR(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 0]);
+					img.setG(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 1]);
+					img.setB(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 2]);
+					img.setA(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 3]);
+				}
+			}
+		} else {
+			for (int yyy = 0; yyy < decodedData.getHeight(); yyy++) {
+				for (int xxx = 0; xxx < decodedData.getWidth(); xxx++) {
+					img.setA(xxx, yyy, 0xFF);
+					img.setR(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 0]);
+					img.setG(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 1]);
+					img.setB(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 2]);
+				}
+			}
+		}
+		resource.setTexture(img, new Vector2i(decodedData.getWidth(), decodedData.getHeight()), (decodedData.isHasAlpha() ? TextureColorMode.rgba : TextureColorMode.rgb), textureUnit);
 		resource.flush();
 		return resource;
 	}
@@ -73,34 +95,26 @@ public class ResourceTexture extends Resource {
 	
 	protected int texId = -1; //!< openGl textureID.
 	// some image are not square  == > we need to sqared it to prevent some openGl api error the the displayable size is not all the time 0.0 . 1.0.
-	protected Vector2f endPointSize = new Vector2f(-1, -1);
+	protected Vector2i endPointSize = new Vector2i(-1, -1);
 	// internal state of the openGl system.
 	protected boolean loaded = false;
 	// Image properties:
 	// pointer on the image data.
-	private ByteBuffer data = null;
+	//private ByteBuffer data = null;
+	protected Image data = new Image(32, 32);
 	// size of the image data.
 	private Vector2i size = new Vector2i(-1, -1);
 	//!< Color space of the image.
 	private TextureColorMode dataColorSpace = TextureColorMode.rgb;
 	// number of lines and colomns in the texture (multiple texturing in a single texture)
 	private int textureUnit = 0;
-	private String filename = "";
 	
 	protected ResourceTexture() {
 		super();
 	}
 	
-	// Public API:
-	protected ResourceTexture(final String filename, final int textureUnit) {
-		super(filename + "__" + textureUnit);
-		this.filename = filename;
-		this.textureUnit = textureUnit;
-	}
-	
 	protected ResourceTexture(final Uri filename, final int textureUnit) {
-		super(filename + "__" + textureUnit);
-		this.filename = filename.get();
+		super(filename.toString() + "__" + textureUnit);
 		this.textureUnit = textureUnit;
 	}
 	
@@ -136,7 +150,7 @@ public class ResourceTexture extends Resource {
 		return this.texId;
 	}
 	
-	public Vector2f getUsableSize() {
+	public Vector2i getUsableSize() {
 		return this.endPointSize;
 	}
 	
@@ -157,11 +171,11 @@ public class ResourceTexture extends Resource {
 		this.texId = -1;
 	}
 	
-	public void setTexture(final ByteBuffer data, final Vector2i size, final TextureColorMode dataColorSpace, final int textureUnit) {
+	public void setTexture(final Image data, final Vector2i size, final TextureColorMode dataColorSpace, final int textureUnit) {
 		this.data = data;
 		this.size = size;
 		this.textureUnit = textureUnit;
-		this.endPointSize = new Vector2f(size.x(), size.y());
+		this.endPointSize = new Vector2i(size.x(), size.y());
 		this.dataColorSpace = dataColorSpace;
 		flush();
 	}
@@ -191,9 +205,11 @@ public class ResourceTexture extends Resource {
 		GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
 		Log.info("TEXTURE: add [" + getId() + "]=" + this.size + " OGlId=" + this.texId);
 		if (this.dataColorSpace == TextureColorMode.rgb) {
-			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, this.size.x(), this.size.y(), 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, this.data);
+			OpenGL.glTexImage2D(0, GL11.GL_RGBA, this.size.x(), this.size.y(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, this.data.getRaw());
+			//The local image has not RGB but only RGBA data ... 
+			//OpenGL.glTexImage2D(0, GL11.GL_RGBA, this.size.x(), this.size.y(), 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, this.data.getRaw());
 		} else {
-			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, this.size.x(), this.size.y(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, this.data);
+			OpenGL.glTexImage2D(0, GL11.GL_RGBA, this.size.x(), this.size.y(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, this.data.getRaw());
 		}
 		// generate multi-texture mapping
 		GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);

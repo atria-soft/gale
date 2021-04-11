@@ -57,7 +57,7 @@ public abstract class Context {
 	private final Fps fpsSystemContext = new Fps("SystemContext", this.displayFps);
 	private final Fps fpsSystem = new Fps("System", this.displayFps);
 	private final Fps fpsFlush = new Fps("Flush", this.displayFps);
-	protected Vector2f windowsSize = new Vector2f(0, 0); //!< current size of the system
+	protected Vector2f windowsSize = Vector2f.ZERO; //!< current size of the system
 	protected boolean fullscreen = false;
 	protected Vector2f windowsPos; //!< current size of the system
 	
@@ -153,6 +153,9 @@ public abstract class Context {
 	 */
 	public void forceRedrawAll() {
 		if (this.application == null) {
+			return;
+		}
+		if (this.windowsSize == Vector2f.ZERO) {
 			return;
 		}
 		this.application.onResize(this.windowsSize);
@@ -615,16 +618,20 @@ public abstract class Context {
 	 * Processing all the event arrived ... (commoly called in draw function)
 	 */
 	public void processEvents() {
-		int nbEvent = 0;
-		//Log.debug(" ********  Event " << this.msgSystem.count());
-		while (this.msgSystem.size() > 0) {
-			nbEvent++;
-			//Log.verbose("    [" << nbEvent << "] event ...");
-			final ActionToDoInAsyncLoop func = getAction();
-			if (func == null) {
-				continue;
+		try {
+			int nbEvent = 0;
+			//Log.debug(" ********  Event " << this.msgSystem.count());
+			while (this.msgSystem.size() > 0) {
+				nbEvent++;
+				//Log.verbose("    [" << nbEvent << "] event ...");
+				final ActionToDoInAsyncLoop func = getAction();
+				if (func == null) {
+					continue;
+				}
+				func.run(this);
 			}
-			func.run(this);
+		} catch (Exception e) {
+			Log.critical("Catch exception in main event Loop ...", e);
 		}
 	}
 	

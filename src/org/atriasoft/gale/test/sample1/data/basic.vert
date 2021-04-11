@@ -16,6 +16,8 @@ uniform mat4 in_matrixView;
 out vec4 io_color;
 
 void main(void) {
+	//gl_Position = in_matrixProjection * vec4(in_position, 1.0);
 	gl_Position = in_matrixProjection * in_matrixView * in_matrixTransformation * vec4(in_position, 1.0);
-	f_color = in_colors;
+	//gl_Position = vec4(in_position, 1.0);
+	io_color = in_colors;
 }

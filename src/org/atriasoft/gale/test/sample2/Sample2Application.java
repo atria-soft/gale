@@ -8,13 +8,13 @@ import org.atriasoft.etk.math.Vector3f;
 import org.atriasoft.gale.Application;
 import org.atriasoft.gale.backend3d.OpenGL;
 import org.atriasoft.gale.context.Context;
-import org.atriasoft.gale.resource.ResourceProgram;
-import org.atriasoft.gale.resource.ResourceTexture;
-import org.atriasoft.gale.resource.ResourceVirtualArrayObject;
 import org.atriasoft.gale.key.KeyKeyboard;
 import org.atriasoft.gale.key.KeySpecial;
 import org.atriasoft.gale.key.KeyStatus;
 import org.atriasoft.gale.key.KeyType;
+import org.atriasoft.gale.resource.ResourceProgram;
+import org.atriasoft.gale.resource.ResourceTexture;
+import org.atriasoft.gale.resource.ResourceVirtualArrayObject;
 
 public class Sample2Application extends Application {
 	private ResourceProgram oGLprogram;
@@ -27,18 +27,16 @@ public class Sample2Application extends Application {
 	private ResourceVirtualArrayObject verticesVBO;
 	private ResourceTexture texture;
 	
-	
 	@Override
-	public void onCreate(Context context) {
-		this.canDraw = true;
+	public void onCreate(final Context context) {
 		setSize(new Vector2f(800, 600));
 		this.oGLprogram = ResourceProgram.create(new Uri("DATA", "basic.vert"), new Uri("DATA", "basic.frag"));
 		if (this.oGLprogram != null) {
-			this.oGLMatrixTransformation = this.oGLprogram.getUniform("matrixTransformation");
-			this.oGLMatrixProjection     = this.oGLprogram.getUniform("matrixProjection");
-			this.oGLMatrixView           = this.oGLprogram.getUniform("matrixView");
+			this.oGLMatrixTransformation = this.oGLprogram.getUniform("in_matrixTransformation");
+			this.oGLMatrixProjection = this.oGLprogram.getUniform("in_matrixProjection");
+			this.oGLMatrixView = this.oGLprogram.getUniform("in_matrixView");
 		}
-		
+		//@formatter:off
 		float[] vertices = {			
 				-0.5f,0.5f,-0.5f,	
 				-0.5f,-0.5f,-0.5f,	
@@ -82,14 +80,16 @@ public class Sample2Application extends Application {
 		};
 							 		
 		int[] indices = {
-				0,1,3,					3,1,2,	
-				4,5,7,					7,5,6,
-				8,9,11,					11,9,10,
+				1,0,3,					1,3,2,	
+				4,5,7,					7,5,6, 
+				9,8,11,					9,11,10,
 				12,13,15,				15,13,14,	
-				16,17,19,				19,17,18,
+				17,16,19,				17,19,18,
 				20,21,23,				23,21,22
 
 		};
+		//@formatter:on
+		
 		// this is the properties of the buffer requested : "r"/"w" + "-" + buffer type "f"=float "i"=integer
 		this.verticesVBO = ResourceVirtualArrayObject.create(vertices, textureCoords, null, indices);
 		// TO facilitate some debugs we add a name of the VBO:
@@ -104,8 +104,9 @@ public class Sample2Application extends Application {
 		}
 		Log.info("==> Init APPL (END)");
 	}
+	
 	@Override
-	public void onDraw(Context context) {
+	public void onDraw(final Context context) {
 		this.angleX += 0.001;
 		this.angleY += 0.005;
 		this.angleZ += 0.01;
@@ -113,7 +114,7 @@ public class Sample2Application extends Application {
 		Vector2f size = getSize();
 		//Log.info("==> Windows size = " + size);
 		// set the basic openGL view port: (position drawed in the windows)
-		OpenGL.setViewPort(new Vector2f(0,0), size);
+		OpenGL.setViewPort(new Vector2f(0, 0), size);
 		// Clear all the stacked matrix ...
 		OpenGL.setBasicMatrix(Matrix4f.IDENTITY);
 		// clear background
@@ -140,11 +141,11 @@ public class Sample2Application extends Application {
 		// set Matrix : translation/positionMatrix
 		Matrix4f projectionMatrix = tmpProjection; //OpenGL.getMatrix();
 		Matrix4f transforamtionMatrix = Matrix4f.IDENTITY;
-		transforamtionMatrix = transforamtionMatrix.multiply(Matrix4f.createMatrixTranslate(new Vector3f(0,0,-1)));
-		transforamtionMatrix = transforamtionMatrix.multiply(Matrix4f.createMatrixRotate(new Vector3f(1,0,0),this.angleX));
-		transforamtionMatrix = transforamtionMatrix.multiply(Matrix4f.createMatrixRotate(new Vector3f(0,1,0),this.angleY));
-		transforamtionMatrix = transforamtionMatrix.multiply(Matrix4f.createMatrixRotate(new Vector3f(0,0,1),this.angleZ));
-		Matrix4f viewMatrix = OpenGL.getCameraMatrix().multiply(Matrix4f.createMatrixTranslate(new Vector3f(0,0,-2)));
+		transforamtionMatrix = transforamtionMatrix.multiply(Matrix4f.createMatrixTranslate(new Vector3f(0, 0, -1)));
+		transforamtionMatrix = transforamtionMatrix.multiply(Matrix4f.createMatrixRotate(new Vector3f(1, 0, 0), this.angleX));
+		transforamtionMatrix = transforamtionMatrix.multiply(Matrix4f.createMatrixRotate(new Vector3f(0, 1, 0), this.angleY));
+		transforamtionMatrix = transforamtionMatrix.multiply(Matrix4f.createMatrixRotate(new Vector3f(0, 0, 1), this.angleZ));
+		Matrix4f viewMatrix = OpenGL.getCameraMatrix().multiply(Matrix4f.createMatrixTranslate(new Vector3f(0, 0, -2)));
 		//Matrix4f tmpMatrix = projMatrix * camMatrix;
 		this.verticesVBO.bindForRendering();
 		this.oGLprogram.uniformMatrix(this.oGLMatrixView, viewMatrix);
@@ -162,27 +163,22 @@ public class Sample2Application extends Application {
 		this.oGLprogram.unUse();
 		// Restore context of matrix
 		OpenGL.pop();
-		this.markDrawingIsNeeded();
+		markDrawingIsNeeded();
 	}
+	
 	@Override
-	public void onPointer(KeySpecial special,
-			KeyType type,
-	               int pointerID,
-	                Vector2f pos,
-	               KeyStatus state) {
-//		Log.info("input event: type=" + type);
-//		Log.info("               id=" + pointerID);
-//		Log.info("              pos=" + pos);
-//		Log.info("            state=" + state);
-	}
-	@Override
-	public void onKeyboard( KeySpecial special,
-	                KeyKeyboard type,
-	                Character value,
-	                KeyStatus state) {
+	public void onKeyboard(final KeySpecial special, final KeyKeyboard type, final Character value, final KeyStatus state) {
 		Log.info("Keyboard event: special=" + special);
 		Log.info("                   type=" + type);
 		Log.info("                  value='" + value + "'");
 		Log.info("                  state=" + state);
+	}
+	
+	@Override
+	public void onPointer(final KeySpecial special, final KeyType type, final int pointerID, final Vector2f pos, final KeyStatus state) {
+		//		Log.info("input event: type=" + type);
+		//		Log.info("               id=" + pointerID);
+		//		Log.info("              pos=" + pos);
+		//		Log.info("            state=" + state);
 	}
 }
