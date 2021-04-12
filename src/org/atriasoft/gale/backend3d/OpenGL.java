@@ -307,20 +307,20 @@ public class OpenGL {
 	}
 	
 	public static void checkGlError(final String op) {
-		// int localLine = Thread.currentThread().getStackTrace()[2].getLineNumber();
-		// if (CHECKERROROPENGL == true) {
-		// boolean hasError = false;
-		// for (int error = GL11.glGetError(); error!=null; error = GL11.glGetError()) {
-		// Log.error("after " + op + "():" + localLine + " glError(" + error + ")");
-		// hasError = true;
-		// }
-		// if (hasError == true) {
-		// Log.critical("plop");
-		// }
-		// for (GLint error = glGetError(); error; error = glGetError()) {
-		// Log.error("after " + op + "() glError (" + error + ")");
-		// }
-		// }
+		//int localLine = Thread.currentThread().getStackTrace()[2].getLineNumber();
+		//		if (CHECKERROROPENGL) {
+		//			boolean hasError = false;
+		//			for (int error = GL11.glGetError(); error != null; error = GL11.glGetError()) {
+		//				Log.error("after " + op + "():" + localLine + " glError(" + error + ")");
+		//				hasError = true;
+		//			}
+		//			if (hasError) {
+		//				Log.critical("plop");
+		//			}
+		//			for (GLint error = glGetError(); error; error = glGetError()) {
+		//				Log.error("after " + op + "() glError (" + error + ")");
+		//			}
+		//		}
 	}
 	
 	/**
@@ -1042,6 +1042,16 @@ public class OpenGL {
 	}
 	
 	public static FloatBuffer storeDataInFloatBuffer(final Color[] data) {
+		float[] tmpData = new float[data.length * 4];
+		for (int iii = 0; iii < data.length; iii++) {
+			tmpData[iii * 4] = data[iii].r();
+			tmpData[iii * 4 + 1] = data[iii].g();
+			tmpData[iii * 4 + 2] = data[iii].b();
+			tmpData[iii * 4 + 3] = data[iii].a();
+		}
+		return storeDataInFloatBuffer(tmpData);
+		// does not work...
+		/*
 		final FloatBuffer buffer = FloatBuffer.allocate(data.length * 4);
 		for (int iii = 0; iii < data.length; iii++) {
 			buffer.put(iii * 4, data[iii].r());
@@ -1051,6 +1061,7 @@ public class OpenGL {
 		}
 		buffer.flip();
 		return buffer;
+		*/
 	}
 	
 	private static FloatBuffer storeDataInFloatBuffer(final float[] data) {
@@ -1068,6 +1079,14 @@ public class OpenGL {
 	}
 	
 	public static FloatBuffer storeDataInFloatBuffer(final Vector2f[] data) {
+		float[] tmpData = new float[data.length * 2];
+		for (int iii = 0; iii < data.length; iii++) {
+			tmpData[iii * 2] = data[iii].x();
+			tmpData[iii * 2 + 1] = data[iii].y();
+		}
+		return storeDataInFloatBuffer(tmpData);
+		// does not work...
+		/*
 		final FloatBuffer buffer = FloatBuffer.allocate(data.length * 2);
 		for (int iii = 0; iii < data.length; iii++) {
 			buffer.put(iii * 2, data[iii].x());
@@ -1075,17 +1094,30 @@ public class OpenGL {
 		}
 		buffer.flip();
 		return buffer;
+		*/
 	}
 	
 	public static FloatBuffer storeDataInFloatBuffer(final Vector3f[] data) {
+		float[] tmpData = new float[data.length * 3];
+		for (int iii = 0; iii < data.length; iii++) {
+			tmpData[iii * 3] = data[iii].x();
+			tmpData[iii * 3 + 1] = data[iii].y();
+			tmpData[iii * 3 + 2] = data[iii].z();
+		}
+		return storeDataInFloatBuffer(tmpData);
+		// does not work...
+		/*
 		final FloatBuffer buffer = FloatBuffer.allocate(data.length * 3);
 		for (int iii = 0; iii < data.length; iii++) {
-			buffer.put(iii * 3, data[iii].x());
-			buffer.put(iii * 3 + 1, data[iii].y());
-			buffer.put(iii * 3 + 2, data[iii].z());
+			buffer.put(data[iii].x());
+			buffer.put(data[iii].y());
+			buffer.put(data[iii].z());
 		}
-		buffer.flip();
+		//buffer.flip();
+		//buffer.limit(data.length * 3);
+		//return buffer.asReadOnlyBuffer();
 		return buffer;
+		*/
 	}
 	
 	/**

@@ -23,13 +23,13 @@ public class ResourceVirtualBufferObject extends Resource {
 		return new ResourceVirtualBufferObject(count);
 	}
 	
-	private boolean exist = false; //!< This data is availlable in the Graphic card
+	private boolean exist = false; //!< This data is available in the Graphic card
 	private final int[] vbo; //!< openGl ID of this VBO
-	private final Object[] buffer; //!< data that is availlable in the VBO system ...
+	private final Object[] buffer; //!< data that is available in the VBO system ...
 	
 	/**
 	 * Constructor of this VBO.
-	 * @param accesMode Acces mode : ???
+	 * @param accesMode Access mode : ???
 	 */
 	protected ResourceVirtualBufferObject(final int number) {
 		super();

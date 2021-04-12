@@ -126,6 +126,24 @@ public class ResourceProgram extends Resource {
 		OpenGL.programBindAttribute(this.program, attribute, variableName);
 	}
 	
+	public void bindVBO(final int idElem, final ResourceVirtualBufferObject vbo, final int vboId) {
+		if (!this.exist) {
+			return;
+		}
+		if (idElem < 0 || idElem > this.elementList.size()) {
+			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			return;
+		}
+		if (!this.elementList.get(idElem).isLinked) {
+			return;
+		}
+		
+		Log.error("[" + this.elementList.get(idElem).name + "] send on oglID=" + vbo.getOpenGlId(vboId) + " VBOindex=" + vboId);
+		GL20.glBindBuffer(GL20.GL_ARRAY_BUFFER, vbo.getOpenGlId(vboId));
+		GL20.glEnableVertexAttribArray(this.elementList.get(idElem).elementId);
+		this.listOfVBOUsed.add(this.elementList.get(idElem).elementId);
+	}
+	
 	/**
 	 * Check If an Id is valid in the shader or not (sometime the shader have
 	 *        not some attribute, then we need to display some error)
@@ -158,16 +176,6 @@ public class ResourceProgram extends Resource {
 		this.hasTexture1 = false;
 	}
 	
-	private float[] convertInFloat(final List<Vector3f> data) {
-		final float[] out = new float[data.size() * 3];
-		for (int iii = 0; iii < data.size(); iii++) {
-			out[iii * 3] = data.get(iii).x();
-			out[iii * 3 + 1] = data.get(iii).y();
-			out[iii * 3 + 2] = data.get(iii).z();
-		}
-		return out;
-	}
-	
 	// private void storeDataInAttributeList(int attributeNumber, int
 	// coordinateSize, float[] data) {
 	// int vboID = GL15.glGenBuffers();
@@ -179,6 +187,16 @@ public class ResourceProgram extends Resource {
 	// false, 0, 0);
 	// GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 	// }
+	
+	private float[] convertInFloat(final List<Vector3f> data) {
+		final float[] out = new float[data.size() * 3];
+		for (int iii = 0; iii < data.size(); iii++) {
+			out[iii * 3] = data.get(iii).x();
+			out[iii * 3 + 1] = data.get(iii).y();
+			out[iii * 3 + 2] = data.get(iii).z();
+		}
+		return out;
+	}
 	
 	/**
 	 * User request an attribute on this program.

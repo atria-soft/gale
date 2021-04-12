@@ -16,10 +16,18 @@ import org.atriasoft.gale.resource.ResourceProgram;
 import org.atriasoft.gale.resource.ResourceVirtualArrayObject;
 
 public class Sample1Application extends Application {
+	//float[] vertices = { 0.2f, 0.1f, 0.0f, 0.3f, 0.4f, 0.0f, 0.1f, 0.4f, 0.0f };
+	private static final float[] VERTICES = { -0.5f, -0.5f, -1.0f, 0.0f, 0.5f, -1.0f, 0.5f, -0.5f, -1.0f };
+	private static final float[] COLORS = { 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, };
+	private static final int[] INDICES = { 0, 1, 2 };
+	
+	private static final boolean TEST_STATIC_MODE = false;
+	
 	private ResourceProgram oGLprogram;
 	private int oGLMatrixTransformation;
 	private int oGLMatrixProjection;
 	private int oGLMatrixView;
+	
 	private float angle;
 	private ResourceVirtualArrayObject verticesVBO;
 	
@@ -34,12 +42,12 @@ public class Sample1Application extends Application {
 			this.oGLMatrixView = this.oGLprogram.getUniform("in_matrixView");
 		}
 		
-		//float[] vertices = { 0.2f, 0.1f, 0.0f, 0.3f, 0.4f, 0.0f, 0.1f, 0.4f, 0.0f };
-		float[] vertices = { -0.5f, -0.5f, -1.0f, 0.0f, 0.5f, -1.0f, 0.5f, -0.5f, -1.0f };
-		float[] colors = { 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, };
-		int[] indices = { 0, 1, 2 };
 		// this is the properties of the buffer requested : "r"/"w" + "-" + buffer type "f"=float "i"=integer
-		this.verticesVBO = ResourceVirtualArrayObject.create(vertices, colors, indices);
+		if (TEST_STATIC_MODE) {
+			this.verticesVBO = ResourceVirtualArrayObject.create(VERTICES, COLORS, INDICES);
+		} else {
+			this.verticesVBO = ResourceVirtualArrayObject.createDynamic();
+		}
 		// TO facilitate some debugs we add a name of the VBO:
 		this.verticesVBO.setName("[VBO] of basic SAMPLE");
 		// update all the VBO elements ...
@@ -88,13 +96,25 @@ public class Sample1Application extends Application {
 		this.oGLprogram.uniformMatrix(this.oGLMatrixTransformation, transforamtionMatrix);
 		
 		// Request the draw of the elements:
-		this.verticesVBO.render(OpenGL.RenderMode.triangle);
-		
+		if (TEST_STATIC_MODE) {
+			this.verticesVBO.render(OpenGL.RenderMode.triangle);
+		} else {
+			this.verticesVBO.renderArrays(OpenGL.RenderMode.triangle);
+		}
 		this.verticesVBO.unBindForRendering();
 		this.oGLprogram.unUse();
 		// Restore context of matrix
 		OpenGL.pop();
+		// mark to redraw the screen ==> demo only....
 		markDrawingIsNeeded();
+		
+		if (!TEST_STATIC_MODE) {
+			this.verticesVBO.clear();
+			this.verticesVBO.setPosition(VERTICES);
+			this.verticesVBO.setColors(COLORS);
+			this.verticesVBO.setVertexCount(3);
+			this.verticesVBO.flush();
+		}
 	}
 	
 	@Override
