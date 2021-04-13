@@ -192,6 +192,10 @@ public class ResourceVirtualArrayObject extends Resource {
 		return this.vaoID;
 	}
 	
+	public int getVertexCount() {
+		return this.vertexCount;
+	}
+	
 	public void loadAgainToVAO() {
 		createVAO();
 		if (this.indices != null) {
@@ -275,16 +279,20 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 	
 	public void render(final RenderMode mode) {
-		Log.warning("request rendering indices : " + this.vertexCount);
+		Log.verbose("request rendering indices : " + this.vertexCount);
 		OpenGL.drawElements(mode, this.vertexCount);
 	}
 	
 	public void renderArrays(final RenderMode mode) {
-		Log.warning("request rendering direct : " + this.vertexCount);
+		Log.verbose("request rendering direct : " + this.vertexCount);
 		OpenGL.drawArrays(mode, 0, this.vertexCount);
 	}
 	
-	public void setColors(final Object colors) {
+	public void setColors(final Color[] colors) {
+		this.colors = colors;
+	}
+	
+	public void setColors(final float[] colors) {
 		this.colors = colors;
 	}
 	
@@ -297,15 +305,27 @@ public class ResourceVirtualArrayObject extends Resource {
 		this.vertexCount = this.indices.length;
 	}
 	
-	public void setNormals(final Object normals) {
+	public void setNormals(final float[] normals) {
 		this.normals = normals;
 	}
 	
-	public void setPosition(final Object positions) {
+	public void setNormals(final Vector3f[] normals) {
+		this.normals = normals;
+	}
+	
+	public void setPosition(final float[] positions) {
+		this.positions = positions;
+	}
+	
+	public void setPosition(final Vector3f[] positions) {
 		this.positions = positions;
 	}
 	
 	public void setTextureCoordinate(final float[] textureCoordinates) {
+		this.textureCoordinates = textureCoordinates;
+	}
+	
+	public void setTextureCoordinate(final Vector2f[] textureCoordinates) {
 		this.textureCoordinates = textureCoordinates;
 	}
 	

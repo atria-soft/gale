@@ -37,7 +37,7 @@ public class Gale {
 	 * @param _argv Standard argv
 	 * @return normal error int for the application error management
 	 */
-	public static int run(final Application application, final String[] arg) {
+	public static int run(final GaleApplication application, final String[] arg) {
 		init();
 		//etk::init(_argc, _argv);
 		Context context = null;

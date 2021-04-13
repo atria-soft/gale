@@ -30,9 +30,9 @@ import io.scenarium.logger.Logger;
 
 import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2f;
-import org.atriasoft.gale.Application;
 import org.atriasoft.gale.DisplayManagerDraw;
 import org.atriasoft.gale.Fps;
+import org.atriasoft.gale.GaleApplication;
 import org.atriasoft.gale.context.Context;
 import org.atriasoft.gale.internal.Log;
 import org.atriasoft.gale.key.KeyKeyboard;
@@ -67,7 +67,7 @@ public class ContextLWJGLAWT extends Context implements MouseListener, MouseMoti
 	private static double currentMousePositionX = 0;
 	private static double currentMousePositionY = 0;
 	
-	public static Context create(final Application application, final String[] arg) {
+	public static Context create(final GaleApplication application, final String[] arg) {
 		// TODO Auto-generated method stub
 		return new ContextLWJGLAWT(application, arg);
 	}
@@ -101,7 +101,7 @@ public class ContextLWJGLAWT extends Context implements MouseListener, MouseMoti
 	
 	private final List<Integer> pressedKey = new ArrayList<>();
 	
-	public ContextLWJGLAWT(final Application application, final String[] args) {
+	public ContextLWJGLAWT(final GaleApplication application, final String[] args) {
 		super(application, args);
 		System.out.println("Hello JOGL !");
 		initWindows();
@@ -202,50 +202,50 @@ public class ContextLWJGLAWT extends Context implements MouseListener, MouseMoti
 	public void keyEvent(final KeyEvent e, final boolean pressed, final boolean thisIsAReapeateKey) {
 		//Log.info("event " + thisIsAReapeateKey + "   " + e.getKeyCode() + "   " + e);
 		boolean find = true;
-		KeyKeyboard keyInput = KeyKeyboard.unknow;
+		KeyKeyboard keyInput = KeyKeyboard.UNKNOWN;
 		//Log.error("keyboard input " + e.getWhen() + "  " + e.getKeyCode() + "  " + e.getKeyLocation());
 		switch (e.getKeyCode()) {
 			//case 328: // keypad
 			case KeyEvent.VK_UP:
-				keyInput = KeyKeyboard.up;
+				keyInput = KeyKeyboard.UP;
 				break;
 			//case 324: // keypad
 			case KeyEvent.VK_LEFT:
-				keyInput = KeyKeyboard.left;
+				keyInput = KeyKeyboard.LEFT;
 				break;
 			//case 326: // keypad
 			case KeyEvent.VK_RIGHT:
-				keyInput = KeyKeyboard.right;
+				keyInput = KeyKeyboard.RIGHT;
 				break;
 			//case 323: // keypad
 			case KeyEvent.VK_DOWN:
-				keyInput = KeyKeyboard.down;
+				keyInput = KeyKeyboard.DOWN;
 				break;
 			//case 329: // keypad
 			case KeyEvent.VK_PAGE_UP:
-				keyInput = KeyKeyboard.pageUp;
+				keyInput = KeyKeyboard.PAGE_UP;
 				break;
 			//case 323: // keypad
 			case KeyEvent.VK_PAGE_DOWN:
-				keyInput = KeyKeyboard.pageDown;
+				keyInput = KeyKeyboard.PAGE_DOWN;
 				break;
 			//case 327: // keypad
 			case KeyEvent.VK_HOME:
-				keyInput = KeyKeyboard.start;
+				keyInput = KeyKeyboard.START;
 				break;
 			//case 321: // keypad
 			case KeyEvent.VK_END:
-				keyInput = KeyKeyboard.end;
+				keyInput = KeyKeyboard.END;
 				break;
 			case KeyEvent.VK_PRINTSCREEN:
-				keyInput = KeyKeyboard.stopDefil;
+				keyInput = KeyKeyboard.STOP_DEFIL;
 				break;
 			case KeyEvent.VK_PAUSE:
-				keyInput = KeyKeyboard.wait;
+				keyInput = KeyKeyboard.WAIT;
 				break;
 			//case 320: // keypad
 			case KeyEvent.VK_INSERT:
-				keyInput = KeyKeyboard.insert;
+				keyInput = KeyKeyboard.INSERT;
 				if (!pressed) {
 					if (this.guiKeyBoardMode.getInsert()) {
 						this.guiKeyBoardMode.setInsert(false);
@@ -256,117 +256,117 @@ public class ContextLWJGLAWT extends Context implements MouseListener, MouseMoti
 				break;
 			//case 84:  keyInput = KeyboardCenter; break; // Keypad
 			case KeyEvent.VK_F1:
-				keyInput = KeyKeyboard.f1;
+				keyInput = KeyKeyboard.F1;
 				break;
 			case KeyEvent.VK_F2:
-				keyInput = KeyKeyboard.f2;
+				keyInput = KeyKeyboard.F2;
 				break;
 			case KeyEvent.VK_F3:
-				keyInput = KeyKeyboard.f3;
+				keyInput = KeyKeyboard.F3;
 				break;
 			case KeyEvent.VK_F4:
-				keyInput = KeyKeyboard.f4;
+				keyInput = KeyKeyboard.F4;
 				break;
 			case KeyEvent.VK_F5:
-				keyInput = KeyKeyboard.f5;
+				keyInput = KeyKeyboard.F5;
 				break;
 			case KeyEvent.VK_F6:
-				keyInput = KeyKeyboard.f6;
+				keyInput = KeyKeyboard.F6;
 				break;
 			case KeyEvent.VK_F7:
-				keyInput = KeyKeyboard.f7;
+				keyInput = KeyKeyboard.F7;
 				break;
 			case KeyEvent.VK_F8:
-				keyInput = KeyKeyboard.f8;
+				keyInput = KeyKeyboard.F8;
 				break;
 			case KeyEvent.VK_F9:
-				keyInput = KeyKeyboard.f9;
+				keyInput = KeyKeyboard.F9;
 				break;
 			case KeyEvent.VK_F10:
-				keyInput = KeyKeyboard.f10;
+				keyInput = KeyKeyboard.F10;
 				break;
 			case KeyEvent.VK_F11:
-				keyInput = KeyKeyboard.f11;
+				keyInput = KeyKeyboard.F11;
 				break;
 			case KeyEvent.VK_F12:
-				keyInput = KeyKeyboard.f12;
+				keyInput = KeyKeyboard.F12;
 				break;
 			case KeyEvent.VK_CAPS_LOCK:
-				keyInput = KeyKeyboard.capLock;
+				keyInput = KeyKeyboard.CAP_LOCK;
 				this.guiKeyBoardMode.setCapsLock(pressed);
 				break;
 			case KeyEvent.VK_SHIFT:
 				if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
-					keyInput = KeyKeyboard.shiftLeft;
+					keyInput = KeyKeyboard.SHIFT_LEFT;
 					this.guiKeyBoardMode.setShiftLeft(pressed);
 					break;
 				} else if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
-					keyInput = KeyKeyboard.shiftLeft;
+					keyInput = KeyKeyboard.SHIFT_LEFT;
 					this.guiKeyBoardMode.setShiftRight(pressed);
 					break;
 				}
 			case KeyEvent.VK_CONTROL:
 				if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
-					keyInput = KeyKeyboard.ctrlLeft;
+					keyInput = KeyKeyboard.CTRL_LEFT;
 					this.guiKeyBoardMode.setCtrlLeft(pressed);
 					break;
 				} else if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
-					keyInput = KeyKeyboard.ctrlRight;
+					keyInput = KeyKeyboard.CTRL_RIGHT;
 					this.guiKeyBoardMode.setCtrlRight(pressed);
 					break;
 				}
 			case KeyEvent.VK_META:
 				if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
-					keyInput = KeyKeyboard.metaLeft;
+					keyInput = KeyKeyboard.META_LEFT;
 					this.guiKeyBoardMode.setMetaLeft(pressed);
 					break;
 				} else if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
-					keyInput = KeyKeyboard.metaRight;
+					keyInput = KeyKeyboard.META_RIGHT;
 					this.guiKeyBoardMode.setMetaRight(pressed);
 					break;
 				}
 			case KeyEvent.VK_ALT:
-				keyInput = KeyKeyboard.altLeft;
+				keyInput = KeyKeyboard.ALT_LEFT;
 				this.guiKeyBoardMode.setAltLeft(pressed);
 				break;
 			case KeyEvent.VK_ALT_GRAPH:
-				keyInput = KeyKeyboard.altRight;
+				keyInput = KeyKeyboard.ALT_RIGHT;
 				this.guiKeyBoardMode.setAltRight(pressed);
 				break;
 			case KeyEvent.VK_CONTEXT_MENU:
-				keyInput = KeyKeyboard.contextMenu;
+				keyInput = KeyKeyboard.CONTEXT_MENU;
 				break;
 			case KeyEvent.VK_NUM_LOCK:
-				keyInput = KeyKeyboard.numLock;
+				keyInput = KeyKeyboard.NUM_LOCK;
 				this.guiKeyBoardMode.setNumLock(pressed);
 				break;
 			case KeyEvent.VK_DELETE: // Suppr on keypad
 				find = false;
 				if (this.guiKeyBoardMode.getNumLock()) {
 					if (thisIsAReapeateKey) {
-						operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.character, (!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, '.');
+						operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, '.');
 					}
-					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.character, (pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, '.');
+					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, '.');
 				} else {
 					if (thisIsAReapeateKey) {
-						operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.character, (!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x7F);
+						operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x7F);
 					}
-					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.character, (pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x7F);
+					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x7F);
 				}
 				break;
 			case KeyEvent.VK_TAB: // special case for TAB
 				find = false;
 				if (thisIsAReapeateKey) {
-					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.character, (!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x09);
+					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x09);
 				}
-				operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.character, (pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x09);
+				operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x09);
 				break;
 			default:
 				find = false;
 				if (thisIsAReapeateKey) {
-					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.character, (!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, e.getKeyChar());
+					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, e.getKeyChar());
 				}
-				operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.character, (pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, e.getKeyChar());
+				operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, e.getKeyChar());
 		}
 		if (find) {
 			if (thisIsAReapeateKey) {

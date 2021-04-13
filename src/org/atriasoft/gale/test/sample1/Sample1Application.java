@@ -5,7 +5,7 @@ import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Matrix4f;
 import org.atriasoft.etk.math.Vector2f;
 import org.atriasoft.etk.math.Vector3f;
-import org.atriasoft.gale.Application;
+import org.atriasoft.gale.GaleApplication;
 import org.atriasoft.gale.backend3d.OpenGL;
 import org.atriasoft.gale.context.Context;
 import org.atriasoft.gale.key.KeyKeyboard;
@@ -15,7 +15,7 @@ import org.atriasoft.gale.key.KeyType;
 import org.atriasoft.gale.resource.ResourceProgram;
 import org.atriasoft.gale.resource.ResourceVirtualArrayObject;
 
-public class Sample1Application extends Application {
+public class Sample1Application extends GaleApplication {
 	//float[] vertices = { 0.2f, 0.1f, 0.0f, 0.3f, 0.4f, 0.0f, 0.1f, 0.4f, 0.0f };
 	private static final float[] VERTICES = { -0.5f, -0.5f, -1.0f, 0.0f, 0.5f, -1.0f, 0.5f, -0.5f, -1.0f };
 	private static final float[] COLORS = { 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, };

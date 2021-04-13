@@ -6,7 +6,7 @@ import org.atriasoft.etk.Color;
 import org.atriasoft.etk.ThreadAbstract;
 import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2f;
-import org.atriasoft.gale.Application;
+import org.atriasoft.gale.GaleApplication;
 import org.atriasoft.gale.Fps;
 import org.atriasoft.gale.Gale;
 import org.atriasoft.gale.Orientation;
@@ -45,7 +45,7 @@ public abstract class Context {
 	}
 	
 	protected ThreadAbstract periodicThread;;
-	protected Application application; //!< Application handle
+	protected GaleApplication application; //!< Application handle
 	protected ApplicationState applicationState = ApplicationState.UNDEFINED; // state of the application
 	private final CommandLine commandLine = new CommandLine(); //!< Start command line information;
 	private final ResourceManager resourceManager = new ResourceManager(); //!< global resources Manager
@@ -61,7 +61,7 @@ public abstract class Context {
 	protected boolean fullscreen = false;
 	protected Vector2f windowsPos; //!< current size of the system
 	
-	public Context(final Application application, final String[] args) {
+	public Context(final GaleApplication application, final String[] args) {
 		// set a basic
 		this.application = application;
 		this.applicationState = ApplicationState.CREATE;
@@ -109,7 +109,7 @@ public abstract class Context {
 		Log.info("GALE v:" + Gale.getVersion());
 		forceOrientation(Orientation.screenAuto);
 		postAction((context) -> {
-			final Application appl = context.getApplication();
+			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
 				this.applicationState = ApplicationState.UNDEFINED;
 				return;
@@ -178,7 +178,7 @@ public abstract class Context {
 		return message;
 	}
 	
-	public Application getApplication() {
+	public GaleApplication getApplication() {
 		return this.application;
 	}
 	
@@ -278,7 +278,7 @@ public abstract class Context {
 	 */
 	public void operatingSystemClipBoardArrive(final ClipboardList clipboardID) {
 		postAction((context) -> {
-			final Application appl = context.getApplication();
+			final GaleApplication appl = context.getApplication();
 			if (appl != null) {
 				appl.onClipboardEvent(clipboardID);
 			}
@@ -467,7 +467,7 @@ public abstract class Context {
 		postAction((context) -> {
 			Log.debug("Receive MSG : THREADMOVE : " + context.windowsPos + " ==> " + pos);
 			context.windowsPos = pos;
-			final Application appl = context.getApplication();
+			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
 				return;
 			}
@@ -496,7 +496,7 @@ public abstract class Context {
 			Log.debug("Receive MSG : THREADRESIZE : " + context.windowsSize + " ==> " + size);
 			context.windowsSize = size;
 			//gale::Dimension::setPixelWindowsSize(context.windowsSize);
-			final Application tmpAppl = context.getApplication();
+			final GaleApplication tmpAppl = context.getApplication();
 			if (tmpAppl != null) {
 				tmpAppl.onResize(context.windowsSize);
 			}
@@ -523,7 +523,7 @@ public abstract class Context {
 	
 	public void operatingSystemSetInput(final KeySpecial special, final KeyType type, final KeyStatus status, final int pointerID, final Vector2f pos) {
 		postAction((context) -> {
-			final Application appl = context.getApplication();
+			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
 				return;
 			}
@@ -549,7 +549,7 @@ public abstract class Context {
 	
 	public void operatingSystemsetKeyboard2(final KeySpecial special, final KeyKeyboard type, final KeyStatus state, final Character charValue) {
 		postAction((context) -> {
-			final Application appl = context.getApplication();
+			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
 				return;
 			}
@@ -723,8 +723,9 @@ public abstract class Context {
 	 * The application request a change of his current size.
 	 * @param size new Requested size of the windows.
 	 */
-	public void setSize(final Vector2f size) {
+	public boolean setSize(final Vector2f size) {
 		Log.info("setSize: NOT implemented ...");
+		return false;
 	}
 	
 	/**
@@ -809,7 +810,7 @@ class PeriodicThread extends ThreadAbstract {
 		synchronized (this.context) {
 			this.context.processEvents();
 			// call all the application for periodic request (the application manage multiple instance )...
-			final Application appl = this.context.getApplication();
+			final GaleApplication appl = this.context.getApplication();
 			if (appl != null) {
 				appl.onPeriod(System.currentTimeMillis());
 			}

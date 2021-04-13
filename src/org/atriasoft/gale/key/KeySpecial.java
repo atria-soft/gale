@@ -12,293 +12,322 @@ public class KeySpecial {
 	private boolean valueAltRight = false;
 	private boolean valueNumLock = false;
 	private boolean valueInsert = false;
+	
 	/**
 	 * Main ructor
 	 */
 	public KeySpecial() {
 		
 	}
-	/**
-	 * get the current CapLock Status
-	 * @return The CapLock value
-	 */
-	public boolean getCapsLock() {
-		return valueCapLock;
-	}
-	/**
-	 * set the current CapLock Status
-	 * @param value The new CapLock value
-	 */
-	public void setCapsLock(boolean value) {
-		valueCapLock = value;
-	}
-	/**
-	 * Get the current Shift key status
-	 * @return The Shift value
-	 */
-	public boolean getShift() {
-		return valueShiftLeft || valueShiftRight;
-	}
-	/**
-	 * Get the current Shift left key status
-	 * @return The Shift value
-	 */
-	public boolean getShiftLeft() {
-		return valueShiftLeft;
-	}
-	/**
-	 * Get the current Shift right key status
-	 * @return The Shift value
-	 */
-	public boolean getShiftRight() {
-		return valueShiftRight;
-	}
-	/**
-	 * Set the current Shift left key status
-	 * @param value The new Shift value
-	 */
-	public void setShiftLeft(boolean value) {
-		valueShiftLeft = value;
-	}
-	/**
-	 * Set the current Shift right key status
-	 * @param value The new Shift value
-	 */
-	public void setShiftRight(boolean value) {
-		valueShiftRight = value;
-	}
-	/**
-	 * Get the Current Control key status
-	 * @return The Control value
-	 */
-	public boolean getCtrl() {
-		return valueCtrlLeft || valueCtrlRight;
-	}
-	/**
-	 * Get the Current Control left key status
-	 * @return The Control value
-	 */
-	public boolean getCtrlLeft() {
-		return valueCtrlLeft;
-	}
-	/**
-	 * Get the Current Control right key status
-	 * @return The Control value
-	 */
-	public boolean getCtrlRight() {
-		return valueCtrlRight;
-	}
-	/**
-	 * Set the Current Control left key status
-	 * @param value The new Control value
-	 */
-	public void setCtrlLeft(boolean value){
-		valueCtrlLeft = value;
-	}
-	/**
-	 * Set the Current Control right key status
-	 * @param value The new Control value
-	 */
-	public void setCtrlRight(boolean value) {
-		valueCtrlRight = value;
-	}
-	/**
-	 * Get the current Meta key status (also named windows or apple key)
-	 * @return The Meta value (name Windows key, apple key, command key ...)
-	 */
-	public boolean getMeta() {
-		return valueMetaLeft || valueMetaRight;
-	}
-	/**
-	 * Get the current Meta left key status (also named windows or apple key)
-	 * @return The Meta value (name Windows key, apple key, command key ...)
-	 */
-	public boolean getMetaLeft() {
-		return valueMetaLeft;
-	}
-	/**
-	 * Get the current Meta right key status (also named windows or apple key)
-	 * @return The Meta value (name Windows key, apple key, command key ...)
-	 */
-	public boolean getMetaRight() {
-		return valueMetaRight;
-	}
-	/**
-	 * Set the current Meta left key status (also named windows or apple key)
-	 * @param value The new Meta value (name Windows key, apple key, command key ...)
-	 */
-	public void setMetaLeft(boolean value) {
-		valueMetaLeft = value;
-	}
-	/**
-	 * Set the current Meta right key status (also named windows or apple key)
-	 * @param value The new Meta value (name Windows key, apple key, command key ...)
-	 */
-	public void setMetaRight(boolean value) {
-		valueMetaRight = value;
-	}
-	/**
-	 * Get the current Alt key status
-	 * @return The Alt value
-	 */
-	public boolean getAlt() {
-		return valueAltLeft || valueAltRight;
-	}
-	/**
-	 * Get the current Alt left key status
-	 * @return The Alt value
-	 */
-	public boolean getAltLeft() {
-		return valueAltLeft;
-	}
-	/**
-	 * Get the current Alt right key status (alt-gr)
-	 * @return The Alt value
-	 */
-	public boolean getAltRight() {
-		return valueAltRight;
-	}
-	/**
-	 * Set the current Alt left key status
-	 * @param value The new Alt value
-	 */
-	public void setAltLeft(boolean value) {
-		valueAltLeft = value;
-	}
-	/**
-	 * Set the current Alt right key status (alt-gr)
-	 * @param value The new Alt value
-	 */
-	public void setAltRight(boolean value) {
-		valueAltRight = value;
-	}
-	/**
-	 * Get the current Alt-Gr key status
-	 * @return The Alt-gr value (does not exist on MacOs)
-	 */
-	public boolean getAltGr()  {
-		return getAltRight();
-	}
-	/**
-	 * Set the current Alt-Gr key status
-	 * @param value The new Alt-gr value (does not exist on MacOs)
-	 */
-	public void setAltGr(boolean value) {
-		setAltRight(value);
-	}
-	/**
-	 * Get the current Ver-num key status
-	 * @return The Numerical Lock value
-	 */
-	public boolean getNumLock()  {
-		return valueNumLock;
-	}
-	/**
-	 * Set the current Ver-num key status
-	 * @param value The new Numerical Lock value
-	 */
-	public void setNumLock(boolean value) {
-		valueNumLock = value;
-	}
-	/**
-	 * Get the current Intert key status
-	 * @return The Insert value
-	 */
-	public boolean getInsert() {
-		return valueInsert;
-	}
-	/**
-	 * Set the current Intert key status
-	 * @param value The new Insert value
-	 */
-	public void setInsert(boolean value) {
-		valueInsert = value;
-	}
-	/**
-	 * Update the internal value with the input moving key.
-	 * @param move Moving key.
-	 * @param isDown The key is pressed or not.
-	 */
-	public void update(KeyKeyboard move, boolean isDown) {
-		switch (move) {
-			case insert:
-				setInsert(isDown);
-				break;
-			case capLock:
-				setCapsLock(isDown);
-				break;
-			case shiftLeft:
-				setShiftLeft(isDown);
-				break;
-			case shiftRight:
-				setShiftRight(isDown);
-				break;
-			case ctrlLeft:
-				setCtrlLeft(isDown);
-				break;
-			case ctrlRight:
-				setCtrlRight(isDown);
-				break;
-			case metaLeft:
-				setMetaLeft(isDown);
-				break;
-			case metaRight:
-				setMetaRight(isDown);
-				break;
-			case altLeft:
-				setAltLeft(isDown);
-				break;
-			case altRight:
-				setAltRight(isDown);
-				break;
-			case numLock:
-				setNumLock(isDown);
-				break;
-			default:
-				break;
-		}
-	}
+	
 	/**
 	 * Get the value with the input moving key.
 	 * @param move Moving key.
 	 * @return true The key is pressed.
 	 * @return false The key is released.
 	 */
-	public boolean get(KeyKeyboard move) {
+	public boolean get(final KeyKeyboard move) {
 		switch (move) {
-			case insert:
+			case INSERT:
 				return getInsert();
-			case capLock:
+			case CAP_LOCK:
 				return getCapsLock();
-			case shiftLeft:
+			case SHIFT_LEFT:
 				return getShiftLeft();
-			case shiftRight:
+			case SHIFT_RIGHT:
 				return getShiftRight();
-			case ctrlLeft:
+			case CTRL_LEFT:
 				return getCtrlLeft();
-			case ctrlRight:
+			case CTRL_RIGHT:
 				return getCtrlRight();
-			case metaLeft:
+			case META_LEFT:
 				return getMetaLeft();
-			case metaRight:
+			case META_RIGHT:
 				return getMetaRight();
-			case altLeft:
+			case ALT_LEFT:
 				return getAltLeft();
-			case altRight:
+			case ALT_RIGHT:
 				return getAltRight();
-			case numLock:
+			case NUM_LOCK:
 				return getNumLock();
 			default:
 				break;
 		}
 		return false;
 	}
+	
+	/**
+	 * Get the current Alt key status
+	 * @return The Alt value
+	 */
+	public boolean getAlt() {
+		return this.valueAltLeft || this.valueAltRight;
+	}
+	
+	/**
+	 * Get the current Alt-Gr key status
+	 * @return The Alt-gr value (does not exist on MacOs)
+	 */
+	public boolean getAltGr() {
+		return getAltRight();
+	}
+	
+	/**
+	 * Get the current Alt left key status
+	 * @return The Alt value
+	 */
+	public boolean getAltLeft() {
+		return this.valueAltLeft;
+	}
+	
+	/**
+	 * Get the current Alt right key status (alt-gr)
+	 * @return The Alt value
+	 */
+	public boolean getAltRight() {
+		return this.valueAltRight;
+	}
+	
+	/**
+	 * get the current CapLock Status
+	 * @return The CapLock value
+	 */
+	public boolean getCapsLock() {
+		return this.valueCapLock;
+	}
+	
+	/**
+	 * Get the Current Control key status
+	 * @return The Control value
+	 */
+	public boolean getCtrl() {
+		return this.valueCtrlLeft || this.valueCtrlRight;
+	}
+	
+	/**
+	 * Get the Current Control left key status
+	 * @return The Control value
+	 */
+	public boolean getCtrlLeft() {
+		return this.valueCtrlLeft;
+	}
+	
+	/**
+	 * Get the Current Control right key status
+	 * @return The Control value
+	 */
+	public boolean getCtrlRight() {
+		return this.valueCtrlRight;
+	}
+	
+	/**
+	 * Get the current Intert key status
+	 * @return The Insert value
+	 */
+	public boolean getInsert() {
+		return this.valueInsert;
+	}
+	
+	/**
+	 * Get the current Meta key status (also named windows or apple key)
+	 * @return The Meta value (name Windows key, apple key, command key ...)
+	 */
+	public boolean getMeta() {
+		return this.valueMetaLeft || this.valueMetaRight;
+	}
+	
+	/**
+	 * Get the current Meta left key status (also named windows or apple key)
+	 * @return The Meta value (name Windows key, apple key, command key ...)
+	 */
+	public boolean getMetaLeft() {
+		return this.valueMetaLeft;
+	}
+	
+	/**
+	 * Get the current Meta right key status (also named windows or apple key)
+	 * @return The Meta value (name Windows key, apple key, command key ...)
+	 */
+	public boolean getMetaRight() {
+		return this.valueMetaRight;
+	}
+	
+	/**
+	 * Get the current Ver-num key status
+	 * @return The Numerical Lock value
+	 */
+	public boolean getNumLock() {
+		return this.valueNumLock;
+	}
+	
+	/**
+	 * Get the current Shift key status
+	 * @return The Shift value
+	 */
+	public boolean getShift() {
+		return this.valueShiftLeft || this.valueShiftRight;
+	}
+	
+	/**
+	 * Get the current Shift left key status
+	 * @return The Shift value
+	 */
+	public boolean getShiftLeft() {
+		return this.valueShiftLeft;
+	}
+	
+	/**
+	 * Get the current Shift right key status
+	 * @return The Shift value
+	 */
+	public boolean getShiftRight() {
+		return this.valueShiftRight;
+	}
+	
+	/**
+	 * Set the current Alt-Gr key status
+	 * @param value The new Alt-gr value (does not exist on MacOs)
+	 */
+	public void setAltGr(final boolean value) {
+		setAltRight(value);
+	}
+	
+	/**
+	 * Set the current Alt left key status
+	 * @param value The new Alt value
+	 */
+	public void setAltLeft(final boolean value) {
+		this.valueAltLeft = value;
+	}
+	
+	/**
+	 * Set the current Alt right key status (alt-gr)
+	 * @param value The new Alt value
+	 */
+	public void setAltRight(final boolean value) {
+		this.valueAltRight = value;
+	}
+	
+	/**
+	 * set the current CapLock Status
+	 * @param value The new CapLock value
+	 */
+	public void setCapsLock(final boolean value) {
+		this.valueCapLock = value;
+	}
+	
+	/**
+	 * Set the Current Control left key status
+	 * @param value The new Control value
+	 */
+	public void setCtrlLeft(final boolean value) {
+		this.valueCtrlLeft = value;
+	}
+	
+	/**
+	 * Set the Current Control right key status
+	 * @param value The new Control value
+	 */
+	public void setCtrlRight(final boolean value) {
+		this.valueCtrlRight = value;
+	}
+	
+	/**
+	 * Set the current Intert key status
+	 * @param value The new Insert value
+	 */
+	public void setInsert(final boolean value) {
+		this.valueInsert = value;
+	}
+	
+	/**
+	 * Set the current Meta left key status (also named windows or apple key)
+	 * @param value The new Meta value (name Windows key, apple key, command key ...)
+	 */
+	public void setMetaLeft(final boolean value) {
+		this.valueMetaLeft = value;
+	}
+	
+	/**
+	 * Set the current Meta right key status (also named windows or apple key)
+	 * @param value The new Meta value (name Windows key, apple key, command key ...)
+	 */
+	public void setMetaRight(final boolean value) {
+		this.valueMetaRight = value;
+	}
+	
+	/**
+	 * Set the current Ver-num key status
+	 * @param value The new Numerical Lock value
+	 */
+	public void setNumLock(final boolean value) {
+		this.valueNumLock = value;
+	}
+	
+	/**
+	 * Set the current Shift left key status
+	 * @param value The new Shift value
+	 */
+	public void setShiftLeft(final boolean value) {
+		this.valueShiftLeft = value;
+	}
+	
+	/**
+	 * Set the current Shift right key status
+	 * @param value The new Shift value
+	 */
+	public void setShiftRight(final boolean value) {
+		this.valueShiftRight = value;
+	}
+	
 	@Override
 	public String toString() {
-		return "Special [CapLock=" + valueCapLock + ", Shift=(" + valueShiftLeft + ","
-				+ valueShiftRight + "), Ctrl=(" + valueCtrlLeft + "," + valueCtrlRight
-				+ "), Meta=(" + valueMetaLeft + "," + valueMetaRight + "), Alt=("
-				+ valueAltLeft + "," + valueAltRight + "), NumLock=" + valueNumLock
-				+ ", Insert=" + valueInsert + "]";
+		return "Special [CapLock=" + this.valueCapLock + ", Shift=(" + this.valueShiftLeft + "," + this.valueShiftRight + "), Ctrl=(" + this.valueCtrlLeft + "," + this.valueCtrlRight + "), Meta=("
+				+ this.valueMetaLeft + "," + this.valueMetaRight + "), Alt=(" + this.valueAltLeft + "," + this.valueAltRight + "), NumLock=" + this.valueNumLock + ", Insert=" + this.valueInsert + "]";
+	}
+	
+	/**
+	 * Update the internal value with the input moving key.
+	 * @param move Moving key.
+	 * @param isDown The key is pressed or not.
+	 */
+	public void update(final KeyKeyboard move, final boolean isDown) {
+		switch (move) {
+			case INSERT:
+				setInsert(isDown);
+				break;
+			case CAP_LOCK:
+				setCapsLock(isDown);
+				break;
+			case SHIFT_LEFT:
+				setShiftLeft(isDown);
+				break;
+			case SHIFT_RIGHT:
+				setShiftRight(isDown);
+				break;
+			case CTRL_LEFT:
+				setCtrlLeft(isDown);
+				break;
+			case CTRL_RIGHT:
+				setCtrlRight(isDown);
+				break;
+			case META_LEFT:
+				setMetaLeft(isDown);
+				break;
+			case META_RIGHT:
+				setMetaRight(isDown);
+				break;
+			case ALT_LEFT:
+				setAltLeft(isDown);
+				break;
+			case ALT_RIGHT:
+				setAltRight(isDown);
+				break;
+			case NUM_LOCK:
+				setNumLock(isDown);
+				break;
+			default:
+				break;
+		}
 	}
 }

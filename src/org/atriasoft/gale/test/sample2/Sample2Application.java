@@ -5,7 +5,7 @@ import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Matrix4f;
 import org.atriasoft.etk.math.Vector2f;
 import org.atriasoft.etk.math.Vector3f;
-import org.atriasoft.gale.Application;
+import org.atriasoft.gale.GaleApplication;
 import org.atriasoft.gale.backend3d.OpenGL;
 import org.atriasoft.gale.context.Context;
 import org.atriasoft.gale.key.KeyKeyboard;
@@ -16,7 +16,7 @@ import org.atriasoft.gale.resource.ResourceProgram;
 import org.atriasoft.gale.resource.ResourceTexture;
 import org.atriasoft.gale.resource.ResourceVirtualArrayObject;
 
-public class Sample2Application extends Application {
+public class Sample2Application extends GaleApplication {
 	private ResourceProgram oGLprogram;
 	private int oGLMatrixTransformation;
 	private int oGLMatrixProjection;

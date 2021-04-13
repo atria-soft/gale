@@ -11,7 +11,7 @@ import org.atriasoft.gale.key.KeySpecial;
 import org.atriasoft.gale.key.KeyStatus;
 import org.atriasoft.gale.key.KeyType;
 
-public class Application {
+public class GaleApplication {
 	private boolean needRedraw = true;
 	private String title = "gale";
 	private Uri iconName = null;
@@ -19,7 +19,7 @@ public class Application {
 	private Orientation orientation = Orientation.screenAuto;
 	private Vector2f windowsSize = new Vector2f(800, 600);
 	
-	public Application() {
+	public GaleApplication() {
 		Log.verbose("Constructor Gale Application");
 	}
 	
@@ -289,12 +289,16 @@ public class Application {
 		if (size.x() <= 0 || size.y() <= 0) {
 			Log.error("Wrong windows size: " + size);
 		}
+		Vector2f oldSize = this.windowsSize;
 		this.windowsSize = size;
 		final Context context = Gale.getContext();
 		if (context == null) {
 			return;
 		}
-		context.setSize(size);
+		if (!context.setSize(size)) {
+			Log.error("Can not set the size required by the user.");
+			this.windowsSize = oldSize;
+		}
 	}
 	
 	/**
