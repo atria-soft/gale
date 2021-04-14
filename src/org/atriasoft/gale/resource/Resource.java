@@ -1,7 +1,7 @@
 package org.atriasoft.gale.resource;
 
 import org.atriasoft.etk.Uri;
-import org.atriasoft.gale.context.Context;
+import org.atriasoft.gale.context.GaleContext;
 import org.atriasoft.gale.internal.Log;
 
 public abstract class Resource {
@@ -13,7 +13,7 @@ public abstract class Resource {
 	 * Get the current resource Manager
 	 */
 	protected static ResourceManager getManager() {
-		return Context.getContext().getResourcesManager();
+		return GaleContext.getContext().getResourcesManager();
 	}
 	
 	protected long uid = -1; //!< unique ID definition

@@ -1,16 +1,16 @@
 package org.atriasoft.gale;
 
 import org.atriasoft.etk.Uri;
-import org.atriasoft.gale.context.Context;
+import org.atriasoft.gale.context.GaleContext;
 //import org.atriasoft.gale.context.JOGL.ContextJOGL;
 import org.atriasoft.gale.context.LWJG_AWT.ContextLWJGLAWT;
 //import org.atriasoft.gale.context.LWJGL.ContextLWJGL;
 import org.atriasoft.gale.internal.Log;
 
 public class Gale {
-	public static Context getContext() {
+	public static GaleContext getContext() {
 		// TODO Auto-generated method stub
-		return Context.getContext();
+		return GaleContext.getContext();
 	}
 	
 	/**
@@ -40,7 +40,7 @@ public class Gale {
 	public static int run(final GaleApplication application, final String[] arg) {
 		init();
 		//etk::init(_argc, _argv);
-		Context context = null;
+		GaleContext context = null;
 		String request = "";
 		
 		//context = ContextLWJGL.create(application, arg);

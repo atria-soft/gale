@@ -7,7 +7,7 @@ import org.atriasoft.etk.math.Vector2f;
 import org.atriasoft.etk.math.Vector3f;
 import org.atriasoft.gale.GaleApplication;
 import org.atriasoft.gale.backend3d.OpenGL;
-import org.atriasoft.gale.context.Context;
+import org.atriasoft.gale.context.GaleContext;
 import org.atriasoft.gale.key.KeyKeyboard;
 import org.atriasoft.gale.key.KeySpecial;
 import org.atriasoft.gale.key.KeyStatus;
@@ -32,7 +32,7 @@ public class Sample1Application extends GaleApplication {
 	private ResourceVirtualArrayObject verticesVBO;
 	
 	@Override
-	public void onCreate(final Context context) {
+	public void onCreate(final GaleContext context) {
 		//setSize(new Vector2f(800, 600));
 		this.angle = 0.0f;
 		this.oGLprogram = ResourceProgram.create(new Uri("DATA", "basic.vert"), new Uri("DATA", "basic.frag"));
@@ -56,7 +56,7 @@ public class Sample1Application extends GaleApplication {
 	}
 	
 	@Override
-	public void onDraw(final Context context) {
+	public void onDraw(final GaleContext context) {
 		this.angle += 0.01;
 		//Log.info("==> appl Draw ...");
 		Vector2f size = getSize();

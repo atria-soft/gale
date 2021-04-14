@@ -1,14 +1,16 @@
 package org.atriasoft.gale.context;
 
 import java.util.Vector;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.atriasoft.etk.Color;
 import org.atriasoft.etk.ThreadAbstract;
 import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2f;
-import org.atriasoft.gale.GaleApplication;
 import org.atriasoft.gale.Fps;
 import org.atriasoft.gale.Gale;
+import org.atriasoft.gale.GaleApplication;
 import org.atriasoft.gale.Orientation;
 import org.atriasoft.gale.backend3d.OpenGL;
 import org.atriasoft.gale.internal.Log;
@@ -19,16 +21,16 @@ import org.atriasoft.gale.key.KeyType;
 import org.atriasoft.gale.resource.ResourceManager;
 
 interface ActionToDoInAsyncLoop {
-	public void run(Context context);
+	public void run(GaleContext context);
 }
 
 enum ApplicationState {
 	UNDEFINED, CREATE, RUNNING, DIED
 };
 
-public abstract class Context {
+public abstract class GaleContext {
 	protected static final int MAX_MANAGE_INPUT = 15;
-	private static Context globalContext = null;
+	private static GaleContext globalContext = null;
 	// return true if a flush is needed
 	private static int countMemeCheck = 0;
 	
@@ -36,13 +38,15 @@ public abstract class Context {
 	 * From everyware in the program, we can get the context inteface.
 	 * @return current reference on the instance.
 	 */
-	public static Context getContext() {
+	public static GaleContext getContext() {
 		return globalContext;
 	}
 	
-	public static void setContext(final Context context) {
+	public static void setContext(final GaleContext context) {
 		globalContext = context;
 	}
+	
+	Lock lock = new ReentrantLock();
 	
 	protected ThreadAbstract periodicThread;;
 	protected GaleApplication application; //!< Application handle
@@ -51,8 +55,8 @@ public abstract class Context {
 	private final ResourceManager resourceManager = new ResourceManager(); //!< global resources Manager
 	// simulation area:
 	private long previousDisplayTime; // this is to limit framerate ... in case...
-	private final Vector<ActionToDoInAsyncLoop> msgSystem = new Vector<>();
 	private final boolean displayFps = true;
+	private final MessageSystem msgSystem = new MessageSystem();
 	private final Fps fpsSystemEvent = new Fps("SystemEvent", this.displayFps);
 	private final Fps fpsSystemContext = new Fps("SystemContext", this.displayFps);
 	private final Fps fpsSystem = new Fps("System", this.displayFps);
@@ -61,7 +65,7 @@ public abstract class Context {
 	protected boolean fullscreen = false;
 	protected Vector2f windowsPos; //!< current size of the system
 	
-	public Context(final GaleApplication application, final String[] args) {
+	public GaleContext(final GaleApplication application, final String[] args) {
 		// set a basic
 		this.application = application;
 		this.applicationState = ApplicationState.CREATE;
@@ -155,31 +159,25 @@ public abstract class Context {
 		if (this.application == null) {
 			return;
 		}
-		if (this.windowsSize == Vector2f.ZERO) {
+		if (this.windowsSize.equals(Vector2f.ZERO)) {
 			return;
 		}
 		this.application.onResize(this.windowsSize);
 	}
 	
 	// Called by Consumer
-	public synchronized ActionToDoInAsyncLoop getAction() {
-		notify();
-		while (this.msgSystem.size() == 0) {
-			try {
-				wait();
-			} catch (final InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return null;
-			} //By executing wait() from a synchronized block, a thread gives up its hold on the lock and goes to sleep.
-		}
-		final ActionToDoInAsyncLoop message = this.msgSystem.firstElement();
-		this.msgSystem.removeElement(message);
-		return message;
+	public ActionToDoInAsyncLoop getAction() {
+		return this.msgSystem.getElementWait();
 	}
 	
 	public GaleApplication getApplication() {
-		return this.application;
+		
+		this.lock.lock();
+		try {
+			return this.application;
+		} finally {
+			this.lock.unlock();
+		}
 	}
 	
 	public CommandLine getCmd() {
@@ -487,13 +485,14 @@ public abstract class Context {
 	 * @param size new size of the windows.
 	 */
 	public void operatingSystemResize(final Vector2f size) {
-		if (this.windowsSize == size) {
+		Log.warning("Resize request: " + size + " old=" + this.windowsSize);
+		if (this.windowsSize.equals(size)) {
 			return;
 		}
 		// TODO Better in the thread ...  ==> but generate some init error ...
 		//gale::Dimension::setPixelWindowsSize(size);
 		postAction((context) -> {
-			Log.debug("Receive MSG : THREADRESIZE : " + context.windowsSize + " ==> " + size);
+			Log.error("Receive MSG : THREAD_RESIZE : " + context.windowsSize + " ==> " + size);
 			context.windowsSize = size;
 			//gale::Dimension::setPixelWindowsSize(context.windowsSize);
 			final GaleApplication tmpAppl = context.getApplication();
@@ -608,9 +607,8 @@ public abstract class Context {
 		unLockContext();
 	}
 	
-	private synchronized void postAction(final ActionToDoInAsyncLoop data) {
+	private void postAction(final ActionToDoInAsyncLoop data) {
 		this.msgSystem.addElement(data);
-		notify();
 		//Later, when the necessary event happens, the thread that is running it calls notify() from a block synchronized on the same object.
 	}
 	
@@ -618,13 +616,15 @@ public abstract class Context {
 	 * Processing all the event arrived ... (commoly called in draw function)
 	 */
 	public void processEvents() {
+		if (!this.lock.tryLock()) {
+			return;
+		}
 		try {
 			int nbEvent = 0;
-			//Log.debug(" ********  Event " << this.msgSystem.count());
-			while (this.msgSystem.size() > 0) {
+			while (this.msgSystem.getSize() > 0) {
+				//Log.error("    [" + nbEvent + "] event ...");
 				nbEvent++;
-				//Log.verbose("    [" << nbEvent << "] event ...");
-				final ActionToDoInAsyncLoop func = getAction();
+				final ActionToDoInAsyncLoop func = this.msgSystem.getElementWait();
 				if (func == null) {
 					continue;
 				}
@@ -632,6 +632,8 @@ public abstract class Context {
 			}
 		} catch (Exception e) {
 			Log.critical("Catch exception in main event Loop ...", e);
+		} finally {
+			this.lock.unlock();
 		}
 	}
 	
@@ -778,12 +780,49 @@ public abstract class Context {
 		
 	}
 	
+}
+
+class MessageSystem {
+	private final Vector<ActionToDoInAsyncLoop> data = new Vector<>();
+	
+	public synchronized void addElement(final ActionToDoInAsyncLoop data2) {
+		this.data.addElement(data2);
+		notifyAll();
+	}
+	
+	public synchronized ActionToDoInAsyncLoop getElement() {
+		//Log.warning("+++++++++++++++++++++++++++++++++ getElement()");
+		ActionToDoInAsyncLoop message = this.data.firstElement();
+		this.data.removeElement(message);
+		//Log.warning("+++++++++++++++++++++++++++++++++ getElement() ===> done " + message);
+		return message;
+	}
+	
+	public synchronized ActionToDoInAsyncLoop getElementWait() {
+		if (this.data.isEmpty()) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+		}
+		if (this.data.isEmpty()) {
+			return null;
+		}
+		return getElement();
+	}
+	
+	public synchronized int getSize() {
+		return this.data.size();
+	}
 };
 
 class PeriodicThread extends ThreadAbstract {
-	private final Context context;
+	private final GaleContext context;
 	
-	public PeriodicThread(final Context context) {
+	public PeriodicThread(final GaleContext context) {
 		super("Galethread 2");
 		this.context = context;
 	}
@@ -807,13 +846,13 @@ class PeriodicThread extends ThreadAbstract {
 			e.printStackTrace();
 			return;
 		}
-		synchronized (this.context) {
-			this.context.processEvents();
-			// call all the application for periodic request (the application manage multiple instance )...
-			final GaleApplication appl = this.context.getApplication();
-			if (appl != null) {
-				appl.onPeriod(System.currentTimeMillis());
-			}
+		///synchronized (this.context) {
+		this.context.processEvents();
+		// call all the application for periodic request (the application manage multiple instance )...
+		final GaleApplication appl = this.context.getApplication();
+		if (appl != null) {
+			appl.onPeriod(System.currentTimeMillis());
 		}
+		//}
 	}
 }

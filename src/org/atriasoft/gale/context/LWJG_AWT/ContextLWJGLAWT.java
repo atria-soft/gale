@@ -33,7 +33,7 @@ import org.atriasoft.etk.math.Vector2f;
 import org.atriasoft.gale.DisplayManagerDraw;
 import org.atriasoft.gale.Fps;
 import org.atriasoft.gale.GaleApplication;
-import org.atriasoft.gale.context.Context;
+import org.atriasoft.gale.context.GaleContext;
 import org.atriasoft.gale.internal.Log;
 import org.atriasoft.gale.key.KeyKeyboard;
 import org.atriasoft.gale.key.KeySpecial;
@@ -48,7 +48,7 @@ import org.lwjgl.opengl.awt.AWTGLCanvas;
 //import org.lwjgl.system.MemoryStack;
 import org.lwjgl.opengl.awt.GLData;
 
-public class ContextLWJGLAWT extends Context implements MouseListener, MouseMotionListener, KeyListener, MouseWheelListener {
+public class ContextLWJGLAWT extends GaleContext implements MouseListener, MouseMotionListener, KeyListener, MouseWheelListener {
 	private static final int WIDTH = 800;
 	private static final int HEIGHT = 600;
 	private static final int MAX_MANAGE_INPUT = 15;
@@ -67,7 +67,7 @@ public class ContextLWJGLAWT extends Context implements MouseListener, MouseMoti
 	private static double currentMousePositionX = 0;
 	private static double currentMousePositionY = 0;
 	
-	public static Context create(final GaleApplication application, final String[] arg) {
+	public static GaleContext create(final GaleApplication application, final String[] arg) {
 		// TODO Auto-generated method stub
 		return new ContextLWJGLAWT(application, arg);
 	}
@@ -170,8 +170,8 @@ public class ContextLWJGLAWT extends Context implements MouseListener, MouseMoti
 				if (ContextLWJGLAWT.this.decoratedWindowsSize.x() != w || ContextLWJGLAWT.this.decoratedWindowsSize.y() != h) {
 					ContextLWJGLAWT.this.decoratedWindowsSize = new Vector2f(w, h);
 					final Rectangle bounds = ContextLWJGLAWT.this.canvas.getBounds();
-					ContextLWJGLAWT.this.windowsSize = new Vector2f(bounds.width, bounds.height);
-					operatingSystemResize(ContextLWJGLAWT.this.windowsSize);
+					Vector2f tmpWindowsSize = new Vector2f(bounds.width, bounds.height);
+					operatingSystemResize(tmpWindowsSize);
 				}
 				operatingSystemDraw(true);
 				swapBuffers();

@@ -3,7 +3,7 @@ package org.atriasoft.gale;
 import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2f;
 import org.atriasoft.gale.context.ClipboardList;
-import org.atriasoft.gale.context.Context;
+import org.atriasoft.gale.context.GaleContext;
 import org.atriasoft.gale.context.Cursor;
 import org.atriasoft.gale.internal.Log;
 import org.atriasoft.gale.key.KeyKeyboard;
@@ -94,7 +94,7 @@ public class GaleApplication {
 	 * Hide the virtal keyboard (if possible : only on iOs/Android)
 	 */
 	public void keyboardHide() {
-		final Context context = Gale.getContext();
+		final GaleContext context = Gale.getContext();
 		if (context == null) {
 			return;
 		}
@@ -105,7 +105,7 @@ public class GaleApplication {
 	 * Show the virtal keyboard (if possible : only on iOs/Android)
 	 */
 	public void keyboardShow() {
-		final Context context = Gale.getContext();
+		final GaleContext context = Gale.getContext();
 		if (context == null) {
 			return;
 		}
@@ -128,7 +128,7 @@ public class GaleApplication {
 	 * The application is created.
 	 * @param context Current gale context.
 	 */
-	public void onCreate(final Context context) {
+	public void onCreate(final GaleContext context) {
 		Log.verbose("Create Gale Application");
 	}
 	
@@ -136,7 +136,7 @@ public class GaleApplication {
 	 * The application is removed (call destructor just adter it.).
 	 * @param context Current gale context.
 	 */
-	public void onDestroy(final Context context) {
+	public void onDestroy(final GaleContext context) {
 		Log.verbose("Destroy Gale Application");
 	}
 	
@@ -144,7 +144,7 @@ public class GaleApplication {
 	 * Real draw of the application
 	 * @param context Current gale context.
 	 */
-	public void onDraw(final Context context) {
+	public void onDraw(final GaleContext context) {
 		Log.verbose("draw Gale Application");
 	}
 	
@@ -163,7 +163,7 @@ public class GaleApplication {
 	 * The user request application removing.
 	 * @param context Current gale context.
 	 */
-	public void onKillDemand(final Context context) {
+	public void onKillDemand(final GaleContext context) {
 		Log.info("Gale request auto destroy ==> no applification specification");
 		System.exit(0);
 	}
@@ -180,7 +180,7 @@ public class GaleApplication {
 	 * The application is Hide / not visible.
 	 * @param context Current gale context.
 	 */
-	public void onPause(final Context context) {
+	public void onPause(final GaleContext context) {
 		Log.verbose("Pause Gale Application");
 	}
 	
@@ -205,7 +205,7 @@ public class GaleApplication {
 	 * call application to precalculate drawing.
 	 * @param context Current gale context.
 	 */
-	public void onRegenerateDisplay(final Context context) {
+	public void onRegenerateDisplay(final GaleContext context) {
 		//Log.verbose("Regenerate Gale Application");
 		markDrawingIsNeeded();
 	}
@@ -220,13 +220,14 @@ public class GaleApplication {
 			return;
 		}
 		this.windowsSize = size;
+		markDrawingIsNeeded();
 	}
 	
 	/**
 	 * The application is resumed (now visible).
 	 * @param context Current gale context.
 	 */
-	public void onResume(final Context context) {
+	public void onResume(final GaleContext context) {
 		Log.verbose("Start Gale Application");
 	}
 	
@@ -234,7 +235,7 @@ public class GaleApplication {
 	 * The application is started.
 	 * @param context Current gale context.
 	 */
-	public void onStart(final Context context) {
+	public void onStart(final GaleContext context) {
 		Log.verbose("Start Gale Application");
 	}
 	
@@ -242,7 +243,7 @@ public class GaleApplication {
 	 * The application is stopped.
 	 * @param context Current gale context.
 	 */
-	public void onStop(final Context context) {
+	public void onStop(final GaleContext context) {
 		Log.verbose("Stop Gale Application");
 	}
 	
@@ -291,7 +292,7 @@ public class GaleApplication {
 		}
 		Vector2f oldSize = this.windowsSize;
 		this.windowsSize = size;
-		final Context context = Gale.getContext();
+		final GaleContext context = Gale.getContext();
 		if (context == null) {
 			return;
 		}
@@ -307,7 +308,7 @@ public class GaleApplication {
 	 */
 	public void setTitle(final String title) {
 		this.title = title;
-		final Context context = Gale.getContext();
+		final GaleContext context = Gale.getContext();
 		if (context == null) {
 			return;
 		}
