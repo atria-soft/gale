@@ -35,7 +35,7 @@ public abstract class Resource {
 	}
 	
 	protected Resource(final Uri uri) {
-		this.name = uri.getValue();
+		this.name = uri.toString();
 		getManager().localAdd(this);
 	}
 	

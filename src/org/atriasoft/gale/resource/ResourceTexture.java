@@ -2,7 +2,7 @@ package org.atriasoft.gale.resource;
 
 import java.nio.ByteBuffer;
 
-import org.atriasoft.egami.Image;
+import org.atriasoft.egami.ImageByteRGBA;
 import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2i;
 import org.atriasoft.gale.backend3d.OpenGL;
@@ -48,26 +48,26 @@ public class ResourceTexture extends Resource {
 		}
 		resource = new ResourceTexture(uriTexture, textureUnit);
 		final ImageRawData decodedData = ImageLoader.decodePngFile(uriTexture);
-		Image img = new Image(decodedData.getWidth(), decodedData.getHeight());
+		ImageByteRGBA img = new ImageByteRGBA(decodedData.getWidth(), decodedData.getHeight());
 		ByteBuffer mlklmklm = decodedData.getBuffer();
 		byte[] elemData = new byte[mlklmklm.remaining()];
 		mlklmklm.get(elemData);
 		if (decodedData.isHasAlpha()) {
 			for (int yyy = 0; yyy < decodedData.getHeight(); yyy++) {
 				for (int xxx = 0; xxx < decodedData.getWidth(); xxx++) {
-					img.setR(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 0]);
-					img.setG(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 1]);
-					img.setB(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 2]);
-					img.setA(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 3]);
+					img.setRByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 0]);
+					img.setGByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 1]);
+					img.setBByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 2]);
+					img.setAByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 3]);
 				}
 			}
 		} else {
 			for (int yyy = 0; yyy < decodedData.getHeight(); yyy++) {
 				for (int xxx = 0; xxx < decodedData.getWidth(); xxx++) {
-					img.setA(xxx, yyy, 0xFF);
-					img.setR(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 0]);
-					img.setG(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 1]);
-					img.setB(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 2]);
+					img.setAFloat(xxx, yyy, 0xFF);
+					img.setRByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 0]);
+					img.setGByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 1]);
+					img.setBByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 2]);
 				}
 			}
 		}
@@ -101,7 +101,7 @@ public class ResourceTexture extends Resource {
 	// Image properties:
 	// pointer on the image data.
 	//private ByteBuffer data = null;
-	protected Image data = new Image(32, 32);
+	protected ImageByteRGBA data = new ImageByteRGBA(32, 32);
 	// size of the image data.
 	private Vector2i size = new Vector2i(-1, -1);
 	//!< Color space of the image.
@@ -171,7 +171,7 @@ public class ResourceTexture extends Resource {
 		this.texId = -1;
 	}
 	
-	public void setTexture(final Image data, final Vector2i size, final TextureColorMode dataColorSpace, final int textureUnit) {
+	public void setTexture(final ImageByteRGBA data, final Vector2i size, final TextureColorMode dataColorSpace, final int textureUnit) {
 		this.data = data;
 		this.size = size;
 		this.textureUnit = textureUnit;

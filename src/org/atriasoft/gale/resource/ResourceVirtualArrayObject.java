@@ -80,7 +80,7 @@ public class ResourceVirtualArrayObject extends Resource {
 		return buffer;
 	}
 	
-	private final boolean dynamic = false;
+	private boolean dynamic = false;
 	private int vaoID = -1;
 	private boolean exist = false; //!< This data is availlable in the Graphic card
 	
@@ -101,6 +101,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	protected ResourceVirtualArrayObject() {
 		super();
 		this.resourceLevel = 3;
+		this.dynamic = true;
 		Log.debug("OGL: load VBO count (dynamic)");
 	}
 	
@@ -170,7 +171,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 	
 	private void createVAO() {
-		Log.error("create VAO...");
+		Log.verbose("create VAO...");
 		this.vaoID = GL30.glGenVertexArrays();
 		GL30.glBindVertexArray(this.vaoID);
 	}
@@ -199,23 +200,23 @@ public class ResourceVirtualArrayObject extends Resource {
 	public void loadAgainToVAO() {
 		createVAO();
 		if (this.indices != null) {
-			Log.error("Set indices");
+			Log.verbose("Set indices");
 			bindIndicesBuffer(this.indices);
 		}
 		if (this.positions != null) {
-			Log.error("Set positions");
+			Log.verbose("Set positions");
 			storeDataInAttributeList(0, 3, this.positions);
 		}
 		if (this.textureCoordinates != null) {
-			Log.error("Set textureCoordinates");
+			Log.verbose("Set textureCoordinates");
 			storeDataInAttributeList(1, 2, this.textureCoordinates);
 		}
 		if (this.normals != null) {
-			Log.error("Set normals");
+			Log.verbose("Set normals");
 			storeDataInAttributeList(2, 3, this.normals);
 		}
 		if (this.colors != null) {
-			Log.error("Set colors");
+			Log.verbose("Set colors");
 			storeDataInAttributeList(3, 4, this.colors);
 		}
 		unbindVAO();
@@ -224,23 +225,23 @@ public class ResourceVirtualArrayObject extends Resource {
 	public void loadToVAO() {
 		GL30.glBindVertexArray(this.vaoID);
 		if (this.indices != null) {
-			Log.error("Set indices");
+			Log.verbose("Set indices");
 			bindIndicesBuffer(this.indices);
 		}
 		if (this.positions != null) {
-			Log.error("Set positions");
+			Log.verbose("Set positions");
 			storeDataInAttributeList(0, 3, this.positions);
 		}
 		if (this.textureCoordinates != null) {
-			Log.error("Set textureCoordinates");
+			Log.verbose("Set textureCoordinates");
 			storeDataInAttributeList(1, 2, this.textureCoordinates);
 		}
 		if (this.normals != null) {
-			Log.error("Set normals");
+			Log.verbose("Set normals");
 			storeDataInAttributeList(2, 3, this.normals);
 		}
 		if (this.colors != null) {
-			Log.error("Set colors");
+			Log.verbose("Set colors");
 			storeDataInAttributeList(3, 4, this.colors);
 		}
 		unbindVAO();
@@ -379,7 +380,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 	
 	private void unbindVAO() {
-		Log.error("Unbind VAO ...");
+		Log.verbose("Unbind VAO ...");
 		GL30.glBindVertexArray(0);
 	}
 	
@@ -388,7 +389,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	 */
 	@Override
 	public boolean updateContext() {
-		Log.error(" Start: [" + getId() + "] '" + getName() + "' (size=" + this.vertexCount + ") ********************************");
+		Log.verbose(" Start: [" + getId() + "] '" + getName() + "' (size=" + this.vertexCount + ") ********************************");
 		if (!this.exist) {
 			Log.error("     ==> ALLOCATE new handle");
 			// Allocate and assign a Vertex Array Object to our handle
@@ -396,13 +397,13 @@ public class ResourceVirtualArrayObject extends Resource {
 		} else {
 			// Update VAO (only for dynamic:
 			if (!this.dynamic) {
-				Log.error(" Request update a VAO with a static buffer !!!");
+				Log.error(" Request update a VAO with a static buffer !!!" + this.name);
 			}
 			loadAgainToVAO();
 			
 		}
 		this.exist = true;
-		Log.error(" Stop: [" + getId() + "] '" + getName() + "'");
+		Log.verbose(" Stop: [" + getId() + "] '" + getName() + "'");
 		return true;
 	}
 	

@@ -431,11 +431,11 @@ public class OpenGL {
 	}
 	
 	public static void drawElements(final RenderMode mode, final int vertexCount) {
-		GL11.glDrawElements(CONVERT_RENDER_MODE.get(mode), vertexCount, GL11.GL_UNSIGNED_INT, 0);
-	}
-	
-	public static void drawTriangleRed(final Vector3f aaa, final Vector3f bbb, final Vector3f ccc) {
-		GL11.glFinish();
+		if (programId >= 0) {
+			updateAllFlags();
+			GL11.glDrawElements(CONVERT_RENDER_MODE.get(mode), vertexCount, GL11.GL_UNSIGNED_INT, 0);
+			checkGlError("glDrawElements");
+		}
 	}
 	
 	/**

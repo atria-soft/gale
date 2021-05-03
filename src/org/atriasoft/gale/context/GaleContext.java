@@ -373,7 +373,7 @@ public abstract class GaleContext {
 						OpenGL.setViewPort(new Vector2f(0, 0), this.application.getSize());
 						final Color bgColor = new Color(0.8f, 0.5f, 0.8f, 1.0f);
 						OpenGL.clearColor(bgColor);
-						Log.info("==> appl clear ==> not created ...");
+						//Log.info("==> appl clear ==> not created ...");
 					}
 					unLockContext();
 					hasDisplayDone = true;
