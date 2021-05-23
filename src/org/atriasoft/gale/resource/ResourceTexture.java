@@ -64,7 +64,7 @@ public class ResourceTexture extends Resource {
 		} else {
 			for (int yyy = 0; yyy < decodedData.getHeight(); yyy++) {
 				for (int xxx = 0; xxx < decodedData.getWidth(); xxx++) {
-					img.setAFloat(xxx, yyy, 0xFF);
+					img.setAByte(xxx, yyy, (byte)0xFF);
 					img.setRByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 0]);
 					img.setGByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 1]);
 					img.setBByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 2]);

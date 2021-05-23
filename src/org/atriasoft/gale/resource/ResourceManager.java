@@ -163,6 +163,7 @@ public class ResourceManager {
 			Log.error("Request update after application EXIT ...");
 			return;
 		}
+		Log.debug("Update context : " + this.resourceListToUpdate.size());
 		// TODO Check the number of call this ... Log.info("update open-gl context ... ");
 		if (this.contextHasBeenRemoved) {
 			// need to update all ...
@@ -173,7 +174,7 @@ public class ResourceManager {
 			synchronized (this.resourceList) {
 				if (this.resourceList.size() != 0) {
 					for (long jjj = 0; jjj < MAX_RESOURCE_LEVEL; jjj++) {
-						Log.verbose("    updateContext level (D) : " + jjj + "/" + (MAX_RESOURCE_LEVEL - 1));
+						Log.warning("    updateContext level (D) : " + jjj + "/" + (MAX_RESOURCE_LEVEL - 1));
 						for (final Resource it : this.resourceList) {
 							if (jjj == it.getResourceLevel()) {
 								//Log.debug("Update context named : " + lresourceList[iii].getName());
@@ -196,7 +197,7 @@ public class ResourceManager {
 			}
 			if (resourceListToUpdate.size() != 0) {
 				for (long jjj = 0; jjj < MAX_RESOURCE_LEVEL; jjj++) {
-					Log.verbose("    updateContext level (U) : " + jjj + "/" + (MAX_RESOURCE_LEVEL - 1));
+					Log.warning("    updateContext level (U) : " + jjj + "/" + (MAX_RESOURCE_LEVEL - 1));
 					for (final Resource it : resourceListToUpdate) {
 						if (jjj == it.getResourceLevel()) {
 							if (!it.updateContext()) {

@@ -33,9 +33,9 @@ public class ResourceProgram extends Resource {
 		final String name = uriVertexShader.getValue() + "<-->" + uriFragmentShader.getValue();
 		Resource resource2 = getManager().localKeep(name);
 		if (resource2 != null) {
-			if (resource2 instanceof ResourceProgram) {
+			if (resource2 instanceof ResourceProgram ploppp) {
 				resource2.keep();
-				return (ResourceProgram) resource2;
+				return ploppp;
 			}
 			Log.critical("Request resource file : '" + name + "' With the wrong type (dynamic cast error)");
 			return null;
@@ -846,7 +846,7 @@ public class ResourceProgram extends Resource {
 			}
 			
 			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_POSITIONS, "in_position");
-			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_TEXTURE_COORDINATES, "tin_extureCoords");
+			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_TEXTURE_COORDINATES, "in_extureCoords");
 			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_NORMALS, "in_normal");
 			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_COLORS, "in_colors");
 			

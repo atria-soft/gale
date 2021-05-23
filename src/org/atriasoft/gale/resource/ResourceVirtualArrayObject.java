@@ -182,7 +182,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	public void flush() {
 		// request to the manager to be call at the next update ...
 		getManager().update(this);
-		Log.verbose("Request flush of VBO: [" + getId() + "] '" + getName() + "'");
+		Log.error("Request flush of VAO: [" + getId() + "] '" + getName() + "'");
 	}
 	
 	/**
@@ -198,51 +198,53 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 	
 	public void loadAgainToVAO() {
-		createVAO();
+		GL30.glBindVertexArray(this.vaoID);
+		Log.error("push VAO: [" + getId() + "] '" + getName() + "'");
 		if (this.indices != null) {
 			Log.verbose("Set indices");
 			bindIndicesBuffer(this.indices);
 		}
 		if (this.positions != null) {
 			Log.verbose("Set positions");
-			storeDataInAttributeList(0, 3, this.positions);
+			storeDataInAttributeList(INDICE_VBO_POSITIONS, 3, this.positions);
 		}
 		if (this.textureCoordinates != null) {
 			Log.verbose("Set textureCoordinates");
-			storeDataInAttributeList(1, 2, this.textureCoordinates);
+			storeDataInAttributeList(INDICE_VBO_TEXTURE_COORDINATES, 2, this.textureCoordinates);
 		}
 		if (this.normals != null) {
 			Log.verbose("Set normals");
-			storeDataInAttributeList(2, 3, this.normals);
+			storeDataInAttributeList(INDICE_VBO_NORMALS, 3, this.normals);
 		}
 		if (this.colors != null) {
 			Log.verbose("Set colors");
-			storeDataInAttributeList(3, 4, this.colors);
+			storeDataInAttributeList(INDICE_VBO_COLORS, 4, this.colors);
 		}
 		unbindVAO();
 	}
 	
 	public void loadToVAO() {
-		GL30.glBindVertexArray(this.vaoID);
+		createVAO();
+		Log.error("push VAO: [" + getId() + "] '" + getName() + "'");
 		if (this.indices != null) {
 			Log.verbose("Set indices");
 			bindIndicesBuffer(this.indices);
 		}
 		if (this.positions != null) {
 			Log.verbose("Set positions");
-			storeDataInAttributeList(0, 3, this.positions);
+			storeDataInAttributeList(INDICE_VBO_POSITIONS, 3, this.positions);
 		}
 		if (this.textureCoordinates != null) {
 			Log.verbose("Set textureCoordinates");
-			storeDataInAttributeList(1, 2, this.textureCoordinates);
+			storeDataInAttributeList(INDICE_VBO_TEXTURE_COORDINATES, 2, this.textureCoordinates);
 		}
 		if (this.normals != null) {
 			Log.verbose("Set normals");
-			storeDataInAttributeList(2, 3, this.normals);
+			storeDataInAttributeList(INDICE_VBO_NORMALS, 3, this.normals);
 		}
 		if (this.colors != null) {
 			Log.verbose("Set colors");
-			storeDataInAttributeList(3, 4, this.colors);
+			storeDataInAttributeList(INDICE_VBO_COLORS, 4, this.colors);
 		}
 		unbindVAO();
 	}
@@ -389,7 +391,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	 */
 	@Override
 	public boolean updateContext() {
-		Log.verbose(" Start: [" + getId() + "] '" + getName() + "' (size=" + this.vertexCount + ") ********************************");
+		Log.error(" Start: [" + getId() + "] '" + getName() + "' (size=" + this.vertexCount + ") ********************************");
 		if (!this.exist) {
 			Log.error("     ==> ALLOCATE new handle");
 			// Allocate and assign a Vertex Array Object to our handle
@@ -403,7 +405,7 @@ public class ResourceVirtualArrayObject extends Resource {
 			
 		}
 		this.exist = true;
-		Log.verbose(" Stop: [" + getId() + "] '" + getName() + "'");
+		Log.error(" Stop: [" + getId() + "] '" + getName() + "'");
 		return true;
 	}
 	

@@ -171,7 +171,6 @@ public abstract class GaleContext {
 	}
 	
 	public GaleApplication getApplication() {
-		
 		this.lock.lock();
 		try {
 			return this.application;
