@@ -47,12 +47,12 @@ public class ResourceShader extends Resource {
 		// load data from file "all the time ..."
 		
 		if (uri.get().endsWith(".frag")) {
-			this.type = ShaderType.fragment;
+			this.type = ShaderType.FRAGMENT;
 		} else if (uri.get().endsWith(".vert")) {
-			this.type = ShaderType.vertex;
+			this.type = ShaderType.VERTEX;
 		} else {
 			Log.error("File does not have extention '.vert' for Vertex Shader or '.frag' for Fragment Shader. but : \"" + uri + "\"");
-			this.type = ShaderType.vertex;
+			this.type = ShaderType.VERTEX;
 			return;
 		}
 		reload();

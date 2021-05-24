@@ -11,6 +11,7 @@ import org.atriasoft.etk.math.Vector2f;
 import org.atriasoft.etk.math.Vector2i;
 import org.atriasoft.etk.math.Vector3f;
 import org.atriasoft.etk.math.Vector3i;
+import org.atriasoft.etk.math.Vector4f;
 import org.atriasoft.gale.backend3d.OpenGL;
 import org.atriasoft.gale.internal.Log;
 import org.lwjgl.BufferUtils;
@@ -33,9 +34,9 @@ public class ResourceProgram extends Resource {
 		final String name = uriVertexShader.getValue() + "<-->" + uriFragmentShader.getValue();
 		Resource resource2 = getManager().localKeep(name);
 		if (resource2 != null) {
-			if (resource2 instanceof ResourceProgram ploppp) {
+			if (resource2 instanceof ResourceProgram) {
 				resource2.keep();
-				return ploppp;
+				return (ResourceProgram) resource2;
 			}
 			Log.critical("Request resource file : '" + name + "' With the wrong type (dynamic cast error)");
 			return null;
@@ -792,6 +793,20 @@ public class ResourceProgram extends Resource {
 	}
 	
 	public void uniformVector(final int idElem, final Vector3i value) {
+		if (!this.exist) {
+			return;
+		}
+		if (idElem < 0 || (long) idElem > this.elementList.size()) {
+			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			return;
+		}
+		if (!this.elementList.get(idElem).isLinked) {
+			return;
+		}
+		OpenGL.programLoadUniformVector(this.elementList.get(idElem).elementId, value);
+	}
+	
+	public void uniformVector(final int idElem, final Vector4f value) {
 		if (!this.exist) {
 			return;
 		}

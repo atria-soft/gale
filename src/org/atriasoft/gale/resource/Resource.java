@@ -30,12 +30,20 @@ public abstract class Resource {
 	}
 	
 	protected Resource(final String name) {
-		this.name = name;
+		//if (name == null) {
+		//	this.name = "---";
+		//} else {
+			this.name = name;
+		//}
 		getManager().localAdd(this);
 	}
 	
 	protected Resource(final Uri uri) {
-		this.name = uri.toString();
+		//if (uri == null) {
+		//	this.name = "---";
+		//} else {
+			this.name = uri.toString();
+		//}
 		getManager().localAdd(this);
 	}
 	

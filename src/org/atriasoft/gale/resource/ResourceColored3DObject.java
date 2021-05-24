@@ -87,7 +87,7 @@ public class ResourceColored3DObject extends Resource {
 			OpenGL.enable(OpenGL.Flag.flag_blend);
 		}
 		// Request the draw of the elements: 
-		OpenGL.drawArrays(OpenGL.RenderMode.triangle, 0, vertices.size());
+		OpenGL.drawArrays(OpenGL.RenderMode.TRIANGLE, 0, vertices.size());
 		if (color.a() < 1.0f) {
 			OpenGL.disable(OpenGL.Flag.flag_blend);
 		}
@@ -135,7 +135,7 @@ public class ResourceColored3DObject extends Resource {
 			OpenGL.enable(OpenGL.Flag.flag_blend);
 		}
 		// Request the draw of the elements: 
-		OpenGL.drawArrays(OpenGL.RenderMode.triangle, 0, vertices.size());
+		OpenGL.drawArrays(OpenGL.RenderMode.TRIANGLE, 0, vertices.size());
 		if (color.a() < 1.0f) {
 			OpenGL.disable(OpenGL.Flag.flag_blend);
 		}
@@ -425,7 +425,7 @@ public class ResourceColored3DObject extends Resource {
 			OpenGL.enable(OpenGL.Flag.flag_blend);
 		}
 		// Request the draw od the elements: 
-		OpenGL.drawArrays(OpenGL.RenderMode.line, 0, vertices.size());
+		OpenGL.drawArrays(OpenGL.RenderMode.LINE, 0, vertices.size());
 		if (color.a() < 1.0f) {
 			OpenGL.disable(OpenGL.Flag.flag_blend);
 		}

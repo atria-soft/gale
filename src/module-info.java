@@ -32,4 +32,5 @@ open module org.atriasoft.gale {
 	requires transitive pngdecoder;
 	requires transitive lwjgl3.awt;
 	requires io.scenarium.logger;
+	requires org.atriasoft.iogami;
 }

@@ -37,6 +37,7 @@ public abstract class GaleContext {
 	/**
 	 * From everyware in the program, we can get the context inteface.
 	 * @return current reference on the instance.
+	 * @note For test create a ``` new GaleContextTest()``` ... this permit to run some test...
 	 */
 	public static GaleContext getContext() {
 		return globalContext;

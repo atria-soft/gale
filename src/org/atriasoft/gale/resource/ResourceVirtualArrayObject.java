@@ -299,6 +299,11 @@ public class ResourceVirtualArrayObject extends Resource {
 		this.colors = colors;
 	}
 	
+	public void setColors(final List<Color> colors) {
+		setColors(colors.toArray(Color[]::new));
+		
+	}
+	
 	public void setIndices(final int[] indices) {
 		this.indices = indices;
 	}
@@ -312,6 +317,10 @@ public class ResourceVirtualArrayObject extends Resource {
 		this.normals = normals;
 	}
 	
+	public void setNormals(final List<Vector3f> normals) {
+		setNormals(normals.toArray(Vector3f[]::new));
+	}
+	
 	public void setNormals(final Vector3f[] normals) {
 		this.normals = normals;
 	}
@@ -320,12 +329,21 @@ public class ResourceVirtualArrayObject extends Resource {
 		this.positions = positions;
 	}
 	
+	public void setPosition(final List<Vector3f> outPosition) {
+		setPosition(outPosition.toArray(Vector3f[]::new));
+		
+	}
+	
 	public void setPosition(final Vector3f[] positions) {
 		this.positions = positions;
 	}
 	
 	public void setTextureCoordinate(final float[] textureCoordinates) {
 		this.textureCoordinates = textureCoordinates;
+	}
+	
+	public void setTextureCoordinate(final List<Vector2f> outTexturePosition) {
+		setTextureCoordinate(outTexturePosition.toArray(Vector2f[]::new));
 	}
 	
 	public void setTextureCoordinate(final Vector2f[] textureCoordinates) {

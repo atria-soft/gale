@@ -156,7 +156,7 @@ public class Sample2Application extends GaleApplication {
 		// update of flags is done asyncronously ==> need update befor drawing...
 		OpenGL.updateAllFlags();
 		// Request the draw od the elements:
-		this.verticesVBO.render(OpenGL.RenderMode.triangle);
+		this.verticesVBO.render(OpenGL.RenderMode.TRIANGLE);
 		
 		this.verticesVBO.unBindForRendering();
 		this.texture.unBindForRendering();

@@ -23,6 +23,7 @@ import org.atriasoft.etk.math.Vector2f;
 import org.atriasoft.etk.math.Vector2i;
 import org.atriasoft.etk.math.Vector3f;
 import org.atriasoft.etk.math.Vector3i;
+import org.atriasoft.etk.math.Vector4f;
 import org.atriasoft.gale.internal.Log;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -124,17 +125,17 @@ public class OpenGL {
 	}
 	
 	public enum RenderMode {
-		point, line, lineStrip, // !< Not supported in GALE (TODO Later)
-		lineLoop, triangle, triangleStrip, // !< Not supported in GALE (TODO Later)
-		triangleFan, // !< Not supported in GALE (TODO Later)
-		quad, // !< Not supported in OpenGL-ES2
-		quadStrip, // !< Not supported in OpenGL-ES2
-		polygon // !< Not supported in OpenGL-ES2
+		POINT, LINE, LINE_STRIP, // !< Not supported in GALE (TODO Later)
+		LINE_LOOP, TRIANGLE, TRIANGLE_STRIP, // !< Not supported in GALE (TODO Later)
+		TRIANGLE_FAN, // !< Not supported in GALE (TODO Later)
+		QUAD, // !< Not supported in OpenGL-ES2
+		QUAD_STRIP, // !< Not supported in OpenGL-ES2
+		POLYGON // !< Not supported in OpenGL-ES2
 	}
 	
 	/* Shader wrapping : */
 	public static enum ShaderType {
-		vertex, fragment
+		VERTEX, FRAGMENT
 	};
 	
 	public static class StateFlag {
@@ -169,9 +170,9 @@ public class OpenGL {
 	private static Matrix4f matrixCamera = Matrix4f.IDENTITY;
 	
 	private static int programId = 0;
-	private static final Map<RenderMode, Integer> CONVERT_RENDER_MODE = Map.of(RenderMode.point, GL11.GL_POINTS, RenderMode.line, GL11.GL_LINES, RenderMode.lineStrip, GL11.GL_LINE_STRIP,
-			RenderMode.lineLoop, GL11.GL_LINE_LOOP, RenderMode.triangle, GL11.GL_TRIANGLES, RenderMode.triangleStrip, GL11.GL_TRIANGLE_STRIP, RenderMode.triangleFan, GL11.GL_TRIANGLE_FAN,
-			RenderMode.quad, GL11.GL_QUADS, RenderMode.quadStrip, GL11.GL_QUAD_STRIP, RenderMode.polygon, GL11.GL_POLYGON);
+	private static final Map<RenderMode, Integer> CONVERT_RENDER_MODE = Map.of(RenderMode.POINT, GL11.GL_POINTS, RenderMode.LINE, GL11.GL_LINES, RenderMode.LINE_STRIP, GL11.GL_LINE_STRIP,
+			RenderMode.LINE_LOOP, GL11.GL_LINE_LOOP, RenderMode.TRIANGLE, GL11.GL_TRIANGLES, RenderMode.TRIANGLE_STRIP, GL11.GL_TRIANGLE_STRIP, RenderMode.TRIANGLE_FAN, GL11.GL_TRIANGLE_FAN,
+			RenderMode.QUAD, GL11.GL_QUADS, RenderMode.QUAD_STRIP, GL11.GL_QUAD_STRIP, RenderMode.POLYGON, GL11.GL_POLYGON);
 	
 	private static final Map<Flag, Integer> BASIC_FLAG;
 	private static boolean flagsStatesChange = false;
@@ -795,6 +796,10 @@ public class OpenGL {
 		GL20.glUniform3i(location, value.x(), value.y(), value.z());
 	}
 	
+	public static void programLoadUniformVector(final int location, final Vector4f value) {
+		GL20.glUniform4f(location, value.x(), value.y(), value.z(), value.w());
+	}
+	
 	public static void programRemove(final int prog) {
 		if (prog < 0) {
 			return;
@@ -999,10 +1004,10 @@ public class OpenGL {
 	
 	private static int shaderCreate(final ShaderType type) {
 		int shaderId = 0;
-		if (type == ShaderType.vertex) {
+		if (type == ShaderType.VERTEX) {
 			Log.verbose("create shader: VERTEX");
 			shaderId = GL20.glCreateShader(GL20.GL_VERTEX_SHADER);
-		} else if (type == ShaderType.fragment) {
+		} else if (type == ShaderType.FRAGMENT) {
 			Log.verbose("create shader: FRAGMENT");
 			shaderId = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
 		} else {

@@ -97,9 +97,9 @@ public class Sample1Application extends GaleApplication {
 		
 		// Request the draw of the elements:
 		if (TEST_STATIC_MODE) {
-			this.verticesVBO.render(OpenGL.RenderMode.triangle);
+			this.verticesVBO.render(OpenGL.RenderMode.TRIANGLE);
 		} else {
-			this.verticesVBO.renderArrays(OpenGL.RenderMode.triangle);
+			this.verticesVBO.renderArrays(OpenGL.RenderMode.TRIANGLE);
 		}
 		this.verticesVBO.unBindForRendering();
 		this.oGLprogram.unUse();
