@@ -14,17 +14,18 @@ import org.atriasoft.etk.math.Vector3i;
 import org.atriasoft.etk.math.Vector4f;
 import org.atriasoft.gale.backend3d.OpenGL;
 import org.atriasoft.gale.internal.Log;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL40;
 
 class ProgAttributeElement {
 	public String name; // !< Name of the element
 	public int elementId; // !< openGl Id if this element == > can not exist ==> @ref m_isLinked
 	public boolean isAttribute; // !< true if it was an attribute element, otherwite it was an uniform
 	public boolean isLinked; // !< if this element does not exist this is false
-};
+}
 
 public class ResourceProgram extends Resource {
 	static final boolean DEBUG = false; // TODO externalize this ...
@@ -32,7 +33,7 @@ public class ResourceProgram extends Resource {
 	public static ResourceProgram create(final Uri uriVertexShader, final Uri uriFragmentShader) {
 		ResourceProgram resource;
 		final String name = uriVertexShader.getValue() + "<-->" + uriFragmentShader.getValue();
-		Resource resource2 = getManager().localKeep(name);
+		Resource resource2 = Resource.getManager().localKeep(name);
 		if (resource2 != null) {
 			if (resource2 instanceof ResourceProgram) {
 				resource2.keep();
@@ -42,7 +43,7 @@ public class ResourceProgram extends Resource {
 			return null;
 		}
 		resource = new ResourceProgram(uriVertexShader, uriFragmentShader);
-		getManager().localAdd(resource);
+		Resource.getManager().localAdd(resource);
 		return resource;
 	}
 	
@@ -103,20 +104,18 @@ public class ResourceProgram extends Resource {
 		if (this.shaderVertex == null) {
 			Log.error("Error while getting a specific shader filename: " + uriVertexShader);
 			return;
-		} else {
-			Log.debug("Add shader on program: '" + uriFragmentShader + "'");
 		}
+		Log.debug("Add shader on program: '" + uriFragmentShader + "'");
 		this.shaderFragment = ResourceShader.create(uriFragmentShader);
 		if (this.shaderFragment == null) {
 			Log.error("Error while getting a specific shader filename: " + uriFragmentShader);
 			return;
-		} else {
-			Log.debug("Add shader on program : " + uriFragmentShader + "frag");
 		}
+		Log.debug("Add shader on program : " + uriFragmentShader + "frag");
 		if (OpenGL.hasContext()) {
 			updateContext();
 		} else {
-			getManager().update(this);
+			Resource.getManager().update(this);
 		}
 	}
 	
@@ -140,7 +139,7 @@ public class ResourceProgram extends Resource {
 		}
 		
 		Log.error("[" + this.elementList.get(idElem).name + "] send on oglID=" + vbo.getOpenGlId(vboId) + " VBOindex=" + vboId);
-		GL20.glBindBuffer(GL20.GL_ARRAY_BUFFER, vbo.getOpenGlId(vboId));
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.getOpenGlId(vboId));
 		GL20.glEnableVertexAttribArray(this.elementList.get(idElem).elementId);
 		this.listOfVBOUsed.add(this.elementList.get(idElem).elementId);
 	}
@@ -217,7 +216,7 @@ public class ResourceProgram extends Resource {
 		tmp.name = elementName;
 		tmp.isAttribute = true;
 		if (!OpenGL.hasContext()) {
-			getManager().update(this);
+			Resource.getManager().update(this);
 			tmp.elementId = -1;
 			tmp.isLinked = false;
 		} else if (this.exist) {
@@ -263,7 +262,7 @@ public class ResourceProgram extends Resource {
 		tmp.name = elementName;
 		tmp.isAttribute = false;
 		if (!OpenGL.hasContext()) {
-			getManager().update(this);
+			Resource.getManager().update(this);
 			tmp.elementId = -1;
 			tmp.isLinked = false;
 		} else if (this.exist) {
@@ -396,10 +395,10 @@ public class ResourceProgram extends Resource {
 		// GL40.glBindVertexArray(this.elementList.get(idElem).elementId);
 		// Log.error("[" + this.elementList.get(idElem).name + "] send " + 3 + "
 		// element");
-		GL40.glVertexAttribPointer(this.elementList.get(idElem).elementId, nbElement, GL40.GL_FLOAT, false, jumpBetweenSample * 4, /* 4 is the size of float in the generic system... */
+		GL20.glVertexAttribPointer(this.elementList.get(idElem).elementId, nbElement, GL11.GL_FLOAT, false, jumpBetweenSample * 4, /* 4 is the size of float in the generic system... */
 				data);
 		// checkGlError("glVertexAttribPointer", LINE, idElem);
-		GL40.glEnableVertexAttribArray(this.elementList.get(idElem).elementId);
+		GL20.glEnableVertexAttribArray(this.elementList.get(idElem).elementId);
 		// checkGlError("glEnableVertexAttribArray", LINE, idElem);
 	}
 	
@@ -463,7 +462,7 @@ public class ResourceProgram extends Resource {
 		}
 		
 		Log.verbose("[" + this.elementList.get(idElem).name + "] send on oglID=" + vbo.getOpenGlId(index) + " VBOindex=" + index);
-		GL20.glBindBuffer(GL20.GL_ARRAY_BUFFER, vbo.getOpenGlId(index));
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.getOpenGlId(index));
 		// checkGlError("glBindBuffer", __LINE__, _idElem);
 		Log.verbose("    id=" + this.elementList.get(idElem).elementId);
 		Log.verbose("    jump sample=" + jumpBetweenSample);
@@ -534,7 +533,20 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformColor(this.elementList.get(idElem).elementId, value);
 	}
-	
+
+	public void uniformColorRGB(final int idElem, final Color value) {
+		if (!this.exist) {
+			return;
+		}
+		if (idElem < 0 || (long) idElem > this.elementList.size()) {
+			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			return;
+		}
+		if (!this.elementList.get(idElem).isLinked) {
+			return;
+		}
+		OpenGL.programLoadUniformColorRGB(this.elementList.get(idElem).elementId, value);
+	}
 	/**
 	 * Send 1 float uniform element to the spefified ID (not send if does not
 	 *        really exist in the openGL program)
@@ -749,6 +761,7 @@ public class ResourceProgram extends Resource {
 		 */
 		OpenGL.programLoadUniformMatrix(this.elementList.get(idElem).elementId, matrix, transpose);
 	}
+
 	
 	public void uniformVector(final int idElem, final Vector2f value) {
 		if (!this.exist) {
