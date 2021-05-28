@@ -44,9 +44,11 @@ public class ResourceManager {
 	 * This is to inform the resources manager that we have no more openGl context ...
 	 */
 	public synchronized void contextHasBeenDestroyed() {
-		for (final Resource it : this.resourceList) {
-			if (it.getCount() > 0) {
-				it.removeContextToLate();
+		synchronized (this.resourceList) {
+			for (final Resource it : this.resourceList) {
+				if (it.getCount() > 0) {
+					it.removeContextToLate();
+				}
 			}
 		}
 		// no context preent ...
@@ -59,33 +61,40 @@ public class ResourceManager {
 	public synchronized void display() {
 		Log.info("Resources loaded : ");
 		// remove all resources ...
-		for (final Resource it : this.resourceList) {
-			Log.info("    [" + it.getId() + "]" + it.getClass().getCanonicalName() + "='" + it.getName() + "' " + it.getCount() + " elements");
+
+		synchronized (this.resourceList) {
+			for (final Resource it : this.resourceList) {
+				Log.info("    [" + it.getId() + "]" + it.getClass().getCanonicalName() + "='" + it.getName() + "' " + it.getCount() + " elements");
+			}
 		}
 		Log.info("Resources ---");
 	}
 	
 	public synchronized void localAdd(final Resource object) {
 		// add at the end if no slot is free
-		this.resourceList.add(object);
+		synchronized (this.resourceList) {
+			this.resourceList.add(object);
+		}
 	}
 	
 	// internal API to extent eResources in extern Soft
 	public synchronized Resource localKeep(final String filename) {
-		Log.verbose("KEEP (DEFAULT) : file : '" + filename + "' in " + this.resourceList.size() + " resources");
-		for (final Resource it : this.resourceList) {
-			if (it == null) {
-				continue;
-			}
-			if (it.getName() == null) {
-				continue;
-			}
-			//Log.verbose("compare : " + filename + " ==???== " + it.getName());
-			if (it.getName().contentEquals(Resource.NO_NAME_RESOURCE)) {
-				continue;
-			}
-			if (it.getName().contentEquals(filename)) {
-				return it;
+		synchronized (this.resourceList) {
+			Log.verbose("KEEP (DEFAULT) : file : '" + filename + "' in " + this.resourceList.size() + " resources");
+			for (final Resource it : this.resourceList) {
+				if (it == null) {
+					continue;
+				}
+				if (it.getName() == null) {
+					continue;
+				}
+				//Log.verbose("compare : " + filename + " ==???== " + it.getName());
+				if (it.getName().contentEquals(Resource.NO_NAME_RESOURCE)) {
+					continue;
+				}
+				if (it.getName().contentEquals(filename)) {
+					return it;
+				}
 			}
 		}
 		return null;
@@ -103,13 +112,15 @@ public class ResourceManager {
 	public synchronized void reLoadResources() {
 		Log.info("-------------  Resources re-loaded  -------------");
 		// remove all resources ...
-		for (long jjj = 0; jjj < MAX_RESOURCE_LEVEL; jjj++) {
-			Log.info("    Reload level : " + jjj + "/" + (MAX_RESOURCE_LEVEL - 1));
-			for (final Resource it : this.resourceList) {
-				if (jjj == it.getResourceLevel()) {
-					if (it.getCount() > 0) {
-						it.reload();
-						Log.info("        [" + it.getId() + "]=" + it.getClass().getCanonicalName());
+		for (long jjj = 0; jjj < ResourceManager.MAX_RESOURCE_LEVEL; jjj++) {
+			Log.info("    Reload level : " + jjj + "/" + (ResourceManager.MAX_RESOURCE_LEVEL - 1));
+			synchronized (this.resourceList) {
+				for (final Resource it : this.resourceList) {
+					if (jjj == it.getResourceLevel()) {
+						if (it.getCount() > 0) {
+							it.reload();
+							Log.info("        [" + it.getId() + "]=" + it.getClass().getCanonicalName());
+						}
 					}
 				}
 			}
@@ -131,10 +142,12 @@ public class ResourceManager {
 		display();
 		this.resourceListToUpdate.clear();
 		// remove all resources ...
-		for (final Resource it : this.resourceList) {
-			Log.warning("Find a resource that is not removed : [" + it.getId() + "]" + "='" + it.getName() + "' " + it.getCount() + " elements");
+		synchronized (this.resourceList) {
+			for (final Resource it : this.resourceList) {
+				Log.warning("Find a resource that is not removed : [" + it.getId() + "]" + "='" + it.getName() + "' " + it.getCount() + " elements");
+			}
+			this.resourceList.clear();
 		}
-		this.resourceList.clear();
 	}
 	
 	/**
@@ -172,8 +185,8 @@ public class ResourceManager {
 			}
 			synchronized (this.resourceList) {
 				if (this.resourceList.size() != 0) {
-					for (long jjj = 0; jjj < MAX_RESOURCE_LEVEL; jjj++) {
-						Log.verbose("    updateContext level (D) : " + jjj + "/" + (MAX_RESOURCE_LEVEL - 1));
+					for (long jjj = 0; jjj < ResourceManager.MAX_RESOURCE_LEVEL; jjj++) {
+						Log.verbose("    updateContext level (D) : " + jjj + "/" + (ResourceManager.MAX_RESOURCE_LEVEL - 1));
 						for (final Resource it : this.resourceList) {
 							if (jjj == it.getResourceLevel()) {
 								//Log.debug("Update context named : " + lresourceList[iii].getName());
@@ -195,8 +208,8 @@ public class ResourceManager {
 				this.resourceListToUpdate = new ArrayList<>();
 			}
 			if (resourceListToUpdate.size() != 0) {
-				for (long jjj = 0; jjj < MAX_RESOURCE_LEVEL; jjj++) {
-					Log.verbose("    updateContext level (U) : " + jjj + "/" + (MAX_RESOURCE_LEVEL - 1));
+				for (long jjj = 0; jjj < ResourceManager.MAX_RESOURCE_LEVEL; jjj++) {
+					Log.verbose("    updateContext level (U) : " + jjj + "/" + (ResourceManager.MAX_RESOURCE_LEVEL - 1));
 					for (final Resource it : resourceListToUpdate) {
 						if (jjj == it.getResourceLevel()) {
 							if (!it.updateContext()) {
