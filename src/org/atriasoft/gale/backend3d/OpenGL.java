@@ -12,6 +12,7 @@ import java.nio.IntBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,13 +26,13 @@ import org.atriasoft.etk.math.Vector3f;
 import org.atriasoft.etk.math.Vector3i;
 import org.atriasoft.etk.math.Vector4f;
 import org.atriasoft.gale.internal.Log;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL40;
 
 public class OpenGL {
 	public static enum ClearFlag {
@@ -136,7 +137,7 @@ public class OpenGL {
 	/* Shader wrapping : */
 	public static enum ShaderType {
 		VERTEX, FRAGMENT
-	};
+	}
 	
 	public static class StateFlag {
 		public boolean current = false;
@@ -180,72 +181,72 @@ public class OpenGL {
 	private static final Map<Flag, StateFlag> FLAGS_STATES = new HashMap<>();
 	public static Map<Usage, Integer> convertUsage;
 	static {
-		FLAGS_STATES.put(Flag.flag_blend, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_clipDistanceI, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_colorLogigOP, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_cullFace, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_debugOutput, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_debugOutputSynchronous, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_depthClamp, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_depthTest, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_dither, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_framebufferSRGB, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_lineSmooth, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_multisample, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_polygonOffsetFill, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_polygonOffsetLine, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_polygonOffsetPoint, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_polygonSmooth, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_primitiveRestart, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_primitiveRestartFixedIndex, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_sampleAlphaToCoverage, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_sampleAlphaToOne, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_sampleCoverage, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_sampleShading, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_sampleMask, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_scissorTest, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_stencilTest, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_programPointSize, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_texture2D, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_alphaTest, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_fog, new StateFlag());
-		FLAGS_STATES.put(Flag.flag_back, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_blend, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_clipDistanceI, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_colorLogigOP, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_cullFace, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_debugOutput, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_debugOutputSynchronous, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_depthClamp, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_depthTest, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_dither, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_framebufferSRGB, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_lineSmooth, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_multisample, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_polygonOffsetFill, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_polygonOffsetLine, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_polygonOffsetPoint, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_polygonSmooth, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_primitiveRestart, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_primitiveRestartFixedIndex, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_sampleAlphaToCoverage, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_sampleAlphaToOne, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_sampleCoverage, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_sampleShading, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_sampleMask, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_scissorTest, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_stencilTest, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_programPointSize, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_texture2D, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_alphaTest, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_fog, new StateFlag());
+		OpenGL.FLAGS_STATES.put(Flag.flag_back, new StateFlag());
 		BASIC_FLAG = new HashMap<>();
-		BASIC_FLAG.put(Flag.flag_blend, GL11.GL_BLEND);
+		OpenGL.BASIC_FLAG.put(Flag.flag_blend, GL11.GL_BLEND);
 		// basicFlag.put(Flag.flag_clipDistanceI, GL_CLIP_DISTANCE0);
 		// basicFlag.put(Flag.flag_colorLogigOP, GL_COLOR_LOGIC_OP);
-		BASIC_FLAG.put(Flag.flag_cullFace, GL11.GL_CULL_FACE);
+		OpenGL.BASIC_FLAG.put(Flag.flag_cullFace, GL11.GL_CULL_FACE);
 		// basicFlag.put(Flag.flag_debugOutput, GLDEBUGOUTPUT);
 		// basicFlag.put(Flag.flag_debugOutputSynchronous, GLDEBUGOUTPUTSYNCHRONOUS);
 		// basicFlag.put(Flag.flag_depthClamp, GLDEPTHCLAMP);
-		BASIC_FLAG.put(Flag.flag_depthTest, GL11.GL_DEPTH_TEST);
-		BASIC_FLAG.put(Flag.flag_dither, GL11.GL_DITHER);
+		OpenGL.BASIC_FLAG.put(Flag.flag_depthTest, GL11.GL_DEPTH_TEST);
+		OpenGL.BASIC_FLAG.put(Flag.flag_dither, GL11.GL_DITHER);
 		// basicFlag.put(Flag.flag_framebufferSRGB, GLFRAMEBUFFERSRGB);
 		// basicFlag.put(Flag.flag_lineSmooth, GLLINESMOOTH);
 		// basicFlag.put(Flag.flag_multisample, GLMULTISAMPLE);
-		BASIC_FLAG.put(Flag.flag_polygonOffsetFill, GL11.GL_POLYGON_OFFSET_FILL);
+		OpenGL.BASIC_FLAG.put(Flag.flag_polygonOffsetFill, GL11.GL_POLYGON_OFFSET_FILL);
 		// basicFlag.put(Flag.flag_polygonOffsetLine, GLPOLYGONOFFSETLINE);
 		// basicFlag.put(Flag.flag_polygonOffsetPoint, GLPOLYGONOFFSETPOINT);
 		// basicFlag.put(Flag.flag_polygonSmooth, GLPOLYGONSMOOTH);
 		// basicFlag.put(Flag.flag_primitiveRestart, GLPRIMITIVERESTART);
 		// basicFlag.put(Flag.flag_primitiveRestartFixedIndex,
 		// GLPRIMITIVERESTARTFIXEDINDEX);
-		BASIC_FLAG.put(Flag.flag_sampleAlphaToCoverage, GL20.GL_SAMPLE_ALPHA_TO_COVERAGE);
+		OpenGL.BASIC_FLAG.put(Flag.flag_sampleAlphaToCoverage, GL13.GL_SAMPLE_ALPHA_TO_COVERAGE);
 		// basicFlag.put(Flag.flag_sampleAlphaToOne, GLSAMPLEALPHATOONE);
-		BASIC_FLAG.put(Flag.flag_sampleCoverage, GL30.GL_SAMPLE_COVERAGE);
+		OpenGL.BASIC_FLAG.put(Flag.flag_sampleCoverage, GL13.GL_SAMPLE_COVERAGE);
 		// basicFlag.put(Flag.flag_sampleShading, GLSAMPLESHADING);
 		// basicFlag.put(Flag.flag_sampleMask, GLSAMPLEMASK);
-		BASIC_FLAG.put(Flag.flag_scissorTest, GL11.GL_SCISSOR_TEST);
-		BASIC_FLAG.put(Flag.flag_stencilTest, GL30.GL_STENCIL_TEST);
+		OpenGL.BASIC_FLAG.put(Flag.flag_scissorTest, GL11.GL_SCISSOR_TEST);
+		OpenGL.BASIC_FLAG.put(Flag.flag_stencilTest, GL11.GL_STENCIL_TEST);
 		// basicFlag.put(Flag.flag_programPointSize, GLPROGRAMPOINTSIZE);
-		BASIC_FLAG.put(Flag.flag_texture2D, GL11.GL_TEXTURE_2D);
+		OpenGL.BASIC_FLAG.put(Flag.flag_texture2D, GL11.GL_TEXTURE_2D);
 		// basicFlag.put(Flag.flag_alphaTest, GLALPHATEST);
 		// basicFlag.put(Flag.flag_fog, GLFOG);
-		BASIC_FLAG.put(Flag.flag_back, GL11.GL_BACK);
-		convertUsage = new HashMap<>();
-		convertUsage.put(Usage.streamDraw, GL20.GL_STREAM_DRAW);
-		convertUsage.put(Usage.staticDraw, GL20.GL_STATIC_DRAW);
-		convertUsage.put(Usage.dynamicDraw, GL20.GL_DYNAMIC_DRAW);
+		OpenGL.BASIC_FLAG.put(Flag.flag_back, GL11.GL_BACK);
+		OpenGL.convertUsage = new HashMap<>();
+		OpenGL.convertUsage.put(Usage.streamDraw, GL15.GL_STREAM_DRAW);
+		OpenGL.convertUsage.put(Usage.staticDraw, GL15.GL_STATIC_DRAW);
+		OpenGL.convertUsage.put(Usage.dynamicDraw, GL15.GL_DYNAMIC_DRAW);
 	}
 	private static final Map<Long, Boolean> THREAD_HAS_CONTEXT = new HashMap<>();
 	private static final Map<ClearFlag, Integer> BASIC_FLAG_CLEAR = Map.of(ClearFlag.clearFlag_colorBuffer, GL11.GL_COLOR_BUFFER_BIT, ClearFlag.clearFlag_depthBuffer, GL11.GL_DEPTH_BUFFER_BIT,
@@ -256,17 +257,17 @@ public class OpenGL {
 	 * @param textureID Id of the texture 0 .. 13
 	 */
 	public static void activeTexture(final int textureID) {
-		if (programId >= 0) {
-			GL13.glActiveTexture(TEXTURE_ID_BINDING[textureID]);
-			checkGlError("glActiveTexture");
-		} else if (DEBUG) {
+		if (OpenGL.programId >= 0) {
+			GL13.glActiveTexture(OpenGL.TEXTURE_ID_BINDING[textureID]);
+			OpenGL.checkGlError("glActiveTexture");
+		} else if (OpenGL.DEBUG) {
 			Log.error("try to bind texture with no program set");
 		}
 	}
 	
 	public static void bindBuffer(final int bufferId) {
-		GL20.glBindBuffer(GL20.GL_ARRAY_BUFFER, bufferId);
-		checkGlError("glBindBuffer");
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, bufferId);
+		OpenGL.checkGlError("glBindBuffer");
 	}
 	
 	public static void bindTexture2D(final int texId) {
@@ -274,37 +275,37 @@ public class OpenGL {
 	}
 	
 	public static void blendFuncAuto() {
-		GL40.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 	}
 	
 	public static void bufferData(final Color[] data, final Usage usage) {
-		final FloatBuffer buffer = storeDataInFloatBuffer(data);
-		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, convertUsage.get(usage));
-		checkGlError("glBufferData");
+		final FloatBuffer buffer = OpenGL.storeDataInFloatBuffer(data);
+		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, OpenGL.convertUsage.get(usage));
+		OpenGL.checkGlError("glBufferData");
 	}
 	
 	public static void bufferData(final float[] data, final Usage usage) {
-		final FloatBuffer buffer = storeDataInFloatBuffer(data);
-		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, convertUsage.get(usage));
-		checkGlError("glBufferData");
+		final FloatBuffer buffer = OpenGL.storeDataInFloatBuffer(data);
+		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, OpenGL.convertUsage.get(usage));
+		OpenGL.checkGlError("glBufferData");
 	}
 	
 	public static void bufferData(final int[] data, final Usage usage) {
-		final IntBuffer buffer = storeDataInFloatBuffer(data);
-		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, convertUsage.get(usage));
-		checkGlError("glBufferData");
+		final IntBuffer buffer = OpenGL.storeDataInFloatBuffer(data);
+		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, OpenGL.convertUsage.get(usage));
+		OpenGL.checkGlError("glBufferData");
 	}
 	
 	public static void bufferData(final Vector2f[] data, final Usage usage) {
-		final FloatBuffer buffer = storeDataInFloatBuffer(data);
-		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, convertUsage.get(usage));
-		checkGlError("glBufferData");
+		final FloatBuffer buffer = OpenGL.storeDataInFloatBuffer(data);
+		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, OpenGL.convertUsage.get(usage));
+		OpenGL.checkGlError("glBufferData");
 	}
 	
 	public static void bufferData(final Vector3f[] data, final Usage usage) {
-		final FloatBuffer buffer = storeDataInFloatBuffer(data);
-		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, convertUsage.get(usage));
-		checkGlError("glBufferData");
+		final FloatBuffer buffer = OpenGL.storeDataInFloatBuffer(data);
+		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, OpenGL.convertUsage.get(usage));
+		OpenGL.checkGlError("glBufferData");
 	}
 	
 	public static void checkGlError(final String op) {
@@ -337,8 +338,8 @@ public class OpenGL {
 	 *              is to be cleared.
 	 */
 	public static void clear(final ClearFlag flag) {
-		GL11.glClear(BASIC_FLAG_CLEAR.get(flag));
-		checkGlError("glClear");
+		GL11.glClear(OpenGL.BASIC_FLAG_CLEAR.get(flag));
+		OpenGL.checkGlError("glClear");
 	}
 	
 	/**
@@ -347,7 +348,7 @@ public class OpenGL {
 	 */
 	public static void clearColor(final Color color) {
 		GL11.glClearColor(color.r(), color.g(), color.b(), color.a());
-		checkGlError("glClearColor");
+		OpenGL.checkGlError("glClearColor");
 	}
 	
 	/**
@@ -357,11 +358,11 @@ public class OpenGL {
 	 */
 	public static void clearDepth(final float value) {
 		GL11.glClearDepth(value);
-		checkGlError("glClearDepth");
+		OpenGL.checkGlError("glClearDepth");
 	}
 	
 	private static void clearFlagState() {
-		for (final Map.Entry<Flag, StateFlag> elem : FLAGS_STATES.entrySet()) {
+		for (final Map.Entry<Flag, StateFlag> elem : OpenGL.FLAGS_STATES.entrySet()) {
 			elem.getValue().current = false;
 			elem.getValue().mustBeSet = false;
 		}
@@ -375,7 +376,7 @@ public class OpenGL {
 	 */
 	public static void clearStencil(final int value) {
 		GL11.glClearStencil(value);
-		checkGlError("glClearStencil");
+		OpenGL.checkGlError("glClearStencil");
 	}
 	
 	public static boolean deleteBuffers(final int[] buffers) {
@@ -384,11 +385,9 @@ public class OpenGL {
 			return true;
 		}
 		// TODO Check if we are in the correct thread
-		GL20.glDeleteBuffers(buffers);
-		checkGlError("glDeleteBuffers");
-		for (int iii = 0; iii < buffers.length; iii++) {
-			buffers[iii] = -1;
-		}
+		GL15.glDeleteBuffers(buffers);
+		OpenGL.checkGlError("glDeleteBuffers");
+		Arrays.fill(buffers, -1);
 		return true;
 	}
 	
@@ -409,13 +408,13 @@ public class OpenGL {
 	 */
 	public static void disable(final Flag flagID) {
 		// Log.info("Disable : " + flagID);
-		if (DIRECT_MODE) {
-			GL11.glDisable(BASIC_FLAG.get(flagID));
-			checkGlError("glDisable");
+		if (OpenGL.DIRECT_MODE) {
+			GL11.glDisable(OpenGL.BASIC_FLAG.get(flagID));
+			OpenGL.checkGlError("glDisable");
 		} else {
 			// Log.debug("Disable FLAGS = " + this.flagsStates);
-			FLAGS_STATES.get(flagID).mustBeSet = false;
-			flagsStatesChange = true;
+			OpenGL.FLAGS_STATES.get(flagID).mustBeSet = false;
+			OpenGL.flagsStatesChange = true;
 			// Log.debug(" == >" + this.flagsStates);
 		}
 	}
@@ -424,18 +423,18 @@ public class OpenGL {
 	 *  draw a specific array == > this enable mode difference ...
 	 */
 	public static void drawArrays(final RenderMode mode, final int first, final int count) {
-		if (programId >= 0) {
-			updateAllFlags();
-			GL20.glDrawArrays(CONVERT_RENDER_MODE.get(mode), first, count);
-			checkGlError("glDrawArrays");
+		if (OpenGL.programId >= 0) {
+			OpenGL.updateAllFlags();
+			GL11.glDrawArrays(OpenGL.CONVERT_RENDER_MODE.get(mode), first, count);
+			OpenGL.checkGlError("glDrawArrays");
 		}
 	}
 	
 	public static void drawElements(final RenderMode mode, final int vertexCount) {
-		if (programId >= 0) {
-			updateAllFlags();
-			GL11.glDrawElements(CONVERT_RENDER_MODE.get(mode), vertexCount, GL11.GL_UNSIGNED_INT, 0);
-			checkGlError("glDrawElements");
+		if (OpenGL.programId >= 0) {
+			OpenGL.updateAllFlags();
+			GL11.glDrawElements(OpenGL.CONVERT_RENDER_MODE.get(mode), vertexCount, GL11.GL_UNSIGNED_INT, 0);
+			OpenGL.checkGlError("glDrawElements");
 		}
 	}
 	
@@ -445,13 +444,13 @@ public class OpenGL {
 	 */
 	public static void enable(final Flag flagID) {
 		// Log.info("Enable : " + flagID);
-		if (DIRECT_MODE) {
-			GL11.glEnable(BASIC_FLAG.get(flagID));
-			checkGlError("glEnable");
+		if (OpenGL.DIRECT_MODE) {
+			GL11.glEnable(OpenGL.BASIC_FLAG.get(flagID));
+			OpenGL.checkGlError("glEnable");
 		} else {
 			// Log.debug("Enable FLAGS = " + this.flagsStates);
-			FLAGS_STATES.get(flagID).mustBeSet = true;
-			flagsStatesChange = true;
+			OpenGL.FLAGS_STATES.get(flagID).mustBeSet = true;
+			OpenGL.flagsStatesChange = true;
 			// Log.debug(" == >" + this.flagsStates);
 		}
 	}
@@ -460,14 +459,14 @@ public class OpenGL {
 	 * 
 	 */
 	public static void finish() {
-		programId = -1;
+		OpenGL.programId = -1;
 	}
 	
 	/**
 	 * 
 	 */
 	public static void flush() {
-		programId = -1;
+		OpenGL.programId = -1;
 		GL11.glFlush();
 		// checkGlError("glFlush");
 		// Log.info("========================" );
@@ -485,8 +484,8 @@ public class OpenGL {
 			return true;
 		}
 		Log.info("Create N=" + buffers.length + " Buffer");
-		GL20.glGenBuffers(buffers);
-		checkGlError("glGenBuffers");
+		GL15.glGenBuffers(buffers);
+		OpenGL.checkGlError("glGenBuffers");
 		boolean hasError = false;
 		for (int iii = 0; iii < buffers.length; iii++) {
 			if (buffers[iii] == 0) {
@@ -503,7 +502,7 @@ public class OpenGL {
 	 * @return The requested matrix.
 	 */
 	public static Matrix4f getCameraMatrix() {
-		return matrixCamera;
+		return OpenGL.matrixCamera;
 	}
 	
 	/**
@@ -511,11 +510,11 @@ public class OpenGL {
 	 * @return The requested matrix.
 	 */
 	public static Matrix4f getMatrix() {
-		if (MATRIX_LIST.size() == 0) {
+		if (OpenGL.MATRIX_LIST.size() == 0) {
 			Log.error("set matrix list is not corect size in the stack: 0");
-			MATRIX_LIST.add(Matrix4f.IDENTITY);
+			OpenGL.MATRIX_LIST.add(Matrix4f.IDENTITY);
 		}
-		return MATRIX_LIST.get(MATRIX_LIST.size() - 1);
+		return OpenGL.MATRIX_LIST.get(OpenGL.MATRIX_LIST.size() - 1);
 	}
 	
 	public static void glDeleteTextures(final int textureId) {
@@ -560,10 +559,10 @@ public class OpenGL {
 	 */
 	public static boolean hasContext() {
 		final long curentThreadId = Thread.currentThread().getId();
-		if (!THREAD_HAS_CONTEXT.containsKey(curentThreadId)) {
+		if (!OpenGL.THREAD_HAS_CONTEXT.containsKey(curentThreadId)) {
 			return false;
 		}
-		return THREAD_HAS_CONTEXT.get(curentThreadId);
+		return OpenGL.THREAD_HAS_CONTEXT.get(curentThreadId);
 	}
 	
 	/**
@@ -572,28 +571,28 @@ public class OpenGL {
 	 */
 	public static void lock() {
 		// mutexOpenGl().lock();
-		MATRIX_LIST.clear();
+		OpenGL.MATRIX_LIST.clear();
 		final Matrix4f tmpMat = Matrix4f.IDENTITY;
-		MATRIX_LIST.add(tmpMat);
-		matrixCamera = Matrix4f.IDENTITY;
-		clearFlagState();
-		programId = -1;
+		OpenGL.MATRIX_LIST.add(tmpMat);
+		OpenGL.matrixCamera = Matrix4f.IDENTITY;
+		OpenGL.clearFlagState();
+		OpenGL.programId = -1;
 	}
 	
 	/**
 	 *  remove the current matrix and get the last one from the matrix stack.
 	 */
 	public static void pop() {
-		Log.verbose("Pop OpenGl Matrix: " + MATRIX_LIST.size());
-		if (MATRIX_LIST.size() <= 1) {
-			Log.error("set matrix list is not corect size in the stack : " + MATRIX_LIST.size());
-			MATRIX_LIST.clear();
-			MATRIX_LIST.add(Matrix4f.IDENTITY);
-			matrixCamera = Matrix4f.IDENTITY;
+		Log.verbose("Pop OpenGl Matrix: " + OpenGL.MATRIX_LIST.size());
+		if (OpenGL.MATRIX_LIST.size() <= 1) {
+			Log.error("set matrix list is not corect size in the stack : " + OpenGL.MATRIX_LIST.size());
+			OpenGL.MATRIX_LIST.clear();
+			OpenGL.MATRIX_LIST.add(Matrix4f.IDENTITY);
+			OpenGL.matrixCamera = Matrix4f.IDENTITY;
 			return;
 		}
-		MATRIX_LIST.remove(MATRIX_LIST.size() - 1);
-		matrixCamera = Matrix4f.IDENTITY;
+		OpenGL.MATRIX_LIST.remove(OpenGL.MATRIX_LIST.size() - 1);
+		OpenGL.matrixCamera = Matrix4f.IDENTITY;
 	}
 	
 	public static boolean programAttach(final int prog, final int shader) {
@@ -606,7 +605,7 @@ public class OpenGL {
 			return false;
 		}
 		GL20.glAttachShader(prog, shader);
-		checkGlError("glAttachShader");
+		OpenGL.checkGlError("glAttachShader");
 		return true;
 	}
 	
@@ -624,7 +623,7 @@ public class OpenGL {
 			return false;
 		}
 		GL20.glLinkProgram(prog);
-		checkGlError("glLinkProgram");
+		OpenGL.checkGlError("glLinkProgram");
 		GL20.glValidateProgram(prog);
 		
 		// GLint linkStatus = GLFALSE;
@@ -669,7 +668,7 @@ public class OpenGL {
 		final int programId = GL20.glCreateProgram();
 		if (programId == 0) {
 			Log.error("program creation return error ...");
-			checkGlError("glCreateProgram");
+			OpenGL.checkGlError("glCreateProgram");
 			return -1;
 		}
 		Log.debug("Create program with oglID=" + programId);
@@ -686,7 +685,7 @@ public class OpenGL {
 			return false;
 		}
 		GL20.glDetachShader(prog, shader);
-		checkGlError("glDetachShader");
+		OpenGL.checkGlError("glDetachShader");
 		return true;
 	}
 	
@@ -701,7 +700,7 @@ public class OpenGL {
 		}
 		final int val = GL20.glGetAttribLocation(prog, name);
 		if (val < 0) {
-			checkGlError("glGetAttribLocation");
+			OpenGL.checkGlError("glGetAttribLocation");
 			Log.warning("glGetAttribLocation('" + name + "') = " + val);
 			return -1;
 		}
@@ -718,14 +717,14 @@ public class OpenGL {
 			return -1;
 		}
 		final int val = GL20.glGetUniformLocation(prog, name);
-		if (val == GL20.GL_INVALID_VALUE) {
-			checkGlError("glGetUniformLocation");
+		if (val == GL11.GL_INVALID_VALUE) {
+			OpenGL.checkGlError("glGetUniformLocation");
 			Log.warning("glGetUniformLocation('" + name + "') = GL_INVALID_VALUE");
-		} else if (val == GL20.GL_INVALID_OPERATION) {
-			checkGlError("glGetUniformLocation");
+		} else if (val == GL11.GL_INVALID_OPERATION) {
+			OpenGL.checkGlError("glGetUniformLocation");
 			Log.warning("glGetUniformLocation('" + name + "') = GL_INVALID_OPERATION");
 		} else if (val < 0) {
-			checkGlError("glGetUniformLocation");
+			OpenGL.checkGlError("glGetUniformLocation");
 			Log.warning("glGetUniformLocation('" + name + "') = " + val);
 		}
 		return val;
@@ -735,9 +734,12 @@ public class OpenGL {
 		// System.out.println("set value " + value + " " + (value==true?1.0f:0.0f));
 		GL20.glUniform1f(location, value ? 1.0f : 0.0f);
 	}
-	
+
 	public static void programLoadUniformColor(final int location, final Color value) {
 		GL20.glUniform4f(location, value.r(), value.g(), value.b(), value.a());
+	}
+	public static void programLoadUniformColorRGB(final int location, final Color value) {
+		GL20.glUniform3f(location, value.r(), value.g(), value.b());
 	}
 	
 	public static void programLoadUniformFloat(final int location, final float value) {
@@ -770,7 +772,7 @@ public class OpenGL {
 	
 	public static void programLoadUniformInt(final int location, final int value, final int value2, final int value3, final int value4) {
 		GL20.glUniform4i(location, value, value2, value3, value4);
-	};
+	}
 	
 	public static void programLoadUniformMatrix(final int location, final Matrix4f value) {
 		GL20.glUniformMatrix4fv(location, true, value.asArray());
@@ -806,7 +808,7 @@ public class OpenGL {
 		}
 		// TODO Check if we are in the correct thread
 		GL20.glDeleteProgram(prog);
-		checkGlError("glDeleteProgram");
+		OpenGL.checkGlError("glDeleteProgram");
 	}
 	
 	public static void programUnUse(final int id) {
@@ -854,25 +856,25 @@ public class OpenGL {
 			// not used == > because it is unneded
 			return;
 		}
-		if (programId != id) {
-			programId = id;
-			GL20.glUseProgram(programId);
+		if (OpenGL.programId != id) {
+			OpenGL.programId = id;
+			GL20.glUseProgram(OpenGL.programId);
 		}
-		checkGlError("glUseProgram");
+		OpenGL.checkGlError("glUseProgram");
 	}
 	
 	/**
 	 *  store current matrix in the matrix stack.
 	 */
 	public static void push() {
-		Log.verbose("push OpenGl Matrix: " + MATRIX_LIST.size());
-		if (MATRIX_LIST.size() == 0) {
-			Log.error("set matrix list is not corect size in the stack : " + MATRIX_LIST.size());
-			MATRIX_LIST.add(Matrix4f.IDENTITY);
+		Log.verbose("push OpenGl Matrix: " + OpenGL.MATRIX_LIST.size());
+		if (OpenGL.MATRIX_LIST.size() == 0) {
+			Log.error("set matrix list is not corect size in the stack : " + OpenGL.MATRIX_LIST.size());
+			OpenGL.MATRIX_LIST.add(Matrix4f.IDENTITY);
 			return;
 		}
-		final Matrix4f tmp = MATRIX_LIST.get(MATRIX_LIST.size() - 1);
-		MATRIX_LIST.add(tmp);
+		final Matrix4f tmp = OpenGL.MATRIX_LIST.get(OpenGL.MATRIX_LIST.size() - 1);
+		OpenGL.MATRIX_LIST.add(tmp);
 	}
 	
 	protected static StringBuilder readLocalFile(final String name) {
@@ -911,20 +913,20 @@ public class OpenGL {
 	}
 	
 	public static void reset() {
-		if (DIRECT_MODE) {
+		if (OpenGL.DIRECT_MODE) {
 			Log.error("TODO ...");
 		} else {
-			clearFlagState();
-			programId = -1;
-			updateAllFlags();
+			OpenGL.clearFlagState();
+			OpenGL.programId = -1;
+			OpenGL.updateAllFlags();
 		}
-	};
+	}
 	
 	public static void resetFlagState() {
-		for (final Map.Entry<Flag, StateFlag> elem : FLAGS_STATES.entrySet()) {
+		for (final Map.Entry<Flag, StateFlag> elem : OpenGL.FLAGS_STATES.entrySet()) {
 			elem.getValue().mustBeSet = false;
 		}
-		flagsStatesChange = true;
+		OpenGL.flagsStatesChange = true;
 	}
 	
 	/**
@@ -935,11 +937,11 @@ public class OpenGL {
 	 *               mmight survived
 	 */
 	public static void setBasicMatrix(final Matrix4f newOne) {
-		if (MATRIX_LIST.size() != 1) {
-			Log.error("matrix is not corect size in the stack : " + MATRIX_LIST.size());
+		if (OpenGL.MATRIX_LIST.size() != 1) {
+			Log.error("matrix is not corect size in the stack : " + OpenGL.MATRIX_LIST.size());
 		}
-		MATRIX_LIST.clear();
-		MATRIX_LIST.add(newOne);
+		OpenGL.MATRIX_LIST.clear();
+		OpenGL.MATRIX_LIST.add(newOne);
 	}
 	
 	/**
@@ -947,11 +949,11 @@ public class OpenGL {
 	 * @param newOne The requested matrix.
 	 */
 	public static void setCameraMatrix(final Matrix4f newOne) {
-		matrixCamera = newOne;
+		OpenGL.matrixCamera = newOne;
 	}
 	
 	public static void setDeathMask(final boolean state) {
-		GL40.glDepthMask(state);
+		GL11.glDepthMask(state);
 	}
 	
 	/**
@@ -962,12 +964,12 @@ public class OpenGL {
 	 *       supported in opengl ES-2
 	 */
 	public static void setMatrix(final Matrix4f newOne) {
-		if (MATRIX_LIST.size() == 0) {
-			Log.error("set matrix list is not corect size in the stack : " + MATRIX_LIST.size());
-			MATRIX_LIST.add(newOne);
+		if (OpenGL.MATRIX_LIST.size() == 0) {
+			Log.error("set matrix list is not corect size in the stack : " + OpenGL.MATRIX_LIST.size());
+			OpenGL.MATRIX_LIST.add(newOne);
 			return;
 		}
-		MATRIX_LIST.set(MATRIX_LIST.size() - 1, newOne);
+		OpenGL.MATRIX_LIST.set(OpenGL.MATRIX_LIST.size() - 1, newOne);
 	}
 	
 	public static void setTexture2DFilterLinear() {
@@ -981,8 +983,8 @@ public class OpenGL {
 	}
 	
 	public static void setTexture2DWrapClampToEdge() {
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL40.GL_CLAMP_TO_EDGE);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL40.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 	}
 	
 	public static void setTexture2DWrapRepeat() {
@@ -993,13 +995,13 @@ public class OpenGL {
 	public static void setViewPort(final Vector2f start, final Vector2f stop) {
 		// Log.info("setViewport " + start + " " + stop);
 		GL11.glViewport((int) start.x(), (int) start.y(), (int) stop.x(), (int) stop.y());
-		checkGlError("glViewport");
+		OpenGL.checkGlError("glViewport");
 	}
 	
 	public static void setViewPort(final Vector2i start, final Vector2i stop) {
 		// Log.info("setViewport " + start + " " + stop);
 		GL11.glViewport(start.x(), start.y(), stop.x(), stop.y());
-		checkGlError("glViewport");
+		OpenGL.checkGlError("glViewport");
 	}
 	
 	private static int shaderCreate(final ShaderType type) {
@@ -1017,7 +1019,7 @@ public class OpenGL {
 		Log.verbose("create shader: ... (done)");
 		if (shaderId == 0) {
 			Log.error("glCreateShader return error ...");
-			checkGlError("glCreateShader");
+			OpenGL.checkGlError("glCreateShader");
 			return -1;
 		}
 		return shaderId;
@@ -1025,8 +1027,8 @@ public class OpenGL {
 	
 	public static int shaderLoad(final Uri file, final ShaderType type) {
 		System.out.println("Load shader: '" + file + "'");
-		final StringBuilder shaderSource = readLocalFile(file);
-		final int shaderID = shaderCreate(type);
+		final StringBuilder shaderSource = OpenGL.readLocalFile(file);
+		final int shaderID = OpenGL.shaderCreate(type);
 		GL20.glShaderSource(shaderID, shaderSource);
 		GL20.glCompileShader(shaderID);
 		if (GL20.glGetShaderi(shaderID, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
@@ -1043,7 +1045,7 @@ public class OpenGL {
 		}
 		// TODO Check if we are in the correct thread
 		GL20.glDeleteShader(shader);
-		checkGlError("glDeleteShader");
+		OpenGL.checkGlError("glDeleteShader");
 	}
 	
 	public static FloatBuffer storeDataInFloatBuffer(final Color[] data) {
@@ -1054,7 +1056,7 @@ public class OpenGL {
 			tmpData[iii * 4 + 2] = data[iii].b();
 			tmpData[iii * 4 + 3] = data[iii].a();
 		}
-		return storeDataInFloatBuffer(tmpData);
+		return OpenGL.storeDataInFloatBuffer(tmpData);
 		// does not work...
 		/*
 		final FloatBuffer buffer = FloatBuffer.allocate(data.length * 4);
@@ -1089,7 +1091,7 @@ public class OpenGL {
 			tmpData[iii * 2] = data[iii].x();
 			tmpData[iii * 2 + 1] = data[iii].y();
 		}
-		return storeDataInFloatBuffer(tmpData);
+		return OpenGL.storeDataInFloatBuffer(tmpData);
 		// does not work...
 		/*
 		final FloatBuffer buffer = FloatBuffer.allocate(data.length * 2);
@@ -1109,7 +1111,7 @@ public class OpenGL {
 			tmpData[iii * 3 + 1] = data[iii].y();
 			tmpData[iii * 3 + 2] = data[iii].z();
 		}
-		return storeDataInFloatBuffer(tmpData);
+		return OpenGL.storeDataInFloatBuffer(tmpData);
 		// does not work...
 		/*
 		final FloatBuffer buffer = FloatBuffer.allocate(data.length * 3);
@@ -1139,7 +1141,7 @@ public class OpenGL {
 	 */
 	public static void threadHasContext() {
 		final long curentThreadId = Thread.currentThread().getId();
-		THREAD_HAS_CONTEXT.put(curentThreadId, true);
+		OpenGL.THREAD_HAS_CONTEXT.put(curentThreadId, true);
 	}
 	
 	/**
@@ -1148,12 +1150,12 @@ public class OpenGL {
 	 */
 	public static void threadHasNoMoreContext() {
 		final long curentThreadId = Thread.currentThread().getId();
-		THREAD_HAS_CONTEXT.remove(curentThreadId);
+		OpenGL.THREAD_HAS_CONTEXT.remove(curentThreadId);
 	}
 	
 	public static boolean unbindBuffer() {
-		GL20.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
-		checkGlError("glBindBuffer(0)");
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+		OpenGL.checkGlError("glBindBuffer(0)");
 		return true;
 	}
 	
@@ -1169,25 +1171,25 @@ public class OpenGL {
 	 *        element set ...
 	 */
 	public static void updateAllFlags() {
-		if (DIRECT_MODE) {
+		if (OpenGL.DIRECT_MODE) {
 			return;
 		}
 		// check if flags has change :
-		if (!flagsStatesChange) {
+		if (!OpenGL.flagsStatesChange) {
 			return;
 		}
-		flagsStatesChange = false;
-		for (final Map.Entry<Flag, StateFlag> elem : FLAGS_STATES.entrySet()) {
+		OpenGL.flagsStatesChange = false;
+		for (final Map.Entry<Flag, StateFlag> elem : OpenGL.FLAGS_STATES.entrySet()) {
 			final StateFlag value = elem.getValue();
 			if (value.current != value.mustBeSet) {
 				value.current = value.mustBeSet;
 				if (value.current) {
-					GL11.glEnable(BASIC_FLAG.get(elem.getKey()));
-					checkGlError("glEnable");
+					GL11.glEnable(OpenGL.BASIC_FLAG.get(elem.getKey()));
+					OpenGL.checkGlError("glEnable");
 					// Log.info(" enable : " + elem.getKey() + " " + basicFlag.get(elem.getKey()));
 				} else {
-					GL11.glDisable(BASIC_FLAG.get(elem.getKey()));
-					checkGlError("glDisable");
+					GL11.glDisable(OpenGL.BASIC_FLAG.get(elem.getKey()));
+					OpenGL.checkGlError("glDisable");
 					// Log.info(" disable : " + elem.getKey());
 				}
 			}
@@ -1196,7 +1198,7 @@ public class OpenGL {
 	
 	public static void vertexAttribPointerFloat(final int id, final int size) {
 		GL20.glVertexAttribPointer(id, size, GL11.GL_FLOAT, false, 0, 0);
-		checkGlError("glVertexAttribPointer");
+		OpenGL.checkGlError("glVertexAttribPointer");
 	}
 	
 	private OpenGL() {}
