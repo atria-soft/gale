@@ -181,11 +181,12 @@ public class ResourceTexture2 extends Resource {
 		Log.debug("    size=" + image.getSize());
 		this.data = image;
 		this.realImageSize = this.data.getSize();
-		final Vector2i compatibilityHWSize = new Vector2i(Tools.nextP2(this.realImageSize.x()), Tools.nextP2(this.realImageSize.y()));
-		if (!this.realImageSize.equals(compatibilityHWSize)) {
-			Log.warning("RESIZE Image for HArwareCompatibility:" + this.realImageSize + " => " + compatibilityHWSize);
-			this.data.resize(compatibilityHWSize.x(), compatibilityHWSize.y());
-		}
+		// Disable compatibility size for embended ... 
+//		final Vector2i compatibilityHWSize = new Vector2i(Tools.nextP2(this.realImageSize.x()), Tools.nextP2(this.realImageSize.y()));
+//		if (!this.realImageSize.equals(compatibilityHWSize)) {
+//			Log.warning("RESIZE Image for HArwareCompatibility:" + this.realImageSize + " => " + compatibilityHWSize);
+//			this.data.resize(compatibilityHWSize.x(), compatibilityHWSize.y());
+//		}
 		flush();
 	}
 	
