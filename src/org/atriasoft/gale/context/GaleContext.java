@@ -521,6 +521,7 @@ public abstract class GaleContext {
 	}
 	
 	public void operatingSystemSetInput(final KeySpecial special, final KeyType type, final KeyStatus status, final int pointerID, final Vector2f pos) {
+		Log.verbose("Position motion: " + pos);
 		postAction(context -> {
 			final GaleApplication appl = context.getApplication();
 			if (appl == null) {

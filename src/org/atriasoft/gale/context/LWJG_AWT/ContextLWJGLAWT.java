@@ -438,7 +438,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	
 	@Override
 	public void mouseMoved(final MouseEvent e) {
-		Log.info("Mouse moved:" + e.getX() + " " + e.getY() + " " + e);
+		Log.verbose("Mouse moved:" + e.getX() + " " + e.getY() + " " + e);
 		if (this.robot != null) {
 			final Rectangle bounds = this.frame.getBounds();
 			//Log.error("         " + bounds + " windows=" + windowsSize + " deco= " + decoratedWindowsSize);
