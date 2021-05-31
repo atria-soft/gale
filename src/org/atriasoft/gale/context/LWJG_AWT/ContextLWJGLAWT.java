@@ -1,12 +1,10 @@
 package org.atriasoft.gale.context.LWJG_AWT;
 
-import static org.lwjgl.opengl.GL.createCapabilities;
-import static org.lwjgl.opengl.GL11.glClearColor;
-
 import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -25,8 +23,7 @@ import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-
-import io.scenarium.logger.Logger;
+import javax.swing.WindowConstants;
 
 import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2f;
@@ -39,6 +36,8 @@ import org.atriasoft.gale.key.KeyKeyboard;
 import org.atriasoft.gale.key.KeySpecial;
 import org.atriasoft.gale.key.KeyStatus;
 import org.atriasoft.gale.key.KeyType;
+
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.awt.AWTGLCanvas;
 //import org.lwjgl.Version;
@@ -47,6 +46,8 @@ import org.lwjgl.opengl.awt.AWTGLCanvas;
 //import org.lwjgl.opengl.GL;
 //import org.lwjgl.system.MemoryStack;
 import org.lwjgl.opengl.awt.GLData;
+
+import io.scenarium.logger.Logger;
 
 public class ContextLWJGLAWT extends GaleContext implements MouseListener, MouseMotionListener, KeyListener, MouseWheelListener {
 	private static final int WIDTH = 800;
@@ -77,10 +78,10 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	}
 	
 	public static float getFrameTimeSecconds() {
-		return delta;
+		return ContextLWJGLAWT.delta;
 	}
 	
-	private final boolean[] inputIsPressed = new boolean[MAX_MANAGE_INPUT];
+	private final boolean[] inputIsPressed = new boolean[ContextLWJGLAWT.MAX_MANAGE_INPUT];
 	private Vector2f decoratedWindowsSize = Vector2f.ZERO;
 	private Vector2f cursorPos = Vector2f.ZERO;
 	
@@ -147,7 +148,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	
 	private void initWindows() {
 		this.frame = new JFrame("Gale base");
-		this.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.frame.setLayout(new BorderLayout());
 		this.frame.setPreferredSize(new Dimension(800, 600));
 		this.glData = new GLData();
@@ -157,8 +158,8 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 			@Override
 			public void initGL() {
 				System.out.println("OpenGL version: " + this.effective.majorVersion + "." + this.effective.minorVersion + " (Profile: " + this.effective.profile + ")");
-				createCapabilities();
-				glClearColor(0.3f, 0.4f, 0.5f, 1);
+				GL.createCapabilities();
+				GL11.glClearColor(0.3f, 0.4f, 0.5f, 1);
 				GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			}
 			
@@ -190,7 +191,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		this.canvas.addMouseWheelListener(this);
 		this.frame.transferFocus();
 		
-		lastFrameTime = getCurrentTime();
+		ContextLWJGLAWT.lastFrameTime = ContextLWJGLAWT.getCurrentTime();
 		
 	}
 	
@@ -300,7 +301,8 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 					keyInput = KeyKeyboard.SHIFT_LEFT;
 					this.guiKeyBoardMode.setShiftLeft(pressed);
 					break;
-				} else if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
+				}
+				if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
 					keyInput = KeyKeyboard.SHIFT_LEFT;
 					this.guiKeyBoardMode.setShiftRight(pressed);
 					break;
@@ -310,7 +312,8 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 					keyInput = KeyKeyboard.CTRL_LEFT;
 					this.guiKeyBoardMode.setCtrlLeft(pressed);
 					break;
-				} else if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
+				}
+				if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
 					keyInput = KeyKeyboard.CTRL_RIGHT;
 					this.guiKeyBoardMode.setCtrlRight(pressed);
 					break;
@@ -320,7 +323,8 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 					keyInput = KeyKeyboard.META_LEFT;
 					this.guiKeyBoardMode.setMetaLeft(pressed);
 					break;
-				} else if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
+				}
+				if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
 					keyInput = KeyKeyboard.META_RIGHT;
 					this.guiKeyBoardMode.setMetaRight(pressed);
 					break;
@@ -443,11 +447,11 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 			if (e.getXOnScreen() == (int) refPosX && e.getYOnScreen() == (int) refPosY) {
 				this.cursorPos = Vector2f.ZERO;
 				return;
-			} else {
-				//Log.error("         " + bounds + "  windows=" + windowsSize + " deco= " + decoratedWindowsSize);
-				this.cursorPos = new Vector2f(-(e.getXOnScreen() - refPosX), e.getYOnScreen() - refPosY);
-				this.robot.mouseMove((int) refPosX, (int) refPosY);
 			}
+			//Log.error("         " + bounds + "  windows=" + windowsSize + " deco= " + decoratedWindowsSize);
+			this.cursorPos = new Vector2f(-(e.getXOnScreen() - refPosX), this.decoratedWindowsSize.y() - (e.getYOnScreen() - refPosY));
+			//this.cursorPos = new Vector2f(-(e.getXOnScreen() - refPosX), refPosY);
+			this.robot.mouseMove((int) refPosX, (int) refPosY);
 			Log.info("delta moved:" + this.cursorPos);
 		} else {
 			// TODO use real size ... !!!!
@@ -455,7 +459,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		}
 		// For compatibility of the Android system : 
 		boolean findOne = false;
-		for (int iii = 0; iii < MAX_MANAGE_INPUT; iii++) {
+		for (int iii = 0; iii < ContextLWJGLAWT.MAX_MANAGE_INPUT; iii++) {
 			if (this.inputIsPressed[iii]) {
 				//Log.debug("X11 event: bt=" << iii << " " << event.type << " = \"MotionNotify\" (" << m_cursorEventX << "," << m_cursorEventY << ")");
 				operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.move, iii, this.cursorPos);
@@ -472,8 +476,8 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	public void mousePressed(final MouseEvent e) {
 		Log.info("Mouse pressed:" + e.getX() + " " + e.getY());
 		final int button = e.getButton();
-		this.cursorPos = new Vector2f(e.getX(), e.getY());
-		if (button < MAX_MANAGE_INPUT) {
+		this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() - e.getY());
+		if (button < ContextLWJGLAWT.MAX_MANAGE_INPUT) {
 			this.inputIsPressed[button] = true;
 		}
 		operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.down, button, this.cursorPos);
@@ -484,8 +488,8 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		//Log.info("Mouse release:" + e.getX() + " " + e.getY());
 		//		Log.info("mouse value: GLFW_RELEASE" + action + " bt=" + button);
 		final int button = e.getButton();
-		this.cursorPos = new Vector2f(e.getX(), e.getY());
-		if (button < MAX_MANAGE_INPUT) {
+		this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() - e.getY());
+		if (button < ContextLWJGLAWT.MAX_MANAGE_INPUT) {
 			this.inputIsPressed[button] = false;
 		}
 		operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.up, button, this.cursorPos);
@@ -494,7 +498,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	@Override
 	public void mouseWheelMoved(final MouseWheelEvent e) {
 		//Log.info("wheel_event : " + e);
-		this.cursorPos = new Vector2f(e.getX(), e.getY());
+		this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() - e.getY());
 		if (e.getWheelRotation() < 0) {
 			this.inputIsPressed[5] = true;
 			operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.down, 5, this.cursorPos);
@@ -586,10 +590,10 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	public void setFullScreen(final boolean status) {
 		super.setFullScreen(status);
 		if (status) {
-			this.frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+			this.frame.setExtendedState(Frame.MAXIMIZED_BOTH);
 			this.frame.setUndecorated(true);
 		} else {
-			this.frame.setExtendedState(JFrame.NORMAL);
+			this.frame.setExtendedState(Frame.NORMAL);
 			this.frame.setUndecorated(false);
 		}
 	}
@@ -597,17 +601,17 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	@Override
 	public void setIcon(final Uri inputFile) {
 		
-	};
+	}
 	
 	/****************************************************************************************/
 	@Override
 	public void setTitle(final String title) {
 		this.frame.setTitle(title);
-	};
+	}
 	
 	private void showCursor() {
 		this.frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	};
+	}
 	
 	public void unInit() {
 		
