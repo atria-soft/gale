@@ -423,7 +423,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	public void mouseEntered(final MouseEvent e) {
 		// TODO Auto-generated method stub
 		//Log.info("Mouse entered:" + e.getX() + " " + e.getY());
-		this.cursorPos = new Vector2f(e.getX(), e.getY());
+		this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() -e.getY());
 		operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.enter, 0, this.cursorPos);
 	}
 	
@@ -431,14 +431,14 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	public void mouseExited(final MouseEvent e) {
 		// TODO Auto-generated method stub
 		//Log.info("Mouse exited:" + e.getX() + " " + e.getY());
-		this.cursorPos = new Vector2f(e.getX(), e.getY());
+		this.cursorPos = new Vector2f(e.getX(),this.decoratedWindowsSize.y() - e.getY());
 		operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.leave, 0, this.cursorPos);
 		//this.frame.mouseMove(e, 200, 200);
 	}
 	
 	@Override
 	public void mouseMoved(final MouseEvent e) {
-		//Log.info("Mouse moved:" + e.getX() + " " + e.getY() + " " + e);
+		Log.info("Mouse moved:" + e.getX() + " " + e.getY() + " " + e);
 		if (this.robot != null) {
 			final Rectangle bounds = this.frame.getBounds();
 			//Log.error("         " + bounds + " windows=" + windowsSize + " deco= " + decoratedWindowsSize);
@@ -449,13 +449,13 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 				return;
 			}
 			//Log.error("         " + bounds + "  windows=" + windowsSize + " deco= " + decoratedWindowsSize);
-			this.cursorPos = new Vector2f(-(e.getXOnScreen() - refPosX), this.decoratedWindowsSize.y() - (e.getYOnScreen() - refPosY));
+			this.cursorPos = new Vector2f(-(e.getXOnScreen() - refPosX), (e.getYOnScreen() - refPosY));
 			//this.cursorPos = new Vector2f(-(e.getXOnScreen() - refPosX), refPosY);
 			this.robot.mouseMove((int) refPosX, (int) refPosY);
 			Log.info("delta moved:" + this.cursorPos);
 		} else {
 			// TODO use real size ... !!!!
-			this.cursorPos = new Vector2f(e.getX(), this.cursorSize.y() - e.getY());
+			this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() + (this.cursorSize.y() - e.getY()));
 		}
 		// For compatibility of the Android system : 
 		boolean findOne = false;
