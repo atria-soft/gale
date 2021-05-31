@@ -181,7 +181,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	public void flush() {
 		// request to the manager to be call at the next update ...
 		Resource.getManager().update(this);
-		Log.error("Request flush of VAO: [" + getId() + "] '" + getName() + "'");
+		Log.verbose("Request flush of VAO: [" + getId() + "] '" + getName() + "'");
 	}
 	
 	/**
@@ -198,7 +198,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	
 	public void loadAgainToVAO() {
 		GL30.glBindVertexArray(this.vaoID);
-		Log.error("push VAO: [" + getId() + "] '" + getName() + "'");
+		Log.verbose("push VAO: [" + getId() + "] '" + getName() + "'");
 		if (this.indices != null) {
 			Log.verbose("Set indices");
 			bindIndicesBuffer(this.indices);
@@ -224,7 +224,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	
 	public void loadToVAO() {
 		createVAO();
-		Log.error("push VAO: [" + getId() + "] '" + getName() + "'");
+		Log.verbose("push VAO: [" + getId() + "] '" + getName() + "'");
 		if (this.indices != null) {
 			Log.verbose("Set indices");
 			bindIndicesBuffer(this.indices);
@@ -412,9 +412,9 @@ public class ResourceVirtualArrayObject extends Resource {
 	 */
 	@Override
 	public boolean updateContext() {
-		Log.error(" Start: [" + getId() + "] '" + getName() + "' (size=" + this.vertexCount + ") ********************************");
+		Log.verbose(" Start: [" + getId() + "] '" + getName() + "' (size=" + this.vertexCount + ") ********************************");
 		if (!this.exist) {
-			Log.error("     ==> ALLOCATE new handle");
+			Log.verbose("     ==> ALLOCATE new handle");
 			// Allocate and assign a Vertex Array Object to our handle
 			loadToVAO();
 		} else {
@@ -426,7 +426,7 @@ public class ResourceVirtualArrayObject extends Resource {
 			
 		}
 		this.exist = true;
-		Log.error(" Stop: [" + getId() + "] '" + getName() + "'");
+		Log.verbose(" Stop: [" + getId() + "] '" + getName() + "'");
 		return true;
 	}
 	

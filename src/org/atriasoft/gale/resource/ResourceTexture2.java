@@ -35,7 +35,7 @@ public class ResourceTexture2 extends Resource {
 			Log.critical("Request resource file : '" + uri + "' With the wrong type (dynamic cast error)");
 			return null;
 		}
-		Log.debug("CREATE: new Texture: " + uri);
+		Log.verbose("CREATE: new Texture: " + uri);
 		return new ResourceTexture2(uri);
 	}
 	
@@ -133,7 +133,7 @@ public class ResourceTexture2 extends Resource {
 	// Flush the data to send it at the openGl system
 	public synchronized void flush() {
 		// request to the manager to be call at the next update ...
-		Log.error("Request UPDATE of Element");
+		Log.verbose("Request UPDATE of Element");
 		Resource.getManager().update(this);
 	}
 	
@@ -225,7 +225,7 @@ public class ResourceTexture2 extends Resource {
 	
 	@Override
 	public synchronized boolean updateContext() {
-		Log.error("updateContext [START]");
+		Log.verbose("updateContext [START]");
 		//final Steady tic = Steady.now();
 		/*
 		 * TODO : use unlockable synchronized ... if (lock.tryLock() == false) { //Lock
