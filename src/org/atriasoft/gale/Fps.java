@@ -4,85 +4,85 @@ public class Fps {
 	private long startTime = 0;
 	private long nbCallTime = 0;
 	private long nbDisplayTime = 0;
-	private float min = 99999999;
+	private float min = (float) 99999999999999.0;
 	private float avg = 0;
 	private float max = 0;
-	private float minIdle = 99999999;
+	private float minIdle = (float) 9999999999999.0;
 	private float avgIdle = 0;
 	private float maxIdle = 0;
 	private long ticTime = 0;
 	private boolean display = false;
 	private boolean drawingDone = false;
 	private String displayName = null;
-	private boolean displayFPS;
-	public Fps(String displayName, boolean displayFPS) {
+	private final boolean displayFPS;
+	public Fps(final String displayName, final boolean displayFPS) {
 		this.displayName = displayName;
 		this.displayFPS = displayFPS;
 	}
 	public void tic() {
-		long currentTime = System.currentTimeMillis();
-		ticTime = currentTime;
-		nbCallTime++;
-		if (startTime == 0) {
-			startTime = currentTime;
+		long currentTime = System.nanoTime();
+		this.ticTime = currentTime;
+		this.nbCallTime++;
+		if (this.startTime == 0) {
+			this.startTime = currentTime;
 		}
-		if ( (currentTime - startTime) > 10000) {
-			display = true;
+		if ( (currentTime - this.startTime) > 10000000000L) {
+			this.display = true;
 		}
 	}
 	public void toc() {
 		toc(false);
 	}
-	public void toc(boolean displayTime) {
-		long currentTime = System.currentTimeMillis();
-		long processTimeLocal = (currentTime - ticTime);
+	public void toc(final boolean displayTime) {
+		long currentTime = System.nanoTime();
+		long processTimeLocal = (currentTime - this.ticTime);
 		if (displayTime) {
-			System.out.println(displayName + ": processTime: " + processTimeLocal);
+			System.out.println(this.displayName + ": processTime: " + processTimeLocal);
 		}
-		if (drawingDone) {
-			min = Math.min(min, processTimeLocal);
-			max = Math.max(max, processTimeLocal);
-			avg += processTimeLocal;
-			drawingDone = false;
+		if (this.drawingDone) {
+			this.min = Math.min(this.min, processTimeLocal);
+			this.max = Math.max(this.max, processTimeLocal);
+			this.avg += processTimeLocal;
+			this.drawingDone = false;
 		} else {
-			minIdle = Math.min(minIdle, processTimeLocal);
-			maxIdle = Math.max(maxIdle, processTimeLocal);
-			avgIdle += processTimeLocal;
+			this.minIdle = Math.min(this.minIdle, processTimeLocal);
+			this.maxIdle = Math.max(this.maxIdle, processTimeLocal);
+			this.avgIdle += processTimeLocal;
 		}
 	}
 
 	public void incrementCounter() {
-		nbDisplayTime++;
-		drawingDone = true;
+		this.nbDisplayTime++;
+		this.drawingDone = true;
 	}
 
 	public void draw() {
-		if (display) {
-			if (nbDisplayTime > 0) {
-				System.out.println(displayName + " : Active : "
-				                         + min + " "
-				                         + avg / nbDisplayTime + "ms "
-				                         + max + " ");
+		if (this.display) {
+			if (this.nbDisplayTime > 0) {
+				System.out.println(this.displayName + " : Active : "
+				                         + this.min + " "
+				                         + this.avg / this.nbDisplayTime + "ms "
+				                         + this.max + " ");
 			}
-			if (nbCallTime-nbDisplayTime>0) {
-				System.out.println(displayName + " : idle   : "
-				                         + minIdle + " "
-				                         + avgIdle / (nbCallTime-nbDisplayTime) + "ms "
-				                         + maxIdle + " ");
+			if (this.nbCallTime-this.nbDisplayTime>0) {
+				System.out.println(this.displayName + " : idle   : "
+				                         + this.minIdle + " "
+				                         + this.avgIdle / (this.nbCallTime-this.nbDisplayTime) + "ms "
+				                         + this.maxIdle + " ");
 			}
-			if (displayFPS) {
-				System.out.println("FPS : " + nbDisplayTime + "/" + nbCallTime + "fps");
+			if (this.displayFPS) {
+				System.out.println("FPS : " + this.nbDisplayTime + "/" + this.nbCallTime + "fps");
 			}
-			max = 0;
-			min = 99999999;
-			avg = 0;
-			maxIdle = 0;
-			minIdle = 99999999;
-			avgIdle = 0;
-			nbCallTime = 0;
-			nbDisplayTime = 0;
-			startTime = 0;
-			display = false;
+			this.max = 0;
+			this.min = 99999999;
+			this.avg = 0;
+			this.maxIdle = 0;
+			this.minIdle = 99999999;
+			this.avgIdle = 0;
+			this.nbCallTime = 0;
+			this.nbDisplayTime = 0;
+			this.startTime = 0;
+			this.display = false;
 		}
 	}
 }
