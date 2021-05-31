@@ -1,5 +1,6 @@
 package org.atriasoft.gale.context;
 
+import java.time.Clock;
 import java.util.Vector;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -26,7 +27,7 @@ interface ActionToDoInAsyncLoop {
 
 enum ApplicationState {
 	UNDEFINED, CREATE, RUNNING, DIED
-};
+}
 
 public abstract class GaleContext {
 	protected static final int MAX_MANAGE_INPUT = 15;
@@ -40,16 +41,16 @@ public abstract class GaleContext {
 	 * @note For test create a ``` new GaleContextTest()``` ... this permit to run some test...
 	 */
 	public static GaleContext getContext() {
-		return globalContext;
+		return GaleContext.globalContext;
 	}
 	
 	public static void setContext(final GaleContext context) {
-		globalContext = context;
+		GaleContext.globalContext = context;
 	}
 	
 	Lock lock = new ReentrantLock();
 	
-	protected ThreadAbstract periodicThread;;
+	protected ThreadAbstract periodicThread;
 	protected GaleApplication application; //!< Application handle
 	protected ApplicationState applicationState = ApplicationState.UNDEFINED; // state of the application
 	private final CommandLine commandLine = new CommandLine(); //!< Start command line information;
@@ -70,7 +71,7 @@ public abstract class GaleContext {
 		// set a basic
 		this.application = application;
 		this.applicationState = ApplicationState.CREATE;
-		setContext(this);
+		GaleContext.setContext(this);
 		Thread.currentThread().setName("galeThread");
 		if (this.application == null) {
 			Log.critical("Can not start context with no Application ==> rtfm ...");
@@ -113,7 +114,7 @@ public abstract class GaleContext {
 		
 		Log.info("GALE v:" + Gale.getVersion());
 		forceOrientation(Orientation.screenAuto);
-		postAction((context) -> {
+		postAction(context -> {
 			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
 				this.applicationState = ApplicationState.UNDEFINED;
@@ -275,7 +276,7 @@ public abstract class GaleContext {
 	 * @param clipboardID of the clipboard
 	 */
 	public void operatingSystemClipBoardArrive(final ClipboardList clipboardID) {
-		postAction((context) -> {
+		postAction(context -> {
 			final GaleApplication appl = context.getApplication();
 			if (appl != null) {
 				appl.onClipboardEvent(clipboardID);
@@ -284,12 +285,11 @@ public abstract class GaleContext {
 	}
 	
 	public boolean operatingSystemDraw(final boolean displayEveryTime) {
-		if (countMemeCheck++ >= 10 * 16) {
-			countMemeCheck = 0;
+		if (GaleContext.countMemeCheck++ >= 10 * 16) {
+			GaleContext.countMemeCheck = 0;
 		}
 		Log.verbose("Call draw");
-		final long currentTime = System.currentTimeMillis();
-		//echrono::Time currentTime2 = echrono::Time::now();
+		final long currentTime = System.nanoTime();
 		//Log.warning("Time = " << currentTime << "         " << currentTime2);
 		// TODO Review this ...
 		// this is to prevent the multiple display at the a high frequency ...
@@ -418,7 +418,7 @@ public abstract class GaleContext {
 		}
 		OpenGL.threadHasNoMoreContext();
 		return hasDisplayDone;
-	};
+	}
 	
 	/**
 	 * The current context is set in foreground (framerate is maximum speed)
@@ -439,7 +439,7 @@ public abstract class GaleContext {
 	 * The OS inform that the Windows is now Hidden.
 	 */
 	public void operatingSystemHide() {
-		postAction((context) -> {
+		postAction(context -> {
 			/*
 			Application> appl = context.getApplication();
 			if (appl == null) {
@@ -452,7 +452,7 @@ public abstract class GaleContext {
 			*/
 			Log.todo("HIDE ... ");
 		});
-	};
+	}
 	
 	/**
 	 * The OS inform that the current windows has change his position.
@@ -462,7 +462,7 @@ public abstract class GaleContext {
 		if (this.windowsPos.isEqual(pos)) {
 			return;
 		}
-		postAction((context) -> {
+		postAction(context -> {
 			Log.debug("Receive MSG : THREADMOVE : " + context.windowsPos + " ==> " + pos);
 			context.windowsPos = pos;
 			final GaleApplication appl = context.getApplication();
@@ -478,7 +478,7 @@ public abstract class GaleContext {
 	 */
 	public void operatingSystemOpenGlContextDestroy() {
 		this.resourceManager.contextHasBeenDestroyed();
-	};
+	}
 	
 	/**
 	 * The OS inform that the current windows has change his size.
@@ -491,7 +491,7 @@ public abstract class GaleContext {
 		}
 		// TODO Better in the thread ...  ==> but generate some init error ...
 		//gale::Dimension::setPixelWindowsSize(size);
-		postAction((context) -> {
+		postAction(context -> {
 			Log.error("Receive MSG : THREAD_RESIZE : " + context.windowsSize + " ==> " + size);
 			context.windowsSize = size;
 			//gale::Dimension::setPixelWindowsSize(context.windowsSize);
@@ -502,7 +502,7 @@ public abstract class GaleContext {
 			// call application inside ..
 			context.forceRedrawAll();
 		});
-	};
+	}
 	
 	/**
 	 * The current context is resumed
@@ -521,7 +521,7 @@ public abstract class GaleContext {
 	}
 	
 	public void operatingSystemSetInput(final KeySpecial special, final KeyType type, final KeyStatus status, final int pointerID, final Vector2f pos) {
-		postAction((context) -> {
+		postAction(context -> {
 			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
 				return;
@@ -547,7 +547,7 @@ public abstract class GaleContext {
 	}
 	
 	public void operatingSystemsetKeyboard2(final KeySpecial special, final KeyKeyboard type, final KeyStatus state, final Character charValue) {
-		postAction((context) -> {
+		postAction(context -> {
 			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
 				return;
@@ -560,7 +560,7 @@ public abstract class GaleContext {
 	 * The OS inform that the Windows is now visible.
 	 */
 	public void operatingSystemShow() {
-		postAction((context) -> {
+		postAction(context -> {
 			/*
 			Application> appl = context.getApplication();
 			if (appl == null) {
@@ -573,7 +573,7 @@ public abstract class GaleContext {
 			*/
 			Log.todo("SHOW ... ");
 		});
-	};
+	}
 	
 	/**
 	 * The OS Inform that the Window has been killed
@@ -613,9 +613,9 @@ public abstract class GaleContext {
 	}
 	
 	/**
-	 * Processing all the event arrived ... (commoly called in draw function)
+	 * Processing all the event arrived ... (commonly called in draw function)
 	 */
-	public void processEvents() {
+	public void processEvents(final Clock clock, final long time) {
 		if (!this.lock.tryLock()) {
 			return;
 		}
@@ -673,7 +673,7 @@ public abstract class GaleContext {
 	//		}
 	//	}
 	public void requestUpdateSize() {
-		postAction((context) -> {
+		postAction(context -> {
 			//Log.debug("Receive MSG : THREADRESIZE");
 			context.forceRedrawAll();
 		});
@@ -711,7 +711,7 @@ public abstract class GaleContext {
 	 * set the Icon of the program
 	 * @param inputFile new filename icon of the current program.
 	 */
-	public void setIcon(final Uri inputFile) {};
+	public void setIcon(final Uri inputFile) {}
 	
 	/**
 	 * The Application request that the current windows will change his position.
@@ -719,7 +719,7 @@ public abstract class GaleContext {
 	 */
 	public void setPos(final Vector2f pos) {
 		Log.info("setPos: NOT implemented ...");
-	};
+	}
 	
 	/**
 	 * The application request a change of his current size.
@@ -736,20 +736,20 @@ public abstract class GaleContext {
 	 */
 	public void setTitle(final String title) {
 		Log.info("setTitle: NOT implemented ...");
-	};
+	}
 	
 	/**
 	 * Enable or Disable the decoration on the Windows (availlable only on Desktop)
 	 * @param status "true" to enable decoration / false otherwise
 	 */
-	public void setWindowsDecoration(final boolean status) {};
+	public void setWindowsDecoration(final boolean status) {}
 	
 	/**
 	 * The Application request that the Windows will be visible.
 	 */
 	public void show() {
 		Log.info("show: NOT implemented ...");
-	};
+	}
 	
 	/**
 	 * StartProcessing (2nd thread).
@@ -767,14 +767,14 @@ public abstract class GaleContext {
 		}
 		// release the current interface:
 		unLockContext();
-	};
+	}
 	
 	/**
 	 * The application request that the Window will be killed
 	 */
 	public void stop() {
 		Log.warning("stop: NOT implemented for this platform...");
-	};
+	}
 	
 	protected void unLockContext() {
 		
@@ -817,7 +817,7 @@ class MessageSystem {
 	public synchronized int getSize() {
 		return this.data.size();
 	}
-};
+}
 
 class PeriodicThread extends ThreadAbstract {
 	private final GaleContext context;
@@ -839,6 +839,7 @@ class PeriodicThread extends ThreadAbstract {
 	
 	@Override
 	protected void runPeriodic() {
+		Log.verbose("----------------------------- [START] -----------------------------------");
 		try {
 			Thread.sleep(10);
 		} catch (final InterruptedException e) {
@@ -846,13 +847,18 @@ class PeriodicThread extends ThreadAbstract {
 			e.printStackTrace();
 			return;
 		}
+		// Keep global clock to process events
+		Clock clock = Clock.systemUTC();
+		long time = System.nanoTime();
+		
 		///synchronized (this.context) {
-		this.context.processEvents();
+		this.context.processEvents(clock, time);
 		// call all the application for periodic request (the application manage multiple instance )...
 		final GaleApplication appl = this.context.getApplication();
+		//Log.verbose("Call application : " + appl);
 		if (appl != null) {
-			appl.onPeriod(System.currentTimeMillis());
+			appl.onPeriod(clock, time);
 		}
-		//}
+		Log.verbose("----------------------------- [ END ] -----------------------------------");
 	}
 }

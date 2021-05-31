@@ -1,10 +1,12 @@
 package org.atriasoft.gale;
 
+import java.time.Clock;
+
 import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2f;
 import org.atriasoft.gale.context.ClipboardList;
-import org.atriasoft.gale.context.GaleContext;
 import org.atriasoft.gale.context.Cursor;
+import org.atriasoft.gale.context.GaleContext;
 import org.atriasoft.gale.internal.Log;
 import org.atriasoft.gale.key.KeyKeyboard;
 import org.atriasoft.gale.key.KeySpecial;
@@ -185,10 +187,11 @@ public class GaleApplication {
 	}
 	
 	/**
-	 * Call every time a draw is called (not entirely periodic, but faster at we can ...
-	 * @param time Current time of the call;
+	 * Call when contrext finish process event in the buffer and add a latency of 10ms between calls
+	 * @param clock Current time of the call;
+	 * @param time time of the program in nanoseconds (monotonic) ==> need restart application approximately every 292 years
 	 */
-	public void onPeriod(final long time) {}
+	public void onPeriod(final Clock clock, final long time) {}
 	
 	/**
 	 * Get touch/mouse/... event.
@@ -313,5 +316,5 @@ public class GaleApplication {
 			return;
 		}
 		context.setTitle(this.title);
-	};
+	}
 }
