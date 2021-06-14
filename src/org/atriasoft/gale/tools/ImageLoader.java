@@ -6,8 +6,8 @@ import java.nio.ByteBuffer;
 
 import org.atriasoft.etk.Uri;
 
-import de.matthiasmann.twl.utils.PNGDecoder;
-import de.matthiasmann.twl.utils.PNGDecoder.Format;
+import org.atriasoft.pngdecoder.PNGDecoder;
+import org.atriasoft.pngdecoder.PNGDecoder.Format;
 
 public class ImageLoader {
 	public static ImageRawData decodePngFile(final Uri filename) {

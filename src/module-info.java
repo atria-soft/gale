@@ -29,7 +29,7 @@ open module org.atriasoft.gale {
 	requires transitive org.lwjgl.opengl.natives;
 	
 	requires transitive java.desktop;
-	requires transitive pngdecoder;
+	requires transitive org.atriasoft.pngdecoder;
 	requires transitive lwjgl3.awt;
 	requires io.scenarium.logger;
 	requires org.atriasoft.iogami;
