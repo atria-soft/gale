@@ -32,7 +32,6 @@ public class ResourceVirtualBufferObject extends Resource {
 	 * @param accesMode Access mode : ???
 	 */
 	protected ResourceVirtualBufferObject(final int number) {
-		super();
 		this.vbo = new int[number]; // 0
 		this.buffer = new Object[number];
 		Log.debug("OGL : load VBO count=\"" + number + "\"");
@@ -44,7 +43,8 @@ public class ResourceVirtualBufferObject extends Resource {
 			// select the buffer to set data inside it ...
 			if (this.buffer[vboidcoord] instanceof float[]) {
 				return ((float[]) (this.buffer[vboidcoord])).length;
-			} else if (this.buffer[vboidcoord] instanceof int[]) {
+			}
+			if (this.buffer[vboidcoord] instanceof int[]) {
 				return ((int[]) (this.buffer[vboidcoord])).length;
 			} else if (this.buffer[vboidcoord] instanceof Vector2f[]) {
 				return ((Vector2f[]) (this.buffer[vboidcoord])).length;
@@ -78,7 +78,7 @@ public class ResourceVirtualBufferObject extends Resource {
 	 */
 	public synchronized void flush() {
 		// request to the manager to be call at the next update ...
-		getManager().update(this);
+		Resource.getManager().update(this);
 		Log.verbose("Request flush of VBO: [" + getId() + "] '" + getName() + "'");
 	}
 	
@@ -87,7 +87,8 @@ public class ResourceVirtualBufferObject extends Resource {
 			// select the buffer to set data inside it ...
 			if (this.buffer[index] instanceof float[]) {
 				return 1;
-			} else if (this.buffer[index] instanceof int[]) {
+			}
+			if (this.buffer[index] instanceof int[]) {
 				return 1;
 			} else if (this.buffer[index] instanceof Vector2f[]) {
 				return 2;
@@ -172,7 +173,7 @@ public class ResourceVirtualBufferObject extends Resource {
 	 */
 	@Override
 	public synchronized boolean updateContext() {
-		Log.warning("updateContext (VBO Start: [" + getId() + "] '" + getName() + "' (size=" + this.buffer.length + ")");
+		Log.verbose("updateContext (VBO Start: [" + getId() + "] '" + getName() + "' (size=" + this.buffer.length + ")");
 		/*
 		if (lock.tryLock() == false) {
 			//Lock error ==> try later ...

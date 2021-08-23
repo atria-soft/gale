@@ -366,7 +366,7 @@ public class ResourceVirtualArrayObject extends Resource {
 			usage = Usage.streamDraw;
 		}
 		// select the buffer to set data inside it ...
-		if (data instanceof float[]buffer) {
+		if (data instanceof float[] buffer) {
 			OpenGL.bufferData(buffer, usage);
 		} else if (data instanceof int[]buffer) {
 			OpenGL.bufferData(buffer, usage);

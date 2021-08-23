@@ -1,8 +1,3 @@
-/** @file
- * @author Edouard DUPIN
- * @copyright 2011, Edouard DUPIN, all right reserved
- * @license MPL v2.0 (see license file)
- */
 package org.atriasoft.gale.resource;
 
 import org.atriasoft.egami.ImageByte;
@@ -16,7 +11,7 @@ import org.atriasoft.iogami.IOgami;
 
 public class ResourceTextureFile extends ResourceTexture2 {
 	public static Vector2i sizeAuto = new Vector2i(-1, -1);
-	public static Vector2i sizeDefault = new Vector2i(0, 0);
+	public static Vector2i sizeDefault = Vector2i.ZERO;
 	
 	public static ResourceTextureFile create(final Uri filename) {
 		return ResourceTextureFile.create(filename, ResourceTextureFile.sizeAuto);
