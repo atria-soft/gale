@@ -22,7 +22,7 @@ import org.atriasoft.gale.key.KeyType;
 import org.atriasoft.gale.resource.ResourceManager;
 
 interface ActionToDoInAsyncLoop {
-	public void run(GaleContext context);
+	void run(GaleContext context);
 }
 
 enum ApplicationState {
@@ -658,7 +658,7 @@ public abstract class GaleContext {
 	//		// internal clean elements
 	//		//this.objectManager.cleanInternalRemoved();
 	//		this.resourceManager.cleanInternalRemoved();
-	//		
+	//
 	//		Log.info("List of all widget of this context must be equal at 0 ==> otherwise some remove is missing");
 	//		//this.objectManager.displayListObject();
 	//		// Resource is an lower element as objects ...

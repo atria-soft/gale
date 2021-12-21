@@ -27,7 +27,6 @@ public class ResourceColored3DObject extends Resource {
 	private int oGLMatrixView;
 	
 	protected ResourceColored3DObject() {
-		super();
 		// get the shader resource :
 		this.oGLPosition = 0;
 		this.program = ResourceProgram.create(new Uri("DATA", "simple3D.vert", "gale"), new Uri("DATA", "simple3D.frag", "gale"));
@@ -86,13 +85,13 @@ public class ResourceColored3DObject extends Resource {
 		if (color.a() < 1.0f) {
 			OpenGL.enable(OpenGL.Flag.flag_blend);
 		}
-		// Request the draw of the elements: 
+		// Request the draw of the elements:
 		OpenGL.drawArrays(OpenGL.RenderMode.TRIANGLE, 0, vertices.size());
 		if (color.a() < 1.0f) {
 			OpenGL.disable(OpenGL.Flag.flag_blend);
 		}
 		this.program.unUse();
-		// Request the draw od the elements: 
+		// Request the draw od the elements:
 		//glDrawArrays(oGLLINES, 0, vertices.size());
 		//this.oGLprogram.UnUse();
 		if (depthtest) {
@@ -134,7 +133,7 @@ public class ResourceColored3DObject extends Resource {
 		if (color.a() < 1.0f) {
 			OpenGL.enable(OpenGL.Flag.flag_blend);
 		}
-		// Request the draw of the elements: 
+		// Request the draw of the elements:
 		OpenGL.drawArrays(OpenGL.RenderMode.TRIANGLE, 0, vertices.size());
 		if (color.a() < 1.0f) {
 			OpenGL.disable(OpenGL.Flag.flag_blend);
@@ -424,7 +423,7 @@ public class ResourceColored3DObject extends Resource {
 		if (color.a() < 1.0f) {
 			OpenGL.enable(OpenGL.Flag.flag_blend);
 		}
-		// Request the draw od the elements: 
+		// Request the draw od the elements:
 		OpenGL.drawArrays(OpenGL.RenderMode.LINE, 0, vertices.size());
 		if (color.a() < 1.0f) {
 			OpenGL.disable(OpenGL.Flag.flag_blend);
@@ -489,6 +488,15 @@ public class ResourceColored3DObject extends Resource {
 			tmpVertices.add(vertices[indices[iii + 1]]);
 			tmpVertices.add(vertices[indices[iii + 2]]);
 		}
+		draw(tmpVertices, tmpColor, transformationMatrix, true, true);
+	}
+	
+	public void drawTriangle(final Vector3f p1, final Vector3f p2, final Vector3f p3, final Matrix4f transformationMatrix, final Color tmpColor) {
+		final List<Vector3f> tmpVertices = new ArrayList<>();
+		tmpVertices.add(p1);
+		tmpVertices.add(p2);
+		tmpVertices.add(p3);
+		//Log.info("display " << tmpVertices.size() << " vertices form " << indice.size());
 		draw(tmpVertices, tmpColor, transformationMatrix, true, true);
 	}
 	
