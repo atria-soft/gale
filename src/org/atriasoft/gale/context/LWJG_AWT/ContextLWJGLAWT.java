@@ -36,7 +36,6 @@ import org.atriasoft.gale.key.KeyKeyboard;
 import org.atriasoft.gale.key.KeySpecial;
 import org.atriasoft.gale.key.KeyStatus;
 import org.atriasoft.gale.key.KeyType;
-
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.awt.AWTGLCanvas;
@@ -101,12 +100,14 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	private Robot robot = null;
 	
 	private final List<Integer> pressedKey = new ArrayList<>();
+	private Boolean isInitialized = false;
 	
 	public ContextLWJGLAWT(final GaleApplication application, final String[] args) {
 		super(application, args);
 		System.out.println("Hello JOGL !");
 		initWindows();
 		start2ndThreadProcessing();
+		this.isInitialized = true;
 	}
 	
 	private int getUniqueIndex(final KeyEvent e) {
@@ -423,7 +424,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	public void mouseEntered(final MouseEvent e) {
 		// TODO Auto-generated method stub
 		//Log.info("Mouse entered:" + e.getX() + " " + e.getY());
-		this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() -e.getY());
+		this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() - e.getY());
 		operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.enter, 0, this.cursorPos);
 	}
 	
@@ -431,7 +432,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	public void mouseExited(final MouseEvent e) {
 		// TODO Auto-generated method stub
 		//Log.info("Mouse exited:" + e.getX() + " " + e.getY());
-		this.cursorPos = new Vector2f(e.getX(),this.decoratedWindowsSize.y() - e.getY());
+		this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() - e.getY());
 		operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.leave, 0, this.cursorPos);
 		//this.frame.mouseMove(e, 200, 200);
 	}
@@ -457,7 +458,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 			// TODO use real size ... !!!!
 			this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() + (this.cursorSize.y() - e.getY()));
 		}
-		// For compatibility of the Android system : 
+		// For compatibility of the Android system :
 		boolean findOne = false;
 		for (int iii = 0; iii < ContextLWJGLAWT.MAX_MANAGE_INPUT; iii++) {
 			if (this.inputIsPressed[iii]) {
@@ -522,7 +523,9 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 					System.exit(0);
 					return;
 				}
-				ContextLWJGLAWT.this.canvas.render();
+				if (ContextLWJGLAWT.this.isInitialized) {
+					ContextLWJGLAWT.this.canvas.render();
+				}
 				//				fps.toc();
 				//				fps.draw();
 				SwingUtilities.invokeLater(this);
@@ -564,7 +567,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		//			fps.toc();
 		//			fps.draw();
 		//			*/
-		//			
+		//
 		//			glfwSwapBuffers(window); // swap the color buffers
 		//			glfwPollEvents();
 		//			/*
