@@ -30,20 +30,20 @@ public abstract class Resource {
 	}
 	
 	protected Resource(final String name) {
-		//if (name == null) {
-		//	this.name = "---";
-		//} else {
+		if (name == null) {
+			this.name = "---";
+		} else {
 			this.name = name;
-		//}
+		}
 		getManager().localAdd(this);
 	}
 	
 	protected Resource(final Uri uri) {
-		//if (uri == null) {
-		//	this.name = "---";
-		//} else {
+		if (uri == null) {
+			this.name = "---";
+		} else {
 			this.name = uri.toString();
-		//}
+		}
 		getManager().localAdd(this);
 	}
 	
@@ -89,7 +89,7 @@ public abstract class Resource {
 	 */
 	public void reload() {
 		Log.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
-	};
+	}
 	
 	/**
 	 * The current OpenGl context is removing ==> remove yout own system data
