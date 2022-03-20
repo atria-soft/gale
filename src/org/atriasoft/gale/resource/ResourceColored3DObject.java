@@ -324,6 +324,11 @@ public class ResourceColored3DObject extends Resource {
 	}
 	
 	public void drawCylinder(final float radius, final float size, final int lats, final int longs, final Matrix4f transformationMatrix, final Color tmpColor) {
+		drawCylinder(radius, size, lats, longs, transformationMatrix, tmpColor, true, true);
+	}
+	
+	public void drawCylinder(final float radius, final float size, final int lats, final int longs, final Matrix4f transformationMatrix, final Color tmpColor, final boolean updateDepthBuffer,
+			final boolean depthtest) {
 		final List<Vector3f> tmpVertices = new ArrayList<>();
 		// center to border (TOP)
 		
@@ -390,7 +395,7 @@ public class ResourceColored3DObject extends Resource {
 			tmpVertices.add(v2);
 			tmpVertices.add(v3);
 		}
-		draw(tmpVertices, tmpColor, transformationMatrix, true, true);
+		draw(tmpVertices, tmpColor, transformationMatrix, updateDepthBuffer, depthtest);
 	}
 	
 	public void drawLine(final List<Vector3f> vertices, final Color color, final Matrix4f transformationMatrix, final boolean updateDepthBuffer, final boolean depthtest) {

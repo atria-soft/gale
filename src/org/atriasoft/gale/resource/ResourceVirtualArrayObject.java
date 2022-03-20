@@ -13,7 +13,6 @@ import org.atriasoft.gale.backend3d.OpenGL;
 import org.atriasoft.gale.backend3d.OpenGL.RenderMode;
 import org.atriasoft.gale.backend3d.OpenGL.Usage;
 import org.atriasoft.gale.internal.Log;
-
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
@@ -285,13 +284,13 @@ public class ResourceVirtualArrayObject extends Resource {
 		OpenGL.drawElements(mode, this.vertexCount);
 	}
 	
+	public void render(final RenderMode mode, final int start, final int stop) {
+		OpenGL.drawArrays(mode, start, stop);
+	}
+	
 	public void renderArrays(final RenderMode mode) {
 		Log.verbose("request rendering direct : " + this.vertexCount);
 		OpenGL.drawArrays(mode, 0, this.vertexCount);
-	}
-
-	public void render(final RenderMode mode, final int start, final int stop) {
-		OpenGL.drawArrays(mode, start, stop);
 	}
 	
 	public void setColors(final Color[] colors) {
@@ -368,13 +367,13 @@ public class ResourceVirtualArrayObject extends Resource {
 		// select the buffer to set data inside it ...
 		if (data instanceof float[] buffer) {
 			OpenGL.bufferData(buffer, usage);
-		} else if (data instanceof int[]buffer) {
+		} else if (data instanceof int[] buffer) {
 			OpenGL.bufferData(buffer, usage);
-		} else if (data instanceof Vector2f[]buffer) {
+		} else if (data instanceof Vector2f[] buffer) {
 			OpenGL.bufferData(buffer, usage);
-		} else if (data instanceof Vector3f[]buffer) {
+		} else if (data instanceof Vector3f[] buffer) {
 			OpenGL.bufferData(buffer, usage);
-		} else if (data instanceof Color[]buffer) {
+		} else if (data instanceof Color[] buffer) {
 			OpenGL.bufferData(buffer, usage);
 		} else {
 			Log.error("Not managed VBO model : " + data.getClass().getCanonicalName());
