@@ -26,7 +26,6 @@ import org.atriasoft.etk.math.Vector3f;
 import org.atriasoft.etk.math.Vector3i;
 import org.atriasoft.etk.math.Vector4f;
 import org.atriasoft.gale.internal.Log;
-
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -35,14 +34,14 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 
 public class OpenGL {
-	public static enum ClearFlag {
+	public enum ClearFlag {
 		clearFlag_colorBuffer, // !< Indicates the buffers currently enabled for color writing.
 		clearFlag_depthBuffer, // !< Indicates the depth buffer.
 		clearFlag_stencilBuffer // !< Indicates the stencil buffer.
 	}
 	
 	// We map all the flag, but not all is supported by all platform...
-	public static enum Flag {
+	public enum Flag {
 		flag_blend, // !< If enabled, blend the computed fragment color values with the values in the color buffers. See glBlendFunc.
 		flag_clipDistanceI, // !< If enabled, clip geometry against user-defined half space i.
 		flag_colorLogigOP, // !< If enabled, apply the currently selected logical operation to the computed
@@ -135,7 +134,7 @@ public class OpenGL {
 	}
 	
 	/* Shader wrapping : */
-	public static enum ShaderType {
+	public enum ShaderType {
 		VERTEX, FRAGMENT
 	}
 	
@@ -734,10 +733,11 @@ public class OpenGL {
 		// System.out.println("set value " + value + " " + (value==true?1.0f:0.0f));
 		GL20.glUniform1f(location, value ? 1.0f : 0.0f);
 	}
-
+	
 	public static void programLoadUniformColor(final int location, final Color value) {
 		GL20.glUniform4f(location, value.r(), value.g(), value.b(), value.a());
 	}
+	
 	public static void programLoadUniformColorRGB(final int location, final Color value) {
 		GL20.glUniform3f(location, value.r(), value.g(), value.b());
 	}
@@ -999,6 +999,18 @@ public class OpenGL {
 	}
 	
 	public static void setViewPort(final Vector2i start, final Vector2i stop) {
+		// Log.info("setViewport " + start + " " + stop);
+		GL11.glViewport(start.x(), start.y(), stop.x(), stop.y());
+		OpenGL.checkGlError("glViewport");
+	}
+	
+	public static void setViewPort(final Vector3f start, final Vector3f stop) {
+		// Log.info("setViewport " + start + " " + stop);
+		GL11.glViewport((int) start.x(), (int) start.y(), (int) stop.x(), (int) stop.y());
+		OpenGL.checkGlError("glViewport");
+	}
+	
+	public static void setViewPort(final Vector3i start, final Vector3i stop) {
 		// Log.info("setViewport " + start + " " + stop);
 		GL11.glViewport(start.x(), start.y(), stop.x(), stop.y());
 		OpenGL.checkGlError("glViewport");

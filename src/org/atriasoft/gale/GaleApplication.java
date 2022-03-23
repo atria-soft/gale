@@ -287,7 +287,7 @@ public class GaleApplication {
 	/**
 	 * Set the size of the window (if possible: Android and Ios does not support it)
 	 * @param size New size of the window.
-	 * @return 
+	 * @return
 	 */
 	public void setSize(final Vector2f size) {
 		if (size.x() <= 0 || size.y() <= 0) {
