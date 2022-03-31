@@ -26,6 +26,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.atriasoft.etk.Uri;
+import org.atriasoft.etk.math.FMath;
 import org.atriasoft.etk.math.Vector2f;
 import org.atriasoft.gale.DisplayManagerDraw;
 import org.atriasoft.gale.Fps;
@@ -125,7 +126,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	}
 	
 	@Override
-	public void grabPointerEvents(final boolean status, final Vector2f forcedPosition) {
+	protected void grabPointerEventsThreadGUI(final boolean status, final Vector2f forcedPosition) {
 		if (status) {
 			try {
 				this.robot = new Robot();
@@ -166,19 +167,30 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 			
 			@Override
 			public void paintGL() {
+				final long startRender = System.currentTimeMillis();
 				//Log.warning("Draw ... ");
 				final int w = getWidth();
 				final int h = getHeight();
 				if (ContextLWJGLAWT.this.decoratedWindowsSize.x() != w || ContextLWJGLAWT.this.decoratedWindowsSize.y() != h) {
 					ContextLWJGLAWT.this.decoratedWindowsSize = new Vector2f(w, h);
 					final Rectangle bounds = ContextLWJGLAWT.this.canvas.getBounds();
-					Vector2f tmpWindowsSize = new Vector2f(bounds.width, bounds.height);
+					final Vector2f tmpWindowsSize = new Vector2f(bounds.width, bounds.height);
 					operatingSystemResize(tmpWindowsSize);
 				}
 				operatingSystemDraw(true);
 				swapBuffers();
 				if (Logger.isCriticalOccured()) {
 					ContextLWJGLAWT.this.frame.dispose();
+				}
+				// Process event from the GUI (specific events...
+				processEventsGui();
+				final long stopRender = System.currentTimeMillis();
+				try {
+					// limit at 60FPS ==> bad to do it here, but it work for now... add a minimum of 10ms to free lock...
+					Thread.sleep((int) FMath.max((3000.0f / 60.0f) - (stopRender - startRender), 10)); // This permit to limit the FPS (base 602FPS)
+				} catch (final InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		}, BorderLayout.CENTER);
@@ -590,7 +602,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	}
 	
 	@Override
-	public void setFullScreen(final boolean status) {
+	public void setFullScreenThreadGUI(final boolean status) {
 		super.setFullScreen(status);
 		if (status) {
 			this.frame.setExtendedState(Frame.MAXIMIZED_BOTH);
@@ -602,13 +614,13 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	}
 	
 	@Override
-	public void setIcon(final Uri inputFile) {
+	public void setIconThreadGUI(final Uri inputFile) {
 		
 	}
 	
 	/****************************************************************************************/
 	@Override
-	public void setTitle(final String title) {
+	public void setTitleThreadGUI(final String title) {
 		this.frame.setTitle(title);
 	}
 	

@@ -1,7 +1,6 @@
 package org.atriasoft.gale.context;
 
 import java.time.Clock;
-import java.util.Vector;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -9,6 +8,7 @@ import org.atriasoft.etk.Color;
 import org.atriasoft.etk.ThreadAbstract;
 import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2f;
+import org.atriasoft.etk.util.AutoUnLock;
 import org.atriasoft.gale.Fps;
 import org.atriasoft.gale.Gale;
 import org.atriasoft.gale.GaleApplication;
@@ -48,8 +48,6 @@ public abstract class GaleContext {
 		GaleContext.globalContext = context;
 	}
 	
-	Lock lock = new ReentrantLock();
-	
 	protected ThreadAbstract periodicThread;
 	protected GaleApplication application; //!< Application handle
 	protected ApplicationState applicationState = ApplicationState.UNDEFINED; // state of the application
@@ -58,7 +56,10 @@ public abstract class GaleContext {
 	// simulation area:
 	private long previousDisplayTime; // this is to limit framerate ... in case...
 	private final boolean displayFps = true;
-	private final MessageSystem msgSystem = new MessageSystem();
+	
+	private final Lock msgSystemAsyncLock = new ReentrantLock();
+	private final MessageSystem msgSystemAsync = new MessageSystem();
+	private final MessageSystem msgSystemGui = new MessageSystem();
 	private final Fps fpsSystemEvent = new Fps("SystemEvent", this.displayFps);
 	private final Fps fpsSystemContext = new Fps("SystemContext", this.displayFps);
 	private final Fps fpsSystem = new Fps("System", this.displayFps);
@@ -112,9 +113,9 @@ public abstract class GaleContext {
 		//		}
 		//cout.setOutputFile(true);
 		
-		Log.info("GALE v:" + Gale.getVersion());
+		Log.info("GALE v: {}", Gale.getVersion());
 		forceOrientation(Orientation.screenAuto);
-		postAction(context -> {
+		postActionAsync(context -> {
 			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
 				this.applicationState = ApplicationState.UNDEFINED;
@@ -152,7 +153,15 @@ public abstract class GaleContext {
 	 * force the screen orientation (availlable on portable elements ...
 	 * @param orientation Selected orientation.
 	 */
-	public void forceOrientation(final Orientation orientation) {}
+	public final void forceOrientation(final Orientation orientation) {
+		postActionToGui(context -> {
+			context.forceOrientationThreadGUI(orientation);
+		});
+	}
+	
+	protected void forceOrientationThreadGUI(final Orientation orientation) {
+		Log.todo("forceOrientation: not implemented");
+	}
 	
 	/**
 	 * Redraw all the windows
@@ -169,16 +178,20 @@ public abstract class GaleContext {
 	
 	// Called by Consumer
 	public ActionToDoInAsyncLoop getAction() {
-		return this.msgSystem.getElementWait();
+		return this.msgSystemAsync.getElementWait();
 	}
 	
 	public GaleApplication getApplication() {
-		this.lock.lock();
+		return this.application;
+		/*
+		 * pb on this lock ...
+		this.msgSystemAsyncLock.lock();
 		try {
 			return this.application;
 		} finally {
-			this.lock.unlock();
+			this.msgSystemAsyncLock.unlock();
 		}
+		*/
 	}
 	
 	public CommandLine getCmd() {
@@ -213,19 +226,42 @@ public abstract class GaleContext {
 	 * get all Keyboard event from the X system (like many time use of META)
 	 * @param status "true" if all the event will be get, false if we want only ours.
 	 */
-	public void grabKeyboardEvents(final boolean status) {}
+	public final void grabKeyboardEvents(final boolean status) {
+		postActionToGui(context -> {
+			context.grabKeyboardEventsThreadGUI(status);
+		});
+	}
+	
+	protected void grabKeyboardEventsThreadGUI(final boolean status) {
+		Log.info("grabKeyboardEvents: NOT implemented ...");
+	}
 	
 	/**
 	 * get all Mouse/Touch events from the X system
 	 * @param status "true" if all the event will be get, false if we want only ours.
 	 * @param forcedPosition the position where the mouse might be reset at  every events ...
 	 */
-	public void grabPointerEvents(final boolean status, final Vector2f forcedPosition) {}
+	public final void grabPointerEvents(final boolean status, final Vector2f forcedPosition) {
+		postActionToGui(context -> {
+			context.grabPointerEventsThreadGUI(status, forcedPosition);
+		});
+	}
+	
+	protected void grabPointerEventsThreadGUI(final boolean status, final Vector2f forcedPosition) {
+		Log.info("grabPointerEvents: NOT implemented ...");
+		
+	}
 	
 	/**
 	 * The Application request that the Windows will be Hidden.
 	 */
-	public void hide() {
+	public final void hide() {
+		postActionToGui(context -> {
+			context.hideThreadGUI();
+		});
+	}
+	
+	protected void hideThreadGUI() {
 		Log.info("hide: NOT implemented ...");
 	}
 	
@@ -234,41 +270,57 @@ public abstract class GaleContext {
 	}
 	
 	/**
-	 * Hide the virtal keyboard (for touch system only)
+	 * Hide the virtual keyboard (for touch system only)
 	 */
-	public void keyboardHide() {
+	public final void keyboardHide() {
+		postActionToGui(context -> {
+			context.keyboardHideThreadGUI();
+		});
+	}
+	
+	protected void keyboardHideThreadGUI() {
 		Log.info("keyboardHide: NOT implemented ...");
 	}
 	
 	/**
-	 * display the virtal keyboard (for touch system only)
+	 * display the virtual keyboard (for touch system only)
 	 */
-	public void keyboardShow() {
-		Log.info("keyboardShow: NOT implemented ...");
+	public final void keyboardShow() {
+		postActionToGui(context -> {
+			context.keyboardShowThreadGUI();
+		});
 	}
 	
-	protected void lockContext() {
-		
+	protected void keyboardShowThreadGUI() {
+		Log.info("keyboardShow: NOT implemented ...");
 	}
 	
 	/**
 	 * Open an URL on an eternal brother.
 	 * @param url URL to open.
 	 */
-	public void openURL(final String url) {}
+	public final void openURL(final String url) {
+		postActionToGui(context -> {
+			context.openURLThreadGUI(url);
+		});
+	}
+	
+	protected void openURLThreadGUI(final String url) {
+		Log.info("openURL: NOT implemented ...");
+	}
 	
 	/**
 	 * The current context is set in background (framerate is slowing down (max fps)/5 # 4fps)
 	 */
 	public void operatingSystemBackground() {
 		// set the current interface :
-		lockContext();
-		Log.info("operatingSystemBackground...");
-		//		if (this.windowsCurrent != null) {
-		//			this.windowsCurrent.onStateBackground();
-		//		}
-		// release the current interface :
-		unLockContext();
+		try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
+			Log.info("operatingSystemBackground...");
+			//		if (this.windowsCurrent != null) {
+			//			this.windowsCurrent.onStateBackground();
+			//		}
+			// release the current interface :
+		}
 	}
 	
 	/**
@@ -276,7 +328,7 @@ public abstract class GaleContext {
 	 * @param clipboardID of the clipboard
 	 */
 	public void operatingSystemClipBoardArrive(final ClipboardList clipboardID) {
-		postAction(context -> {
+		postActionAsync(context -> {
 			final GaleApplication appl = context.getApplication();
 			if (appl != null) {
 				appl.onClipboardEvent(clipboardID);
@@ -313,33 +365,32 @@ public abstract class GaleContext {
 		//! Event management section ...
 		{
 			// set the current interface:
-			lockContext();
-			/*
-			Lock the event processing
-			
-			Wait end of current processing
-			
-			Display ...
-			
-			Release the event processing
-			
-			*/
-			if (this.application != null) {
-				if (this.applicationState == ApplicationState.RUNNING) {
-					// Redraw all needed elements
-					//Log.debug("Regenerate Display");
-					this.application.onRegenerateDisplay(this);
-					needRedraw = this.application.isDrawingNeeded();
-				} else {
-					needRedraw = true;
+			try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
+				/*
+				Lock the event processing
+				
+				Wait end of current processing
+				
+				Display ...
+				
+				Release the event processing
+				
+				*/
+				if (this.application != null) {
+					if (this.applicationState == ApplicationState.RUNNING) {
+						// Redraw all needed elements
+						//Log.debug("Regenerate Display");
+						this.application.onRegenerateDisplay(this);
+						needRedraw = this.application.isDrawingNeeded();
+					} else {
+						needRedraw = true;
+					}
+				}
+				if (this.displayFps) {
+					this.fpsSystemEvent.incrementCounter();
+					this.fpsSystemEvent.toc();
 				}
 			}
-			if (this.displayFps) {
-				this.fpsSystemEvent.incrementCounter();
-				this.fpsSystemEvent.toc();
-			}
-			// release the current interface :
-			unLockContext();
 		}
 		boolean hasDisplayDone = false;
 		//! drawing section:
@@ -351,9 +402,9 @@ public abstract class GaleContext {
 			}
 			if (needRedraw || displayEveryTime) {
 				//Log.debug("  ==> real Draw");
-				lockContext();
-				this.resourceManager.updateContext();
-				unLockContext();
+				try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
+					this.resourceManager.updateContext();
+				}
 				if (this.displayFps) {
 					this.fpsSystemContext.incrementCounter();
 				}
@@ -366,16 +417,16 @@ public abstract class GaleContext {
 				if (needRedraw || displayEveryTime) {
 					this.fpsSystem.incrementCounter();
 					// set the current interface :
-					lockContext();
-					if (this.applicationState == ApplicationState.RUNNING) {
-						this.application.onDraw(this);
-					} else {
-						OpenGL.setViewPort(new Vector2f(0, 0), this.application.getSize());
-						final Color bgColor = new Color(0.8f, 0.5f, 0.8f, 1.0f);
-						OpenGL.clearColor(bgColor);
-						//Log.info("==> appl clear ==> not created ...");
+					try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
+						if (this.applicationState == ApplicationState.RUNNING) {
+							this.application.onDraw(this);
+						} else {
+							OpenGL.setViewPort(new Vector2f(0, 0), this.application.getSize());
+							final Color bgColor = new Color(0.8f, 0.5f, 0.8f, 1.0f);
+							OpenGL.clearColor(bgColor);
+							//Log.info("==> appl clear ==> not created ...");
+						}
 					}
-					unLockContext();
 					hasDisplayDone = true;
 				}
 			}
@@ -404,17 +455,16 @@ public abstract class GaleContext {
 		}
 		{
 			// set the current interface:
-			lockContext();
-			// release open GL Context
-			OpenGL.lock();
-			// while The Gui is drawing in OpenGl, we do some not realTime things
-			this.resourceManager.updateContext();
-			// release open GL Context
-			OpenGL.unLock();
-			// TODO this.objectManager.cleanInternalRemoved();
-			this.resourceManager.cleanInternalRemoved();
-			// release the current interface:
-			unLockContext();
+			try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
+				// release open GL Context
+				OpenGL.lock();
+				// while The Gui is drawing in OpenGl, we do some not realTime things
+				this.resourceManager.updateContext();
+				// release open GL Context
+				OpenGL.unLock();
+				// TODO this.objectManager.cleanInternalRemoved();
+				this.resourceManager.cleanInternalRemoved();
+			}
 		}
 		OpenGL.threadHasNoMoreContext();
 		return hasDisplayDone;
@@ -425,21 +475,20 @@ public abstract class GaleContext {
 	 */
 	public void operatingSystemForeground() {
 		// set the current interface :
-		lockContext();
-		Log.info("operatingSystemForeground...");
-		
-		//		if (this.windowsCurrent != null) {
-		//			this.windowsCurrent.onStateForeground();
-		//		}
-		// release the current interface :
-		unLockContext();
+		try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
+			Log.info("operatingSystemForeground...");
+			
+			//		if (this.windowsCurrent != null) {
+			//			this.windowsCurrent.onStateForeground();
+			//		}
+		}
 	}
 	
 	/**
 	 * The OS inform that the Windows is now Hidden.
 	 */
 	public void operatingSystemHide() {
-		postAction(context -> {
+		postActionAsync(context -> {
 			/*
 			Application> appl = context.getApplication();
 			if (appl == null) {
@@ -462,8 +511,8 @@ public abstract class GaleContext {
 		if (this.windowsPos.isEqual(pos)) {
 			return;
 		}
-		postAction(context -> {
-			Log.debug("Receive MSG : THREADMOVE : " + context.windowsPos + " ==> " + pos);
+		postActionAsync(context -> {
+			Log.debug("Receive MSG : THREADMOVE : {} ==> {}", context.windowsPos, pos);
 			context.windowsPos = pos;
 			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
@@ -485,14 +534,14 @@ public abstract class GaleContext {
 	 * @param size new size of the windows.
 	 */
 	public void operatingSystemResize(final Vector2f size) {
-		Log.warning("Resize request: " + size + " old=" + this.windowsSize);
+		Log.warning("Resize request={} previous={}", size, this.windowsSize);
 		if (this.windowsSize.equals(size)) {
 			return;
 		}
 		// TODO Better in the thread ...  ==> but generate some init error ...
 		//gale::Dimension::setPixelWindowsSize(size);
-		postAction(context -> {
-			Log.error("Receive MSG : THREAD_RESIZE : " + context.windowsSize + " ==> " + size);
+		postActionAsync(context -> {
+			Log.error("Receive MSG : THREAD_RESIZE : {} ==> {}", context.windowsSize, size);
 			context.windowsSize = size;
 			//gale::Dimension::setPixelWindowsSize(context.windowsSize);
 			final GaleApplication tmpAppl = context.getApplication();
@@ -509,20 +558,19 @@ public abstract class GaleContext {
 	 */
 	public void operatingSystemResume() {
 		// set the current interface :
-		lockContext();
-		Log.info("operatingSystemResume...");
-		this.previousDisplayTime = System.currentTimeMillis();
-		// TODO this.objectManager.timeCallResume(this.previousDisplayTime);
-		//		if (this.windowsCurrent != null) {
-		//			this.windowsCurrent.onStateResume();
-		//		}
-		// release the current interface :
-		unLockContext();
+		try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
+			Log.info("operatingSystemResume...");
+			this.previousDisplayTime = System.currentTimeMillis();
+			// TODO this.objectManager.timeCallResume(this.previousDisplayTime);
+			//		if (this.windowsCurrent != null) {
+			//			this.windowsCurrent.onStateResume();
+			//		}
+		}
 	}
 	
 	public void operatingSystemSetInput(final KeySpecial special, final KeyType type, final KeyStatus status, final int pointerID, final Vector2f pos) {
 		Log.verbose("Position motion: " + pos);
-		postAction(context -> {
+		postActionAsync(context -> {
 			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
 				return;
@@ -548,7 +596,7 @@ public abstract class GaleContext {
 	}
 	
 	public void operatingSystemsetKeyboard2(final KeySpecial special, final KeyKeyboard type, final KeyStatus state, final Character charValue) {
-		postAction(context -> {
+		postActionAsync(context -> {
 			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
 				return;
@@ -561,7 +609,7 @@ public abstract class GaleContext {
 	 * The OS inform that the Windows is now visible.
 	 */
 	public void operatingSystemShow() {
-		postAction(context -> {
+		postActionAsync(context -> {
 			/*
 			Application> appl = context.getApplication();
 			if (appl == null) {
@@ -581,15 +629,14 @@ public abstract class GaleContext {
 	 */
 	public void operatingSystemStop() {
 		// set the current interface :
-		lockContext();
-		Log.info("operatingSystemStop...");
-		if (this.application == null) {
-			stop();
-			return;
+		try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
+			Log.info("operatingSystemStop...");
+			if (this.application == null) {
+				stop();
+				return;
+			}
+			this.application.onKillDemand(this);
 		}
-		this.application.onKillDemand(this);
-		// release the current interface :
-		unLockContext();
 	}
 	
 	/**
@@ -597,44 +644,70 @@ public abstract class GaleContext {
 	 */
 	public void operatingSystemSuspend() {
 		// set the current interface :
-		lockContext();
-		Log.info("operatingSystemSuspend...");
-		this.previousDisplayTime = 0;
-		
-		//		if (this.windowsCurrent != null) {
-		//			this.windowsCurrent.onStateSuspend();
-		//		}
-		// release the current interface :
-		unLockContext();
+		try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
+			Log.info("operatingSystemSuspend...");
+			this.previousDisplayTime = 0;
+			
+			//		if (this.windowsCurrent != null) {
+			//			this.windowsCurrent.onStateSuspend();
+			//		}
+		}
 	}
 	
-	private void postAction(final ActionToDoInAsyncLoop data) {
-		this.msgSystem.addElement(data);
+	protected void postActionAsync(final ActionToDoInAsyncLoop data) {
+		this.msgSystemAsync.addElement(data);
+		//Later, when the necessary event happens, the thread that is running it calls notify() from a block synchronized on the same object.
+	}
+	
+	protected void postActionToGui(final ActionToDoInAsyncLoop data) {
+		this.msgSystemGui.addElement(data);
 		//Later, when the necessary event happens, the thread that is running it calls notify() from a block synchronized on the same object.
 	}
 	
 	/**
 	 * Processing all the event arrived ... (commonly called in draw function)
 	 */
-	public void processEvents(final Clock clock, final long time) {
-		if (!this.lock.tryLock()) {
+	public void processEventsAsync(final Clock clock, final long time) {
+		if (!this.msgSystemAsyncLock.tryLock()) {
 			return;
 		}
 		try {
 			int nbEvent = 0;
-			while (this.msgSystem.getSize() > 0) {
-				//Log.error("    [" + nbEvent + "] event ...");
+			while (this.msgSystemAsync.getSize() > 0) {
+				Log.error("    [" + nbEvent + "] event ...");
 				nbEvent++;
-				final ActionToDoInAsyncLoop func = this.msgSystem.getElementWait();
+				final ActionToDoInAsyncLoop func = this.msgSystemAsync.getElementWait();
 				if (func == null) {
 					continue;
 				}
 				func.run(this);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			Log.critical("Catch exception in main event Loop ...", e);
 		} finally {
-			this.lock.unlock();
+			this.msgSystemAsyncLock.unlock();
+		}
+	}
+	
+	/**
+	 * Process event in the GUI thread ==> prevent dead lock on the global GUI interface
+	 */
+	protected void processEventsGui() {
+		if (!this.msgSystemAsyncLock.tryLock()) {
+			return;
+		}
+		try {
+			while (this.msgSystemGui.getSize() > 0) {
+				final ActionToDoInAsyncLoop func = this.msgSystemGui.getElementWait();
+				if (func == null) {
+					continue;
+				}
+				func.run(this);
+			}
+		} catch (final Exception e) {
+			Log.critical("Catch exception in main event Loop ...", e);
+		} finally {
+			this.msgSystemAsyncLock.unlock();
 		}
 	}
 	
@@ -674,7 +747,7 @@ public abstract class GaleContext {
 	//		}
 	//	}
 	public void requestUpdateSize() {
-		postAction(context -> {
+		postActionAsync(context -> {
 			//Log.debug("Receive MSG : THREADRESIZE");
 			context.forceRedrawAll();
 		});
@@ -698,27 +771,56 @@ public abstract class GaleContext {
 	 * set the cursor display type.
 	 * @param newCursor selected new cursor.
 	 */
-	public void setCursor(final Cursor newCursor) {}
+	public final void setCursor(final Cursor newCursor) {
+		postActionToGui(context -> {
+			context.setCursorThreadGUI(newCursor);
+		});
+	}
+	
+	public void setCursorThreadGUI(final Cursor newCursor) {
+		Log.info("setCursor: NOT implemented ...");
+	}
 	
 	/**
 	 * The application request a change of his current size force the fullscreen mode.
 	 * @param status status of the fullscreen mode.
 	 */
-	public void setFullScreen(final boolean status) {
-		this.fullscreen = status;
+	public final void setFullScreen(final boolean status) {
+		postActionToGui(context -> {
+			this.fullscreen = status;
+			context.setFullScreenThreadGUI(status);
+		});
+	}
+	
+	protected void setFullScreenThreadGUI(final boolean status) {
+		Log.info("setFullScreen: NOT implemented ...");
 	}
 	
 	/**
 	 * set the Icon of the program
 	 * @param inputFile new filename icon of the current program.
 	 */
-	public void setIcon(final Uri inputFile) {}
+	public final void setIcon(final Uri inputFile) {
+		postActionToGui(context -> {
+			context.setIconThreadGUI(inputFile);
+		});
+	}
+	
+	public void setIconThreadGUI(final Uri inputFile) {
+		Log.info("setIcon: NOT implemented ...");
+	}
 	
 	/**
 	 * The Application request that the current windows will change his position.
 	 * @param pos New position of the Windows requested.
 	 */
-	public void setPos(final Vector2f pos) {
+	public final void setPos(final Vector2f pos) {
+		postActionToGui(context -> {
+			context.setPosThreadGUI(pos);
+		});
+	}
+	
+	protected void setPosThreadGUI(final Vector2f pos) {
 		Log.info("setPos: NOT implemented ...");
 	}
 	
@@ -726,16 +828,31 @@ public abstract class GaleContext {
 	 * The application request a change of his current size.
 	 * @param size new Requested size of the windows.
 	 */
-	public boolean setSize(final Vector2f size) {
+	public final void setSize(final Vector2f size) {
+		postActionToGui(context -> {
+			context.setSizeThreadGUI(size);
+		});
+	}
+	
+	protected void setSizeThreadGUI(final Vector2f size) {
 		Log.info("setSize: NOT implemented ...");
-		return false;
 	}
 	
 	/**
 	 * set the new title of the windows
 	 * @param title New desired title
 	 */
-	public void setTitle(final String title) {
+	public final void setTitle(final String title) {
+		postActionToGui(context -> {
+			context.setTitleThreadGUI(title);
+		});
+	}
+	
+	/**
+	 * set the new title of the windows
+	 * @param title New desired title
+	 */
+	protected void setTitleThreadGUI(final String title) {
 		Log.info("setTitle: NOT implemented ...");
 	}
 	
@@ -743,12 +860,26 @@ public abstract class GaleContext {
 	 * Enable or Disable the decoration on the Windows (availlable only on Desktop)
 	 * @param status "true" to enable decoration / false otherwise
 	 */
-	public void setWindowsDecoration(final boolean status) {}
+	public final void setWindowsDecoration(final boolean status) {
+		postActionToGui(context -> {
+			context.setWindowsDecorationThreadGUI(status);
+		});
+	}
+	
+	protected void setWindowsDecorationThreadGUI(final boolean status) {
+		Log.info("setWindowsDecoration: NOT implemented ...");
+	}
 	
 	/**
 	 * The Application request that the Windows will be visible.
 	 */
 	public void show() {
+		postActionToGui(context -> {
+			context.showThreadGUI();
+		});
+	}
+	
+	public void showThreadGUI() {
 		Log.info("show: NOT implemented ...");
 	}
 	
@@ -758,16 +889,15 @@ public abstract class GaleContext {
 	 */
 	public void start2ndThreadProcessing() {
 		// set the current interface:
-		lockContext();
-		this.periodicThread.threadStart();
-		try {
-			Thread.sleep(1);
-		} catch (final InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
+			this.periodicThread.threadStart();
+			try {
+				Thread.sleep(1);
+			} catch (final InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		// release the current interface:
-		unLockContext();
 	}
 	
 	/**
@@ -777,89 +907,4 @@ public abstract class GaleContext {
 		Log.warning("stop: NOT implemented for this platform...");
 	}
 	
-	protected void unLockContext() {
-		
-	}
-	
-}
-
-class MessageSystem {
-	private final Vector<ActionToDoInAsyncLoop> data = new Vector<>();
-	
-	public synchronized void addElement(final ActionToDoInAsyncLoop data2) {
-		this.data.addElement(data2);
-		notifyAll();
-	}
-	
-	public synchronized ActionToDoInAsyncLoop getElement() {
-		//Log.warning("+++++++++++++++++++++++++++++++++ getElement()");
-		ActionToDoInAsyncLoop message = this.data.firstElement();
-		this.data.removeElement(message);
-		//Log.warning("+++++++++++++++++++++++++++++++++ getElement() ===> done " + message);
-		return message;
-	}
-	
-	public synchronized ActionToDoInAsyncLoop getElementWait() {
-		if (this.data.isEmpty()) {
-			try {
-				wait();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return null;
-			}
-		}
-		if (this.data.isEmpty()) {
-			return null;
-		}
-		return getElement();
-	}
-	
-	public synchronized int getSize() {
-		return this.data.size();
-	}
-}
-
-class PeriodicThread extends ThreadAbstract {
-	private final GaleContext context;
-	
-	public PeriodicThread(final GaleContext context) {
-		super("Galethread 2");
-		this.context = context;
-	}
-	
-	@Override
-	protected void birth() {
-		// TODO Auto-generated method stub
-	}
-	
-	@Override
-	protected void death() {
-		// TODO Auto-generated method stub
-	}
-	
-	@Override
-	protected void runPeriodic() {
-		Log.verbose("----------------------------- [START] -----------------------------------");
-		try {
-			Thread.sleep(10);
-		} catch (final InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
-		// Keep global clock to process events
-		Clock clock = Clock.systemUTC();
-		long time = System.nanoTime();
-		
-		///synchronized (this.context) {
-		this.context.processEvents(clock, time);
-		// call all the application for periodic request (the application manage multiple instance )...
-		final GaleApplication appl = this.context.getApplication();
-		//Log.verbose("Call application : " + appl);
-		if (appl != null) {
-			appl.onPeriod(clock, time);
-		}
-		Log.verbose("----------------------------- [ END ] -----------------------------------");
-	}
 }

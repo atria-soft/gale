@@ -258,6 +258,10 @@ public class GaleApplication {
 		Gale.getContext().setCursor(this.cursor);
 	}
 	
+	void setForceRedraw() {
+		this.needRedraw = true;
+	}
+	
 	/**
 	 * set the Icon of the application.
 	 * @param iconFile File name icon (.bmp/.png).
@@ -293,16 +297,19 @@ public class GaleApplication {
 		if (size.x() <= 0 || size.y() <= 0) {
 			Log.error("Wrong windows size: " + size);
 		}
-		Vector2f oldSize = this.windowsSize;
+		final Vector2f oldSize = this.windowsSize;
 		this.windowsSize = size;
 		final GaleContext context = Gale.getContext();
 		if (context == null) {
 			return;
 		}
-		if (!context.setSize(size)) {
+		context.setSize(size);
+		/* ==> change API ==> need the GUI notify the Windows that the size has change ????
+		if (!) {
 			Log.error("Can not set the size required by the user.");
 			this.windowsSize = oldSize;
 		}
+		*/
 	}
 	
 	/**
