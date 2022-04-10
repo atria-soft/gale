@@ -26,7 +26,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.atriasoft.etk.Uri;
-import org.atriasoft.etk.math.FMath;
 import org.atriasoft.etk.math.Vector2f;
 import org.atriasoft.gale.DisplayManagerDraw;
 import org.atriasoft.gale.Fps;
@@ -184,6 +183,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 				}
 				// Process event from the GUI (specific events...
 				processEventsGui();
+				/*
 				final long stopRender = System.currentTimeMillis();
 				try {
 					// limit at 60FPS ==> bad to do it here, but it work for now... add a minimum of 10ms to free lock...
@@ -192,6 +192,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				*/
 			}
 		}, BorderLayout.CENTER);
 		this.frame.pack();

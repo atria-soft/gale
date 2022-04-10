@@ -31,6 +31,8 @@ enum ApplicationState {
 
 public abstract class GaleContext {
 	protected static final int MAX_MANAGE_INPUT = 15;
+	private static final String STATIC_ID_RESIZE = "010__RESIZE";
+	private static final String STATIC_ID_REDRAW_ALL = "0100__REDRAW_ALL";
 	private static GaleContext globalContext = null;
 	// return true if a flush is needed
 	private static int countMemeCheck = 0;
@@ -67,6 +69,8 @@ public abstract class GaleContext {
 	protected Vector2f windowsSize = Vector2f.ZERO; //!< current size of the system
 	protected boolean fullscreen = false;
 	protected Vector2f windowsPos; //!< current size of the system
+	// note: in the current mode, the management is not able to synchronize it good..
+	private final boolean requestSynchronousProcessing = true; //!< this permit to process the event in the global GUI thread instead of the local processing thread.
 	
 	public GaleContext(final GaleApplication application, final String[] args) {
 		// set a basic
@@ -125,10 +129,12 @@ public abstract class GaleContext {
 			appl.onStart(context);
 			appl.onResume(context);
 			this.applicationState = ApplicationState.RUNNING;
+			// this is done at the end to perform a full ended rendering.
+			context.requestUpdateSize();
 		});
 		
 		// force a recalculation
-		requestUpdateSize();
+		//requestUpdateSize();
 		Log.info(" == > Gale system init (END)");
 	}
 	
@@ -540,7 +546,7 @@ public abstract class GaleContext {
 		}
 		// TODO Better in the thread ...  ==> but generate some init error ...
 		//gale::Dimension::setPixelWindowsSize(size);
-		postActionAsync(context -> {
+		postActionAsync(GaleContext.STATIC_ID_RESIZE, context -> {
 			Log.error("Receive MSG : THREAD_RESIZE : {} ==> {}", context.windowsSize, size);
 			context.windowsSize = size;
 			//gale::Dimension::setPixelWindowsSize(context.windowsSize);
@@ -655,7 +661,20 @@ public abstract class GaleContext {
 	}
 	
 	protected void postActionAsync(final ActionToDoInAsyncLoop data) {
-		this.msgSystemAsync.addElement(data);
+		if (this.requestSynchronousProcessing) {
+			this.msgSystemGui.addElement(data);
+		} else {
+			this.msgSystemAsync.addElement(data);
+		}
+		//Later, when the necessary event happens, the thread that is running it calls notify() from a block synchronized on the same object.
+	}
+	
+	protected void postActionAsync(final String uniqueID, final ActionToDoInAsyncLoop data) {
+		if (this.requestSynchronousProcessing) {
+			this.msgSystemGui.addElement(uniqueID, data);
+		} else {
+			this.msgSystemAsync.addElement(uniqueID, data);
+		}
 		//Later, when the necessary event happens, the thread that is running it calls notify() from a block synchronized on the same object.
 	}
 	
@@ -674,7 +693,7 @@ public abstract class GaleContext {
 		try {
 			int nbEvent = 0;
 			while (this.msgSystemAsync.getSize() > 0) {
-				Log.error("    [" + nbEvent + "] event ...");
+				Log.verbose("    [" + nbEvent + "] event ...");
 				nbEvent++;
 				final ActionToDoInAsyncLoop func = this.msgSystemAsync.getElementWait();
 				if (func == null) {
@@ -747,7 +766,7 @@ public abstract class GaleContext {
 	//		}
 	//	}
 	public void requestUpdateSize() {
-		postActionAsync(context -> {
+		postActionAsync(this.STATIC_ID_REDRAW_ALL, context -> {
 			//Log.debug("Receive MSG : THREADRESIZE");
 			context.forceRedrawAll();
 		});
