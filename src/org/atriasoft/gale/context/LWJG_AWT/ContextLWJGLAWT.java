@@ -46,7 +46,7 @@ import org.lwjgl.opengl.awt.AWTGLCanvas;
 //import org.lwjgl.system.MemoryStack;
 import org.lwjgl.opengl.awt.GLData;
 
-import io.scenarium.logger.Logger;
+import org.atriasoft.reggol.Logger;
 
 public class ContextLWJGLAWT extends GaleContext implements MouseListener, MouseMotionListener, KeyListener, MouseWheelListener {
 	private static final int WIDTH = 800;

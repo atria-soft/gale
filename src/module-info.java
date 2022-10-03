@@ -31,6 +31,6 @@ open module org.atriasoft.gale {
 	requires transitive java.desktop;
 	requires transitive org.atriasoft.pngdecoder;
 	requires transitive lwjgl3.awt;
-	requires io.scenarium.logger;
+	requires org.atriasoft.reggol;
 	requires org.atriasoft.iogami;
 }

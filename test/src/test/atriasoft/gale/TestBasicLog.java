@@ -11,7 +11,7 @@ package test.atriasoft.gale;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.scenarium.logger.Logger;
+import org.atriasoft.reggol.Logger;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
