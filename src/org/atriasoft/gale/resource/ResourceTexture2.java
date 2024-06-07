@@ -12,59 +12,64 @@ import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2i;
 import org.atriasoft.gale.TextureFilter;
 import org.atriasoft.gale.backend3d.OpenGL;
-import org.atriasoft.gale.internal.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResourceTexture2 extends Resource {
+	static final Logger LOGGER = LoggerFactory.getLogger(ResourceTexture2.class);
+
 	public enum TextureColorMode {
 		rgb, // !< red/green/blue data
 		rgba // !< red/green/blue/alpha data
 	}
 	
 	public static ResourceTexture2 create() {
-		Log.verbose("KEEP: Resource Texture Dynamic: ");
+		LOGGER.trace("KEEP: Resource Texture Dynamic: ");
 		return new ResourceTexture2();
 	}
 	
 	public static ResourceTexture2 create(final Uri uri) {
-		Log.verbose("KEEP: Resource Texture: " + uri);
+		LOGGER.trace("KEEP: Resource Texture: " + uri);
 		final Resource object2 = Resource.getManager().localKeep(uri);
 		if (object2 != null) {
-			if (object2 instanceof ResourceTexture2 tmpp) {
+			if (object2 instanceof final ResourceTexture2 tmpp) {
 				return tmpp;
 			}
-			Log.critical("Request resource file : '" + uri + "' With the wrong type (dynamic cast error)");
+			LOGGER.error("Request resource file : '" + uri + "' With the wrong type (dynamic cast error)");
+			System.exit(-1);
 			return null;
 		}
-		Log.verbose("CREATE: new Texture: " + uri);
+		LOGGER.trace("CREATE: new Texture: " + uri);
 		return new ResourceTexture2(uri);
 	}
 	
 	public static ResourceTexture2 createNamed(final String uri) {
-		Log.verbose("KEEP: Resource Texture Named: " + uri);
+		LOGGER.trace("KEEP: Resource Texture Named: " + uri);
 		final Resource object2 = Resource.getManager().localKeep(uri);
 		if (object2 != null) {
-			if (object2 instanceof ResourceTexture2 tmpp) {
+			if (object2 instanceof final ResourceTexture2 tmpp) {
 				return tmpp;
 			}
-			Log.critical("Request resource file : '" + uri + "' With the wrong type (dynamic cast error)");
+			LOGGER.error("Request resource file : '" + uri + "' With the wrong type (dynamic cast error)");
+			System.exit(-1);
 			return null;
 		}
-		Log.debug("CREATE: new Texture Named: " + uri);
+		LOGGER.debug("CREATE: new Texture Named: " + uri);
 		return new ResourceTexture2(uri);
 	}
 	
 	/*
 	 * public static ResourceTexture2 createFromPng(final Uri uriTexture) { return
 	 * createFromPng(uriTexture, 1); }
-	 * 
+	 *
 	 * public static ResourceTexture2 createFromPng(final Uri uriTexture, final int
 	 * textureUnit) { ResourceTexture2 resource; Resource resource2; final String
 	 * name = uriTexture.getValue(); if (name.isEmpty() == false && name != "---") {
 	 * resource2 = getManager().localKeep(name); } else {
-	 * Log.error("Can not create a shader without a filaname"); return null; } if
+	 * LOGGER.error("Can not create a shader without a filaname"); return null; } if
 	 * (resource2 != null) { if (resource2 instanceof ResourceTexture2) {
 	 * resource2.keep(); return (ResourceTexture2) resource2; }
-	 * Log.critical("Request resource file : '" + name +
+	 * LOGGER.critical("Request resource file : '" + name +
 	 * "' With the wrong type (dynamic cast error)"); return null; } resource = new
 	 * ResourceTexture2(uriTexture, textureUnit); final ImageRawData decodedData =
 	 * ImageLoader.decodePngFile(uriTexture);
@@ -133,7 +138,7 @@ public class ResourceTexture2 extends Resource {
 	// Flush the data to send it at the openGl system
 	public synchronized void flush() {
 		// request to the manager to be call at the next update ...
-		Log.verbose("Request UPDATE of Element");
+		LOGGER.trace("Request UPDATE of Element");
 		Resource.getManager().update(this);
 	}
 	
@@ -158,7 +163,7 @@ public class ResourceTexture2 extends Resource {
 	public synchronized void removeContext() {
 		if (this.loaded) {
 			// Request remove texture ...
-			Log.info("TEXTURE: Rm [" + getId() + "] texId=" + this.texId);
+			LOGGER.info("TEXTURE: Rm [" + getId() + "] texId=" + this.texId);
 			// TODO Check if we are in the correct thread
 			OpenGL.glDeleteTextures(this.texId);
 			this.loaded = false;
@@ -177,16 +182,16 @@ public class ResourceTexture2 extends Resource {
 	 * @param image Image to set.
 	 */
 	public synchronized void set(final ImageByte image) {
-		Log.debug("Set a new image in a texture:");
-		Log.debug("    size=" + image.getSize());
+		LOGGER.debug("Set a new image in a texture:");
+		LOGGER.debug("    size=" + image.getSize());
 		this.data = image;
 		this.realImageSize = this.data.getSize();
-		// Disable compatibility size for embended ... 
-//		final Vector2i compatibilityHWSize = new Vector2i(Tools.nextP2(this.realImageSize.x()), Tools.nextP2(this.realImageSize.y()));
-//		if (!this.realImageSize.equals(compatibilityHWSize)) {
-//			Log.warning("RESIZE Image for HArwareCompatibility:" + this.realImageSize + " => " + compatibilityHWSize);
-//			this.data.resize(compatibilityHWSize.x(), compatibilityHWSize.y());
-//		}
+		// Disable compatibility size for embended ...
+		//		final Vector2i compatibilityHWSize = new Vector2i(Tools.nextP2(this.realImageSize.x()), Tools.nextP2(this.realImageSize.y()));
+		//		if (!this.realImageSize.equals(compatibilityHWSize)) {
+		//			LOGGER.warn("RESIZE Image for HArwareCompatibility:" + this.realImageSize + " => " + compatibilityHWSize);
+		//			this.data.resize(compatibilityHWSize.x(), compatibilityHWSize.y());
+		//		}
 		flush();
 	}
 	
@@ -225,7 +230,7 @@ public class ResourceTexture2 extends Resource {
 	
 	@Override
 	public synchronized boolean updateContext() {
-		Log.verbose("updateContext [START]");
+		LOGGER.trace("updateContext [START]");
 		//final Steady tic = Steady.now();
 		/*
 		 * TODO : use unlockable synchronized ... if (lock.tryLock() == false) { //Lock
@@ -234,8 +239,9 @@ public class ResourceTexture2 extends Resource {
 		final int typeObject = this.data.hasAlpha() ? OpenGL.GL_RGBA : OpenGL.GL_RGB;
 		final int sizeObject = OpenGL.GL_UNSIGNED_BYTE;
 		if (this.loaded) {
-			if (this.lastTypeObject != typeObject || this.lastSizeObject != sizeObject || !this.lastSize.equals(this.data.getSize())) {
-				Log.warning("TEXTURE: Rm [" + getId() + "] texId=" + this.texId);
+			if (this.lastTypeObject != typeObject || this.lastSizeObject != sizeObject
+					|| !this.lastSize.equals(this.data.getSize())) {
+				LOGGER.warn("TEXTURE: Rm [" + getId() + "] texId=" + this.texId);
 				OpenGL.glDeleteTextures(this.texId);
 				this.loaded = false;
 			}
@@ -246,9 +252,11 @@ public class ResourceTexture2 extends Resource {
 			this.lastSize = this.data.getSize();
 			this.lastTypeObject = typeObject;
 			this.lastSizeObject = sizeObject;
-			Log.debug("TEXTURE: add [" + getId() + "]=" + this.data.getSize() + "=>" + this.data.getGPUSize() + " OGlId=" + this.texId + " type=" + this.data.getClass().getCanonicalName());
+			LOGGER.debug("TEXTURE: add [" + getId() + "]=" + this.data.getSize() + "=>" + this.data.getGPUSize()
+					+ " OGlId=" + this.texId + " type=" + this.data.getClass().getCanonicalName());
 		} else {
-			Log.debug("TEXTURE: update [" + getId() + "]=" + this.data.getSize() + "=>" + this.data.getGPUSize() + " OGlId=" + this.texId + " type=" + this.data.getClass().getCanonicalName());
+			LOGGER.debug("TEXTURE: update [" + getId() + "]=" + this.data.getSize() + "=>" + this.data.getGPUSize()
+					+ " OGlId=" + this.texId + " type=" + this.data.getClass().getCanonicalName());
 		}
 		// in all case we set the texture properties :
 		// TODO check error ???
@@ -268,7 +276,7 @@ public class ResourceTexture2 extends Resource {
 		}
 		// glPixelStorei(GLUNPACKALIGNMENT,1);
 		//final Steady toc1 = Steady.now();
-		//Log.verbose("    BIND                 ==> " + toc1.less(tic));
+		//LOGGER.trace("    BIND                 ==> " + toc1.less(tic));
 		// egami::store(this.data, String("~/texture") + etk::toString(getId()) + ".bmp");
 		if (!this.loaded) {
 			OpenGL.glTexImage2D(0, // Level
@@ -289,7 +297,7 @@ public class ResourceTexture2 extends Resource {
 		// now the data is loaded
 		this.loaded = true;
 		// final Steady toc = Steady.now();
-		// Log.error(" updateContext [STOP] ==> " + (toc - toc1));
+		// LOGGER.error(" updateContext [STOP] ==> " + (toc - toc1));
 		return true;
 	}
 	

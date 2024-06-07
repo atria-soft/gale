@@ -3,9 +3,11 @@ package org.atriasoft.gale.resource;
 import org.atriasoft.etk.Uri;
 import org.atriasoft.gale.backend3d.OpenGL;
 import org.atriasoft.gale.backend3d.OpenGL.ShaderType;
-import org.atriasoft.gale.internal.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResourceShader extends Resource {
+	static final Logger LOGGER = LoggerFactory.getLogger(ResourceShader.class);
 	
 	public static ResourceShader create(final Uri uriShader) {
 		ResourceShader resource;
@@ -14,7 +16,7 @@ public class ResourceShader extends Resource {
 		if (!name.isEmpty() && !name.equals("---")) {
 			resource2 = getManager().localKeep(name);
 		} else {
-			Log.error("Can not create a shader without a filaname");
+			LOGGER.error("Can not create a shader without a filaname");
 			return null;
 		}
 		if (resource2 != null) {
@@ -22,7 +24,8 @@ public class ResourceShader extends Resource {
 				resource2.keep();
 				return (ResourceShader) resource2;
 			}
-			Log.critical("Request resource file : '" + name + "' With the wrong type (dynamic cast error)");
+			LOGGER.error("Request resource file : '" + name + "' With the wrong type (dynamic cast error)");
+			System.exit(-1);
 			return null;
 		}
 		resource = new ResourceShader(uriShader);
@@ -43,7 +46,7 @@ public class ResourceShader extends Resource {
 		super(uri);
 		this.uri = uri;
 		this.resourceLevel = 0;
-		Log.debug("OGL : load SHADER '" + uri + "'");
+		LOGGER.debug("OGL : load SHADER '" + uri + "'");
 		// load data from file "all the time ..."
 		
 		if (uri.get().endsWith(".frag")) {
@@ -51,7 +54,9 @@ public class ResourceShader extends Resource {
 		} else if (uri.get().endsWith(".vert")) {
 			this.type = ShaderType.VERTEX;
 		} else {
-			Log.error("File does not have extention '.vert' for Vertex Shader or '.frag' for Fragment Shader. but : \"" + uri + "\"");
+			LOGGER.error(
+					"File does not have extention '.vert' for Vertex Shader or '.frag' for Fragment Shader. but : \""
+							+ uri + "\"");
 			this.type = ShaderType.VERTEX;
 			return;
 		}
@@ -90,15 +95,16 @@ public class ResourceShader extends Resource {
 	@Override
 	public void reload() {
 		//!< A copy of the data loaded from the file (useful only when opengl context is removed)
-		String fileData = "";
-		Log.verbose("load shader:\n-----------------------------------------------------------------\n" + fileData + "\n-----------------------------------------------------------------");
+		final String fileData = "";
+		LOGGER.trace("load shader:\n-----------------------------------------------------------------\n" + fileData
+				+ "\n-----------------------------------------------------------------");
 		// now change the OGL context ...
 		if (OpenGL.hasContext()) {
-			Log.debug("OGL : load SHADER '" + this.name + "' ==> call update context (direct)");
+			LOGGER.debug("OGL : load SHADER '" + this.name + "' ==> call update context (direct)");
 			removeContext();
 			updateContext();
 		} else {
-			Log.debug("OGL : load SHADER '" + this.name + "' ==> tagged has update context needed");
+			LOGGER.debug("OGL : load SHADER '" + this.name + "' ==> tagged has update context needed");
 			// TODO Check this, this is a leek ==> in the GPU ... really bad ...
 			this.exist = false;
 			this.shader = 0;

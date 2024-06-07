@@ -14,12 +14,13 @@ import org.atriasoft.gale.Gale;
 import org.atriasoft.gale.GaleApplication;
 import org.atriasoft.gale.Orientation;
 import org.atriasoft.gale.backend3d.OpenGL;
-import org.atriasoft.gale.internal.Log;
 import org.atriasoft.gale.key.KeyKeyboard;
 import org.atriasoft.gale.key.KeySpecial;
 import org.atriasoft.gale.key.KeyStatus;
 import org.atriasoft.gale.key.KeyType;
 import org.atriasoft.gale.resource.ResourceManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 interface ActionToDoInAsyncLoop {
 	void run(GaleContext context);
@@ -30,13 +31,14 @@ enum ApplicationState {
 }
 
 public abstract class GaleContext {
+	static final Logger LOGGER = LoggerFactory.getLogger(GaleContext.class);
 	protected static final int MAX_MANAGE_INPUT = 15;
 	private static final String STATIC_ID_RESIZE = "010__RESIZE";
 	private static final String STATIC_ID_REDRAW_ALL = "0100__REDRAW_ALL";
 	private static GaleContext globalContext = null;
 	// return true if a flush is needed
 	private static int countMemeCheck = 0;
-	
+
 	/**
 	 * From everyware in the program, we can get the context inteface.
 	 * @return current reference on the instance.
@@ -45,11 +47,11 @@ public abstract class GaleContext {
 	public static GaleContext getContext() {
 		return GaleContext.globalContext;
 	}
-	
+
 	public static void setContext(final GaleContext context) {
 		GaleContext.globalContext = context;
 	}
-	
+
 	protected ThreadAbstract periodicThread;
 	protected GaleApplication application; //!< Application handle
 	protected ApplicationState applicationState = ApplicationState.UNDEFINED; // state of the application
@@ -58,7 +60,7 @@ public abstract class GaleContext {
 	// simulation area:
 	private long previousDisplayTime; // this is to limit framerate ... in case...
 	private final boolean displayFps = true;
-	
+
 	private final Lock msgSystemAsyncLock = new ReentrantLock();
 	private final MessageSystem msgSystemAsync = new MessageSystem();
 	private final MessageSystem msgSystemGui = new MessageSystem();
@@ -71,7 +73,7 @@ public abstract class GaleContext {
 	protected Vector2f windowsPos; //!< current size of the system
 	// note: in the current mode, the management is not able to synchronize it good..
 	private final boolean requestSynchronousProcessing = true; //!< this permit to process the event in the global GUI thread instead of the local processing thread.
-	
+
 	public GaleContext(final GaleApplication application, final String[] args) {
 		// set a basic
 		this.application = application;
@@ -79,17 +81,18 @@ public abstract class GaleContext {
 		GaleContext.setContext(this);
 		Thread.currentThread().setName("galeThread");
 		if (this.application == null) {
-			Log.critical("Can not start context with no Application ==> rtfm ...");
+			LOGGER.error("Can not start context with no Application ==> rtfm ...");
+			throw new RuntimeException("Can not start context with no Application ==> rtfm ...");
 		}
 		this.commandLine.parse(args);
-		Log.info(" == > Gale system init (BEGIN)");
+		LOGGER.info(" == > Gale system init (BEGIN)");
 		// create thread to manage real periodic event
 		this.periodicThread = new PeriodicThread(this);
-		
+
 		// By default we set 2 themes (1 color and 1 shape ...) :
 		//theme::setNameDefault("GUI", "shape/square/");
 		//theme::setNameDefault("COLOR", "color/black/");
-		
+
 		// parse the debug level:
 		//		for(int iii=0; iii<this.commandLine.size(); ++iii) {
 		//			if (this.commandLine.get(iii) == "--gale-fps") {
@@ -97,13 +100,13 @@ public abstract class GaleContext {
 		//			} else if (    this.commandLine.get(iii) == "-h"
 		//			            || this.commandLine.get(iii) == "--help"
 		//			            || startwith(this.commandLine.get(iii), "--gale")) {
-		//				Log.print("gale - help : ");
-		//				Log.print("        --gale-fps");
-		//				Log.print("                Display the current fps of the display");
-		//				Log.print("        -h/--help");
-		//				Log.print("                Display this help");
+		//				LOGGER.print("gale - help : ");
+		//				LOGGER.print("        --gale-fps");
+		//				LOGGER.print("                Display the current fps of the display");
+		//				LOGGER.print("        -h/--help");
+		//				LOGGER.print("                Display this help");
 		//				if (startwith(this.commandLine.get(iii), "--gale")) {
-		//					Log.error("gale unknow element in parameter: '" << this.commandLine.get(iii) << "'");
+		//					LOGGER.error("gale unknow element in parameter: '" << this.commandLine.get(iii) << "'");
 		//					// remove parameter ...
 		//				} else {
 		//					// this is a global help system does not remove it
@@ -116,8 +119,8 @@ public abstract class GaleContext {
 		//			--iii;
 		//		}
 		//cout.setOutputFile(true);
-		
-		Log.info("GALE v: {}", Gale.getVersion());
+
+		LOGGER.info("GALE v: {}", Gale.getVersion());
 		forceOrientation(Orientation.screenAuto);
 		postActionAsync(context -> {
 			final GaleApplication appl = context.getApplication();
@@ -132,12 +135,12 @@ public abstract class GaleContext {
 			// this is done at the end to perform a full ended rendering.
 			context.requestUpdateSize();
 		});
-		
+
 		// force a recalculation
 		//requestUpdateSize();
-		Log.info(" == > Gale system init (END)");
+		LOGGER.info(" == > Gale system init (END)");
 	}
-	
+
 	/**
 	 * Inform the Gui that we want to have a copy of the clipboard
 	 * @param clipboardID ID of the clipboard (STD/SELECTION) only apear here
@@ -146,7 +149,7 @@ public abstract class GaleContext {
 		// just transmit an event , we have the data in the system
 		operatingSystemClipBoardArrive(clipboardID);
 	}
-	
+
 	/**
 	 * Inform the Gui that we are the new owner of the clipboard
 	 * @param clipboardID ID of the clipboard (STD/SELECTION) only apear here
@@ -154,7 +157,7 @@ public abstract class GaleContext {
 	public void clipBoardSet(final ClipboardList clipboardID) {
 		// nothing to do, data is already copyed in the GALE clipborad center
 	}
-	
+
 	/**
 	 * force the screen orientation (availlable on portable elements ...
 	 * @param orientation Selected orientation.
@@ -164,11 +167,11 @@ public abstract class GaleContext {
 			context.forceOrientationThreadGUI(orientation);
 		});
 	}
-	
+
 	protected void forceOrientationThreadGUI(final Orientation orientation) {
-		Log.todo("forceOrientation: not implemented");
+		LOGGER.info("TODO: forceOrientation: not implemented");
 	}
-	
+
 	/**
 	 * Redraw all the windows
 	 */
@@ -181,12 +184,12 @@ public abstract class GaleContext {
 		}
 		this.application.onResize(this.windowsSize);
 	}
-	
+
 	// Called by Consumer
 	public ActionToDoInAsyncLoop getAction() {
 		return this.msgSystemAsync.getElementWait();
 	}
-	
+
 	public GaleApplication getApplication() {
 		return this.application;
 		/*
@@ -199,15 +202,15 @@ public abstract class GaleContext {
 		}
 		*/
 	}
-	
+
 	public CommandLine getCmd() {
 		return this.commandLine;
 	}
-	
+
 	public boolean getFullScreen() {
 		return this.fullscreen;
 	}
-	
+
 	/**
 	 * The Application request the current position of the windows.
 	 * @return Turrent position of the Windows.
@@ -215,11 +218,11 @@ public abstract class GaleContext {
 	public Vector2f getPos() {
 		return this.windowsPos;
 	}
-	
+
 	public ResourceManager getResourcesManager() {
 		return this.resourceManager;
 	}
-	
+
 	/**
 	 * get the current windows size
 	 * @return the current size ...
@@ -227,7 +230,7 @@ public abstract class GaleContext {
 	public Vector2f getSize() {
 		return this.windowsSize;
 	}
-	
+
 	/**
 	 * get all Keyboard event from the X system (like many time use of META)
 	 * @param status "true" if all the event will be get, false if we want only ours.
@@ -237,11 +240,11 @@ public abstract class GaleContext {
 			context.grabKeyboardEventsThreadGUI(status);
 		});
 	}
-	
+
 	protected void grabKeyboardEventsThreadGUI(final boolean status) {
-		Log.info("grabKeyboardEvents: NOT implemented ...");
+		LOGGER.info("grabKeyboardEvents: NOT implemented ...");
 	}
-	
+
 	/**
 	 * get all Mouse/Touch events from the X system
 	 * @param status "true" if all the event will be get, false if we want only ours.
@@ -252,12 +255,12 @@ public abstract class GaleContext {
 			context.grabPointerEventsThreadGUI(status, forcedPosition);
 		});
 	}
-	
+
 	protected void grabPointerEventsThreadGUI(final boolean status, final Vector2f forcedPosition) {
-		Log.info("grabPointerEvents: NOT implemented ...");
-		
+		LOGGER.info("grabPointerEvents: NOT implemented ...");
+
 	}
-	
+
 	/**
 	 * The Application request that the Windows will be Hidden.
 	 */
@@ -266,15 +269,15 @@ public abstract class GaleContext {
 			context.hideThreadGUI();
 		});
 	}
-	
+
 	protected void hideThreadGUI() {
-		Log.info("hide: NOT implemented ...");
+		LOGGER.info("hide: NOT implemented ...");
 	}
-	
+
 	public boolean isGrabPointerEvents() {
 		return false;
 	}
-	
+
 	/**
 	 * Hide the virtual keyboard (for touch system only)
 	 */
@@ -283,11 +286,11 @@ public abstract class GaleContext {
 			context.keyboardHideThreadGUI();
 		});
 	}
-	
+
 	protected void keyboardHideThreadGUI() {
-		Log.info("keyboardHide: NOT implemented ...");
+		LOGGER.info("keyboardHide: NOT implemented ...");
 	}
-	
+
 	/**
 	 * display the virtual keyboard (for touch system only)
 	 */
@@ -296,11 +299,11 @@ public abstract class GaleContext {
 			context.keyboardShowThreadGUI();
 		});
 	}
-	
+
 	protected void keyboardShowThreadGUI() {
-		Log.info("keyboardShow: NOT implemented ...");
+		LOGGER.info("keyboardShow: NOT implemented ...");
 	}
-	
+
 	/**
 	 * Open an URL on an eternal brother.
 	 * @param url URL to open.
@@ -310,25 +313,25 @@ public abstract class GaleContext {
 			context.openURLThreadGUI(url);
 		});
 	}
-	
+
 	protected void openURLThreadGUI(final String url) {
-		Log.info("openURL: NOT implemented ...");
+		LOGGER.info("openURL: NOT implemented ...");
 	}
-	
+
 	/**
 	 * The current context is set in background (framerate is slowing down (max fps)/5 # 4fps)
 	 */
 	public void operatingSystemBackground() {
 		// set the current interface :
 		try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
-			Log.info("operatingSystemBackground...");
+			LOGGER.info("operatingSystemBackground...");
 			//		if (this.windowsCurrent != null) {
 			//			this.windowsCurrent.onStateBackground();
 			//		}
 			// release the current interface :
 		}
 	}
-	
+
 	/**
 	 * Call by the OS when a clipboard arrive to US (previously requested by a widget)
 	 * @param clipboardID of the clipboard
@@ -341,14 +344,14 @@ public abstract class GaleContext {
 			}
 		});
 	}
-	
+
 	public boolean operatingSystemDraw(final boolean displayEveryTime) {
 		if (GaleContext.countMemeCheck++ >= 10 * 16) {
 			GaleContext.countMemeCheck = 0;
 		}
-		Log.verbose("Call draw");
+		LOGGER.trace("Call draw");
 		final long currentTime = System.nanoTime();
-		//Log.warning("Time = " << currentTime << "         " << currentTime2);
+		//LOGGER.warn("Time = " << currentTime << "         " << currentTime2);
 		// TODO Review this ...
 		// this is to prevent the multiple display at the a high frequency ...
 		if (currentTime - this.previousDisplayTime < 8) {
@@ -374,18 +377,18 @@ public abstract class GaleContext {
 			try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
 				/*
 				Lock the event processing
-				
+
 				Wait end of current processing
-				
+
 				Display ...
-				
+
 				Release the event processing
-				
+
 				*/
 				if (this.application != null) {
 					if (this.applicationState == ApplicationState.RUNNING) {
 						// Redraw all needed elements
-						//Log.debug("Regenerate Display");
+						//LOGGER.debug("Regenerate Display");
 						this.application.onRegenerateDisplay(this);
 						needRedraw = this.application.isDrawingNeeded();
 					} else {
@@ -407,7 +410,7 @@ public abstract class GaleContext {
 				this.fpsSystemContext.tic();
 			}
 			if (needRedraw || displayEveryTime) {
-				//Log.debug("  ==> real Draw");
+				//LOGGER.debug("  ==> real Draw");
 				try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
 					this.resourceManager.updateContext();
 				}
@@ -430,7 +433,7 @@ public abstract class GaleContext {
 							OpenGL.setViewPort(new Vector2f(0, 0), this.application.getSize());
 							final Color bgColor = new Color(0.8f, 0.5f, 0.8f, 1.0f);
 							OpenGL.clearColor(bgColor);
-							//Log.info("==> appl clear ==> not created ...");
+							//LOGGER.info("==> appl clear ==> not created ...");
 						}
 					}
 					hasDisplayDone = true;
@@ -441,7 +444,7 @@ public abstract class GaleContext {
 				this.fpsFlush.tic();
 			}
 			if (hasDisplayDone) {
-				//Log.info("lklklklklk " << displayEveryTime);
+				//LOGGER.info("lklklklklk " << displayEveryTime);
 				if (this.displayFps) {
 					this.fpsFlush.incrementCounter();
 				}
@@ -475,21 +478,21 @@ public abstract class GaleContext {
 		OpenGL.threadHasNoMoreContext();
 		return hasDisplayDone;
 	}
-	
+
 	/**
 	 * The current context is set in foreground (framerate is maximum speed)
 	 */
 	public void operatingSystemForeground() {
 		// set the current interface :
 		try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
-			Log.info("operatingSystemForeground...");
-			
+			LOGGER.info("operatingSystemForeground...");
+
 			//		if (this.windowsCurrent != null) {
 			//			this.windowsCurrent.onStateForeground();
 			//		}
 		}
 	}
-	
+
 	/**
 	 * The OS inform that the Windows is now Hidden.
 	 */
@@ -505,10 +508,10 @@ public abstract class GaleContext {
 			                 char,
 			                 state);
 			*/
-			Log.todo("HIDE ... ");
+			LOGGER.info("TODO: HIDE ... ");
 		});
 	}
-	
+
 	/**
 	 * The OS inform that the current windows has change his position.
 	 * @param pos New position of the Windows.
@@ -518,7 +521,7 @@ public abstract class GaleContext {
 			return;
 		}
 		postActionAsync(context -> {
-			Log.debug("Receive MSG : THREADMOVE : {} ==> {}", context.windowsPos, pos);
+			LOGGER.debug("Receive MSG : THREADMOVE : {} ==> {}", context.windowsPos, pos);
 			context.windowsPos = pos;
 			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
@@ -527,27 +530,27 @@ public abstract class GaleContext {
 			appl.onMovePosition(context.windowsPos);
 		});
 	}
-	
+
 	/**
 	 * The OS inform that the openGL ext has been destroy  == > use to automaticly reload the texture and other thinks ...
 	 */
 	public void operatingSystemOpenGlContextDestroy() {
 		this.resourceManager.contextHasBeenDestroyed();
 	}
-	
+
 	/**
 	 * The OS inform that the current windows has change his size.
 	 * @param size new size of the windows.
 	 */
 	public void operatingSystemResize(final Vector2f size) {
-		Log.warning("Resize request={} previous={}", size, this.windowsSize);
+		LOGGER.warn("Resize request={} previous={}", size, this.windowsSize);
 		if (this.windowsSize.equals(size)) {
 			return;
 		}
 		// TODO Better in the thread ...  ==> but generate some init error ...
 		//gale::Dimension::setPixelWindowsSize(size);
 		postActionAsync(GaleContext.STATIC_ID_RESIZE, context -> {
-			Log.error("Receive MSG : THREAD_RESIZE : {} ==> {}", context.windowsSize, size);
+			LOGGER.error("Receive MSG : THREAD_RESIZE : {} ==> {}", context.windowsSize, size);
 			context.windowsSize = size;
 			//gale::Dimension::setPixelWindowsSize(context.windowsSize);
 			final GaleApplication tmpAppl = context.getApplication();
@@ -558,14 +561,14 @@ public abstract class GaleContext {
 			context.forceRedrawAll();
 		});
 	}
-	
+
 	/**
 	 * The current context is resumed
 	 */
 	public void operatingSystemResume() {
 		// set the current interface :
 		try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
-			Log.info("operatingSystemResume...");
+			LOGGER.info("operatingSystemResume...");
 			this.previousDisplayTime = System.currentTimeMillis();
 			// TODO this.objectManager.timeCallResume(this.previousDisplayTime);
 			//		if (this.windowsCurrent != null) {
@@ -573,9 +576,14 @@ public abstract class GaleContext {
 			//		}
 		}
 	}
-	
-	public void operatingSystemSetInput(final KeySpecial special, final KeyType type, final KeyStatus status, final int pointerID, final Vector2f pos) {
-		Log.verbose("Position motion: " + pos);
+
+	public void operatingSystemSetInput(
+			final KeySpecial special,
+			final KeyType type,
+			final KeyStatus status,
+			final int pointerID,
+			final Vector2f pos) {
+		LOGGER.trace("Position motion: " + pos);
 		postActionAsync(context -> {
 			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
@@ -584,12 +592,21 @@ public abstract class GaleContext {
 			appl.onPointer(special, type, pointerID, pos, status);
 		});
 	}
-	
-	public void operatingSystemsetKeyboard(final KeySpecial special, final KeyKeyboard type, final KeyStatus state, final boolean isARepeateKey) {
+
+	public void operatingSystemsetKeyboard(
+			final KeySpecial special,
+			final KeyKeyboard type,
+			final KeyStatus state,
+			final boolean isARepeateKey) {
 		operatingSystemsetKeyboard(special, type, state, isARepeateKey, (char) 0);
 	}
-	
-	public void operatingSystemsetKeyboard(final KeySpecial special, final KeyKeyboard type, final KeyStatus state, final boolean isARepeateKey, final Character charValue) {
+
+	public void operatingSystemsetKeyboard(
+			final KeySpecial special,
+			final KeyKeyboard type,
+			final KeyStatus state,
+			final boolean isARepeateKey,
+			final Character charValue) {
 		KeyStatus tmpState = state;
 		if (isARepeateKey) {
 			if (tmpState == KeyStatus.down) {
@@ -600,8 +617,12 @@ public abstract class GaleContext {
 		}
 		operatingSystemsetKeyboard2(special, type, state, charValue);
 	}
-	
-	public void operatingSystemsetKeyboard2(final KeySpecial special, final KeyKeyboard type, final KeyStatus state, final Character charValue) {
+
+	public void operatingSystemsetKeyboard2(
+			final KeySpecial special,
+			final KeyKeyboard type,
+			final KeyStatus state,
+			final Character charValue) {
 		postActionAsync(context -> {
 			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
@@ -610,7 +631,7 @@ public abstract class GaleContext {
 			appl.onKeyboard(special, type, charValue, state);
 		});
 	}
-	
+
 	/**
 	 * The OS inform that the Windows is now visible.
 	 */
@@ -626,17 +647,17 @@ public abstract class GaleContext {
 			                 char,
 			                 state);
 			*/
-			Log.todo("SHOW ... ");
+			LOGGER.info("TODO: SHOW ... ");
 		});
 	}
-	
+
 	/**
 	 * The OS Inform that the Window has been killed
 	 */
 	public void operatingSystemStop() {
 		// set the current interface :
 		try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
-			Log.info("operatingSystemStop...");
+			LOGGER.info("operatingSystemStop...");
 			if (this.application == null) {
 				stop();
 				return;
@@ -644,22 +665,22 @@ public abstract class GaleContext {
 			this.application.onKillDemand(this);
 		}
 	}
-	
+
 	/**
 	 * The current context is suspended
 	 */
 	public void operatingSystemSuspend() {
 		// set the current interface :
 		try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
-			Log.info("operatingSystemSuspend...");
+			LOGGER.info("operatingSystemSuspend...");
 			this.previousDisplayTime = 0;
-			
+
 			//		if (this.windowsCurrent != null) {
 			//			this.windowsCurrent.onStateSuspend();
 			//		}
 		}
 	}
-	
+
 	protected void postActionAsync(final ActionToDoInAsyncLoop data) {
 		if (this.requestSynchronousProcessing) {
 			this.msgSystemGui.addElement(data);
@@ -668,7 +689,7 @@ public abstract class GaleContext {
 		}
 		//Later, when the necessary event happens, the thread that is running it calls notify() from a block synchronized on the same object.
 	}
-	
+
 	protected void postActionAsync(final String uniqueID, final ActionToDoInAsyncLoop data) {
 		if (this.requestSynchronousProcessing) {
 			this.msgSystemGui.addElement(uniqueID, data);
@@ -677,12 +698,12 @@ public abstract class GaleContext {
 		}
 		//Later, when the necessary event happens, the thread that is running it calls notify() from a block synchronized on the same object.
 	}
-	
+
 	protected void postActionToGui(final ActionToDoInAsyncLoop data) {
 		this.msgSystemGui.addElement(data);
 		//Later, when the necessary event happens, the thread that is running it calls notify() from a block synchronized on the same object.
 	}
-	
+
 	/**
 	 * Processing all the event arrived ... (commonly called in draw function)
 	 */
@@ -693,7 +714,7 @@ public abstract class GaleContext {
 		try {
 			int nbEvent = 0;
 			while (this.msgSystemAsync.getSize() > 0) {
-				Log.verbose("    [" + nbEvent + "] event ...");
+				LOGGER.trace("    [" + nbEvent + "] event ...");
 				nbEvent++;
 				final ActionToDoInAsyncLoop func = this.msgSystemAsync.getElementWait();
 				if (func == null) {
@@ -702,12 +723,13 @@ public abstract class GaleContext {
 				func.run(this);
 			}
 		} catch (final Exception e) {
-			Log.critical("Catch exception in main event Loop ...", e);
+			LOGGER.error("Catch exception in main event Loop ...", e);
+			throw e;
 		} finally {
 			this.msgSystemAsyncLock.unlock();
 		}
 	}
-	
+
 	/**
 	 * Process event in the GUI thread ==> prevent dead lock on the global GUI interface
 	 */
@@ -724,14 +746,15 @@ public abstract class GaleContext {
 				func.run(this);
 			}
 		} catch (final Exception e) {
-			Log.critical("Catch exception in main event Loop ...", e);
+			LOGGER.error("Catch exception in main event Loop ...", e);
+			throw e;
 		} finally {
 			this.msgSystemAsyncLock.unlock();
 		}
 	}
-	
+
 	//	gale::Context::~Context() {
-	//		Log.info(" == > Gale system Un-Init (BEGIN)");
+	//		LOGGER.info(" == > Gale system Un-Init (BEGIN)");
 	//		this.periodicThread.threadStart();
 	//		getResourcesManager().applicationExiting();
 	//		// TODO Clean the message list ...
@@ -751,7 +774,7 @@ public abstract class GaleContext {
 	//		//this.objectManager.cleanInternalRemoved();
 	//		this.resourceManager.cleanInternalRemoved();
 	//
-	//		Log.info("List of all widget of this context must be equal at 0 ==> otherwise some remove is missing");
+	//		LOGGER.info("List of all widget of this context must be equal at 0 ==> otherwise some remove is missing");
 	//		//this.objectManager.displayListObject();
 	//		// Resource is an lower element as objects ...
 	//		this.resourceManager.unInit();
@@ -759,7 +782,7 @@ public abstract class GaleContext {
 	//		//this.objectManager.unInit();
 	//		// release the current interface :
 	//		unLockContext();
-	//		Log.info(" == > Gale system Un-Init (END)");
+	//		LOGGER.info(" == > Gale system Un-Init (END)");
 	//		if (this.simulationActive) {
 	//			// in simulation case:
 	//			this.simulationFile.close();
@@ -767,25 +790,25 @@ public abstract class GaleContext {
 	//	}
 	public void requestUpdateSize() {
 		postActionAsync(this.STATIC_ID_REDRAW_ALL, context -> {
-			//Log.debug("Receive MSG : THREADRESIZE");
+			//LOGGER.debug("Receive MSG : THREADRESIZE");
 			context.forceRedrawAll();
 		});
 	}
-	
+
 	/**
 	 * reset event management for the IO like Input ou Mouse or keyborad
 	 */
 	public void resetIOEvent() {
 		// TODO this.input.newLayerSet();
 	}
-	
+
 	/**
 	 * Internal API to run the processing of the event loop ...
 	 * @return The Exit value of the program
 	 * @note INTERNAL API
 	 */
 	public abstract int run();
-	
+
 	/**
 	 * set the cursor display type.
 	 * @param newCursor selected new cursor.
@@ -795,11 +818,11 @@ public abstract class GaleContext {
 			context.setCursorThreadGUI(newCursor);
 		});
 	}
-	
+
 	public void setCursorThreadGUI(final Cursor newCursor) {
-		Log.info("setCursor: NOT implemented ...");
+		LOGGER.info("setCursor: NOT implemented ...");
 	}
-	
+
 	/**
 	 * The application request a change of his current size force the fullscreen mode.
 	 * @param status status of the fullscreen mode.
@@ -810,11 +833,11 @@ public abstract class GaleContext {
 			context.setFullScreenThreadGUI(status);
 		});
 	}
-	
+
 	protected void setFullScreenThreadGUI(final boolean status) {
-		Log.info("setFullScreen: NOT implemented ...");
+		LOGGER.info("setFullScreen: NOT implemented ...");
 	}
-	
+
 	/**
 	 * set the Icon of the program
 	 * @param inputFile new filename icon of the current program.
@@ -824,11 +847,11 @@ public abstract class GaleContext {
 			context.setIconThreadGUI(inputFile);
 		});
 	}
-	
+
 	public void setIconThreadGUI(final Uri inputFile) {
-		Log.info("setIcon: NOT implemented ...");
+		LOGGER.info("setIcon: NOT implemented ...");
 	}
-	
+
 	/**
 	 * The Application request that the current windows will change his position.
 	 * @param pos New position of the Windows requested.
@@ -838,11 +861,11 @@ public abstract class GaleContext {
 			context.setPosThreadGUI(pos);
 		});
 	}
-	
+
 	protected void setPosThreadGUI(final Vector2f pos) {
-		Log.info("setPos: NOT implemented ...");
+		LOGGER.info("setPos: NOT implemented ...");
 	}
-	
+
 	/**
 	 * The application request a change of his current size.
 	 * @param size new Requested size of the windows.
@@ -852,11 +875,11 @@ public abstract class GaleContext {
 			context.setSizeThreadGUI(size);
 		});
 	}
-	
+
 	protected void setSizeThreadGUI(final Vector2f size) {
-		Log.info("setSize: NOT implemented ...");
+		LOGGER.info("setSize: NOT implemented ...");
 	}
-	
+
 	/**
 	 * set the new title of the windows
 	 * @param title New desired title
@@ -866,15 +889,15 @@ public abstract class GaleContext {
 			context.setTitleThreadGUI(title);
 		});
 	}
-	
+
 	/**
 	 * set the new title of the windows
 	 * @param title New desired title
 	 */
 	protected void setTitleThreadGUI(final String title) {
-		Log.info("setTitle: NOT implemented ...");
+		LOGGER.info("setTitle: NOT implemented ...");
 	}
-	
+
 	/**
 	 * Enable or Disable the decoration on the Windows (availlable only on Desktop)
 	 * @param status "true" to enable decoration / false otherwise
@@ -884,11 +907,11 @@ public abstract class GaleContext {
 			context.setWindowsDecorationThreadGUI(status);
 		});
 	}
-	
+
 	protected void setWindowsDecorationThreadGUI(final boolean status) {
-		Log.info("setWindowsDecoration: NOT implemented ...");
+		LOGGER.info("setWindowsDecoration: NOT implemented ...");
 	}
-	
+
 	/**
 	 * The Application request that the Windows will be visible.
 	 */
@@ -897,11 +920,11 @@ public abstract class GaleContext {
 			context.showThreadGUI();
 		});
 	}
-	
+
 	public void showThreadGUI() {
-		Log.info("show: NOT implemented ...");
+		LOGGER.info("show: NOT implemented ...");
 	}
-	
+
 	/**
 	 * StartProcessing (2nd thread).
 	 * @note to call when all the Context is started
@@ -918,12 +941,12 @@ public abstract class GaleContext {
 			}
 		}
 	}
-	
+
 	/**
 	 * The application request that the Window will be killed
 	 */
 	public void stop() {
-		Log.warning("stop: NOT implemented for this platform...");
+		LOGGER.warn("stop: NOT implemented for this platform...");
 	}
-	
+
 }

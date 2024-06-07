@@ -12,10 +12,10 @@ open module org.atriasoft.gale {
 	exports org.atriasoft.gale.context.LWJG_AWT;
 	exports org.atriasoft.gale.key;
 	exports org.atriasoft.gale.resource;
-	
+
 	requires transitive org.atriasoft.etk;
 	requires transitive org.atriasoft.egami;
-	
+
 	requires transitive org.lwjgl;
 	requires transitive org.lwjgl.natives;
 	requires transitive org.lwjgl.glfw;
@@ -27,10 +27,10 @@ open module org.atriasoft.gale {
 	requires transitive org.lwjgl.jawt;
 	requires transitive org.lwjgl.opengl;
 	requires transitive org.lwjgl.opengl.natives;
-	
+
 	requires transitive java.desktop;
 	requires transitive org.atriasoft.pngdecoder;
 	requires transitive lwjgl3.awt;
-	requires org.atriasoft.reggol;
 	requires org.atriasoft.iogami;
+	requires org.slf4j;
 }

@@ -2,25 +2,27 @@ package org.atriasoft.gale.resource;
 
 import org.atriasoft.etk.Uri;
 import org.atriasoft.gale.context.GaleContext;
-import org.atriasoft.gale.internal.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class Resource {
+	static final Logger LOGGER = LoggerFactory.getLogger(Resource.class);
 	protected static final String NO_NAME_RESOURCE = "---";
 	protected static final int MAXRESOURCELEVEL = 5;
 	private static int idGenerated = 10;
-	
+
 	/**
 	 * Get the current resource Manager
 	 */
 	protected static ResourceManager getManager() {
 		return GaleContext.getContext().getResourcesManager();
 	}
-	
+
 	protected long uid = -1; //!< unique ID definition
 	protected int count = 1;
 	protected int resourceLevel = MAXRESOURCELEVEL - 1; //!< Level of the resource ==> for update priority [0..5] 0 must be update first.
 	protected String name = NO_NAME_RESOURCE; //!< name of the resource ...
-	
+
 	/**
 	 * generic protected contructor (use factory to create this class)
 	 */
@@ -28,7 +30,7 @@ public abstract class Resource {
 		this.uid = idGenerated++;
 		getManager().localAdd(this);
 	}
-	
+
 	protected Resource(final String name) {
 		if (name == null) {
 			this.name = "---";
@@ -37,7 +39,7 @@ public abstract class Resource {
 		}
 		getManager().localAdd(this);
 	}
-	
+
 	protected Resource(final Uri uri) {
 		if (uri == null) {
 			this.name = "---";
@@ -46,17 +48,17 @@ public abstract class Resource {
 		}
 		getManager().localAdd(this);
 	}
-	
+
 	public abstract void cleanUp();
-	
+
 	public int getCount() {
 		return this.count;
 	}
-	
+
 	public long getId() {
 		return this.uid;
 	}
-	
+
 	/**
 	 * get the resource name
 	 * @return The requested name
@@ -64,7 +66,7 @@ public abstract class Resource {
 	public String getName() {
 		return this.name;
 	}
-	
+
 	/**
 	 * Get the current resource level;
 	 * @return value in [0..5]
@@ -72,40 +74,40 @@ public abstract class Resource {
 	public int getResourceLevel() {
 		return this.resourceLevel;
 	}
-	
+
 	public void keep() {
 		this.count++;
 	}
-	
+
 	public void release() {
 		this.count--;
 		if (this.count == 0) {
-			
+
 		}
 	}
-	
+
 	/**
 	 * User request the reload of all resources (usefull when the file depend on DATA:GUI:xxx ...
 	 */
 	public void reload() {
-		Log.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
+		LOGGER.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
 	}
-	
+
 	/**
 	 * The current OpenGl context is removing ==> remove yout own system data
 	 */
 	public void removeContext() {
-		Log.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
+		LOGGER.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
 	}
-	
+
 	/**
 	 * The notification of the Context removing is too late, we have no more acces on the OpenGl context (thank you Android).
 	 * Just update your internal state
 	 */
 	public void removeContextToLate() {
-		Log.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
+		LOGGER.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
 	}
-	
+
 	/**
 	 * get the resource name
 	 * @param name The name to set.
@@ -113,7 +115,7 @@ public abstract class Resource {
 	public void setName(final String name) {
 		this.name = name;
 	}
-	
+
 	/**
 	 * Call when need to send data on the harware (openGL)
 	 * @note This is done asynchronously with the create of the Resource.
@@ -121,7 +123,7 @@ public abstract class Resource {
 	 * @return false The context is not updated
 	 */
 	public boolean updateContext() {
-		Log.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
+		LOGGER.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
 		return true;
 	}
 }

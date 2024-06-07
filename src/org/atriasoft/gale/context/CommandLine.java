@@ -3,31 +3,33 @@ package org.atriasoft.gale.context;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.atriasoft.gale.internal.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CommandLine {
-	private List<String> listArgs = new ArrayList<String>();
-
-	public void parse(String[] args) {
-		for (int iii=1 ; iii<args.length; iii++) {
-			Log.info("commandLine : '" + args[iii] + "'" );
-			listArgs.add(args[iii]);
+	static final Logger LOGGER = LoggerFactory.getLogger(CommandLine.class);
+	private final List<String> listArgs = new ArrayList<>();
+	
+	public void parse(final String[] args) {
+		for (int iii = 1; iii < args.length; iii++) {
+			LOGGER.info("commandLine : '" + args[iii] + "'");
+			this.listArgs.add(args[iii]);
 		}
 	}
-	
+
 	public int size() {
-		return listArgs.size();
+		return this.listArgs.size();
 	}
-	
-	public String get(int id) {
-		return listArgs.get(id);
+
+	public String get(final int id) {
+		return this.listArgs.get(id);
 	}
-	
-	public void add(String newElement) {
-		listArgs.add(newElement);
+
+	public void add(final String newElement) {
+		this.listArgs.add(newElement);
 	}
-	
-	public void remove(int id) {
-		listArgs.remove(id);
+
+	public void remove(final int id) {
+		this.listArgs.remove(id);
 	}
 }

@@ -13,12 +13,12 @@ import org.atriasoft.etk.math.Vector3f;
 import org.atriasoft.etk.math.Vector3i;
 import org.atriasoft.etk.math.Vector4f;
 import org.atriasoft.gale.backend3d.OpenGL;
-import org.atriasoft.gale.internal.Log;
-
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ProgAttributeElement {
 	public String name; // !< Name of the element
@@ -28,18 +28,20 @@ class ProgAttributeElement {
 }
 
 public class ResourceProgram extends Resource {
+	static final Logger LOGGER = LoggerFactory.getLogger(ResourceProgram.class);
 	static final boolean DEBUG = false; // TODO externalize this ...
 	
 	public static ResourceProgram create(final Uri uriVertexShader, final Uri uriFragmentShader) {
 		ResourceProgram resource;
 		final String name = uriVertexShader.getValue() + "<-->" + uriFragmentShader.getValue();
-		Resource resource2 = Resource.getManager().localKeep(name);
+		final Resource resource2 = Resource.getManager().localKeep(name);
 		if (resource2 != null) {
 			if (resource2 instanceof ResourceProgram) {
 				resource2.keep();
 				return (ResourceProgram) resource2;
 			}
-			Log.critical("Request resource file : '" + name + "' With the wrong type (dynamic cast error)");
+			LOGGER.error("Request resource file : '" + name + "' With the wrong type (dynamic cast error)");
+			System.exit(-1);
 			return null;
 		}
 		resource = new ResourceProgram(uriVertexShader, uriFragmentShader);
@@ -99,19 +101,19 @@ public class ResourceProgram extends Resource {
 	protected ResourceProgram(final Uri uriVertexShader, final Uri uriFragmentShader) {
 		super(uriVertexShader.getValue() + "<-->" + uriFragmentShader.getValue());
 		this.resourceLevel = 1;
-		Log.debug("OGL : load PROGRAM '" + uriVertexShader + "' && '" + uriFragmentShader + "'");
+		LOGGER.debug("OGL : load PROGRAM '" + uriVertexShader + "' && '" + uriFragmentShader + "'");
 		this.shaderVertex = ResourceShader.create(uriVertexShader);
 		if (this.shaderVertex == null) {
-			Log.error("Error while getting a specific shader filename: " + uriVertexShader);
+			LOGGER.error("Error while getting a specific shader filename: " + uriVertexShader);
 			return;
 		}
-		Log.debug("Add shader on program: '" + uriFragmentShader + "'");
+		LOGGER.debug("Add shader on program: '" + uriFragmentShader + "'");
 		this.shaderFragment = ResourceShader.create(uriFragmentShader);
 		if (this.shaderFragment == null) {
-			Log.error("Error while getting a specific shader filename: " + uriFragmentShader);
+			LOGGER.error("Error while getting a specific shader filename: " + uriFragmentShader);
 			return;
 		}
-		Log.debug("Add shader on program : " + uriFragmentShader + "frag");
+		LOGGER.debug("Add shader on program : " + uriFragmentShader + "frag");
 		if (OpenGL.hasContext()) {
 			updateContext();
 		} else {
@@ -131,14 +133,15 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
 			return;
 		}
 		
-		Log.error("[" + this.elementList.get(idElem).name + "] send on oglID=" + vbo.getOpenGlId(vboId) + " VBOindex=" + vboId);
+		LOGGER.error("[" + this.elementList.get(idElem).name + "] send on oglID=" + vbo.getOpenGlId(vboId)
+				+ " VBOindex=" + vboId);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.getOpenGlId(vboId));
 		GL20.glEnableVertexAttribArray(this.elementList.get(idElem).elementId);
 		this.listOfVBOUsed.add(this.elementList.get(idElem).elementId);
@@ -223,10 +226,12 @@ public class ResourceProgram extends Resource {
 			tmp.elementId = OpenGL.programGetAttributeLocation(this.program, tmp.name);
 			tmp.isLinked = true;
 			if (tmp.elementId < 0) {
-				Log.warning("    {" + this.program + "}[" + this.elementList.size() + "] glGetAttribLocation(\"" + tmp.name + "\") = " + tmp.elementId);
+				LOGGER.warn("    {" + this.program + "}[" + this.elementList.size() + "] glGetAttribLocation(\""
+						+ tmp.name + "\") = " + tmp.elementId);
 				tmp.isLinked = false;
 			} else {
-				Log.debug("    {" + this.program + "}[" + this.elementList.size() + "] glGetAttribLocation(\"" + tmp.name + "\") = " + tmp.elementId);
+				LOGGER.debug("    {" + this.program + "}[" + this.elementList.size() + "] glGetAttribLocation(\""
+						+ tmp.name + "\") = " + tmp.elementId);
 			}
 		} else {
 			// program is not loaded ==> just local reister ...
@@ -269,10 +274,12 @@ public class ResourceProgram extends Resource {
 			tmp.elementId = OpenGL.programGetUniformLocation(this.program, tmp.name);
 			tmp.isLinked = true;
 			if (tmp.elementId < 0) {
-				Log.warning("    {" + this.program + "}[" + this.elementList.size() + "] glGetUniformLocation(\"" + tmp.name + "\") = " + tmp.elementId);
+				LOGGER.warn("    {" + this.program + "}[" + this.elementList.size() + "] glGetUniformLocation(\""
+						+ tmp.name + "\") = " + tmp.elementId);
 				tmp.isLinked = false;
 			} else {
-				Log.debug("    {" + this.program + "}[" + this.elementList.size() + "] glGetUniformLocation(\"" + tmp.name + "\") = " + tmp.elementId);
+				LOGGER.debug("    {" + this.program + "}[" + this.elementList.size() + "] glGetUniformLocation(\""
+						+ tmp.name + "\") = " + tmp.elementId);
 			}
 		} else {
 			// program is not loaded ==> just local reister ...
@@ -293,14 +300,14 @@ public class ResourceProgram extends Resource {
 	public void reload() {
 		/*
 		 * TODO ... etk::file file(this.name, etk::FILETYPEDATA); if (file.Exist() ==
-		 * false) { Log.error("File does not Exist :"" + file + "\""); return; }
-		 * 
+		 * false) { LOGGER.error("File does not Exist :"" + file + "\""); return; }
+		 *
 		 * int fileSize = file.size(); if (fileSize == 0) {
-		 * Log.error("This file is empty : " + file); return; } if (file.fOpenRead() ==
-		 * false) { Log.error("Can not open the file : " + file); return; } // remove
+		 * LOGGER.error("This file is empty : " + file); return; } if (file.fOpenRead() ==
+		 * false) { LOGGER.error("Can not open the file : " + file); return; } // remove
 		 * previous data ... if (this.fileData != null) { del ete[] this.fileData;
 		 * this.fileData = 0; } // allocate data this.fileData = ne w char[fileSize+5];
-		 * if (this.fileData == null) { Log.error("Error Memory allocation size=" +
+		 * if (this.fileData == null) { LOGGER.error("Error Memory allocation size=" +
 		 * fileSize); return; } memset(this.fileData, 0, (fileSize+5)*sizeof(char)); //
 		 * load data from the file : file.fRead(this.fileData, 1, fileSize); // close
 		 * the file: file.fClose();
@@ -353,7 +360,7 @@ public class ResourceProgram extends Resource {
 	// }
 	// if ( idElem < 0
 	// || (long)idElem > this.elementList.size()) {
-	// Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size()-1)
+	// LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size()-1)
 	// + "]");
 	// return;
 	// }
@@ -362,7 +369,7 @@ public class ResourceProgram extends Resource {
 	// }
 	// FloatBuffer buffer = storeDataInFloatBuffer(data);
 	// //GL40.glBindVertexArray(this.elementList.get(idElem).elementId);
-	// Log.error("[" + this.elementList.get(idElem).name + "] send " + data.length +
+	// LOGGER.error("[" + this.elementList.get(idElem).name + "] send " + data.length +
 	// " element");
 	// GL40.glVertexAttribPointer(
 	// this.elementList.get(idElem).elementId,
@@ -381,21 +388,26 @@ public class ResourceProgram extends Resource {
 	// public void sendAttribute(int idElem, List<Vector3f> data) {
 	// sendAttribute3fv(idElem, convertInFloat(data));
 	// }
-	public void sendAttribute(final int idElem, final int nbElement, final FloatBuffer data, final int jumpBetweenSample) {
+	public void sendAttribute(
+			final int idElem,
+			final int nbElement,
+			final FloatBuffer data,
+			final int jumpBetweenSample) {
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
 			return;
 		}
 		// GL40.glBindVertexArray(this.elementList.get(idElem).elementId);
-		// Log.error("[" + this.elementList.get(idElem).name + "] send " + 3 + "
+		// LOGGER.error("[" + this.elementList.get(idElem).name + "] send " + 3 + "
 		// element");
-		GL20.glVertexAttribPointer(this.elementList.get(idElem).elementId, nbElement, GL11.GL_FLOAT, false, jumpBetweenSample * 4, /* 4 is the size of float in the generic system... */
+		GL20.glVertexAttribPointer(this.elementList.get(idElem).elementId, nbElement, GL11.GL_FLOAT, false,
+				jumpBetweenSample * 4, /* 4 is the size of float in the generic system... */
 				data);
 		// checkGlError("glVertexAttribPointer", LINE, idElem);
 		GL20.glEnableVertexAttribArray(this.elementList.get(idElem).elementId);
@@ -420,7 +432,7 @@ public class ResourceProgram extends Resource {
 	// }
 	// if ( idElem < 0
 	// || (long)idElem > this.elementList.size()) {
-	// Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size()-1)
+	// LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size()-1)
 	// + "]");
 	// return;
 	// }
@@ -429,17 +441,17 @@ public class ResourceProgram extends Resource {
 	// }
 	// // check error of the VBO goog enought ...
 	// if (vbo.getElementSize(index) <= 0) {
-	// Log.error("Can not bind a VBO Buffer with an element size of : " +
+	// LOGGER.error("Can not bind a VBO Buffer with an element size of : " +
 	// vbo.getElementSize(index) + " named=" + vbo.getName());
 	// return;
 	// }
 	//
-	// Log.verbose("[" + this.elementList.get(idElem).name + "] send " +
+	// LOGGER.trace("[" + this.elementList.get(idElem).name + "] send " +
 	// vbo.getElementSize(index) + " element on oglID=" + vbo.getGLID(index) + "
 	// VBOindex=" + index);
 	// OpenGL.bindBuffer(vbo.getGLID(index));
-	// Log.verbose(" id=" + this.elementList.get(idElem).elementId);
-	// Log.verbose(" eleme size=" + vbo.getElementSize(index));
+	// LOGGER.trace(" id=" + this.elementList.get(idElem).elementId);
+	// LOGGER.trace(" eleme size=" + vbo.getElementSize(index));
 	// OpenGL.bufferData(data, Usage.staticDraw);
 	// OpenGL.vertexAttribPointerFloat(this.elementList.get(idElem).elementId,
 	// vbo.getElementSize(index)); // Pointer on the buffer
@@ -454,19 +466,20 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
 			return;
 		}
 		
-		Log.verbose("[" + this.elementList.get(idElem).name + "] send on oglID=" + vbo.getOpenGlId(index) + " VBOindex=" + index);
+		LOGGER.trace("[" + this.elementList.get(idElem).name + "] send on oglID=" + vbo.getOpenGlId(index)
+				+ " VBOindex=" + index);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.getOpenGlId(index));
 		// checkGlError("glBindBuffer", __LINE__, _idElem);
-		Log.verbose("    id=" + this.elementList.get(idElem).elementId);
-		Log.verbose("    jump sample=" + jumpBetweenSample);
-		Log.verbose("    offset=" + offset);
+		LOGGER.trace("    id=" + this.elementList.get(idElem).elementId);
+		LOGGER.trace("    jump sample=" + jumpBetweenSample);
+		LOGGER.trace("    offset=" + offset);
 		GL20.glVertexAttribPointer(this.elementList.get(idElem).elementId, // attribute ID of openGL
 				vbo.getElementSize(index), // number of elements per vertex, here (r,g,b,a)
 				GL11.GL_FLOAT, // the type of each element
@@ -525,7 +538,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -539,7 +552,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -547,6 +560,7 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformColorRGB(this.elementList.get(idElem).elementId, value);
 	}
+
 	/**
 	 * Send 1 float uniform element to the spefified ID (not send if does not
 	 *        really exist in the openGL program)
@@ -558,7 +572,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -580,7 +594,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -603,7 +617,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -621,13 +635,18 @@ public class ResourceProgram extends Resource {
 	 * @param value3 Value to send at the Uniform
 	 * @param value4 Value to send at the Uniform
 	 */
-	public void uniformFloat(final int idElem, final float value1, final float value2, final float value3, final float value4) {
+	public void uniformFloat(
+			final int idElem,
+			final float value1,
+			final float value2,
+			final float value3,
+			final float value4) {
 		
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -648,7 +667,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -670,7 +689,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -693,7 +712,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -717,7 +736,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -744,13 +763,13 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
 			return;
 		}
-		// Log.error("[" + this.elementList.get(idElem).name + "] send 1 matrix");
+		// LOGGER.error("[" + this.elementList.get(idElem).name + "] send 1 matrix");
 		// note : Android des not supported the transposition of the matrix, then we
 		// will done it oursef:
 		/*
@@ -762,13 +781,12 @@ public class ResourceProgram extends Resource {
 		OpenGL.programLoadUniformMatrix(this.elementList.get(idElem).elementId, matrix, transpose);
 	}
 
-	
 	public void uniformVector(final int idElem, final Vector2f value) {
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -782,7 +800,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -796,7 +814,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -810,7 +828,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -824,7 +842,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			Log.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -837,7 +855,7 @@ public class ResourceProgram extends Resource {
 	 * Stop the processing of this program
 	 */
 	public void unUse() {
-		// Log.verbose("Will UN-use program : " + this.program);
+		// LOGGER.trace("Will UN-use program : " + this.program);
 		
 		if (!this.exist) {
 			return;
@@ -860,7 +878,7 @@ public class ResourceProgram extends Resource {
 			// Do nothing == > too dangerous ...
 		} else {
 			// create the Shader
-			Log.debug("Create the Program ...'" + this.name + "'");
+			LOGGER.debug("Create the Program ...'" + this.name + "'");
 			this.program = OpenGL.programCreate();
 			if (this.program < 0) {
 				return true;
@@ -874,12 +892,13 @@ public class ResourceProgram extends Resource {
 			}
 			
 			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_POSITIONS, "in_position");
-			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_TEXTURE_COORDINATES, "in_extureCoords");
+			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_TEXTURE_COORDINATES,
+					"in_extureCoords");
 			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_NORMALS, "in_normal");
 			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_COLORS, "in_colors");
 			
 			if (!OpenGL.programCompile(this.program)) {
-				Log.error("Could not compile'PROGRAM':'" + this.name + "'");
+				LOGGER.error("Could not compile'PROGRAM':'" + this.name + "'");
 				OpenGL.programRemove(this.program);
 				return true;
 			}
@@ -890,19 +909,23 @@ public class ResourceProgram extends Resource {
 					it.elementId = OpenGL.programGetAttributeLocation(this.program, it.name);
 					it.isLinked = true;
 					if (it.elementId < 0) {
-						Log.warning("    {" + this.program + "}[" + iii + "] openGL::getAttributeLocation(\"" + it.name + "\") = " + it.elementId);
+						LOGGER.warn("    {" + this.program + "}[" + iii + "] openGL::getAttributeLocation(\"" + it.name
+								+ "\") = " + it.elementId);
 						it.isLinked = false;
 					} else {
-						Log.debug("    {" + this.program + "}[" + iii + "] openGL::getAttributeLocation(\"" + it.name + "\") = " + it.elementId);
+						LOGGER.debug("    {" + this.program + "}[" + iii + "] openGL::getAttributeLocation(\"" + it.name
+								+ "\") = " + it.elementId);
 					}
 				} else {
 					it.elementId = OpenGL.programGetUniformLocation(this.program, it.name);
 					it.isLinked = true;
 					if (it.elementId < 0) {
-						Log.warning("    {" + this.program + "}[" + iii + "] openGL::getUniformLocation(\"" + it.name + "\") = " + it.elementId);
+						LOGGER.warn("    {" + this.program + "}[" + iii + "] openGL::getUniformLocation(\"" + it.name
+								+ "\") = " + it.elementId);
 						it.isLinked = false;
 					} else {
-						Log.debug("    {" + this.program + "}[" + iii + "] openGL::getUniformLocation(\"" + it.name + "\") = " + it.elementId);
+						LOGGER.debug("    {" + this.program + "}[" + iii + "] openGL::getUniformLocation(\"" + it.name
+								+ "\") = " + it.elementId);
 					}
 				}
 				iii++;
@@ -917,7 +940,7 @@ public class ResourceProgram extends Resource {
 	 * Request the processing of this program
 	 */
 	public void use() {
-		// Log.verbose("Will use program : " + this.program);
+		// LOGGER.trace("Will use program : " + this.program);
 		// event if it was 0 == > set it to prevent other use of the previous shader
 		// display ...
 		OpenGL.programUse(this.program);

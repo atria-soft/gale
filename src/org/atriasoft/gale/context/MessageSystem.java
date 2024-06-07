@@ -4,40 +4,42 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import org.atriasoft.gale.internal.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MessageSystem {
+	static final Logger LOGGER = LoggerFactory.getLogger(MessageSystem.class);
 	private final Vector<ActionToDoInAsyncLoop> data = new Vector<>();
 	private final Map<String, ActionToDoInAsyncLoop> dataSingle = new HashMap<>();
-	
+
 	public synchronized void addElement(final ActionToDoInAsyncLoop data2) {
 		this.data.addElement(data2);
 		notifyAll();
 	}
-	
+
 	public synchronized void addElement(final String uniqueID, final ActionToDoInAsyncLoop data2) {
 		this.dataSingle.put(uniqueID, data2);
 		notifyAll();
 	}
-	
+
 	protected synchronized ActionToDoInAsyncLoop getElementSingle() {
-		//Log.warning("+++++++++++++++++++++++++++++++++ getElement()");
+		//LOGGER.warn("+++++++++++++++++++++++++++++++++ getElement()");
 		final Map.Entry<String, ActionToDoInAsyncLoop> entry = this.dataSingle.entrySet().iterator().next();
 		final String key = entry.getKey();
 		final ActionToDoInAsyncLoop message = entry.getValue();
 		this.dataSingle.remove(key);
-		//Log.warning("+++++++++++++++++++++++++++++++++ getElement() ===> done " + message);
+		//LOGGER.warn("+++++++++++++++++++++++++++++++++ getElement() ===> done " + message);
 		return message;
 	}
-	
+
 	protected synchronized ActionToDoInAsyncLoop getElementVector() {
-		//Log.warning("+++++++++++++++++++++++++++++++++ getElement()");
+		//LOGGER.warn("+++++++++++++++++++++++++++++++++ getElement()");
 		final ActionToDoInAsyncLoop message = this.data.firstElement();
 		this.data.removeElement(message);
-		//Log.warning("+++++++++++++++++++++++++++++++++ getElement() ===> done " + message);
+		//LOGGER.warn("+++++++++++++++++++++++++++++++++ getElement() ===> done " + message);
 		return message;
 	}
-	
+
 	public synchronized ActionToDoInAsyncLoop getElementWait() {
 		if (this.data.isEmpty() && this.dataSingle.isEmpty()) {
 			try {
@@ -56,11 +58,11 @@ public class MessageSystem {
 		}
 		return null;
 	}
-	
+
 	public synchronized int getSize() {
-		Log.verbose("------------------------------------------------------------");
-		Log.verbose("-- nb message: {} + {}", this.data.size(), this.dataSingle.size());
-		Log.verbose("------------------------------------------------------------");
+		LOGGER.trace("------------------------------------------------------------");
+		LOGGER.trace("-- nb message: {} + {}", this.data.size(), this.dataSingle.size());
+		LOGGER.trace("------------------------------------------------------------");
 		return this.data.size() + this.dataSingle.size();
 	}
 }

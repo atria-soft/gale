@@ -31,7 +31,6 @@ import org.atriasoft.gale.DisplayManagerDraw;
 import org.atriasoft.gale.Fps;
 import org.atriasoft.gale.GaleApplication;
 import org.atriasoft.gale.context.GaleContext;
-import org.atriasoft.gale.internal.Log;
 import org.atriasoft.gale.key.KeyKeyboard;
 import org.atriasoft.gale.key.KeySpecial;
 import org.atriasoft.gale.key.KeyStatus;
@@ -45,10 +44,12 @@ import org.lwjgl.opengl.awt.AWTGLCanvas;
 //import org.lwjgl.opengl.GL;
 //import org.lwjgl.system.MemoryStack;
 import org.lwjgl.opengl.awt.GLData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.atriasoft.reggol.Logger;
-
-public class ContextLWJGLAWT extends GaleContext implements MouseListener, MouseMotionListener, KeyListener, MouseWheelListener {
+public class ContextLWJGLAWT extends GaleContext
+		implements MouseListener, MouseMotionListener, KeyListener, MouseWheelListener {
+	static final Logger LOGGER = LoggerFactory.getLogger(ContextLWJGLAWT.class);
 	private static final int WIDTH = 800;
 	private static final int HEIGHT = 600;
 	private static final int MAX_MANAGE_INPUT = 15;
@@ -57,36 +58,36 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	private static float delta;
 	private static double whellOffsetY;
 	private static double whellOffsetX;
-	
+
 	private static boolean rightButtonStateDown = false;
 	private static boolean leftButtonStateDown = false;
-	
+
 	private static double lastMousePositionX = 0;
-	
+
 	private static double lastMousePositionY = 0;
 	private static double currentMousePositionX = 0;
 	private static double currentMousePositionY = 0;
-	
+
 	public static GaleContext create(final GaleApplication application, final String[] arg) {
 		// TODO Auto-generated method stub
 		return new ContextLWJGLAWT(application, arg);
 	}
-	
+
 	private static long getCurrentTime() {
 		return System.currentTimeMillis();
 	}
-	
+
 	public static float getFrameTimeSecconds() {
 		return ContextLWJGLAWT.delta;
 	}
-	
+
 	private final boolean[] inputIsPressed = new boolean[ContextLWJGLAWT.MAX_MANAGE_INPUT];
 	private Vector2f decoratedWindowsSize = Vector2f.ZERO;
 	private Vector2f cursorPos = Vector2f.ZERO;
-	
+
 	private final Vector2f cursorSize = Vector2f.ZERO;
 	private final Fps fps = new Fps("Main Loop", true);
-	
+
 	private DisplayManagerDraw drawer = null;
 	// The window handle
 	private final long window = 0;
@@ -94,14 +95,14 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 	// Generic UI properties
 	private JFrame frame;
 	private GLData glData;
-	
+
 	private AWTGLCanvas canvas;
-	
+
 	private Robot robot = null;
-	
+
 	private final List<Integer> pressedKey = new ArrayList<>();
 	private Boolean isInitialized = false;
-	
+
 	public ContextLWJGLAWT(final GaleApplication application, final String[] args) {
 		super(application, args);
 		System.out.println("Hello JOGL !");
@@ -109,7 +110,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		start2ndThreadProcessing();
 		this.isInitialized = true;
 	}
-	
+
 	private int getUniqueIndex(final KeyEvent e) {
 		int internalKeyValue = e.getKeyCode();
 		if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
@@ -123,7 +124,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		}
 		return internalKeyValue;
 	}
-	
+
 	@Override
 	protected void grabPointerEventsThreadGUI(final boolean status, final Vector2f forcedPosition) {
 		if (status) {
@@ -139,14 +140,15 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 			showCursor();
 		}
 	}
-	
+
 	private void hideCursor() {
 		final int[] pixels = new int[16 * 16];
 		final Image image = Toolkit.getDefaultToolkit().createImage(new MemoryImageSource(16, 16, pixels, 0, 16));
-		final Cursor transparentCursor = Toolkit.getDefaultToolkit().createCustomCursor(image, new Point(0, 0), "invisiblecursor");
+		final Cursor transparentCursor = Toolkit.getDefaultToolkit().createCustomCursor(image, new Point(0, 0),
+				"invisiblecursor");
 		this.frame.setCursor(transparentCursor);
 	}
-	
+
 	private void initWindows() {
 		this.frame = new JFrame("Gale base");
 		this.frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -158,19 +160,21 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		this.frame.add(this.canvas = new AWTGLCanvas(this.glData) {
 			@Override
 			public void initGL() {
-				System.out.println("OpenGL version: " + this.effective.majorVersion + "." + this.effective.minorVersion + " (Profile: " + this.effective.profile + ")");
+				System.out.println("OpenGL version: " + this.effective.majorVersion + "." + this.effective.minorVersion
+						+ " (Profile: " + this.effective.profile + ")");
 				GL.createCapabilities();
 				GL11.glClearColor(0.3f, 0.4f, 0.5f, 1);
 				GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			}
-			
+
 			@Override
 			public void paintGL() {
 				final long startRender = System.currentTimeMillis();
-				//Log.warning("Draw ... ");
+				//LOGGER.warn("Draw ... ");
 				final int w = getWidth();
 				final int h = getHeight();
-				if (ContextLWJGLAWT.this.decoratedWindowsSize.x() != w || ContextLWJGLAWT.this.decoratedWindowsSize.y() != h) {
+				if (ContextLWJGLAWT.this.decoratedWindowsSize.x() != w
+						|| ContextLWJGLAWT.this.decoratedWindowsSize.y() != h) {
 					ContextLWJGLAWT.this.decoratedWindowsSize = new Vector2f(w, h);
 					final Rectangle bounds = ContextLWJGLAWT.this.canvas.getBounds();
 					final Vector2f tmpWindowsSize = new Vector2f(bounds.width, bounds.height);
@@ -178,9 +182,11 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 				}
 				operatingSystemDraw(true);
 				swapBuffers();
+				/*
 				if (Logger.isCriticalOccured()) {
 					ContextLWJGLAWT.this.frame.dispose();
 				}
+				*/
 				// Process event from the GUI (specific events...
 				processEventsGui();
 				/*
@@ -204,21 +210,21 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		this.canvas.addKeyListener(this);
 		this.canvas.addMouseWheelListener(this);
 		this.frame.transferFocus();
-		
+
 		ContextLWJGLAWT.lastFrameTime = ContextLWJGLAWT.getCurrentTime();
-		
+
 	}
-	
+
 	@Override
 	public boolean isGrabPointerEvents() {
 		return this.robot != null;
 	}
-	
+
 	public void keyEvent(final KeyEvent e, final boolean pressed, final boolean thisIsAReapeateKey) {
-		//Log.info("event " + thisIsAReapeateKey + "   " + e.getKeyCode() + "   " + e);
+		//LOGGER.info("event " + thisIsAReapeateKey + "   " + e.getKeyCode() + "   " + e);
 		boolean find = true;
 		KeyKeyboard keyInput = KeyKeyboard.UNKNOWN;
-		//Log.error("keyboard input " + e.getWhen() + "  " + e.getKeyCode() + "  " + e.getKeyLocation());
+		//LOGGER.error("keyboard input " + e.getWhen() + "  " + e.getKeyCode() + "  " + e.getKeyLocation());
 		switch (e.getKeyCode()) {
 			//case 328: // keypad
 			case KeyEvent.VK_UP:
@@ -362,38 +368,48 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 				find = false;
 				if (this.guiKeyBoardMode.getNumLock()) {
 					if (thisIsAReapeateKey) {
-						operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, '.');
+						operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER,
+								(!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, '.');
 					}
-					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, '.');
+					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER,
+							(pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, '.');
 				} else {
 					if (thisIsAReapeateKey) {
-						operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x7F);
+						operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER,
+								(!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x7F);
 					}
-					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x7F);
+					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER,
+							(pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x7F);
 				}
 				break;
 			case KeyEvent.VK_TAB: // special case for TAB
 				find = false;
 				if (thisIsAReapeateKey) {
-					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x09);
+					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER,
+							(!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x09);
 				}
-				operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x09);
+				operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER,
+						(pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, (char) 0x09);
 				break;
 			default:
 				find = false;
 				if (thisIsAReapeateKey) {
-					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, e.getKeyChar());
+					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER,
+							(!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, e.getKeyChar());
 				}
-				operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER, (pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, e.getKeyChar());
+				operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER,
+						(pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, e.getKeyChar());
 		}
 		if (find) {
 			if (thisIsAReapeateKey) {
-				operatingSystemsetKeyboard(this.guiKeyBoardMode, keyInput, (!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey);
+				operatingSystemsetKeyboard(this.guiKeyBoardMode, keyInput, (!pressed ? KeyStatus.down : KeyStatus.up),
+						thisIsAReapeateKey);
 			}
-			operatingSystemsetKeyboard(this.guiKeyBoardMode, keyInput, (pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey);
+			operatingSystemsetKeyboard(this.guiKeyBoardMode, keyInput, (pressed ? KeyStatus.down : KeyStatus.up),
+					thisIsAReapeateKey);
 		}
 	}
-	
+
 	@Override
 	public void keyPressed(final KeyEvent e) {
 		final int internalKeyValue = getUniqueIndex(e);
@@ -403,7 +419,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		}
 		keyEvent(e, true, index != -1);
 	}
-	
+
 	@Override
 	public void keyReleased(final KeyEvent e) {
 		final int internalKeyValue = getUniqueIndex(e);
@@ -413,60 +429,60 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		}
 		keyEvent(e, false, false);
 	}
-	
+
 	@Override
 	public void keyTyped(final KeyEvent e) {
 		// not needed with my model ...
-		//Log.info(" typed " + e.getKeyChar() + "  " + e);
+		//LOGGER.info(" typed " + e.getKeyChar() + "  " + e);
 	}
-	
+
 	@Override
 	public void mouseClicked(final MouseEvent e) {
 		//		System.out.println(e.getX());
 		//		System.out.println(e.getY());
-		Log.info("Mouse clicked:" + e.getX() + " " + e.getY());
+		LOGGER.info("Mouse clicked:" + e.getX() + " " + e.getY());
 	}
-	
+
 	@Override
 	public void mouseDragged(final MouseEvent e) {
-		//Log.error("mouse drag ... " + e);
+		//LOGGER.error("mouse drag ... " + e);
 		mouseMoved(e);
 	}
-	
+
 	@Override
 	public void mouseEntered(final MouseEvent e) {
 		// TODO Auto-generated method stub
-		//Log.info("Mouse entered:" + e.getX() + " " + e.getY());
+		//LOGGER.info("Mouse entered:" + e.getX() + " " + e.getY());
 		this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() - e.getY());
 		operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.enter, 0, this.cursorPos);
 	}
-	
+
 	@Override
 	public void mouseExited(final MouseEvent e) {
 		// TODO Auto-generated method stub
-		//Log.info("Mouse exited:" + e.getX() + " " + e.getY());
+		//LOGGER.info("Mouse exited:" + e.getX() + " " + e.getY());
 		this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() - e.getY());
 		operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.leave, 0, this.cursorPos);
 		//this.frame.mouseMove(e, 200, 200);
 	}
-	
+
 	@Override
 	public void mouseMoved(final MouseEvent e) {
-		Log.verbose("Mouse moved:" + e.getX() + " " + e.getY() + " " + e);
+		LOGGER.trace("Mouse moved:" + e.getX() + " " + e.getY() + " " + e);
 		if (this.robot != null) {
 			final Rectangle bounds = this.frame.getBounds();
-			//Log.error("         " + bounds + " windows=" + windowsSize + " deco= " + decoratedWindowsSize);
+			//LOGGER.error("         " + bounds + " windows=" + windowsSize + " deco= " + decoratedWindowsSize);
 			final float refPosX = bounds.x + bounds.width / 2.0f;
 			final float refPosY = bounds.y + bounds.height / 2.0f;
 			if (e.getXOnScreen() == (int) refPosX && e.getYOnScreen() == (int) refPosY) {
 				this.cursorPos = Vector2f.ZERO;
 				return;
 			}
-			//Log.error("         " + bounds + "  windows=" + windowsSize + " deco= " + decoratedWindowsSize);
+			//LOGGER.error("         " + bounds + "  windows=" + windowsSize + " deco= " + decoratedWindowsSize);
 			this.cursorPos = new Vector2f(-(e.getXOnScreen() - refPosX), (e.getYOnScreen() - refPosY));
 			//this.cursorPos = new Vector2f(-(e.getXOnScreen() - refPosX), refPosY);
 			this.robot.mouseMove((int) refPosX, (int) refPosY);
-			Log.info("delta moved:" + this.cursorPos);
+			LOGGER.info("delta moved:" + this.cursorPos);
 		} else {
 			// TODO use real size ... !!!!
 			this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() + (this.cursorSize.y() - e.getY()));
@@ -475,7 +491,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		boolean findOne = false;
 		for (int iii = 0; iii < ContextLWJGLAWT.MAX_MANAGE_INPUT; iii++) {
 			if (this.inputIsPressed[iii]) {
-				//Log.debug("X11 event: bt=" << iii << " " << event.type << " = \"MotionNotify\" (" << m_cursorEventX << "," << m_cursorEventY << ")");
+				//LOGGER.debug("X11 event: bt=" << iii << " " << event.type << " = \"MotionNotify\" (" << m_cursorEventX << "," << m_cursorEventY << ")");
 				operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.move, iii, this.cursorPos);
 				findOne = true;
 			}
@@ -485,10 +501,10 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 			operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.move, 0, this.cursorPos);
 		}
 	}
-	
+
 	@Override
 	public void mousePressed(final MouseEvent e) {
-		Log.info("Mouse pressed:" + e.getX() + " " + e.getY());
+		LOGGER.info("Mouse pressed:" + e.getX() + " " + e.getY());
 		final int button = e.getButton();
 		this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() - e.getY());
 		if (button < ContextLWJGLAWT.MAX_MANAGE_INPUT) {
@@ -496,11 +512,11 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		}
 		operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.down, button, this.cursorPos);
 	}
-	
+
 	@Override
 	public void mouseReleased(final MouseEvent e) {
-		//Log.info("Mouse release:" + e.getX() + " " + e.getY());
-		//		Log.info("mouse value: GLFW_RELEASE" + action + " bt=" + button);
+		//LOGGER.info("Mouse release:" + e.getX() + " " + e.getY());
+		//		LOGGER.info("mouse value: GLFW_RELEASE" + action + " bt=" + button);
 		final int button = e.getButton();
 		this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() - e.getY());
 		if (button < ContextLWJGLAWT.MAX_MANAGE_INPUT) {
@@ -508,10 +524,10 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		}
 		operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.up, button, this.cursorPos);
 	}
-	
+
 	@Override
 	public void mouseWheelMoved(final MouseWheelEvent e) {
-		//Log.info("wheel_event : " + e);
+		//LOGGER.info("wheel_event : " + e);
 		this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() - e.getY());
 		if (e.getWheelRotation() < 0) {
 			this.inputIsPressed[5] = true;
@@ -525,7 +541,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 			operatingSystemSetInput(this.guiKeyBoardMode, KeyType.mouse, KeyStatus.up, 4, this.cursorPos);
 		}
 	}
-	
+
 	@Override
 	public int run() {
 		final Runnable renderLoop = new Runnable() {
@@ -545,7 +561,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 			}
 		};
 		SwingUtilities.invokeLater(renderLoop);
-		
+
 		//		while (canvas != null && canvas.isValid()) {
 		//			canvas.render();
 		//			try {
@@ -555,7 +571,7 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		//				e.printStackTrace();
 		//			}
 		//		}
-		
+
 		// Run the rendering loop until the user has attempted to close
 		// the window or has pressed the ESCAPE key.
 		//		while ( !glfwWindowShouldClose(window) ) {
@@ -597,11 +613,11 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 		//System.exit(0);
 		return 0;
 	}
-	
+
 	public void setDrawer(final DisplayManagerDraw drawer) {
 		this.drawer = drawer;
 	}
-	
+
 	@Override
 	public void setFullScreenThreadGUI(final boolean status) {
 		super.setFullScreen(status);
@@ -613,24 +629,24 @@ public class ContextLWJGLAWT extends GaleContext implements MouseListener, Mouse
 			this.frame.setUndecorated(false);
 		}
 	}
-	
+
 	@Override
 	public void setIconThreadGUI(final Uri inputFile) {
-		
+
 	}
-	
+
 	/****************************************************************************************/
 	@Override
 	public void setTitleThreadGUI(final String title) {
 		this.frame.setTitle(title);
 	}
-	
+
 	private void showCursor() {
 		this.frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}
-	
+
 	public void unInit() {
-		
+
 	}
-	
+
 }
