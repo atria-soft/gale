@@ -17,17 +17,17 @@ import org.slf4j.LoggerFactory;
 
 public class ResourceTexture2 extends Resource {
 	static final Logger LOGGER = LoggerFactory.getLogger(ResourceTexture2.class);
-
+	
 	public enum TextureColorMode {
 		rgb, // !< red/green/blue data
 		rgba // !< red/green/blue/alpha data
 	}
-	
+
 	public static ResourceTexture2 create() {
 		LOGGER.trace("KEEP: Resource Texture Dynamic: ");
 		return new ResourceTexture2();
 	}
-	
+
 	public static ResourceTexture2 create(final Uri uri) {
 		LOGGER.trace("KEEP: Resource Texture: " + uri);
 		final Resource object2 = Resource.getManager().localKeep(uri);
@@ -42,7 +42,7 @@ public class ResourceTexture2 extends Resource {
 		LOGGER.trace("CREATE: new Texture: " + uri);
 		return new ResourceTexture2(uri);
 	}
-	
+
 	public static ResourceTexture2 createNamed(final String uri) {
 		LOGGER.trace("KEEP: Resource Texture Named: " + uri);
 		final Resource object2 = Resource.getManager().localKeep(uri);
@@ -57,7 +57,7 @@ public class ResourceTexture2 extends Resource {
 		LOGGER.debug("CREATE: new Texture Named: " + uri);
 		return new ResourceTexture2(uri);
 	}
-	
+
 	/*
 	 * public static ResourceTexture2 createFromPng(final Uri uriTexture) { return
 	 * createFromPng(uriTexture, 1); }
@@ -70,7 +70,9 @@ public class ResourceTexture2 extends Resource {
 	 * (resource2 != null) { if (resource2 instanceof ResourceTexture2) {
 	 * resource2.keep(); return (ResourceTexture2) resource2; }
 	 * LOGGER.critical("Request resource file : '" + name +
-	 * "' With the wrong type (dynamic cast error)"); return null; } resource = new
+	 * "' With the wrong type (dynamic cast error)");
+	 * System.exit(-1);
+	 * return null; } resource = new
 	 * ResourceTexture2(uriTexture, textureUnit); final ImageRawData decodedData =
 	 * ImageLoader.decodePngFile(uriTexture);
 	 * resource.setTexture(decodedData.getBuffer(), new
@@ -78,7 +80,7 @@ public class ResourceTexture2 extends Resource {
 	 * (decodedData.isHasAlpha() == true ? TextureColorMode.rgba :
 	 * TextureColorMode.rgb), textureUnit); resource.flush(); return resource; }
 	 */
-	
+
 	// openGl Context properties :
 	protected ImageByte data = new ImageByteRGBA(32, 32);
 	// !< Color space of the image.
@@ -94,18 +96,18 @@ public class ResourceTexture2 extends Resource {
 	// ! some image are not square == > we need to sqared it to prevent some openGl
 	// api error the the displayable size is not all the time 0.0 . 1.0
 	protected Vector2i realImageSize = new Vector2i(1, 1);
-	
+
 	// repeat mode of the image (repeat the image if out of range [0..1])
 	protected boolean repeat = false;
-	
+
 	protected int texId = -1; // !< openGl textureID.
-	
+
 	public ResourceTexture2() {}
-	
+
 	public ResourceTexture2(final String filename) {
 		super(filename);
 	}
-	
+
 	/*
 	 * public void bindForRendering(final int idTexture) { if (this.loaded == false)
 	 * { return; } GL13.glActiveTexture(textureIdBinding[idTexture]);
@@ -113,11 +115,11 @@ public class ResourceTexture2 extends Resource {
 	 * == TextureColorMode.rgb) { OpenGL.enable(OpenGL.Flag.flagcullFace);
 	 * OpenGL.enable(OpenGL.Flag.flagback); } }
 	 */
-	
+
 	public ResourceTexture2(final Uri filename) {
 		super(filename);
 	}
-	
+
 	public void bindForRendering(final int idTexture) {
 		if (!this.loaded) {
 			return;
@@ -129,36 +131,36 @@ public class ResourceTexture2 extends Resource {
 			OpenGL.enable(OpenGL.Flag.flag_back);
 		}
 	}
-	
+
 	@Override
 	public void cleanUp() {
 		removeContext();
 	}
-	
+
 	// Flush the data to send it at the openGl system
 	public synchronized void flush() {
 		// request to the manager to be call at the next update ...
 		LOGGER.trace("Request UPDATE of Element");
 		Resource.getManager().update(this);
 	}
-	
+
 	// Get the reference on this image to draw something on it ...
 	public ImageByte get() {
 		return this.data;
 	}
-	
+
 	public Vector2i getOpenGlSize() {
 		return this.data.getSize();
 	}
-	
+
 	public int getRendererId() {
 		return this.texId;
 	}
-	
+
 	public Vector2i getUsableSize() {
 		return this.realImageSize;
 	}
-	
+
 	@Override
 	public synchronized void removeContext() {
 		if (this.loaded) {
@@ -169,13 +171,13 @@ public class ResourceTexture2 extends Resource {
 			this.loaded = false;
 		}
 	}
-	
+
 	@Override
 	public synchronized void removeContextToLate() {
 		this.loaded = false;
 		this.texId = -1;
 	}
-	
+
 	/**
 	 * Set the image in the texture system
 	 * @note It will resize in square2 if needed by the system.
@@ -194,7 +196,7 @@ public class ResourceTexture2 extends Resource {
 		//		}
 		flush();
 	}
-	
+
 	/**
 	 * Set the Filter mode to apply at the image when display with a scale
 	 *        (not 1:1 ratio)
@@ -203,13 +205,13 @@ public class ResourceTexture2 extends Resource {
 	public void setFilterMode(final TextureFilter filter) {
 		this.filter = filter;
 	}
-	
+
 	// You must set the size here, because it will be set in multiple of pow(2)
 	public synchronized void setImageSize(Vector2i newSize) {
 		newSize = new Vector2i(Tools.nextP2(newSize.x()), Tools.nextP2(newSize.y()));
 		this.data.resize(newSize.x(), newSize.y());
 	}
-	
+
 	/**
 	 * Set the repeate mode of the images if UV range is out of [0..1]
 	 * @param value Value of the new repeate mode
@@ -217,7 +219,7 @@ public class ResourceTexture2 extends Resource {
 	public void setRepeat(final boolean value) {
 		this.repeat = value;
 	}
-	
+
 	public void unBindForRendering() {
 		if (!this.loaded) {
 			return;
@@ -227,7 +229,7 @@ public class ResourceTexture2 extends Resource {
 			OpenGL.disable(OpenGL.Flag.flag_back);
 		}
 	}
-	
+
 	@Override
 	public synchronized boolean updateContext() {
 		LOGGER.trace("updateContext [START]");
@@ -261,7 +263,7 @@ public class ResourceTexture2 extends Resource {
 		// in all case we set the texture properties :
 		// TODO check error ???
 		OpenGL.bindTexture2D(this.texId);
-		
+
 		if (!this.loaded) {
 			if (!this.repeat) {
 				OpenGL.setTexture2DWrapClampToEdge();
@@ -285,7 +287,7 @@ public class ResourceTexture2 extends Resource {
 					typeObject, // format
 					sizeObject, // type
 					this.data.getRaw());
-			
+
 		} else {
 			OpenGL.glTexSubImage2D(0, // Level
 					0, // x offset
@@ -300,5 +302,5 @@ public class ResourceTexture2 extends Resource {
 		// LOGGER.error(" updateContext [STOP] ==> " + (toc - toc1));
 		return true;
 	}
-	
+
 }
