@@ -266,7 +266,7 @@
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
 			<resource>
-				
+				<directory>${basedir}/src/resources</directory>
 			</resource>
 		</resources>
 		<testSourceDirectory>test/src</testSourceDirectory>
