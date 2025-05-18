@@ -5,12 +5,11 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import org.atriasoft.etk.Uri;
-
 import org.atriasoft.pngdecoder.PNGDecoder;
 import org.atriasoft.pngdecoder.PNGDecoder.Format;
 
 public class ImageLoader {
-	public static ImageRawData decodePngFile(final Uri filename) {
+	public static ImageRawData decodePngFile(final Uri filename) throws Exception {
 		ByteBuffer buf = null;
 		int tWidth = 0;
 		int tHeight = 0;
@@ -18,6 +17,9 @@ public class ImageLoader {
 		try {
 			// Open the PNG file as an InputStream
 			final InputStream in = Uri.getStream(filename);
+			if (in == null) {
+				throw new Exception("fail to get th estream ...");
+			}
 			// Link the PNG decoder to this stream
 			final PNGDecoder decoder = new PNGDecoder(in);
 			// Get the width and height of the texture

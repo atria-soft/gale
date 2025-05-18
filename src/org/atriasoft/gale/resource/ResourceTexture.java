@@ -55,7 +55,14 @@ public class ResourceTexture extends Resource {
 			return null;
 		}
 		resource = new ResourceTexture(uriTexture, textureUnit);
-		final ImageRawData decodedData = ImageLoader.decodePngFile(uriTexture);
+		ImageRawData decodedData;
+		try {
+			decodedData = ImageLoader.decodePngFile(uriTexture);
+		} catch (final Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 		final ImageByteRGBA img = new ImageByteRGBA(decodedData.getWidth(), decodedData.getHeight());
 		final ByteBuffer mlklmklm = decodedData.getBuffer();
 		final byte[] elemData = new byte[mlklmklm.remaining()];
