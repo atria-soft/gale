@@ -20,15 +20,13 @@ import org.lwjgl.opengl.GL30;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import models.RawModel;
-
 public class ResourceVirtualArrayObject extends Resource {
 	static final Logger LOGGER = LoggerFactory.getLogger(ResourceVirtualArrayObject.class);
 	public static final int INDICE_VBO_POSITIONS = 0;
 	public static final int INDICE_VBO_TEXTURE_COORDINATES = 1;
 	public static final int INDICE_VBO_NORMALS = 2;
 	public static final int INDICE_VBO_COLORS = 3;
-
+	
 	public static int[] convertIntegers(final List<Integer> integers) {
 		final int[] ret = new int[integers.size()];
 		final Iterator<Integer> iterator = integers.iterator();
@@ -37,7 +35,7 @@ public class ResourceVirtualArrayObject extends Resource {
 		}
 		return ret;
 	}
-
+	
 	public static ResourceVirtualArrayObject create(
 			final float[] positions,
 			final float[] colors,
@@ -49,7 +47,7 @@ public class ResourceVirtualArrayObject extends Resource {
 		Resource.getManager().localAdd(resource);
 		return resource;
 	}
-
+	
 	public static ResourceVirtualArrayObject create(
 			final float[] positions,
 			final float[] textureCoordinates,
@@ -60,7 +58,7 @@ public class ResourceVirtualArrayObject extends Resource {
 		Resource.getManager().localAdd(resource);
 		return resource;
 	}
-
+	
 	public static ResourceVirtualArrayObject create(
 			final float[] positions,
 			final float[] colors,
@@ -70,58 +68,58 @@ public class ResourceVirtualArrayObject extends Resource {
 		Resource.getManager().localAdd(resource);
 		return resource;
 	}
-
+	
 	public static ResourceVirtualArrayObject create(final float[] positions, final int dimentions) {
 		final ResourceVirtualArrayObject resource = new ResourceVirtualArrayObject(positions, null, null, null, null,
 				positions.length / dimentions);
 		Resource.getManager().localAdd(resource);
 		return resource;
 	}
-
+	
 	public static ResourceVirtualArrayObject createDynamic() {
 		final ResourceVirtualArrayObject resource = new ResourceVirtualArrayObject();
 		Resource.getManager().localAdd(resource);
 		return resource;
 	}
-
+	
 	public static FloatBuffer storeDataInFloatBuffer(final float[] data) {
 		final FloatBuffer buffer = BufferUtils.createFloatBuffer(data.length);
 		buffer.put(data);
 		buffer.flip();
 		return buffer;
 	}
-
+	
 	public static IntBuffer storeDataInIntBuffer(final int[] data) {
 		final IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
 		buffer.put(data);
 		buffer.flip();
 		return buffer;
 	}
-
+	
 	private boolean dynamic = false;
 	private int vaoID = -1;
 	private boolean exist = false; //!< This data is availlable in the Graphic card
-
+	
 	private final List<Integer> vbo = new ArrayList<>();
-
+	
 	Object positions = null;
-
+	
 	Object colors = null;
-
+	
 	Object textureCoordinates = null;
-
+	
 	Object normals = null;
-
+	
 	int[] indices = null;
-
+	
 	int vertexCount = -1;
-
+	
 	protected ResourceVirtualArrayObject() {
 		this.resourceLevel = 3;
 		this.dynamic = true;
 		LOGGER.debug("OGL: load VBO count (dynamic)");
 	}
-
+	
 	protected ResourceVirtualArrayObject(final float[] positions, final float[] colors,
 			final float[] textureCoordinates, final float[] normals, final int[] indices, final int vertexCount) {
 		this.resourceLevel = 3;
@@ -133,7 +131,7 @@ public class ResourceVirtualArrayObject extends Resource {
 		this.vertexCount = vertexCount;
 		LOGGER.debug("OGL: load VBO count");
 	}
-
+	
 	public void bindForRendering() {
 		if (!this.exist) {
 			return;
@@ -153,7 +151,7 @@ public class ResourceVirtualArrayObject extends Resource {
 			GL20.glEnableVertexAttribArray(ResourceVirtualArrayObject.INDICE_VBO_COLORS);
 		}
 	}
-
+	
 	private void bindIndicesBuffer(final int[] indices) {
 		final int vboId = OpenGL.genBuffers();
 		this.vbo.add(vboId);
@@ -165,7 +163,7 @@ public class ResourceVirtualArrayObject extends Resource {
 			GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
 		}
 	}
-
+	
 	/**
 	 * Destructor of this VBO.
 	 */
@@ -173,7 +171,7 @@ public class ResourceVirtualArrayObject extends Resource {
 	public void cleanUp() {
 		removeContext();
 	}
-
+	
 	/**
 	 * clear buffers
 	 */
@@ -186,13 +184,13 @@ public class ResourceVirtualArrayObject extends Resource {
 		this.indices = null;
 		this.vertexCount = -1;
 	}
-
+	
 	private void createVAO() {
 		LOGGER.trace("create VAO...");
 		this.vaoID = GL30.glGenVertexArrays();
 		GL30.glBindVertexArray(this.vaoID);
 	}
-
+	
 	/**
 	 * Send the data to the graphic card.
 	 */
@@ -201,7 +199,7 @@ public class ResourceVirtualArrayObject extends Resource {
 		Resource.getManager().update(this);
 		LOGGER.trace("Request flush of VAO: [" + getId() + "] '" + getName() + "'");
 	}
-
+	
 	/**
 	 * get the real openGL ID.
 	 * @return the Ogl id reference of this VBO.
@@ -209,11 +207,11 @@ public class ResourceVirtualArrayObject extends Resource {
 	public int getGLID() {
 		return this.vaoID;
 	}
-
+	
 	public int getVertexCount() {
 		return this.vertexCount;
 	}
-
+	
 	public void loadAgainToVAO() {
 		GL30.glBindVertexArray(this.vaoID);
 		LOGGER.trace("push VAO: [" + getId() + "] '" + getName() + "'");
@@ -240,7 +238,7 @@ public class ResourceVirtualArrayObject extends Resource {
 		}
 		unbindVAO();
 	}
-
+	
 	public void loadToVAO() {
 		createVAO();
 		LOGGER.trace("push VAO: [" + getId() + "] '" + getName() + "'");
@@ -267,7 +265,7 @@ public class ResourceVirtualArrayObject extends Resource {
 		}
 		unbindVAO();
 	}
-
+	
 	/**
 	 * Relode the shader from the file. used when a request of resouces reload is done.
 	 * @note this is really usefull when we tested the new themes or shader developpements.
@@ -277,7 +275,7 @@ public class ResourceVirtualArrayObject extends Resource {
 		removeContext();
 		updateContext();
 	}
-
+	
 	/**
 	 * remove the data from the opengl context.
 	 */
@@ -288,7 +286,7 @@ public class ResourceVirtualArrayObject extends Resource {
 			this.exist = false;
 		}
 	}
-
+	
 	/**
 	 * Special android spec! It inform us that all context is removed and after notify us...
 	 */
@@ -299,84 +297,84 @@ public class ResourceVirtualArrayObject extends Resource {
 		//			this.vbo[iii] = 0;
 		//		}
 	}
-
+	
 	public void render(final RenderMode mode) {
 		LOGGER.trace("request rendering indices : " + this.vertexCount);
 		OpenGL.drawElements(mode, this.vertexCount);
 	}
-
+	
 	public void render(final RenderMode mode, final int start, final int stop) {
 		OpenGL.drawArrays(mode, start, stop);
 	}
-
+	
 	public void renderArrays(final RenderMode mode) {
 		LOGGER.trace("request rendering direct : " + this.vertexCount);
 		OpenGL.drawArrays(mode, 0, this.vertexCount);
 	}
-
+	
 	public void setColors(final Color[] colors) {
 		this.colors = colors;
 	}
-
+	
 	public void setColors(final float[] colors) {
 		this.colors = colors;
 	}
-
+	
 	public void setColors(final List<Color> colors) {
 		setColors(colors.toArray(Color[]::new));
-
+		
 	}
-
+	
 	public void setIndices(final int[] indices) {
 		this.indices = indices;
 	}
-
+	
 	public void setIndices(final List<Integer> indices) {
 		this.indices = ResourceVirtualArrayObject.convertIntegers(indices);
 		this.vertexCount = this.indices.length;
 	}
-
+	
 	public void setNormals(final float[] normals) {
 		this.normals = normals;
 	}
-
+	
 	public void setNormals(final List<Vector3f> normals) {
 		setNormals(normals.toArray(Vector3f[]::new));
 	}
-
+	
 	public void setNormals(final Vector3f[] normals) {
 		this.normals = normals;
 	}
-
+	
 	public void setPosition(final float[] positions) {
 		this.positions = positions;
 	}
-
+	
 	public void setPosition(final List<Vector3f> outPosition) {
 		setPosition(outPosition.toArray(Vector3f[]::new));
-
+		
 	}
-
+	
 	public void setPosition(final Vector3f[] positions) {
 		this.positions = positions;
 	}
-
+	
 	public void setTextureCoordinate(final float[] textureCoordinates) {
 		this.textureCoordinates = textureCoordinates;
 	}
-
+	
 	public void setTextureCoordinate(final List<Vector2f> outTexturePosition) {
 		setTextureCoordinate(outTexturePosition.toArray(Vector2f[]::new));
 	}
-
+	
 	public void setTextureCoordinate(final Vector2f[] textureCoordinates) {
 		this.textureCoordinates = textureCoordinates;
 	}
-
+	
 	public void setVertexCount(final int vertexCount) {
 		this.vertexCount = vertexCount;
 	}
-
+	
 	private void storeDataInAttributeList(final int attributeNumber, final int coordinateSize, final Object data) {
 		final int vboID = GL15.glGenBuffers();
 		this.vbo.add(vboID);
@@ -402,7 +400,7 @@ public class ResourceVirtualArrayObject extends Resource {
 		GL20.glVertexAttribPointer(attributeNumber, coordinateSize, GL11.GL_FLOAT, false, 0, 0);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 	}
-
+	
 	public void unBindForRendering() {
 		if (!this.exist) {
 			return;
@@ -421,12 +419,12 @@ public class ResourceVirtualArrayObject extends Resource {
 		}
 		GL30.glBindVertexArray(0);
 	}
-
+	
 	private void unbindVAO() {
 		LOGGER.trace("Unbind VAO ...");
 		GL30.glBindVertexArray(0);
 	}
-
+	
 	/**
 	 * This load/reload the data in the opengl context, needed when removed previously.
 	 */
@@ -444,11 +442,11 @@ public class ResourceVirtualArrayObject extends Resource {
 				LOGGER.error(" Request update a VAO with a static buffer !!!" + this.name);
 			}
 			loadAgainToVAO();
-
+			
 		}
 		this.exist = true;
 		LOGGER.trace(" Stop: [" + getId() + "] '" + getName() + "'");
 		return true;
 	}
-
+	
 }
