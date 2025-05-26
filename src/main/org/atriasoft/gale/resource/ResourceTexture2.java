@@ -243,7 +243,7 @@ public class ResourceTexture2 extends Resource {
 		if (this.loaded) {
 			if (this.lastTypeObject != typeObject || this.lastSizeObject != sizeObject
 					|| !this.lastSize.equals(this.data.getSize())) {
-				LOGGER.warn("TEXTURE: Rm [" + getId() + "] texId=" + this.texId);
+				LOGGER.trace("TEXTURE: Rm [" + getId() + "] texId=" + this.texId);
 				OpenGL.glDeleteTextures(this.texId);
 				this.loaded = false;
 			}
