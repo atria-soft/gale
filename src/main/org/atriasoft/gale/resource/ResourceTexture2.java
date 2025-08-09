@@ -184,8 +184,7 @@ public class ResourceTexture2 extends Resource {
 	 * @param image Image to set.
 	 */
 	public synchronized void set(final ImageByte image) {
-		System.out.println("Set a new image in a texture:");
-		System.out.println("    size=" + image.getSize());
+		LOGGER.info("Set a new image in a texture:    size={}", image.getSize());
 		this.data = image;
 		this.realImageSize = this.data.getSize();
 		// Disable compatibility size for embended ...
@@ -213,8 +212,8 @@ public class ResourceTexture2 extends Resource {
 	}
 	
 	/**
-	 * Set the repeate mode of the images if UV range is out of [0..1]
-	 * @param value Value of the new repeate mode
+	 * Set the repeat mode of the images if UV range is out of [0..1]
+	 * @param value Value of the new repeat mode
 	 */
 	public void setRepeat(final boolean value) {
 		this.repeat = value;
