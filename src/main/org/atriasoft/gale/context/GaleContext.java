@@ -583,7 +583,7 @@ public abstract class GaleContext {
 			final KeyStatus status,
 			final int pointerID,
 			final Vector2f pos) {
-		LOGGER.trace("Position motion: " + pos);
+		LOGGER.trace("Position motion: {}", pos);
 		postActionAsync(context -> {
 			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
@@ -714,7 +714,7 @@ public abstract class GaleContext {
 		try {
 			int nbEvent = 0;
 			while (this.msgSystemAsync.getSize() > 0) {
-				LOGGER.trace("    [" + nbEvent + "] event ...");
+				LOGGER.trace("    [{}] event ...", nbEvent);
 				nbEvent++;
 				final ActionToDoInAsyncLoop func = this.msgSystemAsync.getElementWait();
 				if (func == null) {

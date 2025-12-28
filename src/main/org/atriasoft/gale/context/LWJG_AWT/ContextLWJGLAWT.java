@@ -440,7 +440,7 @@ public class ContextLWJGLAWT extends GaleContext
 	public void mouseClicked(final MouseEvent e) {
 		//		System.out.println(e.getX());
 		//		System.out.println(e.getY());
-		LOGGER.info("Mouse clicked:" + e.getX() + " " + e.getY());
+		LOGGER.debug("Mouse clicked: {} {}", e.getX(), e.getY());
 	}
 
 	@Override
@@ -468,7 +468,7 @@ public class ContextLWJGLAWT extends GaleContext
 
 	@Override
 	public void mouseMoved(final MouseEvent e) {
-		LOGGER.trace("Mouse moved:" + e.getX() + " " + e.getY() + " " + e);
+		LOGGER.trace("Mouse moved: {} {} {}", e.getX(), e.getY(), e);
 		if (this.robot != null) {
 			final Rectangle bounds = this.frame.getBounds();
 			//LOGGER.error("         " + bounds + " windows=" + windowsSize + " deco= " + decoratedWindowsSize);
@@ -482,7 +482,7 @@ public class ContextLWJGLAWT extends GaleContext
 			this.cursorPos = new Vector2f(-(e.getXOnScreen() - refPosX), (e.getYOnScreen() - refPosY));
 			//this.cursorPos = new Vector2f(-(e.getXOnScreen() - refPosX), refPosY);
 			this.robot.mouseMove((int) refPosX, (int) refPosY);
-			LOGGER.info("delta moved:" + this.cursorPos);
+			LOGGER.debug("delta moved: {}", this.cursorPos);
 		} else {
 			// TODO use real size ... !!!!
 			this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() + (this.cursorSize.y() - e.getY()));
@@ -504,7 +504,7 @@ public class ContextLWJGLAWT extends GaleContext
 
 	@Override
 	public void mousePressed(final MouseEvent e) {
-		LOGGER.info("Mouse pressed:" + e.getX() + " " + e.getY());
+		LOGGER.debug("Mouse pressed: {} {}", e.getX(), e.getY());
 		final int button = e.getButton();
 		this.cursorPos = new Vector2f(e.getX(), this.decoratedWindowsSize.y() - e.getY());
 		if (button < ContextLWJGLAWT.MAX_MANAGE_INPUT) {

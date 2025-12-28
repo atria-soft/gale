@@ -30,7 +30,7 @@ class ProgAttributeElement {
 public class ResourceProgram extends Resource {
 	static final Logger LOGGER = LoggerFactory.getLogger(ResourceProgram.class);
 	static final boolean DEBUG = false; // TODO externalize this ...
-	
+
 	public static ResourceProgram create(final Uri uriVertexShader, final Uri uriFragmentShader) {
 		ResourceProgram resource;
 		final String name = uriVertexShader.getValue() + "<-->" + uriFragmentShader.getValue();
@@ -40,7 +40,7 @@ public class ResourceProgram extends Resource {
 				resource2.keep();
 				return (ResourceProgram) resource2;
 			}
-			LOGGER.error("Request resource file : '" + name + "' With the wrong type (dynamic cast error)");
+			LOGGER.error("Request resource file: '{}' With the wrong type (dynamic cast error)", name);
 			System.exit(-1);
 			return null;
 		}
@@ -48,14 +48,14 @@ public class ResourceProgram extends Resource {
 		Resource.getManager().localAdd(resource);
 		return resource;
 	}
-	
+
 	public static FloatBuffer storeDataInFloatBuffer(final float[] data) {
 		final FloatBuffer buffer = BufferUtils.createFloatBuffer(data.length);
 		buffer.put(data);
 		buffer.flip();
 		return buffer;
 	}
-	
+
 	public static FloatBuffer storeDataInFloatBufferColor(final List<Color> data) {
 		final FloatBuffer buffer = BufferUtils.createFloatBuffer(data.size() * 4);
 		for (int iii = 0; iii < data.size(); iii++) {
@@ -67,7 +67,7 @@ public class ResourceProgram extends Resource {
 		buffer.flip();
 		return buffer;
 	}
-	
+
 	public static FloatBuffer storeDataInFloatBufferVector3f(final List<Vector3f> data) {
 		final FloatBuffer buffer = BufferUtils.createFloatBuffer(data.size() * 3);
 		for (int iii = 0; iii < data.size(); iii++) {
@@ -78,12 +78,12 @@ public class ResourceProgram extends Resource {
 		buffer.flip();
 		return buffer;
 	}
-	
+
 	private boolean exist = false; // !< the file existed
 	private int program = 0; // !< openGL id of the current program
 	private ResourceShader shaderVertex = null;
 	private ResourceShader shaderFragment = null;
-	
+
 	private final List<ProgAttributeElement> elementList = new ArrayList<>(); // !< List of all the attribute requested
 																				// by the user
 	private final List<Integer> listOfVBOUsed = new ArrayList<>(); // !< retain the list of VBO used to disable it when
@@ -92,7 +92,7 @@ public class ResourceProgram extends Resource {
 	// current shader
 	private boolean hasTexture1 = false; // !< A texture has been set to the
 	// current shader
-	
+
 	/**
 	 * Contructor of an opengl Program.
 	 * @param uriVertexShader Uri of the file
@@ -101,52 +101,51 @@ public class ResourceProgram extends Resource {
 	protected ResourceProgram(final Uri uriVertexShader, final Uri uriFragmentShader) {
 		super(uriVertexShader.getValue() + "<-->" + uriFragmentShader.getValue());
 		this.resourceLevel = 1;
-		LOGGER.debug("OGL : load PROGRAM '" + uriVertexShader + "' && '" + uriFragmentShader + "'");
+		LOGGER.debug("OGL: load PROGRAM '{}' && '{}'", uriVertexShader, uriFragmentShader);
 		this.shaderVertex = ResourceShader.create(uriVertexShader);
 		if (this.shaderVertex == null) {
-			LOGGER.error("Error while getting a specific shader filename: " + uriVertexShader);
+			LOGGER.error("Error while getting a specific shader filename: {}", uriVertexShader);
 			return;
 		}
-		LOGGER.debug("Add shader on program: '" + uriFragmentShader + "'");
+		LOGGER.debug("Add shader on program: '{}'", uriFragmentShader);
 		this.shaderFragment = ResourceShader.create(uriFragmentShader);
 		if (this.shaderFragment == null) {
-			LOGGER.error("Error while getting a specific shader filename: " + uriFragmentShader);
+			LOGGER.error("Error while getting a specific shader filename: {}", uriFragmentShader);
 			return;
 		}
-		LOGGER.debug("Add shader on program : " + uriFragmentShader + "frag");
+		LOGGER.debug("Add shader on program: {}frag", uriFragmentShader);
 		if (OpenGL.hasContext()) {
 			updateContext();
 		} else {
 			Resource.getManager().update(this);
 		}
 	}
-	
+
 	public void bindAttribute(final int attribute, final String variableName) {
 		if (!this.exist) {
 			return;
 		}
 		OpenGL.programBindAttribute(this.program, attribute, variableName);
 	}
-	
+
 	public void bindVBO(final int idElem, final ResourceVirtualBufferObject vbo, final int vboId) {
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
 			return;
 		}
-		
-		LOGGER.error("[" + this.elementList.get(idElem).name + "] send on oglID=" + vbo.getOpenGlId(vboId)
-				+ " VBOindex=" + vboId);
+
+		LOGGER.debug("[{}] send on oglID={} VBOindex={}", this.elementList.get(idElem).name, vbo.getOpenGlId(vboId), vboId);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.getOpenGlId(vboId));
 		GL20.glEnableVertexAttribArray(this.elementList.get(idElem).elementId);
 		this.listOfVBOUsed.add(this.elementList.get(idElem).elementId);
 	}
-	
+
 	/**
 	 * Check If an Id is valid in the shader or not (sometime the shader have
 	 *        not some attribute, then we need to display some error)
@@ -159,7 +158,7 @@ public class ResourceProgram extends Resource {
 		}
 		return this.elementList.get(idElem).isLinked;
 	}
-	
+
 	/**
 	 * Destructor, remove the current Program.
 	 */
@@ -178,7 +177,7 @@ public class ResourceProgram extends Resource {
 		this.hasTexture = false;
 		this.hasTexture1 = false;
 	}
-	
+
 	// private void storeDataInAttributeList(int attributeNumber, int
 	// coordinateSize, float[] data) {
 	// int vboID = GL15.glGenBuffers();
@@ -190,7 +189,7 @@ public class ResourceProgram extends Resource {
 	// false, 0, 0);
 	// GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 	// }
-	
+
 	private float[] convertInFloat(final List<Vector3f> data) {
 		final float[] out = new float[data.size() * 3];
 		for (int iii = 0; iii < data.size(); iii++) {
@@ -200,7 +199,7 @@ public class ResourceProgram extends Resource {
 		}
 		return out;
 	}
-	
+
 	/**
 	 * User request an attribute on this program.
 	 * @note The attribute is send to the fragment shaders
@@ -226,12 +225,10 @@ public class ResourceProgram extends Resource {
 			tmp.elementId = OpenGL.programGetAttributeLocation(this.program, tmp.name);
 			tmp.isLinked = true;
 			if (tmp.elementId < 0) {
-				LOGGER.warn("    {" + this.program + "}[" + this.elementList.size() + "] glGetAttribLocation(\""
-						+ tmp.name + "\") = " + tmp.elementId);
+				LOGGER.warn("    {{{}}}[{}] glGetAttribLocation(\"{}\") = {}", this.program, this.elementList.size(), tmp.name, tmp.elementId);
 				tmp.isLinked = false;
 			} else {
-				LOGGER.debug("    {" + this.program + "}[" + this.elementList.size() + "] glGetAttribLocation(\""
-						+ tmp.name + "\") = " + tmp.elementId);
+				LOGGER.debug("    {{{}}}[{}] glGetAttribLocation(\"{}\") = {}", this.program, this.elementList.size(), tmp.name, tmp.elementId);
 			}
 		} else {
 			// program is not loaded ==> just local reister ...
@@ -241,7 +238,7 @@ public class ResourceProgram extends Resource {
 		this.elementList.add(tmp);
 		return this.elementList.size() - 1;
 	}
-	
+
 	// public void sendAttribute(int idElem, etk::Vector<etk::Color<float>> data) {
 	// sendAttribute(idElem, 4/*r,g,b,a*/, data[0]);
 	// }
@@ -274,12 +271,10 @@ public class ResourceProgram extends Resource {
 			tmp.elementId = OpenGL.programGetUniformLocation(this.program, tmp.name);
 			tmp.isLinked = true;
 			if (tmp.elementId < 0) {
-				LOGGER.warn("    {" + this.program + "}[" + this.elementList.size() + "] glGetUniformLocation(\""
-						+ tmp.name + "\") = " + tmp.elementId);
+				LOGGER.warn("    {{{}}}[{}] glGetUniformLocation(\"{}\") = {}", this.program, this.elementList.size(), tmp.name, tmp.elementId);
 				tmp.isLinked = false;
 			} else {
-				LOGGER.debug("    {" + this.program + "}[" + this.elementList.size() + "] glGetUniformLocation(\""
-						+ tmp.name + "\") = " + tmp.elementId);
+				LOGGER.debug("    {{{}}}[{}] glGetUniformLocation(\"{}\") = {}", this.program, this.elementList.size(), tmp.name, tmp.elementId);
 			}
 		} else {
 			// program is not loaded ==> just local reister ...
@@ -289,7 +284,7 @@ public class ResourceProgram extends Resource {
 		this.elementList.add(tmp);
 		return this.elementList.size() - 1;
 	}
-	
+
 	/**
 	 * Relode the shader from the file. used when a request of resouces
 	 *        reload is done.
@@ -316,7 +311,7 @@ public class ResourceProgram extends Resource {
 		removeContext();
 		updateContext();
 	}
-	
+
 	/**
 	 * remove the data from the opengl context.
 	 */
@@ -332,18 +327,18 @@ public class ResourceProgram extends Resource {
 			}
 		}
 	}
-	
+
 	/**
 	 * Special android spec! It inform us that all context is removed and
 	 *        after notify us...
 	 */
 	@Override
 	public void removeContextToLate() {
-		
+
 		this.exist = false;
 		this.program = 0;
 	}
-	
+
 	/**
 	 * Send attribute table to the specified ID attribute (not send if does
 	 *        not really exist in the openGL program).
@@ -397,7 +392,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -413,7 +408,7 @@ public class ResourceProgram extends Resource {
 		GL20.glEnableVertexAttribArray(this.elementList.get(idElem).elementId);
 		// checkGlError("glEnableVertexAttribArray", LINE, idElem);
 	}
-	
+
 	/**
 	 * Send attribute table to the spefified ID attribure (not send if does
 	 *        not really exist in the openGL program).
@@ -466,20 +461,19 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
 			return;
 		}
-		
-		LOGGER.trace("[" + this.elementList.get(idElem).name + "] send on oglID=" + vbo.getOpenGlId(index)
-				+ " VBOindex=" + index);
+
+		LOGGER.trace("[{}] send on oglID={} VBOindex={}", this.elementList.get(idElem).name, vbo.getOpenGlId(index), index);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.getOpenGlId(index));
 		// checkGlError("glBindBuffer", __LINE__, _idElem);
-		LOGGER.trace("    id=" + this.elementList.get(idElem).elementId);
-		LOGGER.trace("    jump sample=" + jumpBetweenSample);
-		LOGGER.trace("    offset=" + offset);
+		LOGGER.trace("    id={}", this.elementList.get(idElem).elementId);
+		LOGGER.trace("    jump sample={}", jumpBetweenSample);
+		LOGGER.trace("    offset={}", offset);
 		GL20.glVertexAttribPointer(this.elementList.get(idElem).elementId, // attribute ID of openGL
 				vbo.getElementSize(index), // number of elements per vertex, here (r,g,b,a)
 				GL11.GL_FLOAT, // the type of each element
@@ -491,7 +485,7 @@ public class ResourceProgram extends Resource {
 		this.listOfVBOUsed.add(this.elementList.get(idElem).elementId);
 		// checkGlError("glEnableVertexAttribArray", __LINE__, _idElem);
 	}
-	
+
 	/**
 	 * set the testure Id on the specify uniform element.
 	 * @param idElem          Id of the uniform that might be sended.
@@ -514,7 +508,7 @@ public class ResourceProgram extends Resource {
 		uniformInt(this.elementList.get(idElem).elementId, /* GLTEXTURE */0);
 		this.hasTexture = true;
 	}
-	
+
 	public void setTexture1(final int idElem, final int textureOpenGlID) {
 		if (!this.exist) {
 			return;
@@ -532,13 +526,13 @@ public class ResourceProgram extends Resource {
 		uniformInt(this.elementList.get(idElem).elementId, /* GLTEXTURE */0);
 		this.hasTexture1 = true;
 	}
-	
+
 	public void uniformColor(final int idElem, final Color value) {
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -546,13 +540,13 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformColor(this.elementList.get(idElem).elementId, value);
 	}
-
+	
 	public void uniformColorRGB(final int idElem, final Color value) {
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -560,7 +554,7 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformColorRGB(this.elementList.get(idElem).elementId, value);
 	}
-
+	
 	/**
 	 * Send 1 float uniform element to the spefified ID (not send if does not
 	 *        really exist in the openGL program)
@@ -572,7 +566,7 @@ public class ResourceProgram extends Resource {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -580,7 +574,7 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformFloat(this.elementList.get(idElem).elementId, value1);
 	}
-	
+
 	/**
 	 * Send 2 float uniform element to the spefified ID (not send if does not
 	 *        really exist in the openGL program)
@@ -589,12 +583,12 @@ public class ResourceProgram extends Resource {
 	 * @param value2 Value to send at the Uniform
 	 */
 	public void uniformFloat(final int idElem, final float value1, final float value2) {
-		
+
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -602,7 +596,7 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformFloat(this.elementList.get(idElem).elementId, value1, value2);
 	}
-	
+
 	/**
 	 * Send 3 float uniform element to the spefified ID (not send if does not
 	 *        really exist in the openGL program)
@@ -612,12 +606,12 @@ public class ResourceProgram extends Resource {
 	 * @param value3 Value to send at the Uniform
 	 */
 	public void uniformFloat(final int idElem, final float value1, final float value2, final float value3) {
-		
+
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -625,7 +619,7 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformFloat(this.elementList.get(idElem).elementId, value1, value2, value3);
 	}
-	
+
 	/**
 	 * Send 4 float uniform element to the spefified ID (not send if does not
 	 *        really exist in the openGL program)
@@ -641,12 +635,12 @@ public class ResourceProgram extends Resource {
 			final float value2,
 			final float value3,
 			final float value4) {
-		
+
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -654,7 +648,7 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformFloat(this.elementList.get(idElem).elementId, value1, value2, value3, value4);
 	}
-	
+
 	/**
 	 * Send 1 signed integer uniform element to the spefified ID (not send if
 	 *        does not really exist in the openGL program)
@@ -662,12 +656,12 @@ public class ResourceProgram extends Resource {
 	 * @param value1 Value to send at the Uniform
 	 */
 	public void uniformInt(final int idElem, final int value1) {
-		
+
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -675,7 +669,7 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformInt(this.elementList.get(idElem).elementId, value1);
 	}
-	
+
 	/**
 	 * Send 2 signed integer uniform element to the spefified ID (not send if
 	 *        does not really exist in the openGL program)
@@ -684,12 +678,12 @@ public class ResourceProgram extends Resource {
 	 * @param value2 Value to send at the Uniform
 	 */
 	public void uniformInt(final int idElem, final int value1, final int value2) {
-		
+
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -697,7 +691,7 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformInt(this.elementList.get(idElem).elementId, value1, value2);
 	}
-	
+
 	/**
 	 * Send 3 signed integer uniform element to the spefified ID (not send if
 	 *        does not really exist in the openGL program)
@@ -707,12 +701,12 @@ public class ResourceProgram extends Resource {
 	 * @param value3 Value to send at the Uniform
 	 */
 	public void uniformInt(final int idElem, final int value1, final int value2, final int value3) {
-		
+
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -720,7 +714,7 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformInt(this.elementList.get(idElem).elementId, value1, value2, value3);
 	}
-	
+
 	/**
 	 * Send 4 signed integer uniform element to the spefified ID (not send if
 	 *        does not really exist in the openGL program)
@@ -731,12 +725,12 @@ public class ResourceProgram extends Resource {
 	 * @param value4 Value to send at the Uniform
 	 */
 	public void uniformInt(final int idElem, final int value1, final int value2, final int value3, final int value4) {
-		
+
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -744,7 +738,7 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformInt(this.elementList.get(idElem).elementId, value1, value2, value3, value4);
 	}
-	
+
 	/**
 	 * Send a uniform element to the spefified ID (not send if does not
 	 *        really exist in the openGL program)
@@ -757,13 +751,13 @@ public class ResourceProgram extends Resource {
 	public void uniformMatrix(final int idElem, final Matrix4f matrix) {
 		uniformMatrix(idElem, matrix, true);
 	}
-	
+
 	public void uniformMatrix(final int idElem, final Matrix4f matrix, final boolean transpose/* =true */) {
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -780,13 +774,13 @@ public class ResourceProgram extends Resource {
 		 */
 		OpenGL.programLoadUniformMatrix(this.elementList.get(idElem).elementId, matrix, transpose);
 	}
-
+	
 	public void uniformVector(final int idElem, final Vector2f value) {
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -794,13 +788,13 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformVector(this.elementList.get(idElem).elementId, value);
 	}
-	
+
 	public void uniformVector(final int idElem, final Vector2i value) {
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -808,13 +802,13 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformVector(this.elementList.get(idElem).elementId, value);
 	}
-	
+
 	public void uniformVector(final int idElem, final Vector3f value) {
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -822,13 +816,13 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformVector(this.elementList.get(idElem).elementId, value);
 	}
-	
+
 	public void uniformVector(final int idElem, final Vector3i value) {
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -836,13 +830,13 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformVector(this.elementList.get(idElem).elementId, value);
 	}
-	
+
 	public void uniformVector(final int idElem, final Vector4f value) {
 		if (!this.exist) {
 			return;
 		}
 		if (idElem < 0 || (long) idElem > this.elementList.size()) {
-			LOGGER.error("idElem = " + idElem + " not in [0.." + (this.elementList.size() - 1) + "]");
+			LOGGER.error("idElem={} not in [0..{}]", idElem, this.elementList.size() - 1);
 			return;
 		}
 		if (!this.elementList.get(idElem).isLinked) {
@@ -850,13 +844,13 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.programLoadUniformVector(this.elementList.get(idElem).elementId, value);
 	}
-	
+
 	/**
 	 * Stop the processing of this program
 	 */
 	public void unUse() {
 		// LOGGER.trace("Will UN-use program : " + this.program);
-		
+
 		if (!this.exist) {
 			return;
 		}
@@ -867,7 +861,7 @@ public class ResourceProgram extends Resource {
 		// no need to disable program == > this only generate perturbation on speed ...
 		OpenGL.programUse(-1);
 	}
-	
+
 	/**
 	 * This load/reload the data in the opengl context, needed when removed
 	 *        previously.
@@ -878,7 +872,7 @@ public class ResourceProgram extends Resource {
 			// Do nothing == > too dangerous ...
 		} else {
 			// create the Shader
-			LOGGER.debug("Create the Program ...'" + this.name + "'");
+			LOGGER.trace("Create the Program ...'{}'", this.name);
 			this.program = OpenGL.programCreate();
 			if (this.program < 0) {
 				return true;
@@ -890,15 +884,15 @@ public class ResourceProgram extends Resource {
 			if (this.shaderFragment != null) {
 				OpenGL.programAttach(this.program, this.shaderFragment.getGLID());
 			}
-			
+
 			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_POSITIONS, "in_position");
 			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_TEXTURE_COORDINATES,
 					"in_extureCoords");
 			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_NORMALS, "in_normal");
 			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_COLORS, "in_colors");
-			
+
 			if (!OpenGL.programCompile(this.program)) {
-				LOGGER.error("Could not compile'PROGRAM':'" + this.name + "'");
+				LOGGER.trace("Could not compile'PROGRAM':'{}'", this.name);
 				OpenGL.programRemove(this.program);
 				return true;
 			}
@@ -909,23 +903,19 @@ public class ResourceProgram extends Resource {
 					it.elementId = OpenGL.programGetAttributeLocation(this.program, it.name);
 					it.isLinked = true;
 					if (it.elementId < 0) {
-						LOGGER.warn("    {" + this.program + "}[" + iii + "] openGL::getAttributeLocation(\"" + it.name
-								+ "\") = " + it.elementId);
+						LOGGER.trace("    {{{}}}[{}] openGL::getAttributeLocation(\"{}\") = {}", this.program, iii, it.name, it.elementId);
 						it.isLinked = false;
 					} else {
-						LOGGER.debug("    {" + this.program + "}[" + iii + "] openGL::getAttributeLocation(\"" + it.name
-								+ "\") = " + it.elementId);
+						LOGGER.trace("    {{{}}}[{}] openGL::getAttributeLocation(\"{}\") = {}", this.program, iii, it.name, it.elementId);
 					}
 				} else {
 					it.elementId = OpenGL.programGetUniformLocation(this.program, it.name);
 					it.isLinked = true;
 					if (it.elementId < 0) {
-						LOGGER.warn("    {" + this.program + "}[" + iii + "] openGL::getUniformLocation(\"" + it.name
-								+ "\") = " + it.elementId);
+						LOGGER.trace("    {{{}}}[{}] openGL::getUniformLocation(\"{}\") = {}", this.program, iii, it.name, it.elementId);
 						it.isLinked = false;
 					} else {
-						LOGGER.debug("    {" + this.program + "}[" + iii + "] openGL::getUniformLocation(\"" + it.name
-								+ "\") = " + it.elementId);
+						LOGGER.trace("    {{{}}}[{}] openGL::getUniformLocation(\"{}\") = {}", this.program, iii, it.name, it.elementId);
 					}
 				}
 				iii++;
@@ -935,7 +925,7 @@ public class ResourceProgram extends Resource {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Request the processing of this program
 	 */
@@ -945,5 +935,5 @@ public class ResourceProgram extends Resource {
 		// display ...
 		OpenGL.programUse(this.program);
 	}
-	
+
 }

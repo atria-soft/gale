@@ -36,7 +36,7 @@ public class ResourceVirtualBufferObject extends Resource {
 	protected ResourceVirtualBufferObject(final int number) {
 		this.vbo = new int[number]; // 0
 		this.buffer = new Object[number];
-		LOGGER.debug("OGL : load VBO count=\"" + number + "\"");
+		LOGGER.debug("OGL: load VBO count=\"{}\"", number);
 		this.resourceLevel = 3;
 	}
 
@@ -55,7 +55,7 @@ public class ResourceVirtualBufferObject extends Resource {
 			} else if (this.buffer[vboidcoord] instanceof Color[]) {
 				return ((Color[]) (this.buffer[vboidcoord])).length;
 			} else {
-				LOGGER.error("Not managed VBO model : " + this.buffer[vboidcoord].getClass().getCanonicalName());
+				LOGGER.error("Not managed VBO model: {}", this.buffer[vboidcoord].getClass().getCanonicalName());
 			}
 		}
 		return 0;
@@ -70,7 +70,7 @@ public class ResourceVirtualBufferObject extends Resource {
 	 * clear buffers
 	 */
 	public void clear() {
-		LOGGER.trace(" Clear: [" + getId() + "] '" + getName() + "' (size=" + this.buffer.length + ")");
+		LOGGER.trace(" Clear: [{}] '{}' (size={})", getId(), getName(), this.buffer.length);
 		// DO not clear the this.vbo indexed in the graphic cards ...
 		Arrays.fill(this.buffer, null);
 	}
@@ -81,7 +81,7 @@ public class ResourceVirtualBufferObject extends Resource {
 	public synchronized void flush() {
 		// request to the manager to be call at the next update ...
 		Resource.getManager().update(this);
-		LOGGER.trace("Request flush of VBO: [" + getId() + "] '" + getName() + "'");
+		LOGGER.trace("Request flush of VBO: [{}] '{}'", getId(), getName());
 	}
 
 	public int getElementSize(final int index) {
@@ -99,7 +99,7 @@ public class ResourceVirtualBufferObject extends Resource {
 			} else if (this.buffer[index] instanceof Color[]) {
 				return 4;
 			} else {
-				LOGGER.error("Not managed VBO model : " + this.buffer[index].getClass().getCanonicalName());
+				LOGGER.error("Not managed VBO model: {}", this.buffer[index].getClass().getCanonicalName());
 			}
 		}
 		return 1;
@@ -175,8 +175,7 @@ public class ResourceVirtualBufferObject extends Resource {
 	 */
 	@Override
 	public synchronized boolean updateContext() {
-		LOGGER.trace(
-				"updateContext (VBO Start: [" + getId() + "] '" + getName() + "' (size=" + this.buffer.length + ")");
+		LOGGER.trace("updateContext (VBO Start: [{}] '{}' (size={})", getId(), getName(), this.buffer.length);
 		/*
 		if (lock.tryLock() == false) {
 			//Lock error ==> try later ...
@@ -192,8 +191,7 @@ public class ResourceVirtualBufferObject extends Resource {
 		this.exist = true;
 		for (int iii = 0; iii < this.vbo.length; iii++) {
 			if (this.buffer[iii] != null) {
-				LOGGER.trace("VBO    : add [" + getId() + "]=" + this.buffer[iii].getClass().getCanonicalName()
-						+ "*sizeof(float) OGl_Id=" + this.vbo[iii]);
+				LOGGER.trace("VBO    : add [{}]={} *sizeof(float) OGl_Id={}", getId(), this.buffer[iii].getClass().getCanonicalName(), this.vbo[iii]);
 				OpenGL.bindBuffer(this.vbo[iii]);
 				// select the buffer to set data inside it ...
 				if (this.buffer[iii] instanceof float[]) {
@@ -207,13 +205,13 @@ public class ResourceVirtualBufferObject extends Resource {
 				} else if (this.buffer[iii] instanceof Color[]) {
 					OpenGL.bufferData((Color[]) (this.buffer[iii]), Usage.streamDraw);
 				} else {
-					LOGGER.error("Not managed VBO model : " + this.buffer[iii].getClass().getCanonicalName());
+					LOGGER.error("Not managed VBO model: {}", this.buffer[iii].getClass().getCanonicalName());
 				}
 			}
 		}
 		// un-bind it to permet to have no error in the next display ...
 		OpenGL.unbindBuffer();
-		LOGGER.trace(" Stop: [" + getId() + "] '" + getName() + "'");
+		LOGGER.trace(" Stop: [{}] '{}'", getId(), getName());
 		return true;
 	}
 }

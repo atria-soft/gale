@@ -50,7 +50,7 @@ public class ResourceTexture extends Resource {
 				resource2.keep();
 				return (ResourceTexture) resource2;
 			}
-			LOGGER.error("Request resource file : '" + name + "' With the wrong type (dynamic cast error)");
+			LOGGER.error("Request resource file: '{}' With the wrong type (dynamic cast error)", name);
 			System.exit(-1);
 			return null;
 		}
@@ -173,7 +173,7 @@ public class ResourceTexture extends Resource {
 	public synchronized void removeContext() {
 		if (this.loaded) {
 			// Request remove texture ...
-			LOGGER.info("TEXTURE: Rm [" + getId() + "] texId=" + this.texId);
+			LOGGER.debug("TEXTURE: Rm [{}] texId={}", getId(), this.texId);
 			// TODO Check if we are in the correct thread
 			OpenGL.glDeleteTextures(this.texId);
 			this.loaded = false;
@@ -222,7 +222,7 @@ public class ResourceTexture extends Resource {
 
 		// All RGB bytes are aligned to each other and each component is 1 byte
 		GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
-		LOGGER.info("TEXTURE: add [" + getId() + "]=" + this.size + " OGlId=" + this.texId);
+		LOGGER.debug("TEXTURE: add [{}]={} OGlId={}", getId(), this.size, this.texId);
 		if (this.dataColorSpace == TextureColorMode.rgb) {
 			OpenGL.glTexImage2D(0, GL11.GL_RGBA, this.size.x(), this.size.y(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE,
 					this.data.getRaw());

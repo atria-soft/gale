@@ -66,8 +66,7 @@ public class ResourceManager {
 		
 		synchronized (this.resourceList) {
 			for (final Resource it : this.resourceList) {
-				LOGGER.info("    [" + it.getId() + "]" + it.getClass().getCanonicalName() + "='" + it.getName() + "' "
-						+ it.getCount() + " elements");
+				LOGGER.info("    [{}]{}='{}' {} elements", it.getId(), it.getClass().getCanonicalName(), it.getName(), it.getCount());
 			}
 		}
 		LOGGER.info("Resources ---");
@@ -83,7 +82,7 @@ public class ResourceManager {
 	// internal API to extent eResources in extern Soft
 	public synchronized Resource localKeep(final String filename) {
 		synchronized (this.resourceList) {
-			LOGGER.trace("KEEP (DEFAULT) : file : '" + filename + "' in " + this.resourceList.size() + " resources");
+			LOGGER.trace("KEEP (DEFAULT): file: '{}' in {} resources", filename, this.resourceList.size());
 			for (final Resource it : this.resourceList) {
 				if (it == null) {
 					continue;
@@ -116,13 +115,13 @@ public class ResourceManager {
 		LOGGER.info("-------------  Resources re-loaded  -------------");
 		// remove all resources ...
 		for (long jjj = 0; jjj < ResourceManager.MAX_RESOURCE_LEVEL; jjj++) {
-			LOGGER.info("    Reload level : " + jjj + "/" + (ResourceManager.MAX_RESOURCE_LEVEL - 1));
+			LOGGER.info("    Reload level: {}/{}", jjj, ResourceManager.MAX_RESOURCE_LEVEL - 1);
 			synchronized (this.resourceList) {
 				for (final Resource it : this.resourceList) {
 					if (jjj == it.getResourceLevel()) {
 						if (it.getCount() > 0) {
 							it.reload();
-							LOGGER.info("        [" + it.getId() + "]=" + it.getClass().getCanonicalName());
+							LOGGER.info("        [{}]={}", it.getId(), it.getClass().getCanonicalName());
 						}
 					}
 				}
@@ -147,8 +146,7 @@ public class ResourceManager {
 		// remove all resources ...
 		synchronized (this.resourceList) {
 			for (final Resource it : this.resourceList) {
-				LOGGER.warn("Find a resource that is not removed : [" + it.getId() + "]" + "='" + it.getName() + "' "
-						+ it.getCount() + " elements");
+				LOGGER.warn("Find a resource that is not removed: [{}]='{}' {} elements", it.getId(), it.getName(), it.getCount());
 			}
 			this.resourceList.clear();
 		}
@@ -190,8 +188,7 @@ public class ResourceManager {
 			synchronized (this.resourceList) {
 				if (this.resourceList.size() != 0) {
 					for (long jjj = 0; jjj < ResourceManager.MAX_RESOURCE_LEVEL; jjj++) {
-						LOGGER.trace("    updateContext level (D) : " + jjj + "/"
-								+ (ResourceManager.MAX_RESOURCE_LEVEL - 1));
+						LOGGER.trace("    updateContext level (D): {}/{}", jjj, ResourceManager.MAX_RESOURCE_LEVEL - 1);
 						for (final Resource it : this.resourceList) {
 							if (jjj == it.getResourceLevel()) {
 								//LOGGER.debug("Update context named : " + lresourceList[iii].getName());

@@ -12,7 +12,7 @@ public class CommandLine {
 	
 	public void parse(final String[] args) {
 		for (int iii = 1; iii < args.length; iii++) {
-			LOGGER.info("commandLine : '" + args[iii] + "'");
+			LOGGER.debug("commandLine: '{}'", args[iii]);
 			this.listArgs.add(args[iii]);
 		}
 	}

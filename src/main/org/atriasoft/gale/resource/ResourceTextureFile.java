@@ -34,7 +34,7 @@ public class ResourceTextureFile extends ResourceTexture2 {
 	 * @return pointer on the resource or null if an error occured.
 	 */
 	public static ResourceTextureFile create(final Uri uri, final Vector2i inSize, final Vector2i sizeRegister) {
-		LOGGER.trace("KEEP: TextureFile: '" + uri + "' size=" + inSize + " sizeRegister=" + sizeRegister);
+		LOGGER.trace("KEEP: TextureFile: '{}' size={} sizeRegister={}", uri, inSize, sizeRegister);
 		Vector2i size = inSize;
 		if (uri == null) {
 			return new ResourceTextureFile();
@@ -51,7 +51,7 @@ public class ResourceTextureFile extends ResourceTexture2 {
 			size = ResourceTextureFile.sizeAuto;
 		}
 		if (size.x() > 0 && size.y() > 0) {
-			LOGGER.trace("     == > specific size : " + size);
+			LOGGER.trace("     == > specific size: {}", size);
 			size = new Vector2i(Tools.nextP2(size.x()), Tools.nextP2(size.y()));
 			if (!sizeRegister.equals(ResourceTextureFile.sizeAuto)) {
 				if (!sizeRegister.equals(ResourceTextureFile.sizeDefault)) {
@@ -61,18 +61,18 @@ public class ResourceTextureFile extends ResourceTexture2 {
 			}
 		}
 		
-		LOGGER.trace("KEEP: TextureFile: '" + uri + "' new size=" + size);
+		LOGGER.trace("KEEP: TextureFile: '{}' new size={}", uri, size);
 		final Resource object2 = Resource.getManager().localKeep(uri.toString());
 		if (object2 != null) {
 			if (object2 instanceof final ResourceTextureFile out) {
 				object2.keep();
 				return out;
 			}
-			LOGGER.error("Request resource file : '" + uri + "' With the wrong type (dynamic cast error)");
+			LOGGER.error("Request resource file: '{}' With the wrong type (dynamic cast error)", uri);
 			System.exit(-1);
 			return null;
 		}
-		LOGGER.debug("CREATE: TextureFile: '" + uri + "' size=" + size);
+		LOGGER.debug("CREATE: TextureFile: '{}' size={}", uri, size);
 		// need to crate a new one ...
 		final ResourceTextureFile object = new ResourceTextureFile(uri.toString(), uri, size);
 		Resource.getManager().localAdd(object);
@@ -83,10 +83,10 @@ public class ResourceTextureFile extends ResourceTexture2 {
 	
 	protected ResourceTextureFile(final String genName, final Uri uri, final Vector2i size) {
 		super(genName);
-		LOGGER.debug("create a new resource::Image : genName=" + genName + " uri=" + uri + " size=" + size);
+		LOGGER.debug("create a new resource::Image: genName={} uri={} size={}", genName, uri, size);
 		final ImageByte tmp = IOgami.load(uri, size);
 		if (tmp == null) {
-			LOGGER.error("Can not load the file : " + uri);
+			LOGGER.error("Can not load the file: {}", uri);
 			return;
 		}
 		set(tmp);

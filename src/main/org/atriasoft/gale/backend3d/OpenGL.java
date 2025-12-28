@@ -36,13 +36,13 @@ import org.slf4j.LoggerFactory;
 
 public class OpenGL {
 	static final Logger LOGGER = LoggerFactory.getLogger(OpenGL.class);
-	
+
 	public enum ClearFlag {
 		clearFlag_colorBuffer, // !< Indicates the buffers currently enabled for color writing.
 		clearFlag_depthBuffer, // !< Indicates the depth buffer.
 		clearFlag_stencilBuffer // !< Indicates the stencil buffer.
 	}
-
+	
 	// We map all the flag, but not all is supported by all platform...
 	public enum Flag {
 		flag_blend, // !< If enabled, blend the computed fragment color values with the values in the color buffers. See glBlendFunc.
@@ -126,7 +126,7 @@ public class OpenGL {
 		flag_alphaTest, // !<
 		flag_fog, flag_back
 	}
-
+	
 	public enum RenderMode {
 		POINT, LINE, LINE_STRIP, // !< Not supported in GALE (TODO Later)
 		LINE_LOOP, TRIANGLE, TRIANGLE_STRIP, // !< Not supported in GALE (TODO Later)
@@ -135,21 +135,21 @@ public class OpenGL {
 		QUAD_STRIP, // !< Not supported in OpenGL-ES2
 		POLYGON // !< Not supported in OpenGL-ES2
 	}
-
+	
 	/* Shader wrapping : */
 	public enum ShaderType {
 		VERTEX, FRAGMENT
 	}
-
+	
 	public static class StateFlag {
 		public boolean current = false;
 		public boolean mustBeSet = false;
 	}
-
+	
 	public enum Usage {
 		streamDraw, staticDraw, dynamicDraw
 	}
-
+	
 	private static final int[] TEXTURE_ID_BINDING = { GL13.GL_TEXTURE0, GL13.GL_TEXTURE1, GL13.GL_TEXTURE2,
 			GL13.GL_TEXTURE3, GL13.GL_TEXTURE4, GL13.GL_TEXTURE5, GL13.GL_TEXTURE6, GL13.GL_TEXTURE7, GL13.GL_TEXTURE8,
 			GL13.GL_TEXTURE9, GL13.GL_TEXTURE10, GL13.GL_TEXTURE11, GL13.GL_TEXTURE12, GL13.GL_TEXTURE13,
@@ -157,34 +157,34 @@ public class OpenGL {
 			GL13.GL_TEXTURE19, GL13.GL_TEXTURE20, GL13.GL_TEXTURE21, GL13.GL_TEXTURE22, GL13.GL_TEXTURE23,
 			GL13.GL_TEXTURE24, GL13.GL_TEXTURE25, GL13.GL_TEXTURE26, GL13.GL_TEXTURE27, GL13.GL_TEXTURE28,
 			GL13.GL_TEXTURE29, GL13.GL_TEXTURE30, GL13.GL_TEXTURE31 };
-
+	
 	public static final int GL_RGB = GL11.GL_RGB;
-
+	
 	public static final int GL_RGBA = GL11.GL_RGBA;
 	public static final int GL_UNSIGNED_BYTE = GL11.GL_UNSIGNED_BYTE;
-
+	
 	public static final int GL_TEXTURE_2D = GL11.GL_TEXTURE_2D;
-
+	
 	static final boolean DEBUG = false; // TODO externalize this ...
-
+	
 	static final boolean CHECKERROROPENGL = false; // TODO externalize this ...
-
+	
 	static final boolean DIRECT_MODE = false; // TODO externalize this ...;
-
+	
 	private static final List<Matrix4f> MATRIX_LIST = new ArrayList<>();
-
+	
 	private static Matrix4f matrixCamera = Matrix4f.IDENTITY;
-
+	
 	private static int programId = 0;
 	private static final Map<RenderMode, Integer> CONVERT_RENDER_MODE = Map.of(RenderMode.POINT, GL11.GL_POINTS,
 			RenderMode.LINE, GL11.GL_LINES, RenderMode.LINE_STRIP, GL11.GL_LINE_STRIP, RenderMode.LINE_LOOP,
 			GL11.GL_LINE_LOOP, RenderMode.TRIANGLE, GL11.GL_TRIANGLES, RenderMode.TRIANGLE_STRIP,
 			GL11.GL_TRIANGLE_STRIP, RenderMode.TRIANGLE_FAN, GL11.GL_TRIANGLE_FAN, RenderMode.QUAD, GL11.GL_QUADS,
 			RenderMode.QUAD_STRIP, GL11.GL_QUAD_STRIP, RenderMode.POLYGON, GL11.GL_POLYGON);
-
+	
 	private static final Map<Flag, Integer> BASIC_FLAG;
 	private static boolean flagsStatesChange = false;
-
+	
 	private static final Map<Flag, StateFlag> FLAGS_STATES = new HashMap<>();
 	public static Map<Usage, Integer> convertUsage;
 	static {
@@ -259,7 +259,7 @@ public class OpenGL {
 	private static final Map<ClearFlag, Integer> BASIC_FLAG_CLEAR = Map.of(ClearFlag.clearFlag_colorBuffer,
 			GL11.GL_COLOR_BUFFER_BIT, ClearFlag.clearFlag_depthBuffer, GL11.GL_DEPTH_BUFFER_BIT,
 			ClearFlag.clearFlag_stencilBuffer, GL11.GL_STENCIL_BUFFER_BIT);
-
+	
 	/**
 	 * enable Texture on the system
 	 * @param textureID Id of the texture 0 .. 13
@@ -272,50 +272,50 @@ public class OpenGL {
 			LOGGER.error("try to bind texture with no program set");
 		}
 	}
-
+	
 	public static void bindBuffer(final int bufferId) {
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, bufferId);
 		OpenGL.checkGlError("glBindBuffer");
 	}
-
+	
 	public static void bindTexture2D(final int texId) {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texId);
 	}
-
+	
 	public static void blendFuncAuto() {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 	}
-
+	
 	public static void bufferData(final Color[] data, final Usage usage) {
 		final FloatBuffer buffer = OpenGL.storeDataInFloatBuffer(data);
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, OpenGL.convertUsage.get(usage));
 		OpenGL.checkGlError("glBufferData");
 	}
-
+	
 	public static void bufferData(final float[] data, final Usage usage) {
 		final FloatBuffer buffer = OpenGL.storeDataInFloatBuffer(data);
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, OpenGL.convertUsage.get(usage));
 		OpenGL.checkGlError("glBufferData");
 	}
-
+	
 	public static void bufferData(final int[] data, final Usage usage) {
 		final IntBuffer buffer = OpenGL.storeDataInFloatBuffer(data);
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, OpenGL.convertUsage.get(usage));
 		OpenGL.checkGlError("glBufferData");
 	}
-
+	
 	public static void bufferData(final Vector2f[] data, final Usage usage) {
 		final FloatBuffer buffer = OpenGL.storeDataInFloatBuffer(data);
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, OpenGL.convertUsage.get(usage));
 		OpenGL.checkGlError("glBufferData");
 	}
-
+	
 	public static void bufferData(final Vector3f[] data, final Usage usage) {
 		final FloatBuffer buffer = OpenGL.storeDataInFloatBuffer(data);
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, OpenGL.convertUsage.get(usage));
 		OpenGL.checkGlError("glBufferData");
 	}
-
+	
 	public static void checkGlError(final String op) {
 		//int localLine = Thread.currentThread().getStackTrace()[2].getLineNumber();
 		//		if (CHECKERROROPENGL) {
@@ -333,7 +333,7 @@ public class OpenGL {
 		//			}
 		//		}
 	}
-
+	
 	/**
 	 * clear sets the bitplane area of the window to values previously
 	 *        selected by clearColor, clearDepth, and clearStencil. Multiple color
@@ -350,7 +350,7 @@ public class OpenGL {
 		GL11.glClear(OpenGL.BASIC_FLAG_CLEAR.get(flag));
 		OpenGL.checkGlError("glClear");
 	}
-
+	
 	/**
 	 *  Specifies the clear color value When clear is requested
 	 * @param color cleear color of the screen
@@ -359,7 +359,7 @@ public class OpenGL {
 		GL11.glClearColor(color.r(), color.g(), color.b(), color.a());
 		OpenGL.checkGlError("glClearColor");
 	}
-
+	
 	/**
 	 *  Specifies the depth value used when the depth buffer is cleared. The
 	 *        initial value is 1.
@@ -369,14 +369,14 @@ public class OpenGL {
 		GL11.glClearDepth(value);
 		OpenGL.checkGlError("glClearDepth");
 	}
-
+	
 	private static void clearFlagState() {
 		for (final Map.Entry<Flag, StateFlag> elem : OpenGL.FLAGS_STATES.entrySet()) {
 			elem.getValue().current = false;
 			elem.getValue().mustBeSet = false;
 		}
 	}
-
+	
 	/**
 	 *  Specifies the index used by clear to clear the stencil buffer. s is
 	 *        masked with 2 m - 1 , where m is the number of bits in the stencil
@@ -387,7 +387,7 @@ public class OpenGL {
 		GL11.glClearStencil(value);
 		OpenGL.checkGlError("glClearStencil");
 	}
-
+	
 	public static boolean deleteBuffers(final int[] buffers) {
 		if (buffers.length == 0) {
 			LOGGER.warn("try to delete vector buffer with size 0");
@@ -399,7 +399,7 @@ public class OpenGL {
 		Arrays.fill(buffers, -1);
 		return true;
 	}
-
+	
 	/**
 	 *  disable Texture on the system
 	 * @param flagID The flag requested
@@ -410,7 +410,7 @@ public class OpenGL {
 		//
 		// }
 	}
-
+	
 	/**
 	 *  disable a flag on the system
 	 * @param flagID The flag requested
@@ -427,7 +427,7 @@ public class OpenGL {
 			// LOGGER.debug(" == >" + this.flagsStates);
 		}
 	}
-
+	
 	/**
 	 *  draw a specific array == > this enable mode difference ...
 	 */
@@ -438,7 +438,7 @@ public class OpenGL {
 			OpenGL.checkGlError("glDrawArrays");
 		}
 	}
-
+	
 	public static void drawElements(final RenderMode mode, final int vertexCount) {
 		if (OpenGL.programId >= 0) {
 			OpenGL.updateAllFlags();
@@ -446,7 +446,7 @@ public class OpenGL {
 			OpenGL.checkGlError("glDrawElements");
 		}
 	}
-
+	
 	/**
 	 *  enable a flag on the system
 	 * @param flagID The flag requested
@@ -463,14 +463,14 @@ public class OpenGL {
 			// LOGGER.debug(" == >" + this.flagsStates);
 		}
 	}
-
+	
 	/**
 	 *
 	 */
 	public static void finish() {
 		OpenGL.programId = -1;
 	}
-
+	
 	/**
 	 *
 	 */
@@ -482,29 +482,29 @@ public class OpenGL {
 		// LOGGER.info("== FLUSH OPEN GL ==" );
 		// LOGGER.info("========================");
 	}
-
+	
 	public static int genBuffers() {
 		return GL15.glGenBuffers();
 	}
-
+	
 	public static boolean genBuffers(final int[] buffers) {
 		if (buffers.length == 0) {
 			LOGGER.warn("try to generate vector buffer with size 0");
 			return true;
 		}
-		LOGGER.info("Create N=" + buffers.length + " Buffer");
+		LOGGER.debug("Create N={} Buffer", buffers.length);
 		GL15.glGenBuffers(buffers);
 		OpenGL.checkGlError("glGenBuffers");
 		boolean hasError = false;
 		for (int iii = 0; iii < buffers.length; iii++) {
 			if (buffers[iii] == 0) {
-				LOGGER.error("[" + iii + "] error to create a buffer id=" + buffers[iii]);
+				LOGGER.error("[{}] error to create a buffer id={}", iii, buffers[iii]);
 				hasError = true;
 			}
 		}
 		return hasError;
 	}
-
+	
 	/**
 	 *  get a reference on the current matrix camera destinate to opengl
 	 *        renderer.
@@ -513,7 +513,7 @@ public class OpenGL {
 	public static Matrix4f getCameraMatrix() {
 		return OpenGL.matrixCamera;
 	}
-
+	
 	/**
 	 *  get a reference on the current matrix destinate to opengl renderer.
 	 * @return The requested matrix.
@@ -525,15 +525,15 @@ public class OpenGL {
 		}
 		return OpenGL.MATRIX_LIST.get(OpenGL.MATRIX_LIST.size() - 1);
 	}
-
+	
 	public static void glDeleteTextures(final int textureId) {
 		GL11.glDeleteTextures(textureId);
 	}
-
+	
 	public static int glGenTextures() {
 		return GL11.glGenTextures();
 	}
-
+	
 	public static void glTexImage2D(
 			final int level,
 			final int internalFormat,
@@ -551,7 +551,7 @@ public class OpenGL {
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, level, internalFormat, width, height, border, format, sizeObject,
 				dataBuffer);
 	}
-
+	
 	public static void glTexImage2D(
 			final int level,
 			final int internalFormat,
@@ -563,7 +563,7 @@ public class OpenGL {
 			final ByteBuffer data) {
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, level, internalFormat, width, height, border, format, sizeObject, data);
 	}
-
+	
 	public static void glTexSubImage2D(
 			final int level,
 			final int xOffset,
@@ -581,7 +581,7 @@ public class OpenGL {
 		GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, level, xOffset, yOffset, width, height, format, sizeObject,
 				dataBuffer);
 	}
-
+	
 	public static void glTexSubImage2D(
 			final int level,
 			final int xOffset,
@@ -593,7 +593,7 @@ public class OpenGL {
 			final ByteBuffer data) {
 		GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, level, xOffset, yOffset, width, height, format, sizeObject, data);
 	}
-
+	
 	/**
 	 *  Get the current thread context status.
 	 * @return true The threflagsStates.putn acces to
@@ -607,7 +607,7 @@ public class OpenGL {
 		}
 		return OpenGL.THREAD_HAS_CONTEXT.get(curentThreadId);
 	}
-
+	
 	/**
 	 *  Lock the openGL context for one user only == > better to keep flags
 	 *        and other things ...
@@ -621,14 +621,14 @@ public class OpenGL {
 		OpenGL.clearFlagState();
 		OpenGL.programId = -1;
 	}
-
+	
 	/**
 	 *  remove the current matrix and get the last one from the matrix stack.
 	 */
 	public static void pop() {
-		LOGGER.trace("Pop OpenGl Matrix: " + OpenGL.MATRIX_LIST.size());
+		LOGGER.trace("Pop OpenGl Matrix: {}", OpenGL.MATRIX_LIST.size());
 		if (OpenGL.MATRIX_LIST.size() <= 1) {
-			LOGGER.error("set matrix list is not corect size in the stack : " + OpenGL.MATRIX_LIST.size());
+			LOGGER.error("set matrix list is not correct size in the stack: {}", OpenGL.MATRIX_LIST.size());
 			OpenGL.MATRIX_LIST.clear();
 			OpenGL.MATRIX_LIST.add(Matrix4f.IDENTITY);
 			OpenGL.matrixCamera = Matrix4f.IDENTITY;
@@ -637,7 +637,7 @@ public class OpenGL {
 		OpenGL.MATRIX_LIST.remove(OpenGL.MATRIX_LIST.size() - 1);
 		OpenGL.matrixCamera = Matrix4f.IDENTITY;
 	}
-
+	
 	public static boolean programAttach(final int prog, final int shader) {
 		if (prog < 0) {
 			LOGGER.error("wrong program ID");
@@ -651,7 +651,7 @@ public class OpenGL {
 		OpenGL.checkGlError("glAttachShader");
 		return true;
 	}
-
+	
 	public static void programBindAttribute(final int prog, final int attribute, final String variableName) {
 		if (prog < 0) {
 			LOGGER.error("wrong program ID");
@@ -659,7 +659,7 @@ public class OpenGL {
 		}
 		GL20.glBindAttribLocation(prog, attribute, variableName);
 	}
-
+	
 	public static boolean programCompile(final int prog) {
 		if (prog < 0) {
 			LOGGER.error("wrong program ID");
@@ -668,7 +668,7 @@ public class OpenGL {
 		GL20.glLinkProgram(prog);
 		OpenGL.checkGlError("glLinkProgram");
 		GL20.glValidateProgram(prog);
-
+		
 		// GLint linkStatus = GLFALSE;
 		// glGetProgramiv(GLint(prog), GLLINKSTATUS, linkStatus);
 		// checkGlError("glGetProgramiv");
@@ -703,7 +703,7 @@ public class OpenGL {
 		// }
 		return true;
 	}
-
+	
 	// ------------------------------------------------------------------------------------
 	// -- Open GL program ...
 	// ------------------------------------------------------------------------------------
@@ -714,10 +714,10 @@ public class OpenGL {
 			OpenGL.checkGlError("glCreateProgram");
 			return -1;
 		}
-		LOGGER.debug("Create program with oglID=" + programId);
+		LOGGER.trace("Create program with oglID={}", programId);
 		return programId;
 	}
-
+	
 	public static boolean programDetach(final int prog, final int shader) {
 		if (prog < 0) {
 			LOGGER.error("wrong program ID");
@@ -731,7 +731,7 @@ public class OpenGL {
 		OpenGL.checkGlError("glDetachShader");
 		return true;
 	}
-
+	
 	public static int programGetAttributeLocation(final int prog, final String name) {
 		if (prog < 0) {
 			LOGGER.error("wrong program ID");
@@ -744,12 +744,12 @@ public class OpenGL {
 		final int val = GL20.glGetAttribLocation(prog, name);
 		if (val < 0) {
 			OpenGL.checkGlError("glGetAttribLocation");
-			LOGGER.warn("glGetAttribLocation('" + name + "') = " + val);
+			LOGGER.warn("glGetAttribLocation('{}') = {}", name, val);
 			return -1;
 		}
 		return val;
 	}
-
+	
 	public static int programGetUniformLocation(final int prog, final String name) {
 		if (prog < 0) {
 			LOGGER.error("wrong program ID");
@@ -762,38 +762,38 @@ public class OpenGL {
 		final int val = GL20.glGetUniformLocation(prog, name);
 		if (val == GL11.GL_INVALID_VALUE) {
 			OpenGL.checkGlError("glGetUniformLocation");
-			LOGGER.warn("glGetUniformLocation('" + name + "') = GL_INVALID_VALUE");
+			LOGGER.warn("glGetUniformLocation('{}') = GL_INVALID_VALUE", name);
 		} else if (val == GL11.GL_INVALID_OPERATION) {
 			OpenGL.checkGlError("glGetUniformLocation");
-			LOGGER.warn("glGetUniformLocation('" + name + "') = GL_INVALID_OPERATION");
+			LOGGER.warn("glGetUniformLocation('{}') = GL_INVALID_OPERATION", name);
 		} else if (val < 0) {
 			OpenGL.checkGlError("glGetUniformLocation");
-			LOGGER.warn("glGetUniformLocation('" + name + "') = " + val);
+			LOGGER.warn("glGetUniformLocation('{}') = {}", name, val);
 		}
 		return val;
 	}
-
+	
 	public static void programLoadUniformBoolean(final int location, final boolean value) {
 		// System.out.println("set value " + value + " " + (value==true?1.0f:0.0f));
 		GL20.glUniform1f(location, value ? 1.0f : 0.0f);
 	}
-
+	
 	public static void programLoadUniformColor(final int location, final Color value) {
 		GL20.glUniform4f(location, value.r(), value.g(), value.b(), value.a());
 	}
-
+	
 	public static void programLoadUniformColorRGB(final int location, final Color value) {
 		GL20.glUniform3f(location, value.r(), value.g(), value.b());
 	}
-
+	
 	public static void programLoadUniformFloat(final int location, final float value) {
 		GL20.glUniform1f(location, value);
 	}
-
+	
 	public static void programLoadUniformFloat(final int location, final float value, final float value2) {
 		GL20.glUniform2f(location, value, value2);
 	}
-
+	
 	public static void programLoadUniformFloat(
 			final int location,
 			final float value,
@@ -801,7 +801,7 @@ public class OpenGL {
 			final float value3) {
 		GL20.glUniform3f(location, value, value2, value3);
 	}
-
+	
 	public static void programLoadUniformFloat(
 			final int location,
 			final float value,
@@ -810,19 +810,19 @@ public class OpenGL {
 			final float value4) {
 		GL20.glUniform4f(location, value, value2, value3, value4);
 	}
-
+	
 	public static void programLoadUniformInt(final int location, final int value) {
 		GL20.glUniform1i(location, value);
 	}
-
+	
 	public static void programLoadUniformInt(final int location, final int value, final int value2) {
 		GL20.glUniform2i(location, value, value2);
 	}
-
+	
 	public static void programLoadUniformInt(final int location, final int value, final int value2, final int value3) {
 		GL20.glUniform3i(location, value, value2, value3);
 	}
-
+	
 	public static void programLoadUniformInt(
 			final int location,
 			final int value,
@@ -831,35 +831,35 @@ public class OpenGL {
 			final int value4) {
 		GL20.glUniform4i(location, value, value2, value3, value4);
 	}
-
+	
 	public static void programLoadUniformMatrix(final int location, final Matrix4f value) {
 		GL20.glUniformMatrix4fv(location, true, value.asArray());
 	}
-
+	
 	public static void programLoadUniformMatrix(final int location, final Matrix4f value, final boolean transpose) {
 		GL20.glUniformMatrix4fv(location, transpose, value.asArray());
 	}
-
+	
 	public static void programLoadUniformVector(final int location, final Vector2f value) {
 		GL20.glUniform2f(location, value.x(), value.y());
 	}
-
+	
 	public static void programLoadUniformVector(final int location, final Vector2i value) {
 		GL20.glUniform2i(location, value.x(), value.y());
 	}
-
+	
 	public static void programLoadUniformVector(final int location, final Vector3f value) {
 		GL20.glUniform3f(location, value.x(), value.y(), value.z());
 	}
-
+	
 	public static void programLoadUniformVector(final int location, final Vector3i value) {
 		GL20.glUniform3i(location, value.x(), value.y(), value.z());
 	}
-
+	
 	public static void programLoadUniformVector(final int location, final Vector4f value) {
 		GL20.glUniform4f(location, value.x(), value.y(), value.z(), value.w());
 	}
-
+	
 	public static void programRemove(final int prog) {
 		if (prog < 0) {
 			return;
@@ -868,11 +868,11 @@ public class OpenGL {
 		GL20.glDeleteProgram(prog);
 		OpenGL.checkGlError("glDeleteProgram");
 	}
-
+	
 	public static void programUnUse(final int id) {
 		// nothing to do ...
 	}
-
+	
 	// public static void drawElements(RenderMode mode, List<Integer> indices) {
 	// if (this.programId >= 0) {
 	// updateAllFlags();
@@ -920,21 +920,21 @@ public class OpenGL {
 		}
 		OpenGL.checkGlError("glUseProgram");
 	}
-
+	
 	/**
 	 *  store current matrix in the matrix stack.
 	 */
 	public static void push() {
-		LOGGER.trace("push OpenGl Matrix: " + OpenGL.MATRIX_LIST.size());
+		LOGGER.trace("push OpenGl Matrix: {}", OpenGL.MATRIX_LIST.size());
 		if (OpenGL.MATRIX_LIST.size() == 0) {
-			LOGGER.error("set matrix list is not corect size in the stack : " + OpenGL.MATRIX_LIST.size());
+			LOGGER.error("set matrix list is not correct size in the stack: {}", OpenGL.MATRIX_LIST.size());
 			OpenGL.MATRIX_LIST.add(Matrix4f.IDENTITY);
 			return;
 		}
 		final Matrix4f tmp = OpenGL.MATRIX_LIST.get(OpenGL.MATRIX_LIST.size() - 1);
 		OpenGL.MATRIX_LIST.add(tmp);
 	}
-
+	
 	protected static StringBuilder readLocalFile(final String name) {
 		final StringBuilder fileSource = new StringBuilder();
 		try {
@@ -950,13 +950,13 @@ public class OpenGL {
 		}
 		return fileSource;
 	}
-
+	
 	protected static StringBuilder readLocalFile(final Uri name) {
 		final StringBuilder fileSource = new StringBuilder();
 		try {
 			final InputStream inputStream = Uri.getStream(name);
 			if (inputStream == null) {
-				LOGGER.error("Could not read the file! " + name);
+				LOGGER.error("Could not read the file! {}", name);
 				System.exit(-1);
 			}
 			final Reader reader = new BufferedReader(
@@ -966,13 +966,13 @@ public class OpenGL {
 				fileSource.append((char) c);
 			}
 		} catch (final IOException e) {
-			LOGGER.error("Could not read the file! " + name);
+			LOGGER.error("Could not read the file! {}", name);
 			e.printStackTrace();
 			System.exit(-1);
 		}
 		return fileSource;
 	}
-
+	
 	public static void reset() {
 		if (OpenGL.DIRECT_MODE) {
 			LOGGER.error("TODO ...");
@@ -982,14 +982,14 @@ public class OpenGL {
 			OpenGL.updateAllFlags();
 		}
 	}
-
+	
 	public static void resetFlagState() {
 		for (final Map.Entry<Flag, StateFlag> elem : OpenGL.FLAGS_STATES.entrySet()) {
 			elem.getValue().mustBeSet = false;
 		}
 		OpenGL.flagsStatesChange = true;
 	}
-
+	
 	/**
 	 *  When you will done an opengl rendering, you might call this reset
 	 *        matrix first. It remove all the stach of the matrix pushed.
@@ -999,12 +999,12 @@ public class OpenGL {
 	 */
 	public static void setBasicMatrix(final Matrix4f newOne) {
 		if (OpenGL.MATRIX_LIST.size() != 1) {
-			LOGGER.error("matrix is not corect size in the stack : " + OpenGL.MATRIX_LIST.size());
+			LOGGER.error("matrix is not correct size in the stack: {}", OpenGL.MATRIX_LIST.size());
 		}
 		OpenGL.MATRIX_LIST.clear();
 		OpenGL.MATRIX_LIST.add(newOne);
 	}
-
+	
 	/**
 	 *  set a reference on the current camera to opengl renderer.
 	 * @param newOne The requested matrix.
@@ -1012,11 +1012,11 @@ public class OpenGL {
 	public static void setCameraMatrix(final Matrix4f newOne) {
 		OpenGL.matrixCamera = newOne;
 	}
-
+	
 	public static void setDeathMask(final boolean state) {
 		GL11.glDepthMask(state);
 	}
-
+	
 	/**
 	 *  this funtion configure the current use matrix for the renderer
 	 *        (call @ref Push before, and @ref Pop when no more needed).
@@ -1026,57 +1026,57 @@ public class OpenGL {
 	 */
 	public static void setMatrix(final Matrix4f newOne) {
 		if (OpenGL.MATRIX_LIST.size() == 0) {
-			LOGGER.error("set matrix list is not corect size in the stack : " + OpenGL.MATRIX_LIST.size());
+			LOGGER.error("set matrix list is not correct size in the stack: {}", OpenGL.MATRIX_LIST.size());
 			OpenGL.MATRIX_LIST.add(newOne);
 			return;
 		}
 		OpenGL.MATRIX_LIST.set(OpenGL.MATRIX_LIST.size() - 1, newOne);
 	}
-
+	
 	public static void setTexture2DFilterLinear() {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 	}
-
+	
 	public static void setTexture2DFilterNearest() {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 	}
-
+	
 	public static void setTexture2DWrapClampToEdge() {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 	}
-
+	
 	public static void setTexture2DWrapRepeat() {
 		GL11.glTexParameteri(OpenGL.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
 		GL11.glTexParameteri(OpenGL.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
 	}
-
+	
 	public static void setViewPort(final Vector2f start, final Vector2f stop) {
 		// LOGGER.info("setViewport " + start + " " + stop);
 		GL11.glViewport((int) start.x(), (int) start.y(), (int) stop.x(), (int) stop.y());
 		OpenGL.checkGlError("glViewport");
 	}
-
+	
 	public static void setViewPort(final Vector2i start, final Vector2i stop) {
 		// LOGGER.info("setViewport " + start + " " + stop);
 		GL11.glViewport(start.x(), start.y(), stop.x(), stop.y());
 		OpenGL.checkGlError("glViewport");
 	}
-
+	
 	public static void setViewPort(final Vector3f start, final Vector3f stop) {
 		// LOGGER.info("setViewport " + start + " " + stop);
 		GL11.glViewport((int) start.x(), (int) start.y(), (int) stop.x(), (int) stop.y());
 		OpenGL.checkGlError("glViewport");
 	}
-
+	
 	public static void setViewPort(final Vector3i start, final Vector3i stop) {
 		// LOGGER.info("setViewport " + start + " " + stop);
 		GL11.glViewport(start.x(), start.y(), stop.x(), stop.y());
 		OpenGL.checkGlError("glViewport");
 	}
-
+	
 	private static int shaderCreate(final ShaderType type) {
 		int shaderId = 0;
 		if (type == ShaderType.VERTEX) {
@@ -1097,7 +1097,7 @@ public class OpenGL {
 		}
 		return shaderId;
 	}
-
+	
 	public static int shaderLoad(final Uri file, final ShaderType type) {
 		System.out.println("Load shader: '" + file + "'");
 		final StringBuilder shaderSource = OpenGL.readLocalFile(file);
@@ -1111,7 +1111,7 @@ public class OpenGL {
 		}
 		return shaderID;
 	}
-
+	
 	public static void shaderRemove(final int shader) {
 		if (shader < 0) {
 			return;
@@ -1120,7 +1120,7 @@ public class OpenGL {
 		GL20.glDeleteShader(shader);
 		OpenGL.checkGlError("glDeleteShader");
 	}
-
+	
 	public static FloatBuffer storeDataInFloatBuffer(final Color[] data) {
 		final float[] tmpData = new float[data.length * 4];
 		for (int iii = 0; iii < data.length; iii++) {
@@ -1143,21 +1143,21 @@ public class OpenGL {
 		return buffer;
 		*/
 	}
-
+	
 	private static FloatBuffer storeDataInFloatBuffer(final float[] data) {
 		final FloatBuffer buffer = BufferUtils.createFloatBuffer(data.length);
 		buffer.put(data);
 		buffer.flip();
 		return buffer;
 	}
-
+	
 	private static IntBuffer storeDataInFloatBuffer(final int[] data) {
 		final IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
 		buffer.put(data);
 		buffer.flip();
 		return buffer;
 	}
-
+	
 	public static FloatBuffer storeDataInFloatBuffer(final Vector2f[] data) {
 		final float[] tmpData = new float[data.length * 2];
 		for (int iii = 0; iii < data.length; iii++) {
@@ -1176,7 +1176,7 @@ public class OpenGL {
 		return buffer;
 		*/
 	}
-
+	
 	public static FloatBuffer storeDataInFloatBuffer(final Vector3f[] data) {
 		final float[] tmpData = new float[data.length * 3];
 		for (int iii = 0; iii < data.length; iii++) {
@@ -1199,14 +1199,14 @@ public class OpenGL {
 		return buffer;
 		*/
 	}
-
+	
 	/**
 	 *
 	 */
 	public static void swap() {
-
+		
 	}
-
+	
 	/**
 	 *  must be called by the thread that has openGl context to notify the
 	 *        system
@@ -1216,7 +1216,7 @@ public class OpenGL {
 		final long curentThreadId = Thread.currentThread().getId();
 		OpenGL.THREAD_HAS_CONTEXT.put(curentThreadId, true);
 	}
-
+	
 	/**
 	 *  At the end of the thread exection, set the thead has no more openGL
 	 *        cotext
@@ -1225,20 +1225,20 @@ public class OpenGL {
 		final long curentThreadId = Thread.currentThread().getId();
 		OpenGL.THREAD_HAS_CONTEXT.remove(curentThreadId);
 	}
-
+	
 	public static boolean unbindBuffer() {
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		OpenGL.checkGlError("glBindBuffer(0)");
 		return true;
 	}
-
+	
 	/**
 	 *  Un-lock the openGL context for an other user...
 	 */
 	public static void unLock() {
 		// mutexOpenGl().unLock();
 	}
-
+	
 	/**
 	 * @brieg update all the internal flag needed to be set from tre previous
 	 *        element set ...
@@ -1268,12 +1268,12 @@ public class OpenGL {
 			}
 		}
 	}
-
+	
 	public static void vertexAttribPointerFloat(final int id, final int size) {
 		GL20.glVertexAttribPointer(id, size, GL11.GL_FLOAT, false, 0, 0);
 		OpenGL.checkGlError("glVertexAttribPointer");
 	}
-
+	
 	private OpenGL() {}
-
+	
 }

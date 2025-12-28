@@ -32,7 +32,7 @@ public class GaleApplication {
 	 * @param value value to return on the program
 	 */
 	public void exit(final int value) {
-		LOGGER.trace("Exit Requested " + value);
+		LOGGER.trace("Exit Requested {}", value);
 		Gale.getContext().stop();
 	}
 
@@ -306,7 +306,7 @@ public class GaleApplication {
 	 */
 	public void setSize(final Vector2f size) {
 		if (size.x() <= 0 || size.y() <= 0) {
-			LOGGER.error("Wrong windows size: " + size);
+			LOGGER.error("Wrong windows size: {}", size);
 		}
 		final Vector2f oldSize = this.windowsSize;
 		this.windowsSize = size;

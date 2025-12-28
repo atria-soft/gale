@@ -90,14 +90,14 @@ public abstract class Resource {
 	 * User request the reload of all resources (usefull when the file depend on DATA:GUI:xxx ...
 	 */
 	public void reload() {
-		LOGGER.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
+		LOGGER.debug("Not set for: [{}]{} loaded ??? time(s)", getId(), getName());
 	}
 
 	/**
 	 * The current OpenGl context is removing ==> remove yout own system data
 	 */
 	public void removeContext() {
-		LOGGER.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
+		LOGGER.debug("Not set for: [{}]{} loaded ??? time(s)", getId(), getName());
 	}
 
 	/**
@@ -105,7 +105,7 @@ public abstract class Resource {
 	 * Just update your internal state
 	 */
 	public void removeContextToLate() {
-		LOGGER.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
+		LOGGER.debug("Not set for: [{}]{} loaded ??? time(s)", getId(), getName());
 	}
 
 	/**
@@ -123,7 +123,7 @@ public abstract class Resource {
 	 * @return false The context is not updated
 	 */
 	public boolean updateContext() {
-		LOGGER.debug("Not set for : [" + getId() + "]" + getName() + " loaded ??? time(s)");
+		LOGGER.debug("Not set for: [{}]{} loaded ??? time(s)", getId(), getName());
 		return true;
 	}
 }

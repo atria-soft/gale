@@ -29,32 +29,32 @@ public class ResourceTexture2 extends Resource {
 	}
 	
 	public static ResourceTexture2 create(final Uri uri) {
-		LOGGER.trace("KEEP: Resource Texture: " + uri);
+		LOGGER.trace("KEEP: Resource Texture: {}", uri);
 		final Resource object2 = Resource.getManager().localKeep(uri);
 		if (object2 != null) {
 			if (object2 instanceof final ResourceTexture2 tmpp) {
 				return tmpp;
 			}
-			LOGGER.error("Request resource file : '" + uri + "' With the wrong type (dynamic cast error)");
+			LOGGER.error("Request resource file: '{}' With the wrong type (dynamic cast error)", uri);
 			System.exit(-1);
 			return null;
 		}
-		LOGGER.trace("CREATE: new Texture: " + uri);
+		LOGGER.trace("CREATE: new Texture: {}", uri);
 		return new ResourceTexture2(uri);
 	}
 	
 	public static ResourceTexture2 createNamed(final String uri) {
-		LOGGER.trace("KEEP: Resource Texture Named: " + uri);
+		LOGGER.trace("KEEP: Resource Texture Named: {}", uri);
 		final Resource object2 = Resource.getManager().localKeep(uri);
 		if (object2 != null) {
 			if (object2 instanceof final ResourceTexture2 tmpp) {
 				return tmpp;
 			}
-			LOGGER.error("Request resource file : '" + uri + "' With the wrong type (dynamic cast error)");
+			LOGGER.error("Request resource file: '{}' With the wrong type (dynamic cast error)", uri);
 			System.exit(-1);
 			return null;
 		}
-		LOGGER.debug("CREATE: new Texture Named: " + uri);
+		LOGGER.debug("CREATE: new Texture Named: {}", uri);
 		return new ResourceTexture2(uri);
 	}
 	
@@ -165,7 +165,7 @@ public class ResourceTexture2 extends Resource {
 	public synchronized void removeContext() {
 		if (this.loaded) {
 			// Request remove texture ...
-			LOGGER.info("TEXTURE: Rm [" + getId() + "] texId=" + this.texId);
+			LOGGER.debug("TEXTURE: Rm [{}] texId={}", getId(), this.texId);
 			// TODO Check if we are in the correct thread
 			OpenGL.glDeleteTextures(this.texId);
 			this.loaded = false;
@@ -184,7 +184,7 @@ public class ResourceTexture2 extends Resource {
 	 * @param image Image to set.
 	 */
 	public synchronized void set(final ImageByte image) {
-		LOGGER.info("Set a new image in a texture:    size={}", image.getSize());
+		LOGGER.trace("Set a new image in a texture:    size={}", image.getSize());
 		this.data = image;
 		this.realImageSize = this.data.getSize();
 		// Disable compatibility size for embended ...
@@ -242,7 +242,7 @@ public class ResourceTexture2 extends Resource {
 		if (this.loaded) {
 			if (this.lastTypeObject != typeObject || this.lastSizeObject != sizeObject
 					|| !this.lastSize.equals(this.data.getSize())) {
-				LOGGER.trace("TEXTURE: Rm [" + getId() + "] texId=" + this.texId);
+				LOGGER.trace("TEXTURE: Rm [{}] texId={}", getId(), this.texId);
 				OpenGL.glDeleteTextures(this.texId);
 				this.loaded = false;
 			}
@@ -253,11 +253,9 @@ public class ResourceTexture2 extends Resource {
 			this.lastSize = this.data.getSize();
 			this.lastTypeObject = typeObject;
 			this.lastSizeObject = sizeObject;
-			LOGGER.debug("TEXTURE: add [" + getId() + "]=" + this.data.getSize() + "=>" + this.data.getGPUSize()
-					+ " OGlId=" + this.texId + " type=" + this.data.getClass().getCanonicalName());
+			LOGGER.trace("TEXTURE: add [{}]={} => {} OGlId={} type={}", getId(), this.data.getSize(), this.data.getGPUSize(), this.texId, this.data.getClass().getCanonicalName());
 		} else {
-			LOGGER.debug("TEXTURE: update [" + getId() + "]=" + this.data.getSize() + "=>" + this.data.getGPUSize()
-					+ " OGlId=" + this.texId + " type=" + this.data.getClass().getCanonicalName());
+			LOGGER.trace("TEXTURE: update [{}]={} => {} OGlId={} type={}", getId(), this.data.getSize(), this.data.getGPUSize(), this.texId, this.data.getClass().getCanonicalName());
 		}
 		// in all case we set the texture properties :
 		// TODO check error ???

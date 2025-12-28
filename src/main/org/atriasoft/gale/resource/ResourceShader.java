@@ -24,7 +24,7 @@ public class ResourceShader extends Resource {
 				resource2.keep();
 				return (ResourceShader) resource2;
 			}
-			LOGGER.error("Request resource file : '" + name + "' With the wrong type (dynamic cast error)");
+			LOGGER.error("Request resource file: '{}' With the wrong type (dynamic cast error)", name);
 			System.exit(-1);
 			return null;
 		}
@@ -46,7 +46,7 @@ public class ResourceShader extends Resource {
 		super(uri);
 		this.uri = uri;
 		this.resourceLevel = 0;
-		LOGGER.debug("OGL : load SHADER '" + uri + "'");
+		LOGGER.debug("OGL: load SHADER '{}'", uri);
 		// load data from file "all the time ..."
 		
 		if (uri.get().endsWith(".frag")) {
@@ -96,15 +96,14 @@ public class ResourceShader extends Resource {
 	public void reload() {
 		//!< A copy of the data loaded from the file (useful only when opengl context is removed)
 		final String fileData = "";
-		LOGGER.trace("load shader:\n-----------------------------------------------------------------\n" + fileData
-				+ "\n-----------------------------------------------------------------");
+		LOGGER.trace("load shader:\n-----------------------------------------------------------------\n{}\n-----------------------------------------------------------------", fileData);
 		// now change the OGL context ...
 		if (OpenGL.hasContext()) {
-			LOGGER.debug("OGL : load SHADER '" + this.name + "' ==> call update context (direct)");
+			LOGGER.debug("OGL: load SHADER '{}' ==> call update context (direct)", this.name);
 			removeContext();
 			updateContext();
 		} else {
-			LOGGER.debug("OGL : load SHADER '" + this.name + "' ==> tagged has update context needed");
+			LOGGER.debug("OGL: load SHADER '{}' ==> tagged has update context needed", this.name);
 			// TODO Check this, this is a leek ==> in the GPU ... really bad ...
 			this.exist = false;
 			this.shader = 0;

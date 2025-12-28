@@ -179,10 +179,10 @@ public class Sample2Application extends GaleApplication {
 			final KeyKeyboard type,
 			final Character value,
 			final KeyStatus state) {
-		LOGGER.info("Keyboard event: special=" + special);
-		LOGGER.info("                   type=" + type);
-		LOGGER.info("                  value='" + value + "'");
-		LOGGER.info("                  state=" + state);
+		LOGGER.debug("Keyboard event: special={}", special);
+		LOGGER.debug("                   type={}", type);
+		LOGGER.debug("                  value='{}'", value);
+		LOGGER.debug("                  state={}", state);
 	}
 
 	@Override
