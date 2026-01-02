@@ -5,6 +5,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.atriasoft.etk.Color;
+import org.atriasoft.etk.Dimension2f;
 import org.atriasoft.etk.ThreadAbstract;
 import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2f;
@@ -547,12 +548,10 @@ public abstract class GaleContext {
 		if (this.windowsSize.equals(size)) {
 			return;
 		}
-		// TODO Better in the thread ...  ==> but generate some init error ...
-		//gale::Dimension::setPixelWindowsSize(size);
 		postActionAsync(GaleContext.STATIC_ID_RESIZE, context -> {
-			LOGGER.error("Receive MSG : THREAD_RESIZE : {} ==> {}", context.windowsSize, size);
+			LOGGER.debug("Receive MSG : THREAD_RESIZE : {} ==> {}", context.windowsSize, size);
 			context.windowsSize = size;
-			//gale::Dimension::setPixelWindowsSize(context.windowsSize);
+			Dimension2f.setPixelWindowsSize(context.windowsSize);
 			final GaleApplication tmpAppl = context.getApplication();
 			if (tmpAppl != null) {
 				tmpAppl.onResize(context.windowsSize);
