@@ -166,9 +166,9 @@ public class OpenGL {
 	public static final int GL_TEXTURE_2D = GL11.GL_TEXTURE_2D;
 	
 	static final boolean DEBUG = false; // TODO externalize this ...
-	
+
 	static final boolean CHECKERROROPENGL = false; // TODO externalize this ...
-	
+
 	static final boolean DIRECT_MODE = false; // TODO externalize this ...;
 	
 	private static final List<Matrix4f> MATRIX_LIST = new ArrayList<>();
@@ -268,8 +268,8 @@ public class OpenGL {
 		if (OpenGL.programId >= 0) {
 			GL13.glActiveTexture(OpenGL.TEXTURE_ID_BINDING[textureID]);
 			OpenGL.checkGlError("glActiveTexture");
-		} else if (OpenGL.DEBUG) {
-			LOGGER.error("try to bind texture with no program set");
+		} else {
+			LOGGER.warn("activeTexture({}): programId={} < 0, skipping glActiveTexture call!", textureID, OpenGL.programId);
 		}
 	}
 	
@@ -280,6 +280,16 @@ public class OpenGL {
 	
 	public static void bindTexture2D(final int texId) {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texId);
+	}
+
+	/**
+	 * Force active texture unit without checking programId.
+	 * Use this for texture updates outside of rendering context.
+	 * @param textureID Id of the texture 0 .. 13
+	 */
+	public static void forceActiveTexture(final int textureID) {
+		GL13.glActiveTexture(OpenGL.TEXTURE_ID_BINDING[textureID]);
+		OpenGL.checkGlError("glActiveTexture (forced)");
 	}
 	
 	public static void blendFuncAuto() {

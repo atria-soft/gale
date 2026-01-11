@@ -215,6 +215,11 @@ public class ResourceVirtualArrayObject extends Resource {
 	public void loadAgainToVAO() {
 		GL30.glBindVertexArray(this.vaoID);
 		LOGGER.trace("push VAO: [{}] '{}'", getId(), getName());
+		// Delete old VBOs before creating new ones
+		for (final Integer vboId : this.vbo) {
+			GL15.glDeleteBuffers(vboId);
+		}
+		this.vbo.clear();
 		if (this.indices != null) {
 			LOGGER.trace("Set indices");
 			bindIndicesBuffer(this.indices);

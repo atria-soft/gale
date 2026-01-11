@@ -122,6 +122,7 @@ public class ResourceTexture2 extends Resource {
 	
 	public void bindForRendering(final int idTexture) {
 		if (!this.loaded) {
+			LOGGER.warn("TEXTURE: bindForRendering called but texture not loaded: [{}]", getId());
 			return;
 		}
 		OpenGL.activeTexture(idTexture);
@@ -259,6 +260,8 @@ public class ResourceTexture2 extends Resource {
 		}
 		// in all case we set the texture properties :
 		// TODO check error ???
+		// Force texture unit 0 to avoid binding on wrong unit
+		OpenGL.forceActiveTexture(0);
 		OpenGL.bindTexture2D(this.texId);
 		
 		if (!this.loaded) {

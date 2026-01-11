@@ -10,6 +10,7 @@ import org.atriasoft.etk.math.Matrix4f;
 import org.atriasoft.etk.math.Vector3f;
 import org.atriasoft.gale.backend3d.OpenGL;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL30;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +72,8 @@ public class ResourceColored3DObject extends Resource {
 			LOGGER.error("No shader ...");
 			return;
 		}
+		// Unbind any VAO to avoid corrupting other VAO state
+		GL30.glBindVertexArray(0);
 		if (depthtest) {
 			OpenGL.enable(OpenGL.Flag.flag_depthTest);
 			if (!updateDepthBuffer) {
@@ -90,11 +93,13 @@ public class ResourceColored3DObject extends Resource {
 		// position :
 		final FloatBuffer buffer = storeDataInFloatBuffer(convertInFloat(vertices));
 		this.program.sendAttribute(this.oGLPosition, 3, buffer, 3);
+		// Enable blend for transparent colors
 		if (color.a() < 1.0f) {
 			OpenGL.enable(OpenGL.Flag.flag_blend);
 		}
 		// Request the draw of the elements:
 		OpenGL.drawArrays(OpenGL.RenderMode.TRIANGLE, 0, vertices.size());
+		// Disable blend after drawing
 		if (color.a() < 1.0f) {
 			OpenGL.disable(OpenGL.Flag.flag_blend);
 		}
@@ -123,6 +128,8 @@ public class ResourceColored3DObject extends Resource {
 			LOGGER.error("No shader ...");
 			return;
 		}
+		// Unbind any VAO to avoid corrupting other VAO state
+		GL30.glBindVertexArray(0);
 		if (depthtest) {
 			OpenGL.enable(OpenGL.Flag.flag_depthTest);
 			if (!updateDepthBuffer) {
@@ -143,11 +150,13 @@ public class ResourceColored3DObject extends Resource {
 		// color :
 		//LOGGER.info("color= " + color + " " + this.oGLPosition);
 		this.program.uniformColor(this.oGLColor, color);
+		// Enable blend for transparent colors
 		if (color.a() < 1.0f) {
 			OpenGL.enable(OpenGL.Flag.flag_blend);
 		}
 		// Request the draw of the elements:
 		OpenGL.drawArrays(OpenGL.RenderMode.TRIANGLE, 0, vertices.size());
+		// Disable blend after drawing
 		if (color.a() < 1.0f) {
 			OpenGL.disable(OpenGL.Flag.flag_blend);
 		}
@@ -455,6 +464,8 @@ public class ResourceColored3DObject extends Resource {
 			LOGGER.error("No shader ...");
 			return;
 		}
+		// Unbind any VAO to avoid corrupting other VAO state
+		GL30.glBindVertexArray(0);
 		if (depthtest) {
 			OpenGL.enable(OpenGL.Flag.flag_depthTest);
 			if (!updateDepthBuffer) {
@@ -474,11 +485,13 @@ public class ResourceColored3DObject extends Resource {
 		this.program.sendAttribute(this.oGLPosition, 3, buffer, 3);
 		// color :
 		this.program.uniformColor(this.oGLColor, color);
+		// Enable blend for transparent colors
 		if (color.a() < 1.0f) {
 			OpenGL.enable(OpenGL.Flag.flag_blend);
 		}
-		// Request the draw od the elements:
+		// Request the draw of the elements:
 		OpenGL.drawArrays(OpenGL.RenderMode.LINE, 0, vertices.size());
+		// Disable blend after drawing
 		if (color.a() < 1.0f) {
 			OpenGL.disable(OpenGL.Flag.flag_blend);
 		}

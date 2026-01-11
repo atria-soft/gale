@@ -6,7 +6,7 @@ precision mediump int;
 #endif
 
 // Input :
-in vec3 in_position;
+layout (location = 0) in vec3 in_position;
 uniform vec4 in_colors;
 uniform mat4 in_matrixTransformation;
 uniform mat4 in_matrixProjection;

@@ -398,6 +398,8 @@ public class ResourceProgram extends Resource {
 		if (!this.elementList.get(idElem).isLinked) {
 			return;
 		}
+		// Unbind any VBO before using client-side buffer pointer
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		// GL40.glBindVertexArray(this.elementList.get(idElem).elementId);
 		// LOGGER.error("[" + this.elementList.get(idElem).name + "] send " + 3 + "
 		// element");
@@ -406,6 +408,7 @@ public class ResourceProgram extends Resource {
 				data);
 		// checkGlError("glVertexAttribPointer", LINE, idElem);
 		GL20.glEnableVertexAttribArray(this.elementList.get(idElem).elementId);
+		this.listOfVBOUsed.add(this.elementList.get(idElem).elementId);
 		// checkGlError("glEnableVertexAttribArray", LINE, idElem);
 	}
 
@@ -523,7 +526,7 @@ public class ResourceProgram extends Resource {
 		// set the textureID
 		OpenGL.bindTexture2D(textureOpenGlID);
 		// set the texture on the uniform attribute
-		uniformInt(this.elementList.get(idElem).elementId, /* GLTEXTURE */0);
+		uniformInt(this.elementList.get(idElem).elementId, /* GLTEXTURE */1);
 		this.hasTexture1 = true;
 	}
 
