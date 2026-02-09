@@ -10,25 +10,25 @@ import org.slf4j.LoggerFactory;
 public class PeriodicThread extends ThreadAbstract {
 	static final Logger LOGGER = LoggerFactory.getLogger(PeriodicThread.class);
 	private final GaleContext context;
-
+	
 	public PeriodicThread(final GaleContext context) {
 		super("GaleAsync");
 		this.context = context;
 	}
-
+	
 	@Override
 	protected void birth() {
 		// TODO Auto-generated method stub
 	}
-
+	
 	@Override
 	protected void death() {
 		// TODO Auto-generated method stub
 	}
-
+	
 	@Override
 	protected void runPeriodic() {
-		LOGGER.trace("----------------------------- [START] -----------------------------------");
+		//LOGGER.trace("----------------------------- [START] -----------------------------------");
 		try {
 			Thread.sleep(100);
 		} catch (final InterruptedException e) {
@@ -39,7 +39,7 @@ public class PeriodicThread extends ThreadAbstract {
 		// Keep global clock to process events
 		final Clock clock = Clock.systemUTC();
 		final long time = System.nanoTime();
-
+		
 		///synchronized (this.context) {
 		this.context.processEventsAsync(clock, time);
 		// call all the application for periodic request (the application manage multiple instance )...
@@ -48,6 +48,6 @@ public class PeriodicThread extends ThreadAbstract {
 		if (appl != null) {
 			appl.onPeriod(clock, time);
 		}
-		LOGGER.trace("----------------------------- [ END ] -----------------------------------");
+		//LOGGER.trace("----------------------------- [ END ] -----------------------------------");
 	}
 }
