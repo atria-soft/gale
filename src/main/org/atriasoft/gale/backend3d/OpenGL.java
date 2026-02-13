@@ -31,6 +31,7 @@ import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL30;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -176,6 +177,8 @@ public class OpenGL {
 	private static Matrix4f matrixCamera = Matrix4f.IDENTITY;
 	
 	private static int programId = 0;
+	private static int viewportWidth = 0;
+	private static int viewportHeight = 0;
 	private static final Map<RenderMode, Integer> CONVERT_RENDER_MODE = Map.of(RenderMode.POINT, GL11.GL_POINTS,
 			RenderMode.LINE, GL11.GL_LINES, RenderMode.LINE_STRIP, GL11.GL_LINE_STRIP, RenderMode.LINE_LOOP,
 			GL11.GL_LINE_LOOP, RenderMode.TRIANGLE, GL11.GL_TRIANGLES, RenderMode.TRIANGLE_STRIP,
@@ -295,7 +298,12 @@ public class OpenGL {
 	public static void blendFuncAuto() {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 	}
-	
+
+	public static void blendFunc(final int sfactor, final int dfactor) {
+		GL11.glBlendFunc(sfactor, dfactor);
+		OpenGL.checkGlError("glBlendFunc");
+	}
+
 	public static void bufferData(final Color[] data, final Usage usage) {
 		final FloatBuffer buffer = OpenGL.storeDataInFloatBuffer(data);
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, OpenGL.convertUsage.get(usage));
@@ -397,7 +405,107 @@ public class OpenGL {
 		GL11.glClearStencil(value);
 		OpenGL.checkGlError("glClearStencil");
 	}
-	
+
+	/**
+	 * Set front and back function and reference value for stencil testing.
+	 * @param func Test function (e.g. GL11.GL_ALWAYS, GL11.GL_NOTEQUAL)
+	 * @param ref Reference value for the stencil test
+	 * @param mask Mask that is ANDed with both the reference value and the stored stencil value
+	 */
+	public static void stencilFunc(final int func, final int ref, final int mask) {
+		GL11.glStencilFunc(func, ref, mask);
+		OpenGL.checkGlError("glStencilFunc");
+	}
+
+	/**
+	 * Set front and back stencil test actions.
+	 * @param sfail Action when stencil test fails
+	 * @param dpfail Action when stencil passes but depth test fails
+	 * @param dppass Action when both stencil and depth test pass
+	 */
+	public static void stencilOp(final int sfail, final int dpfail, final int dppass) {
+		GL11.glStencilOp(sfail, dpfail, dppass);
+		OpenGL.checkGlError("glStencilOp");
+	}
+
+	/**
+	 * Control the front and back writing of individual bits in the stencil planes.
+	 * @param mask Bit mask to enable and disable writing of individual bits in the stencil planes
+	 */
+	public static void stencilMask(final int mask) {
+		GL11.glStencilMask(mask);
+		OpenGL.checkGlError("glStencilMask");
+	}
+
+	/**
+	 * Specify the width of rasterized lines.
+	 * @param width Line width in pixels
+	 */
+	public static void lineWidth(final float width) {
+		GL11.glLineWidth(width);
+		OpenGL.checkGlError("glLineWidth");
+	}
+
+	// --- Framebuffer Object (FBO) support ---
+
+	public static int glGenFramebuffers() {
+		final int fbo = GL30.glGenFramebuffers();
+		OpenGL.checkGlError("glGenFramebuffers");
+		return fbo;
+	}
+
+	public static void bindFramebuffer(final int framebuffer) {
+		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, framebuffer);
+		OpenGL.checkGlError("glBindFramebuffer");
+	}
+
+	public static void glFramebufferTexture2D(final int attachment, final int textureId) {
+		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, attachment, GL11.GL_TEXTURE_2D, textureId, 0);
+		OpenGL.checkGlError("glFramebufferTexture2D");
+	}
+
+	public static int glGenRenderbuffers() {
+		final int rbo = GL30.glGenRenderbuffers();
+		OpenGL.checkGlError("glGenRenderbuffers");
+		return rbo;
+	}
+
+	public static void glBindRenderbuffer(final int renderbuffer) {
+		GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, renderbuffer);
+		OpenGL.checkGlError("glBindRenderbuffer");
+	}
+
+	public static void glRenderbufferStorage(final int internalFormat, final int width, final int height) {
+		GL30.glRenderbufferStorage(GL30.GL_RENDERBUFFER, internalFormat, width, height);
+		OpenGL.checkGlError("glRenderbufferStorage");
+	}
+
+	public static void glFramebufferRenderbuffer(final int attachment, final int renderbuffer) {
+		GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER, attachment, GL30.GL_RENDERBUFFER, renderbuffer);
+		OpenGL.checkGlError("glFramebufferRenderbuffer");
+	}
+
+	public static boolean checkFramebufferStatus() {
+		return GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER) == GL30.GL_FRAMEBUFFER_COMPLETE;
+	}
+
+	public static void glDeleteFramebuffers(final int framebuffer) {
+		GL30.glDeleteFramebuffers(framebuffer);
+		OpenGL.checkGlError("glDeleteFramebuffers");
+	}
+
+	public static void glDeleteRenderbuffers(final int renderbuffer) {
+		GL30.glDeleteRenderbuffers(renderbuffer);
+		OpenGL.checkGlError("glDeleteRenderbuffers");
+	}
+
+	// --- Color mask ---
+
+	public static void colorMask(final boolean red, final boolean green, final boolean blue, final boolean alpha) {
+		GL11.glColorMask(red, green, blue, alpha);
+		OpenGL.checkGlError("glColorMask");
+	}
+
 	public static boolean deleteBuffers(final int[] buffers) {
 		if (buffers.length == 0) {
 			LOGGER.warn("try to delete vector buffer with size 0");
@@ -573,7 +681,20 @@ public class OpenGL {
 			final ByteBuffer data) {
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, level, internalFormat, width, height, border, format, sizeObject, data);
 	}
-	
+
+	public static void glTexImage2D(
+			final int level,
+			final int internalFormat,
+			final int width,
+			final int height,
+			final int border,
+			final int format,
+			final int type) {
+		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, level, internalFormat, width, height, border, format, type,
+				(ByteBuffer) null);
+		OpenGL.checkGlError("glTexImage2D (empty)");
+	}
+
 	public static void glTexSubImage2D(
 			final int level,
 			final int xOffset,
@@ -1063,27 +1184,39 @@ public class OpenGL {
 		GL11.glTexParameteri(OpenGL.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
 	}
 	
+	/**
+	 * Get the current viewport dimensions in pixels.
+	 * @return Viewport width and height as a Vector2f
+	 */
+	public static Vector2f getViewportSize() {
+		return new Vector2f(viewportWidth, viewportHeight);
+	}
+
 	public static void setViewPort(final Vector2f start, final Vector2f stop) {
-		// LOGGER.info("setViewport " + start + " " + stop);
-		GL11.glViewport((int) start.x(), (int) start.y(), (int) stop.x(), (int) stop.y());
+		viewportWidth = (int) stop.x();
+		viewportHeight = (int) stop.y();
+		GL11.glViewport((int) start.x(), (int) start.y(), viewportWidth, viewportHeight);
 		OpenGL.checkGlError("glViewport");
 	}
-	
+
 	public static void setViewPort(final Vector2i start, final Vector2i stop) {
-		// LOGGER.info("setViewport " + start + " " + stop);
-		GL11.glViewport(start.x(), start.y(), stop.x(), stop.y());
+		viewportWidth = stop.x();
+		viewportHeight = stop.y();
+		GL11.glViewport(start.x(), start.y(), viewportWidth, viewportHeight);
 		OpenGL.checkGlError("glViewport");
 	}
-	
+
 	public static void setViewPort(final Vector3f start, final Vector3f stop) {
-		// LOGGER.info("setViewport " + start + " " + stop);
-		GL11.glViewport((int) start.x(), (int) start.y(), (int) stop.x(), (int) stop.y());
+		viewportWidth = (int) stop.x();
+		viewportHeight = (int) stop.y();
+		GL11.glViewport((int) start.x(), (int) start.y(), viewportWidth, viewportHeight);
 		OpenGL.checkGlError("glViewport");
 	}
-	
+
 	public static void setViewPort(final Vector3i start, final Vector3i stop) {
-		// LOGGER.info("setViewport " + start + " " + stop);
-		GL11.glViewport(start.x(), start.y(), stop.x(), stop.y());
+		viewportWidth = stop.x();
+		viewportHeight = stop.y();
+		GL11.glViewport(start.x(), start.y(), viewportWidth, viewportHeight);
 		OpenGL.checkGlError("glViewport");
 	}
 	
