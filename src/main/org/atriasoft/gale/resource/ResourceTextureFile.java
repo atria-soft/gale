@@ -92,7 +92,7 @@ public class ResourceTextureFile extends ResourceTexture2 {
 		if (uri.get().endsWith(".svg")) {
 			final EsvgDocument doc = new EsvgDocument();
 			doc.load(uri);
-			tmp = ToolImage.convertImageByte(doc.renderImageFloatRGBA(size));
+			tmp = ToolImage.fromBufferedImage(doc.renderImage(size));
 		} else {
 			try (final InputStream in = Uri.getStream(uri)) {
 				tmp = ToolImage.loadImage(in);
