@@ -5,8 +5,9 @@
  */
 package org.atriasoft.gale.resource;
 
-import org.atriasoft.egami.ImageByte;
-import org.atriasoft.egami.ImageByteRGBA;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.atriasoft.etk.Tools;
 import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2i;
@@ -22,12 +23,12 @@ public class ResourceTexture2 extends Resource {
 		rgb, // !< red/green/blue data
 		rgba // !< red/green/blue/alpha data
 	}
-	
+
 	public static ResourceTexture2 create() {
 		LOGGER.trace("KEEP: Resource Texture Dynamic: ");
 		return new ResourceTexture2();
 	}
-	
+
 	public static ResourceTexture2 create(final Uri uri) {
 		LOGGER.trace("KEEP: Resource Texture: {}", uri);
 		final Resource object2 = Resource.getManager().localKeep(uri);
@@ -42,7 +43,7 @@ public class ResourceTexture2 extends Resource {
 		LOGGER.trace("CREATE: new Texture: {}", uri);
 		return new ResourceTexture2(uri);
 	}
-	
+
 	public static ResourceTexture2 createNamed(final String uri) {
 		LOGGER.trace("KEEP: Resource Texture Named: {}", uri);
 		final Resource object2 = Resource.getManager().localKeep(uri);
@@ -57,32 +58,44 @@ public class ResourceTexture2 extends Resource {
 		LOGGER.debug("CREATE: new Texture Named: {}", uri);
 		return new ResourceTexture2(uri);
 	}
-	
-	/*
-	 * public static ResourceTexture2 createFromPng(final Uri uriTexture) { return
-	 * createFromPng(uriTexture, 1); }
-	 *
-	 * public static ResourceTexture2 createFromPng(final Uri uriTexture, final int
-	 * textureUnit) { ResourceTexture2 resource; Resource resource2; final String
-	 * name = uriTexture.getValue(); if (name.isEmpty() == false && name != "---") {
-	 * resource2 = getManager().localKeep(name); } else {
-	 * LOGGER.error("Can not create a shader without a filaname"); return null; } if
-	 * (resource2 != null) { if (resource2 instanceof ResourceTexture2) {
-	 * resource2.keep(); return (ResourceTexture2) resource2; }
-	 * LOGGER.critical("Request resource file : '" + name +
-	 * "' With the wrong type (dynamic cast error)");
-	 * System.exit(-1);
-	 * return null; } resource = new
-	 * ResourceTexture2(uriTexture, textureUnit); final ImageRawData decodedData =
-	 * ImageLoader.decodePngFile(uriTexture);
-	 * resource.setTexture(decodedData.getBuffer(), new
-	 * Vector2i(decodedData.getWidth(), decodedData.getHeight()),
-	 * (decodedData.isHasAlpha() == true ? TextureColorMode.rgba :
-	 * TextureColorMode.rgb), textureUnit); resource.flush(); return resource; }
+
+	/**
+	 * Extract raw byte array (RGBA or RGB) from a BufferedImage for OpenGL upload.
 	 */
-	
+	static byte[] extractRawBytes(final BufferedImage image) {
+		final int width = image.getWidth();
+		final int height = image.getHeight();
+		final boolean hasAlpha = image.getColorModel().hasAlpha();
+		final int channels = hasAlpha ? 4 : 3;
+		final byte[] raw = new byte[width * height * channels];
+		for (int yyy = 0; yyy < height; yyy++) {
+			for (int xxx = 0; xxx < width; xxx++) {
+				final int argb = image.getRGB(xxx, yyy);
+				final int offset = (yyy * width + xxx) * channels;
+				raw[offset] = (byte) ((argb >> 16) & 0xFF);
+				raw[offset + 1] = (byte) ((argb >> 8) & 0xFF);
+				raw[offset + 2] = (byte) (argb & 0xFF);
+				if (hasAlpha) {
+					raw[offset + 3] = (byte) ((argb >> 24) & 0xFF);
+				}
+			}
+		}
+		return raw;
+	}
+
+	/**
+	 * Resize a BufferedImage, preserving existing pixel data.
+	 */
+	protected static BufferedImage resizeImage(final BufferedImage source, final int newWidth, final int newHeight) {
+		final BufferedImage resized = new BufferedImage(newWidth, newHeight, source.getType());
+		final Graphics2D g = resized.createGraphics();
+		g.drawImage(source, 0, 0, null);
+		g.dispose();
+		return resized;
+	}
+
 	// openGl Context properties :
-	protected ImageByte data = new ImageByteRGBA(32, 32);
+	protected BufferedImage data = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
 	// !< Color space of the image.
 	private final TextureColorMode dataColorSpace = TextureColorMode.rgba;
 	// Filter apply at the image when rendering it
@@ -96,30 +109,22 @@ public class ResourceTexture2 extends Resource {
 	// ! some image are not square == > we need to sqared it to prevent some openGl
 	// api error the the displayable size is not all the time 0.0 . 1.0
 	protected Vector2i realImageSize = new Vector2i(1, 1);
-	
+
 	// repeat mode of the image (repeat the image if out of range [0..1])
 	protected boolean repeat = false;
-	
+
 	protected int texId = -1; // !< openGl textureID.
-	
+
 	public ResourceTexture2() {}
-	
+
 	public ResourceTexture2(final String filename) {
 		super(filename);
 	}
-	
-	/*
-	 * public void bindForRendering(final int idTexture) { if (this.loaded == false)
-	 * { return; } GL13.glActiveTexture(textureIdBinding[idTexture]);
-	 * GL11.glBindTexture(GL11.GLTEXTURE2D, this.texId); if (this.dataColorSpace
-	 * == TextureColorMode.rgb) { OpenGL.enable(OpenGL.Flag.flagcullFace);
-	 * OpenGL.enable(OpenGL.Flag.flagback); } }
-	 */
-	
+
 	public ResourceTexture2(final Uri filename) {
 		super(filename);
 	}
-	
+
 	public void bindForRendering(final int idTexture) {
 		if (!this.loaded) {
 			LOGGER.warn("TEXTURE: bindForRendering called but texture not loaded: [{}]", getId());
@@ -132,36 +137,36 @@ public class ResourceTexture2 extends Resource {
 			OpenGL.enable(OpenGL.Flag.flag_back);
 		}
 	}
-	
+
 	@Override
 	public void cleanUp() {
 		removeContext();
 	}
-	
+
 	// Flush the data to send it at the openGl system
 	public synchronized void flush() {
 		// request to the manager to be call at the next update ...
 		LOGGER.trace("Request UPDATE of Element");
 		Resource.getManager().update(this);
 	}
-	
+
 	// Get the reference on this image to draw something on it ...
-	public ImageByte get() {
+	public BufferedImage get() {
 		return this.data;
 	}
-	
+
 	public Vector2i getOpenGlSize() {
-		return this.data.getSize();
+		return new Vector2i(this.data.getWidth(), this.data.getHeight());
 	}
-	
+
 	public int getRendererId() {
 		return this.texId;
 	}
-	
+
 	public Vector2i getUsableSize() {
 		return this.realImageSize;
 	}
-	
+
 	@Override
 	public synchronized void removeContext() {
 		if (this.loaded) {
@@ -172,31 +177,24 @@ public class ResourceTexture2 extends Resource {
 			this.loaded = false;
 		}
 	}
-	
+
 	@Override
 	public synchronized void removeContextToLate() {
 		this.loaded = false;
 		this.texId = -1;
 	}
-	
+
 	/**
 	 * Set the image in the texture system
-	 * @note It will resize in square2 if needed by the system.
 	 * @param image Image to set.
 	 */
-	public synchronized void set(final ImageByte image) {
-		LOGGER.trace("Set a new image in a texture:    size={}", image.getSize());
+	public synchronized void set(final BufferedImage image) {
+		LOGGER.trace("Set a new image in a texture:    size={}x{}", image.getWidth(), image.getHeight());
 		this.data = image;
-		this.realImageSize = this.data.getSize();
-		// Disable compatibility size for embended ...
-		//		final Vector2i compatibilityHWSize = new Vector2i(Tools.nextP2(this.realImageSize.x()), Tools.nextP2(this.realImageSize.y()));
-		//		if (!this.realImageSize.equals(compatibilityHWSize)) {
-		//			LOGGER.warn("RESIZE Image for HArwareCompatibility:" + this.realImageSize + " => " + compatibilityHWSize);
-		//			this.data.resize(compatibilityHWSize.x(), compatibilityHWSize.y());
-		//		}
+		this.realImageSize = new Vector2i(this.data.getWidth(), this.data.getHeight());
 		flush();
 	}
-	
+
 	/**
 	 * Set the Filter mode to apply at the image when display with a scale
 	 *        (not 1:1 ratio)
@@ -205,13 +203,15 @@ public class ResourceTexture2 extends Resource {
 	public void setFilterMode(final TextureFilter filter) {
 		this.filter = filter;
 	}
-	
+
 	// You must set the size here, because it will be set in multiple of pow(2)
-	public synchronized void setImageSize(Vector2i newSize) {
-		newSize = new Vector2i(Tools.nextP2(newSize.x()), Tools.nextP2(newSize.y()));
-		this.data.resize(newSize.x(), newSize.y());
+	public synchronized void setImageSize(final Vector2i requestedSize) {
+		final Vector2i newSize = new Vector2i(Tools.nextP2(requestedSize.x()), Tools.nextP2(requestedSize.y()));
+		if (this.data.getWidth() != newSize.x() || this.data.getHeight() != newSize.y()) {
+			this.data = resizeImage(this.data, newSize.x(), newSize.y());
+		}
 	}
-	
+
 	/**
 	 * Set the repeat mode of the images if UV range is out of [0..1]
 	 * @param value Value of the new repeat mode
@@ -219,7 +219,7 @@ public class ResourceTexture2 extends Resource {
 	public void setRepeat(final boolean value) {
 		this.repeat = value;
 	}
-	
+
 	public void unBindForRendering() {
 		if (!this.loaded) {
 			return;
@@ -229,20 +229,19 @@ public class ResourceTexture2 extends Resource {
 			OpenGL.disable(OpenGL.Flag.flag_back);
 		}
 	}
-	
+
 	@Override
 	public synchronized boolean updateContext() {
 		LOGGER.trace("updateContext [START]");
-		//final Steady tic = Steady.now();
-		/*
-		 * TODO : use unlockable synchronized ... if (lock.tryLock() == false) { //Lock
-		 * error ==> try later ... return false; }
-		 */
-		final int typeObject = this.data.hasAlpha() ? OpenGL.GL_RGBA : OpenGL.GL_RGB;
+		final boolean hasAlpha = this.data.getColorModel().hasAlpha();
+		final int typeObject = hasAlpha ? OpenGL.GL_RGBA : OpenGL.GL_RGB;
 		final int sizeObject = OpenGL.GL_UNSIGNED_BYTE;
+		final int width = this.data.getWidth();
+		final int height = this.data.getHeight();
+		final Vector2i currentSize = new Vector2i(width, height);
 		if (this.loaded) {
 			if (this.lastTypeObject != typeObject || this.lastSizeObject != sizeObject
-					|| !this.lastSize.equals(this.data.getSize())) {
+					|| !this.lastSize.equals(currentSize)) {
 				LOGGER.trace("TEXTURE: Rm [{}] texId={}", getId(), this.texId);
 				OpenGL.glDeleteTextures(this.texId);
 				this.loaded = false;
@@ -251,19 +250,18 @@ public class ResourceTexture2 extends Resource {
 		if (!this.loaded) {
 			// Request a new texture at openGl :
 			this.texId = OpenGL.glGenTextures();
-			this.lastSize = this.data.getSize();
+			this.lastSize = currentSize;
 			this.lastTypeObject = typeObject;
 			this.lastSizeObject = sizeObject;
-			LOGGER.trace("TEXTURE: add [{}]={} => {} OGlId={} type={}", getId(), this.data.getSize(), this.data.getGPUSize(), this.texId, this.data.getClass().getCanonicalName());
+			LOGGER.trace("TEXTURE: add [{}]={}x{} OGlId={}", getId(), width, height, this.texId);
 		} else {
-			LOGGER.trace("TEXTURE: update [{}]={} => {} OGlId={} type={}", getId(), this.data.getSize(), this.data.getGPUSize(), this.texId, this.data.getClass().getCanonicalName());
+			LOGGER.trace("TEXTURE: update [{}]={}x{} OGlId={}", getId(), width, height, this.texId);
 		}
 		// in all case we set the texture properties :
-		// TODO check error ???
 		// Force texture unit 0 to avoid binding on wrong unit
 		OpenGL.forceActiveTexture(0);
 		OpenGL.bindTexture2D(this.texId);
-		
+
 		if (!this.loaded) {
 			if (!this.repeat) {
 				OpenGL.setTexture2DWrapClampToEdge();
@@ -276,31 +274,26 @@ public class ResourceTexture2 extends Resource {
 				OpenGL.setTexture2DFilterNearest();
 			}
 		}
-		// glPixelStorei(GLUNPACKALIGNMENT,1);
-		//final Steady toc1 = Steady.now();
-		//LOGGER.trace("    BIND                 ==> " + toc1.less(tic));
-		// egami::store(this.data, String("~/texture") + etk::toString(getId()) + ".bmp");
+		final byte[] raw = extractRawBytes(this.data);
 		if (!this.loaded) {
 			OpenGL.glTexImage2D(0, // Level
 					typeObject, // Format internal
-					this.data.getWidth(), this.data.getHeight(), 0, // Border
+					width, height, 0, // Border
 					typeObject, // format
 					sizeObject, // type
-					this.data.getRaw());
-			
+					raw);
+
 		} else {
 			OpenGL.glTexSubImage2D(0, // Level
 					0, // x offset
 					0, // y offset
-					this.data.getWidth(), this.data.getHeight(), typeObject, // format
+					width, height, typeObject, // format
 					sizeObject, // type
-					this.data.getRaw());
+					raw);
 		}
 		// now the data is loaded
 		this.loaded = true;
-		// final Steady toc = Steady.now();
-		// LOGGER.error(" updateContext [STOP] ==> " + (toc - toc1));
 		return true;
 	}
-	
+
 }

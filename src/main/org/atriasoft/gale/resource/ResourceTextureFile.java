@@ -1,10 +1,11 @@
 package org.atriasoft.gale.resource;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.atriasoft.egami.ImageByte;
-import org.atriasoft.egami.ToolImage;
+import javax.imageio.ImageIO;
+
 import org.atriasoft.esvg.EsvgDocument;
 import org.atriasoft.etk.Tools;
 import org.atriasoft.etk.Uri;
@@ -88,14 +89,14 @@ public class ResourceTextureFile extends ResourceTexture2 {
 	protected ResourceTextureFile(final String genName, final Uri uri, final Vector2i size) {
 		super(genName);
 		LOGGER.debug("create a new resource::Image: genName={} uri={} size={}", genName, uri, size);
-		final ImageByte tmp;
+		final BufferedImage tmp;
 		if (uri.get().endsWith(".svg")) {
 			final EsvgDocument doc = new EsvgDocument();
 			doc.load(uri);
-			tmp = ToolImage.fromBufferedImage(doc.renderImage(size));
+			tmp = doc.renderImage(size);
 		} else {
 			try (final InputStream in = Uri.getStream(uri)) {
-				tmp = ToolImage.loadImage(in);
+				tmp = ImageIO.read(in);
 			} catch (final IOException ex) {
 				LOGGER.error("Failed to load image: {}", uri, ex);
 				return;

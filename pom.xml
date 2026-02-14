@@ -175,11 +175,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.atriasoft</groupId>
-			<artifactId>egami</artifactId>
-			<version>0.1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.atriasoft</groupId>
 			<artifactId>esvg</artifactId>
 			<version>0.1.0</version>
 		</dependency>

@@ -1,8 +1,8 @@
 package org.atriasoft.gale.resource;
 
+import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
-import org.atriasoft.egami.ImageByteRGBA;
 import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2i;
 import org.atriasoft.gale.backend3d.OpenGL;
@@ -59,34 +59,39 @@ public class ResourceTexture extends Resource {
 		try {
 			decodedData = ImageLoader.decodePngFile(uriTexture);
 		} catch (final Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
-		final ImageByteRGBA img = new ImageByteRGBA(decodedData.getWidth(), decodedData.getHeight());
-		final ByteBuffer mlklmklm = decodedData.getBuffer();
-		final byte[] elemData = new byte[mlklmklm.remaining()];
-		mlklmklm.get(elemData);
+		final int width = decodedData.getWidth();
+		final int height = decodedData.getHeight();
+		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		final ByteBuffer rawBuf = decodedData.getBuffer();
+		final byte[] elemData = new byte[rawBuf.remaining()];
+		rawBuf.get(elemData);
 		if (decodedData.isHasAlpha()) {
-			for (int yyy = 0; yyy < decodedData.getHeight(); yyy++) {
-				for (int xxx = 0; xxx < decodedData.getWidth(); xxx++) {
-					img.setRByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 0]);
-					img.setGByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 1]);
-					img.setBByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 2]);
-					img.setAByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 4 + 3]);
+			for (int yyy = 0; yyy < height; yyy++) {
+				for (int xxx = 0; xxx < width; xxx++) {
+					final int offset = (yyy * width + xxx) * 4;
+					final int argb = ((elemData[offset + 3] & 0xFF) << 24)
+							| ((elemData[offset] & 0xFF) << 16)
+							| ((elemData[offset + 1] & 0xFF) << 8)
+							| (elemData[offset + 2] & 0xFF);
+					img.setRGB(xxx, yyy, argb);
 				}
 			}
 		} else {
-			for (int yyy = 0; yyy < decodedData.getHeight(); yyy++) {
-				for (int xxx = 0; xxx < decodedData.getWidth(); xxx++) {
-					img.setAByte(xxx, yyy, (byte) 0xFF);
-					img.setRByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 0]);
-					img.setGByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 1]);
-					img.setBByte(xxx, yyy, elemData[(yyy * decodedData.getWidth() + xxx) * 3 + 2]);
+			for (int yyy = 0; yyy < height; yyy++) {
+				for (int xxx = 0; xxx < width; xxx++) {
+					final int offset = (yyy * width + xxx) * 3;
+					final int argb = 0xFF000000
+							| ((elemData[offset] & 0xFF) << 16)
+							| ((elemData[offset + 1] & 0xFF) << 8)
+							| (elemData[offset + 2] & 0xFF);
+					img.setRGB(xxx, yyy, argb);
 				}
 			}
 		}
-		resource.setTexture(img, new Vector2i(decodedData.getWidth(), decodedData.getHeight()),
+		resource.setTexture(img, new Vector2i(width, height),
 				(decodedData.isHasAlpha() ? TextureColorMode.rgba : TextureColorMode.rgb), textureUnit);
 		resource.flush();
 		return resource;
@@ -118,7 +123,7 @@ public class ResourceTexture extends Resource {
 	// Image properties:
 	// pointer on the image data.
 	//private ByteBuffer data = null;
-	protected ImageByteRGBA data = new ImageByteRGBA(32, 32);
+	protected BufferedImage data = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
 	// size of the image data.
 	private Vector2i size = new Vector2i(-1, -1);
 	//!< Color space of the image.
@@ -187,7 +192,7 @@ public class ResourceTexture extends Resource {
 	}
 
 	public void setTexture(
-			final ImageByteRGBA data,
+			final BufferedImage data,
 			final Vector2i size,
 			final TextureColorMode dataColorSpace,
 			final int textureUnit) {
@@ -223,15 +228,9 @@ public class ResourceTexture extends Resource {
 		// All RGB bytes are aligned to each other and each component is 1 byte
 		GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
 		LOGGER.debug("TEXTURE: add [{}]={} OGlId={}", getId(), this.size, this.texId);
-		if (this.dataColorSpace == TextureColorMode.rgb) {
-			OpenGL.glTexImage2D(0, GL11.GL_RGBA, this.size.x(), this.size.y(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE,
-					this.data.getRaw());
-			//The local image has not RGB but only RGBA data ...
-			//OpenGL.glTexImage2D(0, GL11.GL_RGBA, this.size.x(), this.size.y(), 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, this.data.getRaw());
-		} else {
-			OpenGL.glTexImage2D(0, GL11.GL_RGBA, this.size.x(), this.size.y(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE,
-					this.data.getRaw());
-		}
+		final byte[] raw = ResourceTexture2.extractRawBytes(this.data);
+		OpenGL.glTexImage2D(0, GL11.GL_RGBA, this.size.x(), this.size.y(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE,
+				raw);
 		// generate multi-texture mapping
 		GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
 
