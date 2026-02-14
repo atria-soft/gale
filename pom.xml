@@ -175,12 +175,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.atriasoft</groupId>
-			<artifactId>io-gami</artifactId>
+			<artifactId>egami</artifactId>
 			<version>0.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.atriasoft</groupId>
-			<artifactId>egami</artifactId>
+			<artifactId>esvg</artifactId>
 			<version>0.1.0</version>
 		</dependency>
 		

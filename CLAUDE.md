@@ -356,7 +356,7 @@ program.unUse();
 Modern texture resource. Can be created dynamically or from URI.
 
 ```java
-// From file (via IOgami image loading)
+// From file (via ToolImage + EsvgDocument)
 ResourceTextureFile tex = ResourceTextureFile.create(new Uri("DATA", "image.png"));
 
 // Dynamic texture
@@ -378,7 +378,7 @@ Vector2i realSize = tex.getUsableSize();                       // Actual image d
 
 ### ResourceTextureFile
 
-Extends `ResourceTexture2`. Loads image files through the `IOgami` library (supports PNG, SVG with auto-resize to power-of-2).
+Extends `ResourceTexture2`. Loads image files via `egami/ToolImage` + `esvg/EsvgDocument` (supports PNG, JPEG, BMP, GIF, SVG with auto-resize to power-of-2).
 
 ```java
 // Auto-detect size
@@ -652,7 +652,7 @@ gale/
 | Library | Usage |
 |---------|-------|
 | `etk` | Core utilities (Uri, Color, Vector2f/3f, Matrix4f, Dimension) |
-| `egami` | Image data types (ImageByte, ImageByteRGBA) |
-| `io-gami` | Image loading (IOgami.load) |
+| `egami` | Image data types + ImageIO load/store (ToolImage) |
+| `esvg` | SVG rendering (EsvgDocument) for texture loading |
 | `LWJGL` | Native OpenGL, AWT integration |
 | `SLF4J` | Logging |
