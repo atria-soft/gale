@@ -1,50 +1,59 @@
 package org.atriasoft.gale.tools;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import javax.imageio.ImageIO;
+
 import org.atriasoft.etk.Uri;
-import org.atriasoft.pngdecoder.PNGDecoder;
-import org.atriasoft.pngdecoder.PNGDecoder.Format;
 
 public class ImageLoader {
 	public static ImageRawData decodePngFile(final Uri filename) throws Exception {
-		ByteBuffer buf = null;
-		int tWidth = 0;
-		int tHeight = 0;
-		boolean hasAlpha = false;
-		try {
-			// Open the PNG file as an InputStream
-			final InputStream in = Uri.getStream(filename);
+		try (InputStream in = Uri.getStream(filename)) {
 			if (in == null) {
-				throw new Exception("fail to get th estream ...");
+				throw new Exception("Failed to get stream for: " + filename);
 			}
-			// Link the PNG decoder to this stream
-			final PNGDecoder decoder = new PNGDecoder(in);
-			// Get the width and height of the texture
-			tWidth = decoder.getWidth();
-			tHeight = decoder.getHeight();
-			hasAlpha = decoder.hasAlpha();
-			// Decode the PNG file in a ByteBuffer
+			final BufferedImage image = ImageIO.read(in);
+			if (image == null) {
+				throw new Exception("Unsupported image format or corrupted data: " + filename);
+			}
+			final int width = image.getWidth();
+			final int height = image.getHeight();
+			final boolean hasAlpha = image.getColorModel().hasAlpha();
 			if (hasAlpha) {
-				buf = ByteBuffer.allocateDirect(4 * decoder.getWidth() * decoder.getHeight());
-				//decoder.decodeFlipped(buf, decoder.getWidth() * 4, Format.RGBA);
-				decoder.decode(buf, decoder.getWidth() * 4, Format.RGBA);
+				final ByteBuffer buf = ByteBuffer.allocateDirect(4 * width * height);
+				for (int yyy = 0; yyy < height; yyy++) {
+					for (int xxx = 0; xxx < width; xxx++) {
+						final int argb = image.getRGB(xxx, yyy);
+						buf.put((byte) ((argb >> 16) & 0xFF));
+						buf.put((byte) ((argb >> 8) & 0xFF));
+						buf.put((byte) (argb & 0xFF));
+						buf.put((byte) ((argb >> 24) & 0xFF));
+					}
+				}
+				buf.flip();
+				return new ImageRawData(buf, width, height, true);
 			} else {
-				buf = ByteBuffer.allocateDirect(3 * decoder.getWidth() * decoder.getHeight());
-				//decoder.decodeFlipped(buf, decoder.getWidth() * 4, Format.RGBA);
-				decoder.decode(buf, decoder.getWidth() * 3, Format.RGB);
+				final ByteBuffer buf = ByteBuffer.allocateDirect(3 * width * height);
+				for (int yyy = 0; yyy < height; yyy++) {
+					for (int xxx = 0; xxx < width; xxx++) {
+						final int rgb = image.getRGB(xxx, yyy);
+						buf.put((byte) ((rgb >> 16) & 0xFF));
+						buf.put((byte) ((rgb >> 8) & 0xFF));
+						buf.put((byte) (rgb & 0xFF));
+					}
+				}
+				buf.flip();
+				return new ImageRawData(buf, width, height, false);
 			}
-			buf.flip();
-			in.close();
 		} catch (final IOException e) {
 			e.printStackTrace();
 			System.err.println("try to load texture " + filename + ", didn't work");
-			System.exit(-1);
+			throw new Exception("Failed to load image: " + filename, e);
 		}
-		return new ImageRawData(buf, tWidth, tHeight, hasAlpha);
 	}
-	
+
 	private ImageLoader() {}
 }
