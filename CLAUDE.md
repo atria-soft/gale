@@ -606,6 +606,13 @@ public class MyAppApplication extends GaleApplication {
 }
 ```
 
+## Common Pitfalls
+
+### OpenGL state management
+- **Always restore `blendFunc` after changing it.** Non-standard blending (e.g., additive `GL_SRC_ALPHA, GL_ONE`) leaks into subsequent passes if not reset. Call `OpenGL.blendFuncAuto()` to restore default alpha blending (`GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA`).
+- **General rule:** any OpenGL state changed during a render pass (`blendFunc`, `depthFunc`, `stencilOp`, `cullFace`, etc.) must be restored before returning. OpenGL is global mutable state.
+- **Flags use deferred state management** — changes are batched. Call `OpenGL.updateAllFlags()` to flush pending state changes before drawing.
+
 ## File Structure
 
 ```
