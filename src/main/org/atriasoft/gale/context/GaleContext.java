@@ -391,7 +391,6 @@ public abstract class GaleContext {
 				if (this.application != null) {
 					if (this.applicationState == ApplicationState.RUNNING) {
 						// Redraw all needed elements
-						//LOGGER.debug("Regenerate Display");
 						this.application.onRegenerateDisplay(this);
 						needRedraw = this.application.isDrawingNeeded();
 					} else {
