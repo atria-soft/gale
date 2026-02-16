@@ -29,6 +29,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
+import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
@@ -1417,6 +1418,88 @@ public class OpenGL {
 		OpenGL.checkGlError("glVertexAttribPointer");
 	}
 	
+	// --- Shadow mapping support ---
+
+	/**
+	 * Select a color buffer for drawing. Use GL11.GL_NONE for depth-only FBOs.
+	 * @param mode The buffer to draw to (e.g., GL11.GL_NONE, GL30.GL_COLOR_ATTACHMENT0)
+	 */
+	public static void glDrawBuffer(final int mode) {
+		GL11.glDrawBuffer(mode);
+		OpenGL.checkGlError("glDrawBuffer");
+	}
+
+	/**
+	 * Select a color buffer as the source for reading. Use GL11.GL_NONE for depth-only FBOs.
+	 * @param mode The buffer to read from (e.g., GL11.GL_NONE, GL30.GL_COLOR_ATTACHMENT0)
+	 */
+	public static void glReadBuffer(final int mode) {
+		GL11.glReadBuffer(mode);
+		OpenGL.checkGlError("glReadBuffer");
+	}
+
+	/**
+	 * Set an integer texture parameter.
+	 * @param target Texture target (e.g., GL11.GL_TEXTURE_2D)
+	 * @param pname  Parameter name (e.g., GL14.GL_TEXTURE_COMPARE_MODE)
+	 * @param param  Parameter value
+	 */
+	public static void glTexParameteri(final int target, final int pname, final int param) {
+		GL11.glTexParameteri(target, pname, param);
+		OpenGL.checkGlError("glTexParameteri");
+	}
+
+	/**
+	 * Set a float-array texture parameter (e.g., border color).
+	 * @param target Texture target (e.g., GL11.GL_TEXTURE_2D)
+	 * @param pname  Parameter name (e.g., GL11.GL_TEXTURE_BORDER_COLOR)
+	 * @param params Float array of parameter values
+	 */
+	public static void glTexParameterfv(final int target, final int pname, final float[] params) {
+		GL11.glTexParameterfv(target, pname, params);
+		OpenGL.checkGlError("glTexParameterfv");
+	}
+
+	/**
+	 * Specify the depth comparison function.
+	 * @param func Depth function (e.g., GL11.GL_LESS, GL11.GL_LEQUAL)
+	 */
+	public static void glDepthFunc(final int func) {
+		GL11.glDepthFunc(func);
+		OpenGL.checkGlError("glDepthFunc");
+	}
+
+	/**
+	 * Set texture 2D wrap mode to CLAMP_TO_BORDER.
+	 * Fragments outside [0,1] use the border color set by {@link #setTexture2DBorderColor}.
+	 */
+	public static void setTexture2DWrapClampToBorder() {
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL13.GL_CLAMP_TO_BORDER);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL13.GL_CLAMP_TO_BORDER);
+	}
+
+	/**
+	 * Set the border color for CLAMP_TO_BORDER wrap mode.
+	 * For shadow maps, typically (1,1,1,1) so areas outside the shadow map are lit.
+	 * @param r Red component
+	 * @param g Green component
+	 * @param b Blue component
+	 * @param a Alpha component
+	 */
+	public static void setTexture2DBorderColor(final float r, final float g, final float b, final float a) {
+		final float[] borderColor = { r, g, b, a };
+		GL11.glTexParameterfv(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_BORDER_COLOR, borderColor);
+	}
+
+	/**
+	 * Enable hardware shadow comparison on a texture (sampler2DShadow).
+	 * When enabled, texture() returns a comparison result instead of the raw depth.
+	 */
+	public static void setTexture2DShadowCompare() {
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_COMPARE_MODE, GL30.GL_COMPARE_REF_TO_TEXTURE);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_COMPARE_FUNC, GL11.GL_LEQUAL);
+	}
+
 	private OpenGL() {}
-	
+
 }

@@ -530,6 +530,27 @@ public class ResourceProgram extends Resource {
 		this.hasTexture1 = true;
 	}
 
+	/**
+	 * Bind a texture to an arbitrary texture unit and set the corresponding sampler uniform.
+	 * @param idElem          Id of the uniform sampler
+	 * @param textureOpenGlID Real OpenGL texture ID
+	 * @param textureUnit     Texture unit index (0-31)
+	 */
+	public void setTexture(final int idElem, final int textureOpenGlID, final int textureUnit) {
+		if (!this.exist) {
+			return;
+		}
+		if (idElem < 0 || (long) idElem > this.elementList.size()) {
+			return;
+		}
+		if (!this.elementList.get(idElem).isLinked) {
+			return;
+		}
+		OpenGL.activeTexture(textureUnit);
+		OpenGL.bindTexture2D(textureOpenGlID);
+		uniformInt(this.elementList.get(idElem).elementId, textureUnit);
+	}
+
 	public void uniformColor(final int idElem, final Color value) {
 		if (!this.exist) {
 			return;
