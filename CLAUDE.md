@@ -493,15 +493,35 @@ context.postActionToGui(() -> { /* runs on GUI thread */ });
 context.postActionAsync(() -> { /* runs asynchronously */ });
 ```
 
-The render loop (`operatingSystemDraw` in `GaleContext`) manages:
-1. Process async message queue
-2. Process GUI message queue
-3. Lock OpenGL context
-4. Update resources via `ResourceManager.updateContext()`
-5. Call `application.onDraw()`
-6. Flush OpenGL
-7. Clean removed resources
-8. Unlock OpenGL context
+### Render Loop
+
+The main loop (`ContextLWJGLAWT.run()`) uses a frame-rate-limited event loop:
+
+1. **Process events** — drain all pending GUI events (`processEventsGui()`)
+2. **Render** — `canvas.render()` triggers `paintGL()` which calls `operatingSystemDraw(false)` (only draws if `needRedraw` flag is set) and `swapBuffers()`
+3. **Process post-render events** — handle events that arrived during rendering
+4. **Sleep** — wait for remaining frame budget to maintain target FPS
+
+The `operatingSystemDraw()` call internally:
+1. Processes async message queue
+2. Locks OpenGL context
+3. Updates resources via `ResourceManager.updateContext()`
+4. Calls `application.onDraw()`
+5. Flushes OpenGL
+6. Cleans removed resources
+7. Unlocks OpenGL context
+
+### Frame Rate Control
+
+```java
+GaleContext context = ...;
+context.setTargetFps(60);     // default: 60 FPS
+context.setTargetFps(120);    // for high refresh rate
+int fps = context.getTargetFps();
+long frameMs = context.getTargetFrameTimeMs();  // e.g. 16ms for 60 FPS
+```
+
+The frame rate limiter uses `Thread.sleep()` for the remaining frame budget. Events are processed in batches before each frame, preventing event accumulation during drag operations.
 
 ## URI System
 
