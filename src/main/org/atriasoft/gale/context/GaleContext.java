@@ -61,6 +61,8 @@ public abstract class GaleContext {
 	// simulation area:
 	private long previousDisplayTime; // this is to limit framerate ... in case...
 	private final boolean displayFps = true;
+	private int targetFps = 60;
+	private long targetFrameTimeMs = 1000 / 60;
 
 	private final Lock msgSystemAsyncLock = new ReentrantLock();
 	private final MessageSystem msgSystemAsync = new MessageSystem();
@@ -787,6 +789,31 @@ public abstract class GaleContext {
 	//			this.simulationFile.close();
 	//		}
 	//	}
+	/**
+	 * Get the target frames per second.
+	 * @return the target FPS
+	 */
+	public int getTargetFps() {
+		return this.targetFps;
+	}
+
+	/**
+	 * Set the target frames per second (e.g. 60, 120).
+	 * @param fps the target FPS (clamped to 1-1000)
+	 */
+	public void setTargetFps(final int fps) {
+		this.targetFps = Math.max(1, Math.min(fps, 1000));
+		this.targetFrameTimeMs = 1000 / this.targetFps;
+	}
+
+	/**
+	 * Get the target frame time in milliseconds.
+	 * @return the target frame time in ms
+	 */
+	public long getTargetFrameTimeMs() {
+		return this.targetFrameTimeMs;
+	}
+
 	public void requestUpdateSize() {
 		postActionAsync(this.STATIC_ID_REDRAW_ALL, context -> {
 			//LOGGER.debug("Receive MSG : THREADRESIZE");

@@ -169,8 +169,7 @@ public class ContextLWJGLAWT extends GaleContext
 
 			@Override
 			public void paintGL() {
-				final long startRender = System.currentTimeMillis();
-				//LOGGER.warn("Draw ... ");
+				// Check for resize
 				final int w = getWidth();
 				final int h = getHeight();
 				if (ContextLWJGLAWT.this.decoratedWindowsSize.x() != w
@@ -180,25 +179,11 @@ public class ContextLWJGLAWT extends GaleContext
 					final Vector2f tmpWindowsSize = new Vector2f(bounds.width, bounds.height);
 					operatingSystemResize(tmpWindowsSize);
 				}
-				operatingSystemDraw(true);
-				swapBuffers();
-				/*
-				if (Logger.isCriticalOccured()) {
-					ContextLWJGLAWT.this.frame.dispose();
+				// Draw only if needed
+				final boolean didDraw = operatingSystemDraw(false);
+				if (didDraw) {
+					swapBuffers();
 				}
-				*/
-				// Process event from the GUI (specific events...
-				processEventsGui();
-				/*
-				final long stopRender = System.currentTimeMillis();
-				try {
-					// limit at 60FPS ==> bad to do it here, but it work for now... add a minimum of 10ms to free lock...
-					Thread.sleep((int) FMath.max((3000.0f / 60.0f) - (stopRender - startRender), 10)); // This permit to limit the FPS (base 602FPS)
-				} catch (final InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				*/
 			}
 		}, BorderLayout.CENTER);
 		this.frame.pack();
@@ -544,73 +529,50 @@ public class ContextLWJGLAWT extends GaleContext
 
 	@Override
 	public int run() {
+		// Main loop: process events then render, with frame rate limiting.
+		// Events are processed on the Swing EDT via invokeLater, rendering
+		// is triggered by canvas.render() which calls paintGL().
 		final Runnable renderLoop = new Runnable() {
 			@Override
 			public void run() {
-				//				fps.tic();
 				if (!ContextLWJGLAWT.this.canvas.isValid()) {
 					System.exit(0);
 					return;
 				}
-				if (ContextLWJGLAWT.this.isInitialized) {
-					ContextLWJGLAWT.this.canvas.render();
+				if (!ContextLWJGLAWT.this.isInitialized) {
+					SwingUtilities.invokeLater(this);
+					return;
 				}
-				//				fps.toc();
-				//				fps.draw();
+				final long frameStartMs = System.currentTimeMillis();
+				final long targetFrameMs = getTargetFrameTimeMs();
+				final long frameDeadlineMs = frameStartMs + targetFrameMs;
+
+				// 1. Process events while we have time budget
+				processEventsGui();
+
+				// 2. Render (paintGL will only draw if needRedraw)
+				ContextLWJGLAWT.this.canvas.render();
+
+				// 3. If more events arrived during render, process them too
+				//    (keeps UI responsive without waiting for next frame)
+				processEventsGui();
+
+				// 4. Wait for remaining frame budget
+				final long nowMs = System.currentTimeMillis();
+				final long remainingMs = frameDeadlineMs - nowMs;
+				if (remainingMs > 1) {
+					try {
+						Thread.sleep(remainingMs);
+					} catch (final InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				}
+
+				// 5. Schedule next frame
 				SwingUtilities.invokeLater(this);
 			}
 		};
 		SwingUtilities.invokeLater(renderLoop);
-
-		//		while (canvas != null && canvas.isValid()) {
-		//			canvas.render();
-		//			try {
-		//				Thread.sleep(10);
-		//			} catch (InterruptedException e) {
-		//				// TODO Auto-generated catch block
-		//				e.printStackTrace();
-		//			}
-		//		}
-
-		// Run the rendering loop until the user has attempted to close
-		// the window or has pressed the ESCAPE key.
-		//		while ( !glfwWindowShouldClose(window) ) {
-		//			/*
-		//			fps.tic();
-		//			long currentFrameTime = getCurrentTime();
-		//			delta = (currentFrameTime-lastFrameTime)/1000f;
-		//			lastFrameTime = currentFrameTime;
-		//			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-		//			if (this.drawer != null) {
-		//				fps.incrementCounter();
-		//				this.drawer.draw();
-		//			}
-		//			lastMousePositionX = currentMousePositionX;
-		//			lastMousePositionY = currentMousePositionY;
-		//			whellOffsetY = 0;
-		//			whellOffsetY = 0;
-		//			glfwSwapBuffers(window); // swap the color buffers
-		//			// Poll for window events. The key callback above will only be
-		//			// invoked during this call.
-		//			glfwPollEvents();
-		//			fps.toc();
-		//			fps.draw();
-		//			*/
-		//
-		//			glfwSwapBuffers(window); // swap the color buffers
-		//			glfwPollEvents();
-		//			/*
-		//			if (specialEventThatNeedARedraw) {
-		//				X11_INFO("specialEventThatNeedARedraw = " << specialEventThatNeedARedraw);
-		//			}
-		//			hasDisplay = operatingSystemDraw(specialEventThatNeedARedraw);
-		//			if (hasDisplay) {
-		//				// need to request it every time needed to have a redrawing (this can take some time if the application filter the drfaw periodicity)
-		//				specialEventThatNeedARedraw = false;
-		//			}
-		//			*/
-		//		}
-		//System.exit(0);
 		return 0;
 	}
 
