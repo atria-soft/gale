@@ -59,6 +59,27 @@ public class MessageSystem {
 		return null;
 	}
 
+	/**
+	 * Wait until an event arrives or timeout expires.
+	 * @param timeoutMs maximum time to wait in milliseconds
+	 * @return true if there are events to process, false if timeout expired
+	 */
+	public synchronized boolean waitForEvent(final long timeoutMs) {
+		if (!this.data.isEmpty() || !this.dataSingle.isEmpty()) {
+			return true;
+		}
+		if (timeoutMs <= 0) {
+			return false;
+		}
+		try {
+			wait(timeoutMs);
+		} catch (final InterruptedException e) {
+			Thread.currentThread().interrupt();
+			return false;
+		}
+		return !this.data.isEmpty() || !this.dataSingle.isEmpty();
+	}
+
 	public synchronized int getSize() {
 		LOGGER.trace("------------------------------------------------------------");
 		LOGGER.trace("-- nb message: {} + {}", this.data.size(), this.dataSingle.size());

@@ -557,15 +557,14 @@ public class ContextLWJGLAWT extends GaleContext
 				//    (keeps UI responsive without waiting for next frame)
 				processEventsGui();
 
-				// 4. Wait for remaining frame budget
-				final long nowMs = System.currentTimeMillis();
-				final long remainingMs = frameDeadlineMs - nowMs;
-				if (remainingMs > 1) {
-					try {
-						Thread.sleep(remainingMs);
-					} catch (final InterruptedException e) {
-						Thread.currentThread().interrupt();
-					}
+				// 4. Wait for remaining frame budget, waking instantly on new events.
+				//    Uses wait/notify on the message queue instead of polling.
+				long nowMs = System.currentTimeMillis();
+				while (nowMs < frameDeadlineMs - 1) {
+					final long remainingMs = frameDeadlineMs - nowMs;
+					waitForGuiEvent(remainingMs);
+					processEventsGui();
+					nowMs = System.currentTimeMillis();
 				}
 
 				// 5. Schedule next frame

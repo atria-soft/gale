@@ -753,6 +753,16 @@ public abstract class GaleContext {
 		}
 	}
 
+	/**
+	 * Wait for GUI events with timeout. Returns immediately if events are pending,
+	 * otherwise blocks until an event arrives or timeout expires.
+	 * @param timeoutMs maximum time to wait in milliseconds
+	 * @return true if there are events to process
+	 */
+	protected boolean waitForGuiEvent(final long timeoutMs) {
+		return this.msgSystemGui.waitForEvent(timeoutMs);
+	}
+
 	//	gale::Context::~Context() {
 	//		LOGGER.info(" == > Gale system Un-Init (BEGIN)");
 	//		this.periodicThread.threadStart();
