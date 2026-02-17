@@ -508,7 +508,7 @@ public class ResourceProgram extends Resource {
 		// set the textureID
 		OpenGL.bindTexture2D(textureOpenGlID);
 		// set the texture on the uniform attribute
-		uniformInt(this.elementList.get(idElem).elementId, /* GLTEXTURE */0);
+		uniformInt(idElem, /* GLTEXTURE */0);
 		this.hasTexture = true;
 	}
 
@@ -526,7 +526,7 @@ public class ResourceProgram extends Resource {
 		// set the textureID
 		OpenGL.bindTexture2D(textureOpenGlID);
 		// set the texture on the uniform attribute
-		uniformInt(this.elementList.get(idElem).elementId, /* GLTEXTURE */1);
+		uniformInt(idElem, /* GLTEXTURE */1);
 		this.hasTexture1 = true;
 	}
 
@@ -548,7 +548,9 @@ public class ResourceProgram extends Resource {
 		}
 		OpenGL.activeTexture(textureUnit);
 		OpenGL.bindTexture2D(textureOpenGlID);
-		uniformInt(this.elementList.get(idElem).elementId, textureUnit);
+		// Set the sampler uniform to the texture unit index.
+		// Use the elementList index (idElem), not the raw OpenGL location.
+		uniformInt(idElem, textureUnit);
 	}
 
 	public void uniformColor(final int idElem, final Color value) {
