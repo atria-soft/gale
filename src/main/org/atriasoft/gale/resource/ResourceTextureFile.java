@@ -1,12 +1,16 @@
 package org.atriasoft.gale.resource;
 
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
-import org.atriasoft.esvg.EsvgDocument;
 import org.atriasoft.etk.Tools;
 import org.atriasoft.etk.Uri;
 import org.atriasoft.etk.math.Vector2i;
@@ -90,17 +94,28 @@ public class ResourceTextureFile extends ResourceTexture2 {
 		super(genName);
 		LOGGER.debug("create a new resource::Image: genName={} uri={} size={}", genName, uri, size);
 		final BufferedImage tmp;
-		if (uri.get().endsWith(".svg")) {
-			final EsvgDocument doc = new EsvgDocument();
-			doc.load(uri);
-			tmp = doc.renderImage(size);
-		} else {
-			try (final InputStream in = Uri.getStream(uri)) {
+		try (final InputStream in = Uri.getStream(uri)) {
+			if (uri.get().endsWith(".svg") && size.x() > 0 && size.y() > 0) {
+				final Iterator<ImageReader> readers = ImageIO.getImageReadersBySuffix("svg");
+				if (!readers.hasNext()) {
+					LOGGER.error("No ImageReader found for SVG format. Is imageio-batik on classpath?");
+					return;
+				}
+				final ImageReader reader = readers.next();
+				try (final ImageInputStream iis = ImageIO.createImageInputStream(in)) {
+					reader.setInput(iis);
+					final ImageReadParam param = reader.getDefaultReadParam();
+					param.setSourceRenderSize(new Dimension(size.x(), size.y()));
+					tmp = reader.read(0, param);
+				} finally {
+					reader.dispose();
+				}
+			} else {
 				tmp = ImageIO.read(in);
-			} catch (final IOException ex) {
-				LOGGER.error("Failed to load image: {}", uri, ex);
-				return;
 			}
+		} catch (final IOException ex) {
+			LOGGER.error("Failed to load image: {}", uri, ex);
+			return;
 		}
 		if (tmp == null) {
 			LOGGER.error("Can not load the file: {}", uri);

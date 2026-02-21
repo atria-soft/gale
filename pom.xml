@@ -175,10 +175,34 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.atriasoft</groupId>
-			<artifactId>esvg</artifactId>
+			<artifactId>etk</artifactId>
 			<version>0.1.0</version>
 		</dependency>
-		
+		<!-- SVG support via TwelveMonkeys ImageIO + Batik -->
+		<dependency>
+			<groupId>com.twelvemonkeys.imageio</groupId>
+			<artifactId>imageio-batik</artifactId>
+			<version>3.12.0</version>
+		</dependency>
+		<!-- Batik transcoder: required at runtime by imageio-batik (declared as provided scope) -->
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-transcoder</artifactId>
+			<version>1.18</version>
+			<exclusions>
+				<exclusion>
+					<groupId>fop</groupId>
+					<artifactId>fop</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- Batik codec extensions for rasterization -->
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-codec</artifactId>
+			<version>1.18</version>
+		</dependency>
+
 		<!-- generate with https://www.lwjgl.org/customize -->
 		<dependency>
 			<groupId>org.lwjgl</groupId>
