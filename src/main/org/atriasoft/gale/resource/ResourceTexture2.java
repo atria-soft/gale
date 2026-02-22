@@ -5,7 +5,6 @@
  */
 package org.atriasoft.gale.resource;
 
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import org.atriasoft.etk.Tools;
@@ -85,12 +84,21 @@ public class ResourceTexture2 extends Resource {
 
 	/**
 	 * Resize a BufferedImage, preserving existing pixel data.
+	 * <p>
+	 * WARNING: Do NOT replace with Graphics2D.drawImage() — it applies alpha
+	 * compositing which destroys RGB channel data when Alpha is 0. The font
+	 * atlas stores independent data per ARGB channel (one font mode per channel),
+	 * so raw pixel copy is required to preserve all channels correctly.
 	 */
 	protected static BufferedImage resizeImage(final BufferedImage source, final int newWidth, final int newHeight) {
 		final BufferedImage resized = new BufferedImage(newWidth, newHeight, source.getType());
-		final Graphics2D g = resized.createGraphics();
-		g.drawImage(source, 0, 0, null);
-		g.dispose();
+		final int copyW = Math.min(source.getWidth(), newWidth);
+		final int copyH = Math.min(source.getHeight(), newHeight);
+		for (int y = 0; y < copyH; y++) {
+			for (int x = 0; x < copyW; x++) {
+				resized.setRGB(x, y, source.getRGB(x, y));
+			}
+		}
 		return resized;
 	}
 
