@@ -73,7 +73,8 @@ public abstract class GaleContext {
 	private final Fps fpsFlush = new Fps("Flush", this.displayFps);
 	protected Vector2f windowsSize = Vector2f.ZERO; //!< current size of the system
 	protected boolean fullscreen = false;
-	protected Vector2f windowsPos; //!< current size of the system
+	protected Vector2f windowsPos = Vector2f.ZERO; //!< current top-left position of the window (absolute screen coords)
+	protected int monitorIndex = -1; //!< current monitor index where the window is located, -1 if unknown
 	// note: in the current mode, the management is not able to synchronize it good..
 	private final boolean requestSynchronousProcessing = true; //!< this permit to process the event in the global GUI thread instead of the local processing thread.
 
@@ -519,7 +520,7 @@ public abstract class GaleContext {
 	 * @param pos New position of the Windows.
 	 */
 	public void operatingSystemMove(final Vector2f pos) {
-		if (this.windowsPos.isEqual(pos)) {
+		if (this.windowsPos != null && this.windowsPos.isEqual(pos)) {
 			return;
 		}
 		postActionAsync(context -> {
@@ -530,6 +531,26 @@ public abstract class GaleContext {
 				return;
 			}
 			appl.onMovePosition(context.windowsPos);
+		});
+	}
+
+	/**
+	 * The OS inform that the current windows has changed monitor (because the user dragged it
+	 * across screens, or because the monitor configuration changed).
+	 * @param newMonitorIndex new monitor index (0-based) where the window is now located.
+	 */
+	public void operatingSystemMonitorChange(final int newMonitorIndex) {
+		if (this.monitorIndex == newMonitorIndex) {
+			return;
+		}
+		postActionAsync(context -> {
+			LOGGER.debug("Receive MSG : MONITOR_CHANGE : {} ==> {}", context.monitorIndex, newMonitorIndex);
+			context.monitorIndex = newMonitorIndex;
+			final GaleApplication appl = context.getApplication();
+			if (appl == null) {
+				return;
+			}
+			appl.onMonitorChange(newMonitorIndex);
 		});
 	}
 
@@ -889,7 +910,7 @@ public abstract class GaleContext {
 
 	/**
 	 * The Application request that the current windows will change his position.
-	 * @param pos New position of the Windows requested.
+	 * @param pos New position of the Windows requested (top-left corner, absolute screen coordinates).
 	 */
 	public final void setPos(final Vector2f pos) {
 		postActionToGui(context -> {
@@ -899,6 +920,38 @@ public abstract class GaleContext {
 
 	protected void setPosThreadGUI(final Vector2f pos) {
 		LOGGER.info("setPos: NOT implemented ...");
+	}
+
+	/**
+	 * Get the current monitor index where the window is located.
+	 * @return monitor index, or -1 if unknown / not yet placed.
+	 */
+	public int getMonitorIndex() {
+		return this.monitorIndex;
+	}
+
+	/**
+	 * Get the list of available monitors (workspaces) on the system.
+	 * Default implementation returns an empty list — backends override this.
+	 * @return list of MonitorInfo entries, in order; index 0 is the primary monitor.
+	 */
+	public java.util.List<MonitorInfo> getMonitors() {
+		return java.util.Collections.emptyList();
+	}
+
+	/**
+	 * The Application request that the current windows be moved to a specific monitor.
+	 * The window keeps its current size and is centered on the target monitor.
+	 * @param index Monitor index (0-based). Use -1 for system default / primary monitor.
+	 */
+	public final void setMonitor(final int index) {
+		postActionToGui(context -> {
+			context.setMonitorThreadGUI(index);
+		});
+	}
+
+	protected void setMonitorThreadGUI(final int index) {
+		LOGGER.info("setMonitor: NOT implemented ...");
 	}
 
 	/**

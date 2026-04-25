@@ -5,11 +5,16 @@ import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -31,6 +36,7 @@ import org.atriasoft.gale.DisplayManagerDraw;
 import org.atriasoft.gale.Fps;
 import org.atriasoft.gale.GaleApplication;
 import org.atriasoft.gale.context.GaleContext;
+import org.atriasoft.gale.context.MonitorInfo;
 import org.atriasoft.gale.key.KeyKeyboard;
 import org.atriasoft.gale.key.KeySpecial;
 import org.atriasoft.gale.key.KeyStatus;
@@ -150,10 +156,26 @@ public class ContextLWJGLAWT extends GaleContext
 	}
 
 	private void initWindows() {
+		// Read startup preferences from the application BEFORE creating the window.
+		// This avoids the "create at 800x600 then resize" flash and lets the user pick
+		// initial size, position, and monitor via setSize()/setPosition()/setMonitorIndex().
+		final GaleApplication appl = getApplication();
+		Vector2f initialSize = new Vector2f(WIDTH, HEIGHT);
+		Vector2f initialPos = null;
+		int initialMonitor = -1;
+		if (appl != null) {
+			final Vector2f s = appl.getSize();
+			if (s != null && s.x() > 0 && s.y() > 0) {
+				initialSize = s;
+			}
+			initialPos = appl.getPosition();
+			initialMonitor = appl.getMonitorIndex();
+		}
+
 		this.frame = new JFrame("Gale base");
 		this.frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.frame.setLayout(new BorderLayout());
-		this.frame.setPreferredSize(new Dimension(800, 600));
+		this.frame.setPreferredSize(new Dimension((int) initialSize.x(), (int) initialSize.y()));
 		this.glData = new GLData();
 		this.glData.samples = 4;
 		this.glData.swapInterval = 0;
@@ -187,8 +209,36 @@ public class ContextLWJGLAWT extends GaleContext
 			}
 		}, BorderLayout.CENTER);
 		this.frame.pack();
-		this.frame.setLocationRelativeTo(null);
+		// Place the window: explicit position > monitor > centered fallback.
+		if (initialPos != null) {
+			this.frame.setLocation((int) initialPos.x(), (int) initialPos.y());
+		} else if (initialMonitor >= 0) {
+			centerOnMonitor(initialMonitor);
+		} else {
+			this.frame.setLocationRelativeTo(null);
+		}
+		// Listen for user-initiated resize/move so the application can react and persist them.
+		this.frame.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentMoved(final ComponentEvent e) {
+				final Point p = ContextLWJGLAWT.this.frame.getLocation();
+				operatingSystemMove(new Vector2f(p.x, p.y));
+				final int newMonitor = computeMonitorIndex(ContextLWJGLAWT.this.frame.getBounds());
+				operatingSystemMonitorChange(newMonitor);
+			}
+
+			@Override
+			public void componentResized(final ComponentEvent e) {
+				// The canvas's paintGL() already detects size changes and calls operatingSystemResize.
+				// We don't duplicate the call here to avoid reporting the frame size (which includes
+				// decorations) instead of the canvas (drawable) size.
+			}
+		});
 		this.frame.setVisible(true);
+		// Seed the context's known position from what AWT actually placed us at.
+		final Point placed = this.frame.getLocation();
+		this.windowsPos = new Vector2f(placed.x, placed.y);
+		this.monitorIndex = computeMonitorIndex(this.frame.getBounds());
 		this.canvas.requestFocus();
 		this.canvas.addMouseListener(this);
 		this.canvas.addMouseMotionListener(this);
@@ -198,6 +248,48 @@ public class ContextLWJGLAWT extends GaleContext
 
 		ContextLWJGLAWT.lastFrameTime = ContextLWJGLAWT.getCurrentTime();
 
+	}
+
+	/**
+	 * Move the frame so it is centered on the given monitor index. If the index is invalid,
+	 * the call is silently ignored and the system default position is used.
+	 */
+	private void centerOnMonitor(final int index) {
+		final GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+		if (index < 0 || index >= devices.length) {
+			this.frame.setLocationRelativeTo(null);
+			return;
+		}
+		final GraphicsConfiguration cfg = devices[index].getDefaultConfiguration();
+		final Rectangle b = cfg.getBounds();
+		final Dimension fs = this.frame.getSize();
+		final int x = b.x + Math.max(0, (b.width - fs.width) / 2);
+		final int y = b.y + Math.max(0, (b.height - fs.height) / 2);
+		this.frame.setLocation(x, y);
+	}
+
+	/**
+	 * Determine which monitor index best contains the given window bounds.
+	 * Picks the monitor with the largest overlap with the window rectangle.
+	 * @return monitor index, or -1 if none matches.
+	 */
+	private static int computeMonitorIndex(final Rectangle windowBounds) {
+		final GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+		int best = -1;
+		long bestArea = -1;
+		for (int i = 0; i < devices.length; i++) {
+			final Rectangle db = devices[i].getDefaultConfiguration().getBounds();
+			final Rectangle inter = db.intersection(windowBounds);
+			if (inter.isEmpty()) {
+				continue;
+			}
+			final long area = (long) inter.width * (long) inter.height;
+			if (area > bestArea) {
+				bestArea = area;
+				best = i;
+			}
+		}
+		return best;
 	}
 
 	@Override
@@ -600,6 +692,47 @@ public class ContextLWJGLAWT extends GaleContext
 	@Override
 	public void setTitleThreadGUI(final String title) {
 		this.frame.setTitle(title);
+	}
+
+	@Override
+	protected void setSizeThreadGUI(final Vector2f size) {
+		if (size == null || size.x() <= 0 || size.y() <= 0) {
+			LOGGER.error("Invalid size requested: {}", size);
+			return;
+		}
+		this.frame.setSize((int) size.x(), (int) size.y());
+		// pack() would shrink-to-preferred; we want exact pixel size.
+		this.frame.validate();
+	}
+
+	@Override
+	protected void setPosThreadGUI(final Vector2f pos) {
+		if (pos == null) {
+			return;
+		}
+		this.frame.setLocation((int) pos.x(), (int) pos.y());
+	}
+
+	@Override
+	protected void setMonitorThreadGUI(final int index) {
+		centerOnMonitor(index);
+	}
+
+	@Override
+	public java.util.List<MonitorInfo> getMonitors() {
+		final GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+		final GraphicsDevice primary = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		final java.util.List<MonitorInfo> out = new ArrayList<>(devices.length);
+		for (int i = 0; i < devices.length; i++) {
+			final Rectangle b = devices[i].getDefaultConfiguration().getBounds();
+			out.add(new MonitorInfo(
+					i,
+					devices[i].getIDstring(),
+					new Vector2f(b.x, b.y),
+					new Vector2f(b.width, b.height),
+					devices[i].equals(primary)));
+		}
+		return out;
 	}
 
 	private void showCursor() {

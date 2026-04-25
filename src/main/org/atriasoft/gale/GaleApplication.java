@@ -22,6 +22,8 @@ public class GaleApplication {
 	private final Cursor cursor = Cursor.arrow;
 	private Orientation orientation = Orientation.screenAuto;
 	private Vector2f windowsSize = new Vector2f(800, 600);
+	private Vector2f windowsPosition = null; //!< null means "let the system center the window"
+	private int monitorIndex = -1; //!< -1 means "use the system default / primary monitor"
 
 	public GaleApplication() {
 		LOGGER.trace("Constructor Gale Application");
@@ -66,10 +68,19 @@ public class GaleApplication {
 
 	/**
 	 * Get the position of the window.
-	 * @return Current position of the window.
+	 * @return Current position of the window (top-left corner, in absolute screen coordinates),
+	 *         or null if no position has been set yet.
 	 */
 	public Vector2f getPosition() {
-		return new Vector2f(0, 0);
+		return this.windowsPosition;
+	}
+
+	/**
+	 * Get the monitor index where the window is currently placed (or where it should be placed at startup).
+	 * @return monitor index, or -1 for system default / primary monitor.
+	 */
+	public int getMonitorIndex() {
+		return this.monitorIndex;
 	}
 
 	/**
@@ -178,10 +189,19 @@ public class GaleApplication {
 
 	/**
 	 * Event generated when user change the position of the window.
-	 * @param size New position of the window.
+	 * @param pos New position of the window (top-left corner, absolute screen coordinates).
 	 */
-	public void onMovePosition(final Vector2f size) {
+	public void onMovePosition(final Vector2f pos) {
+		this.windowsPosition = pos;
+	}
 
+	/**
+	 * Event generated when the window changes monitor (because the user dragged it across screens
+	 * or because the monitor configuration changed).
+	 * @param monitorIndex New monitor index (0-based).
+	 */
+	public void onMonitorChange(final int monitorIndex) {
+		this.monitorIndex = monitorIndex;
 	}
 
 	/**
@@ -292,35 +312,56 @@ public class GaleApplication {
 	}
 
 	/**
-	 * Set the position of the window (if possible: Android and Ios does not support it)
-	 * @param size New position of the window.
+	 * Set the position of the window (if possible: Android and Ios does not support it).
+	 * If called BEFORE the GaleContext is created (i.e. before {@link Gale#run}), the value is
+	 * stored as a startup preference and applied when the window is shown.
+	 * If called AFTER, the window is moved live.
+	 * @param pos New position of the window (top-left corner, absolute screen coordinates).
 	 */
-	public void setPosition(final Vector2f size) {
-
+	public void setPosition(final Vector2f pos) {
+		this.windowsPosition = pos;
+		final GaleContext context = Gale.getContext();
+		if (context == null) {
+			// Pre-init: just remember the value; ContextLWJGLAWT will read it in initWindows().
+			return;
+		}
+		context.setPos(pos);
 	}
 
 	/**
-	 * Set the size of the window (if possible: Android and Ios does not support it)
-	 * @param size New size of the window.
-	 * @return
+	 * Set the monitor where the window should be placed.
+	 * If called BEFORE the GaleContext is created, the value is stored as a startup preference.
+	 * If called AFTER, the window is moved to that monitor (centered on it, keeping current size).
+	 * @param index Monitor index (0-based). Use -1 for system default / primary monitor.
 	 */
-	public void setSize(final Vector2f size) {
-		if (size.x() <= 0 || size.y() <= 0) {
-			LOGGER.error("Wrong windows size: {}", size);
-		}
-		final Vector2f oldSize = this.windowsSize;
-		this.windowsSize = size;
+	public void setMonitorIndex(final int index) {
+		this.monitorIndex = index;
 		final GaleContext context = Gale.getContext();
 		if (context == null) {
 			return;
 		}
-		context.setSize(size);
-		/* ==> change API ==> need the GUI notify the Windows that the size has change ????
-		if (!) {
-			LOGGER.error("Can not set the size required by the user.");
-			this.windowsSize = oldSize;
+		context.setMonitor(index);
+	}
+
+	/**
+	 * Set the size of the window (if possible: Android and Ios does not support it).
+	 * If called BEFORE the GaleContext is created (i.e. before {@link Gale#run}), the value is
+	 * stored as a startup preference and the window is created at this size.
+	 * If called AFTER, the window is resized live.
+	 * @param size New size of the window.
+	 */
+	public void setSize(final Vector2f size) {
+		if (size.x() <= 0 || size.y() <= 0) {
+			LOGGER.error("Wrong windows size: {}", size);
+			return;
 		}
-		*/
+		this.windowsSize = size;
+		final GaleContext context = Gale.getContext();
+		if (context == null) {
+			// Pre-init: just remember the value; ContextLWJGLAWT will read it in initWindows().
+			return;
+		}
+		context.setSize(size);
 	}
 
 	/**
