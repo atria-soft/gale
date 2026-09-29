@@ -83,6 +83,30 @@ public class ResourceTexture2 extends Resource {
 	}
 
 	/**
+	 * Extract raw RGBA bytes from a BufferedImage, always producing 4 channels
+	 * regardless of the source image format.
+	 * <p>
+	 * Useful when all textures in a group must share the same OpenGL format
+	 * (e.g. cubemap faces). Images without alpha get alpha=255.
+	 */
+	static byte[] extractRawBytesRGBA(final BufferedImage image) {
+		final int width = image.getWidth();
+		final int height = image.getHeight();
+		final byte[] raw = new byte[width * height * 4];
+		for (int yyy = 0; yyy < height; yyy++) {
+			for (int xxx = 0; xxx < width; xxx++) {
+				final int argb = image.getRGB(xxx, yyy);
+				final int offset = (yyy * width + xxx) * 4;
+				raw[offset] = (byte) ((argb >> 16) & 0xFF);
+				raw[offset + 1] = (byte) ((argb >> 8) & 0xFF);
+				raw[offset + 2] = (byte) (argb & 0xFF);
+				raw[offset + 3] = (byte) ((argb >> 24) & 0xFF);
+			}
+		}
+		return raw;
+	}
+
+	/**
 	 * Resize a BufferedImage, preserving existing pixel data.
 	 * <p>
 	 * WARNING: Do NOT replace with Graphics2D.drawImage() — it applies alpha

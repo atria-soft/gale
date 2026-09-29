@@ -287,6 +287,61 @@ public class OpenGL {
 	}
 
 	/**
+	 * Bind a cubemap texture.
+	 * @param texId OpenGL texture name
+	 */
+	public static void bindTextureCubeMap(final int texId) {
+		GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, texId);
+	}
+
+	/**
+	 * Upload pixel data for one face of a cubemap texture.
+	 * @param face   One of GL_TEXTURE_CUBE_MAP_POSITIVE_X, etc.
+	 * @param level  Mipmap level
+	 * @param internalFormat Internal format (e.g. GL_RGBA)
+	 * @param width  Width in pixels
+	 * @param height Height in pixels
+	 * @param border Border (must be 0)
+	 * @param format Pixel data format (e.g. GL_RGBA)
+	 * @param type   Pixel data type (e.g. GL_UNSIGNED_BYTE)
+	 * @param data   Raw pixel data
+	 */
+	public static void glTexImage2DCubeMapFace(
+			final int face,
+			final int level,
+			final int internalFormat,
+			final int width,
+			final int height,
+			final int border,
+			final int format,
+			final int type,
+			final byte[] data) {
+		final ByteBuffer dataBuffer = ByteBuffer.allocateDirect(data.length);
+		for (final byte element : data) {
+			dataBuffer.put(element);
+		}
+		dataBuffer.flip();
+		GL11.glTexImage2D(face, level, internalFormat, width, height, border, format, type, dataBuffer);
+	}
+
+	/**
+	 * Set cubemap texture filtering to linear.
+	 */
+	public static void setTextureCubeMapFilterLinear() {
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+	}
+
+	/**
+	 * Set cubemap texture wrapping to clamp-to-edge.
+	 */
+	public static void setTextureCubeMapWrapClampToEdge() {
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL12.GL_TEXTURE_WRAP_R, GL12.GL_CLAMP_TO_EDGE);
+	}
+
+	/**
 	 * Force active texture unit without checking programId.
 	 * Use this for texture updates outside of rendering context.
 	 * @param textureID Id of the texture 0 .. 13
