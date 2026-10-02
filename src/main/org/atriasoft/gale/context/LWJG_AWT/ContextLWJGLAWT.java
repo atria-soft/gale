@@ -24,7 +24,9 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.MemoryImageSource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -106,7 +108,12 @@ public class ContextLWJGLAWT extends GaleContext
 
 	private Robot robot = null;
 
+	/** Longest time between the release and the press of one auto-repeat of a held key, in milliseconds. */
+	private static final long AUTO_REPEAT_PAIR_MS = 2;
+
 	private final List<Integer> pressedKey = new ArrayList<>();
+	/** Time of the last release of each key, to tell the auto-repeat of a held key from a key pressed again. */
+	private final Map<Integer, Long> releasedAt = new HashMap<>();
 	private Boolean isInitialized = false;
 
 	public ContextLWJGLAWT(final GaleApplication application, final String[] args) {
@@ -489,21 +496,24 @@ public class ContextLWJGLAWT extends GaleContext
 
 	@Override
 	public void keyPressed(final KeyEvent e) {
-		final int internalKeyValue = getUniqueIndex(e);
-		final int index = this.pressedKey.indexOf(internalKeyValue);
-		if (index == -1) {
+		final Integer internalKeyValue = getUniqueIndex(e);
+		// Held already: the system repeats the press without any release (Windows, macOS).
+		final boolean held = this.pressedKey.contains(internalKeyValue);
+		if (!held) {
 			this.pressedKey.add(internalKeyValue);
 		}
-		keyEvent(e, true, index != -1);
+		// X11 repeats a held key as a release and a press that carry the same time.
+		final Long released = this.releasedAt.remove(internalKeyValue);
+		final boolean pairedWithRelease = released != null && e.getWhen() - released <= AUTO_REPEAT_PAIR_MS;
+		keyEvent(e, true, held || pairedWithRelease);
 	}
 
 	@Override
 	public void keyReleased(final KeyEvent e) {
-		final int internalKeyValue = getUniqueIndex(e);
-		final int index = this.pressedKey.indexOf(internalKeyValue);
-		if (index == -1) {
-			this.pressedKey.remove(internalKeyValue);
-		}
+		final Integer internalKeyValue = getUniqueIndex(e);
+		// By value: a key released without its press seen here (focus gained meanwhile) is simply not in the list.
+		this.pressedKey.remove(internalKeyValue);
+		this.releasedAt.put(internalKeyValue, e.getWhen());
 		keyEvent(e, false, false);
 	}
 
