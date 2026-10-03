@@ -22,6 +22,10 @@ public abstract class Resource {
 	protected int count = 1;
 	protected int resourceLevel = MAXRESOURCELEVEL - 1; //!< Level of the resource ==> for update priority [0..5] 0 must be update first.
 	protected String name = NO_NAME_RESOURCE; //!< name of the resource ...
+	/** Set by the manager (under its lock) while the resource is in its list. */
+	boolean registered = false;
+	/** Set by the manager when the count of references fell to 0: the resource is dead. */
+	volatile boolean released = false;
 	
 	/**
 	 * generic protected contructor (use factory to create this class)
@@ -32,6 +36,7 @@ public abstract class Resource {
 	}
 	
 	protected Resource(final String name) {
+		this.uid = idGenerated++;
 		if (name == null) {
 			this.name = "---";
 		} else {
@@ -41,6 +46,7 @@ public abstract class Resource {
 	}
 	
 	protected Resource(final Uri uri) {
+		this.uid = idGenerated++;
 		if (uri == null) {
 			this.name = "---";
 		} else {
@@ -75,15 +81,30 @@ public abstract class Resource {
 		return this.resourceLevel;
 	}
 	
-	public void keep() {
-		this.count++;
+	/**
+	 * Whether the count of references fell to 0: the resource left the manager and
+	 * its OpenGL objects are (or will be) deleted. It must not be used any more.
+	 * @return true when released.
+	 */
+	public boolean isReleased() {
+		return this.released;
 	}
 	
+	/**
+	 * One more user of this resource (count of references + 1).
+	 */
+	public void keep() {
+		getManager().keep(this);
+	}
+	
+	/**
+	 * One user less (count of references - 1). At 0 the resource leaves the
+	 * manager and {@link #cleanUp()} deletes its OpenGL objects: at once when the
+	 * caller is on the OpenGL thread, at the next update of the context otherwise.
+	 * Call it once per {@code create()} (or {@link #keep()}), from any thread.
+	 */
 	public void release() {
-		this.count--;
-		if (this.count == 0) {
-			
-		}
+		getManager().release(this);
 	}
 	
 	/**
