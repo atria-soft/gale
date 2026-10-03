@@ -18,9 +18,7 @@ public class ResourceColored3DObject extends Resource {
 	static final Logger LOGGER = LoggerFactory.getLogger(ResourceColored3DObject.class);
 	
 	public static ResourceColored3DObject create() {
-		final ResourceColored3DObject resource = new ResourceColored3DObject();
-		getManager().localAdd(resource);
-		return resource;
+		return new ResourceColored3DObject();
 	}
 
 	private final ResourceProgram program;

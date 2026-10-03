@@ -36,30 +36,23 @@ public class ResourceTexture extends Resource {
 	}
 
 	public static ResourceTexture createFromPng(final Uri uriTexture, final int textureUnit) {
-		ResourceTexture resource;
-		Resource resource2;
-		final String name = uriTexture.getValue();
-		if (!name.isEmpty() && !name.equals("---")) {
-			resource2 = getManager().localKeep(name);
-		} else {
-			LOGGER.error("Can not create a shader without a filaname");
+		if (uriTexture.getValue().isEmpty()) {
+			LOGGER.error("Can not create a texture without a filaname");
 			return null;
 		}
-		if (resource2 != null) {
-			if (resource2 instanceof ResourceTexture) {
-				resource2.keep();
-				return (ResourceTexture) resource2;
-			}
-			LOGGER.error("Request resource file: '{}' With the wrong type (dynamic cast error)", name);
-			System.exit(-1);
-			return null;
+		// Same name as the one the constructor gives.
+		final String name = uriTexture.toString() + "__" + textureUnit;
+		final ResourceTexture existing = keepExisting(name, ResourceTexture.class);
+		if (existing != null) {
+			return existing;
 		}
-		resource = new ResourceTexture(uriTexture, textureUnit);
+		final ResourceTexture resource = new ResourceTexture(uriTexture, textureUnit);
 		ImageRawData decodedData;
 		try {
 			decodedData = ImageLoader.decodePngFile(uriTexture);
 		} catch (final Exception e) {
-			e.printStackTrace();
+			LOGGER.error("Cannot load the texture {}", uriTexture, e);
+			resource.release();
 			return null;
 		}
 		final int width = decodedData.getWidth();

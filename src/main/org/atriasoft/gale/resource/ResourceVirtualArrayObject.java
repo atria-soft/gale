@@ -42,10 +42,8 @@ public class ResourceVirtualArrayObject extends Resource {
 			final float[] textureCoordinates,
 			final float[] normals,
 			final int[] indices) {
-		final ResourceVirtualArrayObject resource = new ResourceVirtualArrayObject(positions, colors,
+		return new ResourceVirtualArrayObject(positions, colors,
 				textureCoordinates, normals, indices, indices.length);
-		Resource.getManager().localAdd(resource);
-		return resource;
 	}
 
 	public static ResourceVirtualArrayObject create(
@@ -53,33 +51,25 @@ public class ResourceVirtualArrayObject extends Resource {
 			final float[] textureCoordinates,
 			final float[] normals,
 			final int[] indices) {
-		final ResourceVirtualArrayObject resource = new ResourceVirtualArrayObject(positions, null, textureCoordinates,
+		return new ResourceVirtualArrayObject(positions, null, textureCoordinates,
 				normals, indices, indices.length);
-		Resource.getManager().localAdd(resource);
-		return resource;
 	}
 
 	public static ResourceVirtualArrayObject create(
 			final float[] positions,
 			final float[] colors,
 			final int[] indices) {
-		final ResourceVirtualArrayObject resource = new ResourceVirtualArrayObject(positions, colors, null, null,
+		return new ResourceVirtualArrayObject(positions, colors, null, null,
 				indices, indices.length);
-		Resource.getManager().localAdd(resource);
-		return resource;
 	}
 
 	public static ResourceVirtualArrayObject create(final float[] positions, final int dimentions) {
-		final ResourceVirtualArrayObject resource = new ResourceVirtualArrayObject(positions, null, null, null, null,
+		return new ResourceVirtualArrayObject(positions, null, null, null, null,
 				positions.length / dimentions);
-		Resource.getManager().localAdd(resource);
-		return resource;
 	}
 
 	public static ResourceVirtualArrayObject createDynamic() {
-		final ResourceVirtualArrayObject resource = new ResourceVirtualArrayObject();
-		Resource.getManager().localAdd(resource);
-		return resource;
+		return new ResourceVirtualArrayObject();
 	}
 
 	public static FloatBuffer storeDataInFloatBuffer(final float[] data) {

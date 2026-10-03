@@ -54,13 +54,9 @@ public class ResourceTextureCubeMap extends Resource {
 			final Uri front,
 			final Uri back) {
 		final String key = "cubemap[RGBA]:" + right + "," + left + "," + top + "," + bottom + "," + front + "," + back;
-		final Resource existing = Resource.getManager().localKeep(key);
+		final ResourceTextureCubeMap existing = keepExisting(key, ResourceTextureCubeMap.class);
 		if (existing != null) {
-			if (existing instanceof final ResourceTextureCubeMap cubemap) {
-				return cubemap;
-			}
-			LOGGER.error("Resource '{}' exists with wrong type", key);
-			return null;
+			return existing;
 		}
 		LOGGER.debug("CREATE: CubeMap: {}", key);
 		return new ResourceTextureCubeMap(key, right, left, top, bottom, front, back);

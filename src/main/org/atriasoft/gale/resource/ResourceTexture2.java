@@ -28,31 +28,31 @@ public class ResourceTexture2 extends Resource {
 		return new ResourceTexture2();
 	}
 
+	/**
+	 * Get the texture named after {@code uri}, shared (kept) if it exists already.
+	 * @param uri Name of the texture.
+	 * @return the texture; give it back with {@link #release()}.
+	 */
 	public static ResourceTexture2 create(final Uri uri) {
 		LOGGER.trace("KEEP: Resource Texture: {}", uri);
-		final Resource object2 = Resource.getManager().localKeep(uri);
-		if (object2 != null) {
-			if (object2 instanceof final ResourceTexture2 tmpp) {
-				return tmpp;
-			}
-			LOGGER.error("Request resource file: '{}' With the wrong type (dynamic cast error)", uri);
-			System.exit(-1);
-			return null;
+		final ResourceTexture2 existing = keepExisting(uri.toString(), ResourceTexture2.class);
+		if (existing != null) {
+			return existing;
 		}
 		LOGGER.trace("CREATE: new Texture: {}", uri);
 		return new ResourceTexture2(uri);
 	}
 
+	/**
+	 * Get the texture named {@code uri}, shared (kept) if it exists already.
+	 * @param uri Name of the texture.
+	 * @return the texture; give it back with {@link #release()}.
+	 */
 	public static ResourceTexture2 createNamed(final String uri) {
 		LOGGER.trace("KEEP: Resource Texture Named: {}", uri);
-		final Resource object2 = Resource.getManager().localKeep(uri);
-		if (object2 != null) {
-			if (object2 instanceof final ResourceTexture2 tmpp) {
-				return tmpp;
-			}
-			LOGGER.error("Request resource file: '{}' With the wrong type (dynamic cast error)", uri);
-			System.exit(-1);
-			return null;
+		final ResourceTexture2 existing = keepExisting(uri, ResourceTexture2.class);
+		if (existing != null) {
+			return existing;
 		}
 		LOGGER.debug("CREATE: new Texture Named: {}", uri);
 		return new ResourceTexture2(uri);

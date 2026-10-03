@@ -32,21 +32,12 @@ public class ResourceProgram extends Resource {
 	static final boolean DEBUG = false; // TODO externalize this ...
 
 	public static ResourceProgram create(final Uri uriVertexShader, final Uri uriFragmentShader) {
-		ResourceProgram resource;
 		final String name = uriVertexShader.getValue() + "<-->" + uriFragmentShader.getValue();
-		final Resource resource2 = Resource.getManager().localKeep(name);
-		if (resource2 != null) {
-			if (resource2 instanceof ResourceProgram) {
-				resource2.keep();
-				return (ResourceProgram) resource2;
-			}
-			LOGGER.error("Request resource file: '{}' With the wrong type (dynamic cast error)", name);
-			System.exit(-1);
-			return null;
+		final ResourceProgram existing = keepExisting(name, ResourceProgram.class);
+		if (existing != null) {
+			return existing;
 		}
-		resource = new ResourceProgram(uriVertexShader, uriFragmentShader);
-		Resource.getManager().localAdd(resource);
-		return resource;
+		return new ResourceProgram(uriVertexShader, uriFragmentShader);
 	}
 
 	public static FloatBuffer storeDataInFloatBuffer(final float[] data) {

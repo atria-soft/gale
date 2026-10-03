@@ -19,6 +19,27 @@ public abstract class Resource {
 	}
 
 	/**
+	 * Get the living resource named {@code name}, kept for the caller (count of
+	 * references + 1), as factories with a cache do.
+	 * @param name Name of the resource.
+	 * @param type Type the resource must have.
+	 * @return the kept resource, or null if no living resource has this name.
+	 * @throws IllegalStateException if the resource of this name has another type.
+	 */
+	protected static <T extends Resource> T keepExisting(final String name, final Class<T> type) {
+		final Resource found = getManager().localKeepAndRetain(name);
+		if (found == null) {
+			return null;
+		}
+		if (type.isInstance(found)) {
+			return type.cast(found);
+		}
+		found.release();
+		throw new IllegalStateException("The resource '" + name + "' exists with the type " + found.getClass().getName()
+				+ ", not " + type.getName());
+	}
+
+	/**
 	 * Run an OpenGL work (deletion of OpenGL objects) on the OpenGL thread: at
 	 * once when the caller is on it, at the next update of the context otherwise.
 	 * @param task The OpenGL work.

@@ -10,27 +10,16 @@ public class ResourceShader extends Resource {
 	static final Logger LOGGER = LoggerFactory.getLogger(ResourceShader.class);
 	
 	public static ResourceShader create(final Uri uriShader) {
-		ResourceShader resource;
-		Resource resource2;
 		final String name = uriShader.getValue();
-		if (!name.isEmpty() && !name.equals("---")) {
-			resource2 = getManager().localKeep(name);
-		} else {
+		if (name.isEmpty() || name.equals(NO_NAME_RESOURCE)) {
 			LOGGER.error("Can not create a shader without a filaname");
 			return null;
 		}
-		if (resource2 != null) {
-			if (resource2 instanceof ResourceShader) {
-				resource2.keep();
-				return (ResourceShader) resource2;
-			}
-			LOGGER.error("Request resource file: '{}' With the wrong type (dynamic cast error)", name);
-			System.exit(-1);
-			return null;
+		final ResourceShader existing = keepExisting(name, ResourceShader.class);
+		if (existing != null) {
+			return existing;
 		}
-		resource = new ResourceShader(uriShader);
-		getManager().localAdd(resource);
-		return resource;
+		return new ResourceShader(uriShader);
 	}
 	
 	private boolean exist = false; //!< The shader file existed and has been loaded

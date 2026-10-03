@@ -71,21 +71,13 @@ public class ResourceTextureFile extends ResourceTexture2 {
 		}
 		
 		LOGGER.trace("KEEP: TextureFile: '{}' new size={}", uri, size);
-		final Resource object2 = Resource.getManager().localKeep(uri.toString());
-		if (object2 != null) {
-			if (object2 instanceof final ResourceTextureFile out) {
-				object2.keep();
-				return out;
-			}
-			LOGGER.error("Request resource file: '{}' With the wrong type (dynamic cast error)", uri);
-			System.exit(-1);
-			return null;
+		final ResourceTextureFile existing = keepExisting(uri.toString(), ResourceTextureFile.class);
+		if (existing != null) {
+			return existing;
 		}
 		LOGGER.debug("CREATE: TextureFile: '{}' size={}", uri, size);
 		// need to crate a new one ...
-		final ResourceTextureFile object = new ResourceTextureFile(uri.toString(), uri, size);
-		Resource.getManager().localAdd(object);
-		return object;
+		return new ResourceTextureFile(uri.toString(), uri, size);
 	}
 	
 	protected ResourceTextureFile() {}
