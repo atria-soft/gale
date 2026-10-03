@@ -388,9 +388,14 @@ public class ResourceManager {
 				if (jjj != it.getResourceLevel() || it.isReleased()) {
 					continue;
 				}
-				if (!it.updateContext()) {
-					// Lock error ==> postponned
-					update(it);
+				try {
+					if (!it.updateContext()) {
+						// Lock error ==> postponned
+						update(it);
+					}
+				} catch (final RuntimeException ex) {
+					// One faulty resource (a shader file missing) does not stop the others.
+					LOGGER.error("Cannot send the resource [{}] '{}' to the graphic card", it.getId(), it.getName(), ex);
 				}
 			}
 		}

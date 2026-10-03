@@ -117,6 +117,8 @@ public class ContextLWJGLAWT extends GaleContext
 	/** Time of the last release of each key, to tell the auto-repeat of a held key from a key pressed again. */
 	private final Map<Integer, Long> releasedAt = new HashMap<>();
 	private Boolean isInitialized = false;
+	/** First error that ended the GUI loop, handed to the default uncaught exception handler at exit. */
+	private Throwable fatalError = null;
 
 	public ContextLWJGLAWT(final GaleApplication application, final String[] args) {
 		super(application, args);
@@ -650,10 +652,23 @@ public class ContextLWJGLAWT extends GaleContext
 					shutdownAndExit();
 					return;
 				}
-				if (!ContextLWJGLAWT.this.isInitialized) {
-					SwingUtilities.invokeLater(this);
-					return;
+				if (ContextLWJGLAWT.this.isInitialized) {
+					try {
+						runFrame();
+					} catch (final Throwable ex) {
+						// The loop must go on: it is the only one to empty the GUI queue, and it ends the application.
+						LOGGER.error("The GUI loop failed: the application ends", ex);
+						if (ContextLWJGLAWT.this.fatalError == null) {
+							ContextLWJGLAWT.this.fatalError = ex;
+						}
+						stop(-1);
+					}
 				}
+				// Schedule next frame
+				SwingUtilities.invokeLater(this);
+			}
+
+			private void runFrame() {
 				final long frameStartMs = System.currentTimeMillis();
 				final long targetFrameMs = getTargetFrameTimeMs();
 				final long frameDeadlineMs = frameStartMs + targetFrameMs;
@@ -677,9 +692,6 @@ public class ContextLWJGLAWT extends GaleContext
 					processEventsGui();
 					nowMs = System.currentTimeMillis();
 				}
-
-				// 5. Schedule next frame
-				SwingUtilities.invokeLater(this);
 			}
 		};
 		SwingUtilities.invokeLater(renderLoop);
@@ -693,20 +705,37 @@ public class ContextLWJGLAWT extends GaleContext
 	 * ends with the exit code given to {@link #stop(int)}.
 	 */
 	private void shutdownAndExit() {
-		if (this.canvas.isValid()) {
-			try {
-				this.canvas.runInContext(() -> operatingSystemShutdown(true));
-			} catch (final RuntimeException ex) {
-				LOGGER.error("Cannot close the application with its OpenGL context", ex);
+		try {
+			// Its join must not wait under the lock of the drawing surface (the global AWT lock on X11).
+			this.periodicThread.threadStop();
+			if (this.canvas.isValid()) {
+				try {
+					this.canvas.runInContext(() -> operatingSystemShutdown(true));
+				} catch (final RuntimeException ex) {
+					LOGGER.error("Cannot close the application with its OpenGL context", ex);
+					operatingSystemShutdown(false);
+				}
+			} else {
+				// The window is gone with its OpenGL context: the application is closed all the same.
 				operatingSystemShutdown(false);
 			}
-		} else {
-			// The window is gone with its OpenGL context: the application is closed all the same.
-			operatingSystemShutdown(false);
+			this.frame.dispose();
+		} catch (final Throwable ex) {
+			LOGGER.error("Closing the application failed", ex);
+		} finally {
+			final Throwable fatal = this.fatalError;
+			final Thread.UncaughtExceptionHandler handler = Thread.getDefaultUncaughtExceptionHandler();
+			if (fatal != null && handler != null) {
+				// The application is closed: the crash handler of the application (crash report) gets the error.
+				try {
+					handler.uncaughtException(Thread.currentThread(), fatal);
+				} catch (final Throwable ex) {
+					LOGGER.error("The uncaught exception handler failed", ex);
+				}
+			}
+			LOGGER.info("Gale exits (code {})", getExitCode());
+			System.exit(getExitCode());
 		}
-		this.frame.dispose();
-		LOGGER.info("Gale exits (code {})", getExitCode());
-		System.exit(getExitCode());
 	}
 
 	public void setDrawer(final DisplayManagerDraw drawer) {

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 class ResourceLifecycleTest {
 
 	/** A resource that counts its clean-ups and its uploads, and touches no OpenGL. */
-	private static final class CountingResource extends Resource {
+	private static class CountingResource extends Resource {
 		private int cleanUps = 0;
 		private int updates = 0;
 
@@ -117,6 +117,21 @@ class ResourceLifecycleTest {
 		this.manager.update(living);
 		this.manager.updateContext();
 		assertEquals(1, living.updates);
+	}
+
+	@Test
+	void aFaultyResourceDoesNotStopTheUpdateOfTheOthers() {
+		final Resource faulty = new CountingResource("faulty") {
+			@Override
+			public boolean updateContext() {
+				throw new IllegalStateException("test: cannot be sent");
+			}
+		};
+		final CountingResource sound = new CountingResource("sound");
+		this.manager.update(faulty);
+		this.manager.update(sound);
+		this.manager.updateContext();
+		assertEquals(1, sound.updates);
 	}
 
 	@Test

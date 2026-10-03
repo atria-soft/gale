@@ -372,6 +372,15 @@ public abstract class GaleContext {
 		}
 		this.previousDisplayTime = currentTime;
 		OpenGL.threadHasContext();
+		try {
+			return drawWithContext(displayEveryTime);
+		} finally {
+			OpenGL.threadHasNoMoreContext();
+		}
+	}
+
+	/** {@link #operatingSystemDraw(boolean)} once the thread is marked as owning the OpenGL context. */
+	private boolean drawWithContext(final boolean displayEveryTime) {
 		OpenGL.resetFlagState();
 		// process the events
 		if (this.displayFps) {
@@ -481,7 +490,6 @@ public abstract class GaleContext {
 				this.resourceManager.cleanInternalRemoved();
 			}
 		}
-		OpenGL.threadHasNoMoreContext();
 		return hasDisplayDone;
 	}
 
