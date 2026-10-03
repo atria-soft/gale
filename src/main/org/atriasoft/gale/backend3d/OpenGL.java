@@ -954,8 +954,10 @@ public class OpenGL {
 			OpenGL.checkGlError("glGetUniformLocation");
 			LOGGER.warn("glGetUniformLocation('{}') = GL_INVALID_OPERATION", name);
 		} else if (val < 0) {
+			// Not an active uniform of the program: an optional uniform its shaders do not declare, or one
+			// unused and removed by the GLSL compiler. Setting it is a no-op in OpenGL, so it is not a failure.
 			OpenGL.checkGlError("glGetUniformLocation");
-			LOGGER.warn("glGetUniformLocation('{}') = {}", name, val);
+			LOGGER.debug("glGetUniformLocation('{}') = {} (inactive uniform)", name, val);
 		}
 		return val;
 	}
