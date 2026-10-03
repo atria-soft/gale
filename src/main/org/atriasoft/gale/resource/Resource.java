@@ -17,7 +17,16 @@ public abstract class Resource {
 	protected static ResourceManager getManager() {
 		return GaleContext.getContext().getResourcesManager();
 	}
-	
+
+	/**
+	 * Run an OpenGL work (deletion of OpenGL objects) on the OpenGL thread: at
+	 * once when the caller is on it, at the next update of the context otherwise.
+	 * @param task The OpenGL work.
+	 */
+	protected static void runOnGlThread(final Runnable task) {
+		getManager().runOnGlThread(task);
+	}
+
 	protected long uid = -1; //!< unique ID definition
 	protected int count = 1;
 	protected int resourceLevel = MAXRESOURCELEVEL - 1; //!< Level of the resource ==> for update priority [0..5] 0 must be update first.

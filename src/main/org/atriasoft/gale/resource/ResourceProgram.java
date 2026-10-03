@@ -318,7 +318,8 @@ public class ResourceProgram extends Resource {
 	@Override
 	public void removeContext() {
 		if (this.exist) {
-			OpenGL.programRemove(this.program);
+			final int oldProgram = this.program;
+			runOnGlThread(() -> OpenGL.programRemove(oldProgram));
 			this.program = 0;
 			this.exist = false;
 			for (final ProgAttributeElement it : this.elementList) {
@@ -894,6 +895,9 @@ public class ResourceProgram extends Resource {
 	 */
 	@Override
 	public boolean updateContext() {
+		if (isReleased()) {
+			return true;
+		}
 		if (this.exist) {
 			// Do nothing == > too dangerous ...
 		} else {

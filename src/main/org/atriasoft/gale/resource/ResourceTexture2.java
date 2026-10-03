@@ -204,9 +204,10 @@ public class ResourceTexture2 extends Resource {
 		if (this.loaded) {
 			// Request remove texture ...
 			LOGGER.debug("TEXTURE: Rm [{}] texId={}", getId(), this.texId);
-			// TODO Check if we are in the correct thread
-			OpenGL.glDeleteTextures(this.texId);
+			final int oldTexture = this.texId;
+			this.texId = -1;
 			this.loaded = false;
+			runOnGlThread(() -> OpenGL.glDeleteTextures(oldTexture));
 		}
 	}
 
@@ -264,6 +265,9 @@ public class ResourceTexture2 extends Resource {
 
 	@Override
 	public synchronized boolean updateContext() {
+		if (isReleased()) {
+			return true;
+		}
 		LOGGER.trace("updateContext [START]");
 		final boolean hasAlpha = this.data.getColorModel().hasAlpha();
 		final int typeObject = hasAlpha ? OpenGL.GL_RGBA : OpenGL.GL_RGB;

@@ -24,6 +24,7 @@ public class ResourceColored3DObject extends Resource {
 	}
 
 	private final ResourceProgram program;
+	private boolean programReleased = false;
 	private int oGLPosition;
 	private int oGLColor;
 	private int oGLMatrixTransformation;
@@ -44,10 +45,15 @@ public class ResourceColored3DObject extends Resource {
 		}
 	}
 
+	/**
+	 * Give back the shader program (called when the resource is released).
+	 */
 	@Override
-	public void cleanUp() {
-		// TODO Auto-generated method stub
-
+	public synchronized void cleanUp() {
+		if (this.program != null && !this.programReleased) {
+			this.programReleased = true;
+			this.program.release();
+		}
 	}
 
 	private float[] convertInFloat(final List<Vector3f> data) {

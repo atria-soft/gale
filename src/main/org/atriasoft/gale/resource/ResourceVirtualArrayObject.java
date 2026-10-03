@@ -165,7 +165,8 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 
 	/**
-	 * Destructor of this VBO.
+	 * Delete the vertex array and its buffers from the graphic card (called when
+	 * the resource is released, see {@link Resource#release()}).
 	 */
 	@Override
 	public void cleanUp() {
@@ -282,14 +283,31 @@ public class ResourceVirtualArrayObject extends Resource {
 	}
 
 	/**
-	 * remove the data from the opengl context.
+	 * Remove the data from the OpenGL context: the buffers and the vertex array
+	 * are deleted (at once on the OpenGL thread, at the next update of the context
+	 * otherwise) and the resource forgets their ids.
 	 */
 	@Override
 	public void removeContext() {
-		if (this.exist) {
-			// OpenGL.deleteBuffers(this.vbo);
-			this.exist = false;
+		final int oldVao = this.vaoID;
+		final int[] oldVbo = new int[this.vbo.size()];
+		for (int iii = 0; iii < oldVbo.length; iii++) {
+			oldVbo[iii] = this.vbo.get(iii);
 		}
+		this.vbo.clear();
+		this.vaoID = -1;
+		this.exist = false;
+		if (oldVao == -1 && oldVbo.length == 0) {
+			return;
+		}
+		runOnGlThread(() -> {
+			if (oldVbo.length != 0) {
+				GL15.glDeleteBuffers(oldVbo);
+			}
+			if (oldVao != -1) {
+				GL30.glDeleteVertexArrays(oldVao);
+			}
+		});
 	}
 
 	/**
@@ -298,9 +316,8 @@ public class ResourceVirtualArrayObject extends Resource {
 	@Override
 	public void removeContextToLate() {
 		this.exist = false;
-		//		for (int iii=0; iii<this.vbo.length; iii++) {
-		//			this.vbo[iii] = 0;
-		//		}
+		this.vaoID = -1;
+		this.vbo.clear();
 	}
 
 	public void render(final RenderMode mode) {
@@ -435,6 +452,10 @@ public class ResourceVirtualArrayObject extends Resource {
 	 */
 	@Override
 	public boolean updateContext() {
+		if (isReleased()) {
+			// Given back: nothing is sent to the graphic card any more.
+			return true;
+		}
 		LOGGER.trace(" Start: [{}] '{}' (size={}) ********************************", getId(), getName(), this.vertexCount);
 		if (!this.exist) {
 			LOGGER.trace("     ==> ALLOCATE new handle");

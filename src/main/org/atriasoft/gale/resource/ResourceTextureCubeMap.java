@@ -135,6 +135,9 @@ public class ResourceTextureCubeMap extends Resource {
 
 	@Override
 	public synchronized boolean updateContext() {
+		if (isReleased()) {
+			return true;
+		}
 		LOGGER.trace("CubeMap updateContext [START]");
 		if (this.loaded) {
 			OpenGL.glDeleteTextures(this.texId);
@@ -172,8 +175,10 @@ public class ResourceTextureCubeMap extends Resource {
 	public synchronized void removeContext() {
 		if (this.loaded) {
 			LOGGER.debug("CubeMap: Rm [{}] texId={}", getId(), this.texId);
-			OpenGL.glDeleteTextures(this.texId);
+			final int oldTexture = this.texId;
+			this.texId = -1;
 			this.loaded = false;
+			runOnGlThread(() -> OpenGL.glDeleteTextures(oldTexture));
 		}
 	}
 

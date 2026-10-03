@@ -61,9 +61,12 @@ public class ResourceVirtualBufferObject extends Resource {
 		return 0;
 	}
 
+	/**
+	 * Delete the buffers of the graphic card (called when the resource is released).
+	 */
 	@Override
 	public void cleanUp() {
-		// TODO Auto-generated method stub
+		removeContext();
 	}
 
 	/**
@@ -129,8 +132,10 @@ public class ResourceVirtualBufferObject extends Resource {
 	@Override
 	public synchronized void removeContext() {
 		if (this.exist) {
-			OpenGL.deleteBuffers(this.vbo);
+			final int[] oldVbo = this.vbo.clone();
+			Arrays.fill(this.vbo, 0);
 			this.exist = false;
+			runOnGlThread(() -> OpenGL.deleteBuffers(oldVbo));
 		}
 	}
 
@@ -175,6 +180,9 @@ public class ResourceVirtualBufferObject extends Resource {
 	 */
 	@Override
 	public synchronized boolean updateContext() {
+		if (isReleased()) {
+			return true;
+		}
 		LOGGER.trace("updateContext (VBO Start: [{}] '{}' (size={})", getId(), getName(), this.buffer.length);
 		/*
 		if (lock.tryLock() == false) {

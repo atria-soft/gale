@@ -179,9 +179,10 @@ public class ResourceTexture extends Resource {
 		if (this.loaded) {
 			// Request remove texture ...
 			LOGGER.debug("TEXTURE: Rm [{}] texId={}", getId(), this.texId);
-			// TODO Check if we are in the correct thread
-			OpenGL.glDeleteTextures(this.texId);
+			final int oldTexture = this.texId;
+			this.texId = -1;
 			this.loaded = false;
+			runOnGlThread(() -> OpenGL.glDeleteTextures(oldTexture));
 		}
 	}
 
@@ -217,7 +218,7 @@ public class ResourceTexture extends Resource {
 	// Gale internal API:
 	@Override
 	public boolean updateContext() {
-		if (this.loaded) {
+		if (this.loaded || isReleased()) {
 			return true;
 		}
 		// Request a new texture at openGl :

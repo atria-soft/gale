@@ -68,9 +68,8 @@ public class ResourceShader extends Resource {
 	 */
 	@Override
 	public void cleanUp() {
-		OpenGL.shaderRemove(this.shader);
-		this.exist = false;
-	};
+		removeContext();
+	}
 	
 	/**
 	 * get the opengl reference id of this shader.
@@ -104,9 +103,7 @@ public class ResourceShader extends Resource {
 			updateContext();
 		} else {
 			LOGGER.debug("OGL: load SHADER '{}' ==> tagged has update context needed", this.name);
-			// TODO Check this, this is a leek ==> in the GPU ... really bad ...
-			this.exist = false;
-			this.shader = 0;
+			removeContext();
 			getManager().update(this);
 		}
 	}
@@ -117,9 +114,10 @@ public class ResourceShader extends Resource {
 	@Override
 	public void removeContext() {
 		if (this.exist) {
-			OpenGL.shaderRemove(this.shader);
+			final int oldShader = this.shader;
 			this.shader = -1;
 			this.exist = false;
+			runOnGlThread(() -> OpenGL.shaderRemove(oldShader));
 		}
 	}
 	
@@ -137,6 +135,9 @@ public class ResourceShader extends Resource {
 	 */
 	@Override
 	public boolean updateContext() {
+		if (isReleased()) {
+			return true;
+		}
 		if (!this.exist) {
 			this.shader = OpenGL.shaderLoad(this.uri, this.type);
 			// create the Shader
