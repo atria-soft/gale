@@ -347,15 +347,29 @@ public class ResourceManager {
 			LOGGER.error("Request update after application EXIT ...");
 			return;
 		}
-		final List<Resource> toDestroy;
-		final List<Runnable> tasks;
+		// Deletions first, until none is left: the clean-up of a resource may release others (a program its shaders).
+		while (true) {
+			final List<Resource> toDestroy;
+			final List<Runnable> tasks;
+			synchronized (this.lock) {
+				toDestroy = new ArrayList<>(this.resourceListToDestroy);
+				this.resourceListToDestroy.clear();
+				tasks = new ArrayList<>(this.glTasks);
+				this.glTasks.clear();
+			}
+			if (toDestroy.isEmpty() && tasks.isEmpty()) {
+				break;
+			}
+			for (final Resource it : toDestroy) {
+				destroy(it);
+			}
+			for (final Runnable task : tasks) {
+				runTask(task);
+			}
+		}
 		final List<Resource> toUpdate;
 		final boolean all = this.contextHasBeenRemoved;
 		synchronized (this.lock) {
-			toDestroy = new ArrayList<>(this.resourceListToDestroy);
-			this.resourceListToDestroy.clear();
-			tasks = new ArrayList<>(this.glTasks);
-			this.glTasks.clear();
 			if (all) {
 				toUpdate = new ArrayList<>(this.resourceList);
 			} else {
@@ -364,12 +378,6 @@ public class ResourceManager {
 			this.resourceListToUpdate.clear();
 		}
 		this.contextHasBeenRemoved = false;
-		for (final Resource it : toDestroy) {
-			destroy(it);
-		}
-		for (final Runnable task : tasks) {
-			runTask(task);
-		}
 		if (toUpdate.isEmpty()) {
 			return;
 		}
