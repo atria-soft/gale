@@ -85,6 +85,10 @@ public class ResourceTextureCubeMap extends Resource {
 		// Load images from disk immediately (they will be uploaded to GPU in updateContext)
 		for (int i = 0; i < 6; i++) {
 			try (final InputStream in = Uri.getStream(this.faceUris[i])) {
+				if (in == null) {
+					LOGGER.error("Cannot find the cubemap face: {}", this.faceUris[i]);
+					continue;
+				}
 				this.faceImages[i] = ImageIO.read(in);
 				if (this.faceImages[i] == null) {
 					LOGGER.error("Failed to decode cubemap face image: {}", this.faceUris[i]);

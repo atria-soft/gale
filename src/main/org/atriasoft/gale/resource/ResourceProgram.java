@@ -913,8 +913,9 @@ public class ResourceProgram extends Resource {
 			OpenGL.programBindAttribute(this.program, ResourceVirtualArrayObject.INDICE_VBO_COLORS, "in_colors");
 
 			if (!OpenGL.programCompile(this.program)) {
-				LOGGER.trace("Could not compile'PROGRAM':'{}'", this.name);
+				LOGGER.error("Cannot link the program '{}'", this.name);
 				OpenGL.programRemove(this.program);
+				this.program = 0;
 				return true;
 			}
 			// now get the old attribute requested priviously ...

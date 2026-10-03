@@ -1,15 +1,16 @@
 package org.atriasoft.gale.backend3d;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -854,6 +855,10 @@ public class OpenGL {
 		}
 		GL20.glLinkProgram(prog);
 		OpenGL.checkGlError("glLinkProgram");
+		if (GL20.glGetProgrami(prog, GL20.GL_LINK_STATUS) == GL11.GL_FALSE) {
+			LOGGER.error("Cannot link the program {}:\n{}", prog, GL20.glGetProgramInfoLog(prog));
+			return false;
+		}
 		GL20.glValidateProgram(prog);
 		
 		// GLint linkStatus = GLFALSE;
@@ -1124,40 +1129,44 @@ public class OpenGL {
 		OpenGL.MATRIX_LIST.add(tmp);
 	}
 	
+	/**
+	 * Read a text file of the file system.
+	 * @param name Path of the file.
+	 * @return its content.
+	 * @throws UncheckedIOException if the file cannot be read.
+	 */
 	protected static StringBuilder readLocalFile(final String name) {
 		final StringBuilder fileSource = new StringBuilder();
-		try {
-			final BufferedReader reader = new BufferedReader(new FileReader(name));
+		try (final BufferedReader reader = new BufferedReader(new FileReader(name, StandardCharsets.UTF_8))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				fileSource.append(line).append("\n");
 			}
-			reader.close();
 		} catch (final IOException e) {
-			LOGGER.error("Could not read the file!");
-			System.exit(-1);
+			throw new UncheckedIOException("Cannot read the file " + name, e);
 		}
 		return fileSource;
 	}
 	
+	/**
+	 * Read a text file (a shader) given by its URI.
+	 * @param name URI of the file.
+	 * @return its content.
+	 * @throws UncheckedIOException if the file does not exist or cannot be read.
+	 */
 	protected static StringBuilder readLocalFile(final Uri name) {
 		final StringBuilder fileSource = new StringBuilder();
-		try {
-			final InputStream inputStream = Uri.getStream(name);
-			if (inputStream == null) {
-				LOGGER.error("Could not read the file! {}", name);
-				System.exit(-1);
-			}
-			final Reader reader = new BufferedReader(
-					new InputStreamReader(inputStream, Charset.forName(StandardCharsets.UTF_8.name())));
+		final InputStream inputStream = Uri.getStream(name);
+		if (inputStream == null) {
+			throw new UncheckedIOException(new FileNotFoundException("Cannot find the file " + name));
+		}
+		try (final Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 			int c = 0;
 			while ((c = reader.read()) != -1) {
 				fileSource.append((char) c);
 			}
 		} catch (final IOException e) {
-			LOGGER.error("Could not read the file! {}", name);
-			e.printStackTrace();
-			System.exit(-1);
+			throw new UncheckedIOException("Cannot read the file " + name, e);
 		}
 		return fileSource;
 	}
@@ -1299,15 +1308,26 @@ public class OpenGL {
 		return shaderId;
 	}
 	
+	/**
+	 * Load and compile a shader. A shader that does not compile is journaled with
+	 * its whole compilation log and deleted.
+	 * @param file URI of the source of the shader.
+	 * @param type Type of the shader.
+	 * @return the OpenGL id of the shader, or -1 if it does not compile.
+	 * @throws UncheckedIOException if the source cannot be read.
+	 */
 	public static int shaderLoad(final Uri file, final ShaderType type) {
-		System.out.println("Load shader: '" + file + "'");
+		LOGGER.debug("Load shader: '{}'", file);
 		final StringBuilder shaderSource = OpenGL.readLocalFile(file);
 		final int shaderID = OpenGL.shaderCreate(type);
+		if (shaderID < 0) {
+			return -1;
+		}
 		GL20.glShaderSource(shaderID, shaderSource);
 		GL20.glCompileShader(shaderID);
 		if (GL20.glGetShaderi(shaderID, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
-			LOGGER.error(GL20.glGetShaderInfoLog(shaderID, 500));
-			LOGGER.error("Could not compile the shader");
+			LOGGER.error("Cannot compile the shader '{}':\n{}", file, GL20.glGetShaderInfoLog(shaderID));
+			GL20.glDeleteShader(shaderID);
 			return -1;
 		}
 		return shaderID;

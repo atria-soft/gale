@@ -103,9 +103,7 @@ public class ResourceTexture extends Resource {
 			}
 			val *= 2;
 		}
-		LOGGER.error("impossible CASE....");
-		System.exit(-1);
-		return val;
+		throw new IllegalArgumentException("No power of 2 holds " + value);
 	}
 
 	protected int texId = -1; //!< openGl textureID.
