@@ -77,6 +77,9 @@ public abstract class GaleContext {
 	protected int monitorIndex = -1; //!< current monitor index where the window is located, -1 if unknown
 	// note: in the current mode, the management is not able to synchronize it good..
 	private final boolean requestSynchronousProcessing = true; //!< this permit to process the event in the global GUI thread instead of the local processing thread.
+	/** Set by {@link #stop(int)}: the backend ends the application at its next loop. */
+	private volatile boolean stopRequested = false;
+	private volatile int exitCode = 0;
 
 	public GaleContext(final GaleApplication application, final String[] args) {
 		// set a basic
@@ -673,17 +676,70 @@ public abstract class GaleContext {
 	}
 
 	/**
-	 * The OS Inform that the Window has been killed
+	 * The OS informs that the user asks to close the window: the application is
+	 * asked ({@link GaleApplication#onKillDemand}) on the GUI thread; it ends
+	 * itself with {@link GaleApplication#exit(int)}, the default behaviour.
 	 */
 	public void operatingSystemStop() {
-		// set the current interface :
-		try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
-			LOGGER.info("operatingSystemStop...");
-			if (this.application == null) {
-				stop();
+		LOGGER.info("operatingSystemStop...");
+		postActionAsync(context -> {
+			final GaleApplication appl = context.getApplication();
+			if (appl == null) {
+				context.stop();
 				return;
 			}
-			this.application.onKillDemand(this);
+			appl.onKillDemand(context);
+		});
+	}
+
+	/**
+	 * End of the application, called once by the backend on the GUI thread
+	 * before the end of the process: the periodic thread stops, the application
+	 * is paused, stopped and destroyed ({@link GaleApplication#onPause},
+	 * {@link GaleApplication#onStop}, {@link GaleApplication#onDestroy}), then the
+	 * OpenGL objects of the resources it released are deleted and the resource
+	 * manager is closed.
+	 * @param hasGlContext true when the OpenGL context is current on the caller
+	 *            (the OpenGL objects can be deleted), false when it is lost.
+	 */
+	protected void operatingSystemShutdown(final boolean hasGlContext) {
+		if (this.applicationState == ApplicationState.DIED) {
+			return;
+		}
+		LOGGER.info(" == > Gale system Un-Init (BEGIN)");
+		this.periodicThread.threadStop();
+		if (hasGlContext) {
+			OpenGL.threadHasContext();
+		}
+		try (AutoUnLock autoUnlock = AutoUnLock.lock(this.msgSystemAsyncLock)) {
+			final boolean wasRunning = this.applicationState == ApplicationState.RUNNING;
+			this.applicationState = ApplicationState.DIED;
+			final GaleApplication appl = this.application;
+			if (appl != null && wasRunning) {
+				runLifeCycle("onPause", () -> appl.onPause(this));
+				runLifeCycle("onStop", () -> appl.onStop(this));
+				runLifeCycle("onDestroy", () -> appl.onDestroy(this));
+			}
+			if (hasGlContext) {
+				// The resources released by onDestroy, and those their clean-up released.
+				this.resourceManager.updateContext();
+				this.resourceManager.updateContext();
+			}
+			LOGGER.info("{} resources still alive at the end", this.resourceManager.getResourceCount());
+			this.resourceManager.applicationExiting();
+		} finally {
+			if (hasGlContext) {
+				OpenGL.threadHasNoMoreContext();
+			}
+		}
+		LOGGER.info(" == > Gale system Un-Init (END)");
+	}
+
+	private static void runLifeCycle(final String name, final Runnable callback) {
+		try {
+			callback.run();
+		} catch (final RuntimeException | Error ex) {
+			LOGGER.error("The application failed in {} while closing", name, ex);
 		}
 	}
 
@@ -1031,10 +1087,38 @@ public abstract class GaleContext {
 	}
 
 	/**
-	 * The application request that the Window will be killed
+	 * The application request that the Window will be killed (exit code 0).
 	 */
 	public void stop() {
-		LOGGER.warn("stop: NOT implemented for this platform...");
+		stop(0);
+	}
+
+	/**
+	 * The application requests its end: at its next loop the backend closes it
+	 * ({@link #operatingSystemShutdown(boolean)}) then ends the process with
+	 * {@code code}.
+	 * @param code Exit code of the process.
+	 */
+	public void stop(final int code) {
+		LOGGER.info("Stop requested (exit code {})", code);
+		this.exitCode = code;
+		this.stopRequested = true;
+	}
+
+	/**
+	 * Whether the application asked its end ({@link #stop(int)}).
+	 * @return true once requested.
+	 */
+	public boolean isStopRequested() {
+		return this.stopRequested;
+	}
+
+	/**
+	 * Exit code given to {@link #stop(int)}.
+	 * @return the exit code of the process.
+	 */
+	public int getExitCode() {
+		return this.exitCode;
 	}
 
 }

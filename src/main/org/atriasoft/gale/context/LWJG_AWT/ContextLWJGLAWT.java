@@ -22,6 +22,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.MemoryImageSource;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -180,7 +182,14 @@ public class ContextLWJGLAWT extends GaleContext
 		}
 
 		this.frame = new JFrame("Gale base");
-		this.frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		// Closing the window asks the application (onKillDemand); it ends through stop(), see run().
+		this.frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		this.frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(final WindowEvent e) {
+				operatingSystemStop();
+			}
+		});
 		this.frame.setLayout(new BorderLayout());
 		this.frame.setPreferredSize(new Dimension((int) initialSize.x(), (int) initialSize.y()));
 		this.glData = new GLData();
@@ -637,8 +646,8 @@ public class ContextLWJGLAWT extends GaleContext
 		final Runnable renderLoop = new Runnable() {
 			@Override
 			public void run() {
-				if (!ContextLWJGLAWT.this.canvas.isValid()) {
-					System.exit(0);
+				if (isStopRequested() || !ContextLWJGLAWT.this.canvas.isValid()) {
+					shutdownAndExit();
 					return;
 				}
 				if (!ContextLWJGLAWT.this.isInitialized) {
@@ -675,6 +684,29 @@ public class ContextLWJGLAWT extends GaleContext
 		};
 		SwingUtilities.invokeLater(renderLoop);
 		return 0;
+	}
+
+	/**
+	 * End of the application, on the GUI thread: the application is destroyed
+	 * with the OpenGL context current (its OpenGL objects are deleted), the
+	 * window and its drawing surface are released (dispose), then the process
+	 * ends with the exit code given to {@link #stop(int)}.
+	 */
+	private void shutdownAndExit() {
+		if (this.canvas.isValid()) {
+			try {
+				this.canvas.runInContext(() -> operatingSystemShutdown(true));
+			} catch (final RuntimeException ex) {
+				LOGGER.error("Cannot close the application with its OpenGL context", ex);
+				operatingSystemShutdown(false);
+			}
+		} else {
+			// The window is gone with its OpenGL context: the application is closed all the same.
+			operatingSystemShutdown(false);
+		}
+		this.frame.dispose();
+		LOGGER.info("Gale exits (code {})", getExitCode());
+		System.exit(getExitCode());
 	}
 
 	public void setDrawer(final DisplayManagerDraw drawer) {

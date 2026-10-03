@@ -35,7 +35,7 @@ public class GaleApplication {
 	 */
 	public void exit(final int value) {
 		LOGGER.trace("Exit Requested {}", value);
-		Gale.getContext().stop();
+		Gale.getContext().stop(value);
 	}
 
 	public float getAspectRatio() {
@@ -179,12 +179,14 @@ public class GaleApplication {
 	}
 
 	/**
-	 * The user request application removing.
+	 * The user asks to close the application (the window is closed). By default
+	 * the application ends ({@link #exit(int)}): onPause, onStop and onDestroy are
+	 * called, then the process ends. Override it to ask a confirmation first.
 	 * @param context Current gale context.
 	 */
 	public void onKillDemand(final GaleContext context) {
 		LOGGER.info("Gale request auto destroy ==> no applification specification");
-		System.exit(0);
+		exit(0);
 	}
 
 	/**

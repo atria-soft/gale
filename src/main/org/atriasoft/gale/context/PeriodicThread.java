@@ -32,8 +32,8 @@ public class PeriodicThread extends ThreadAbstract {
 		try {
 			Thread.sleep(100);
 		} catch (final InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// threadStop() interrupts the sleep to end the thread: not an error.
+			Thread.currentThread().interrupt();
 			return;
 		}
 		// Keep global clock to process events
