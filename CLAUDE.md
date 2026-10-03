@@ -93,6 +93,16 @@ Gale (entry point)
 | `onDestroy` | Application is being destroyed - clean up resources here |
 | `onKillDemand` | System requested application exit |
 
+### Closing the application
+
+Closing the window calls `onKillDemand` on the GUI thread; its default answer is `exit(0)`
+(`GaleContext.stop(code)`). At its next loop the backend stops the periodic thread, calls
+`onPause`, `onStop` and `onDestroy` **on the GUI thread with the OpenGL context current**
+(release your resources there: their OpenGL objects are deleted at once), closes the resource
+manager, disposes the window and ends the process with the exit code. Override
+`onKillDemand` to ask a confirmation; call `exit(code)` to end the application from code
+(never `System.exit`, which skips `onDestroy`).
+
 ### Rendering Callbacks
 
 | Callback | When |
@@ -296,17 +306,27 @@ All GPU resources extend `Resource` and are managed by `ResourceManager`. The sy
 ### Resource Lifecycle
 
 ```
-create() → localAdd(manager) → [deferred] updateContext() → use → cleanUp()
-                                    ↑
-                     flush() → manager.update(resource)
+create() → [constructor registers it, count 1] → [deferred] updateContext() → use → release()
+                                    ↑                                                  ↓ count 0
+                     flush() → manager.update(resource)          leaves the manager, cleanUp() deletes its GL objects
 ```
 
 Every resource follows the pattern:
-1. **Factory method** (`create(...)`) checks if resource already exists by name in `ResourceManager`
-2. If found, increment reference count and return existing instance
-3. If not found, create new instance (constructor calls `localAdd` to register with manager)
-4. If OpenGL context is available, call `updateContext()` immediately
-5. If not, call `manager.update(this)` to defer until context is ready
+1. **Factory method** (`create(...)`) looks for a living resource of the same name with
+   `keepExisting(name, Type.class)`: found → it is kept (count + 1) and returned; another type → `IllegalStateException`
+2. If not found, create new instance (the constructor registers it once, count 1; never call `localAdd` again)
+3. If OpenGL context is available, call `updateContext()` immediately
+4. If not, call `manager.update(this)` to defer until context is ready
+
+**Releasing:** call `release()` once per `create()`/`keep()`, from any thread. At count 0 the
+resource leaves the manager (a later `create` of the same name builds a new one), queued
+updates are ignored, and `cleanUp()` deletes its OpenGL objects: at once on the OpenGL thread,
+at the next `updateContext()` otherwise. A released resource must not be used any more
+(`isReleased()`); a second `release()` is logged and ignored. Do not delete a resource's GL ids
+yourself (`glDeleteVertexArrays`...): `release()` does it, and `removeContext()` forgets the ids.
+To delete raw GL objects of your own from a thread without context, use
+`ResourceManager.runOnGlThread(Runnable)`. The manager logs (DEBUG) the number of living
+resources when it changes: a number that grows after each level/match is a missing `release()`.
 
 ### ResourceShader
 
