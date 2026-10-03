@@ -566,7 +566,7 @@ public abstract class GaleContext {
 	 * @param size new size of the windows.
 	 */
 	public void operatingSystemResize(final Vector2f size) {
-		LOGGER.warn("Resize request={} previous={}", size, this.windowsSize);
+		LOGGER.debug("Resize request={} previous={}", size, this.windowsSize);
 		if (this.windowsSize.equals(size)) {
 			return;
 		}
