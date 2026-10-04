@@ -130,18 +130,9 @@ public class ContextLWJGLAWT extends GaleContext
 		this.isInitialized = true;
 	}
 
-	private int getUniqueIndex(final KeyEvent e) {
-		int internalKeyValue = e.getKeyCode();
-		if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
-			internalKeyValue += 100000000;
-		} else if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
-			internalKeyValue += 200000000;
-		} else if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_NUMPAD) {
-			internalKeyValue += 300000000;
-		} else if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_STANDARD) {
-			internalKeyValue += 400000000;
-		}
-		return internalKeyValue;
+	/** The number of the key of an event, its own for each key ({@link TypedCharacters#keyOf}). */
+	private static int getUniqueIndex(final KeyEvent e) {
+		return TypedCharacters.keyOf(e.getKeyCode(), e.getExtendedKeyCode(), e.getKeyLocation());
 	}
 
 	@Override
@@ -513,13 +504,12 @@ public class ContextLWJGLAWT extends GaleContext
 	 * than a control code, and at its release the one of its press.
 	 */
 	private char typedCharacter(final KeyEvent e, final boolean pressed) {
-		final int key = getUniqueIndex(e);
 		if (pressed) {
-			return this.typedCharacters.pressed(key, e.getKeyChar(), e.getKeyCode(), e.getExtendedKeyCode(),
-					e.isControlDown(), e.isShiftDown());
+			return this.typedCharacters.pressed(e.getKeyChar(), e.getKeyCode(), e.getExtendedKeyCode(),
+					e.getKeyLocation(), e.isControlDown(), e.isShiftDown());
 		}
-		return this.typedCharacters.released(key, e.getKeyChar(), e.getKeyCode(), e.getExtendedKeyCode(),
-				e.isControlDown(), e.isShiftDown());
+		return this.typedCharacters.released(e.getKeyChar(), e.getKeyCode(), e.getExtendedKeyCode(),
+				e.getKeyLocation(), e.isControlDown(), e.isShiftDown());
 	}
 
 	@Override

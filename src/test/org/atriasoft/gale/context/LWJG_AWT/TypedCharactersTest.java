@@ -1,8 +1,11 @@
 package org.atriasoft.gale.context.LWJG_AWT;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.event.KeyEvent;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -73,15 +76,49 @@ class TypedCharactersTest {
 	@Test
 	void aKeyIsReleasedWithTheCharacterOfItsPress() {
 		final TypedCharacters keys = new TypedCharacters();
-		final int z = KeyEvent.VK_Z + 400000000;
+		final int standard = KeyEvent.KEY_LOCATION_STANDARD;
 		// Z pressed alone, then Control (crouch), then Z released: AWT types Ctrl+Z, the release is still a z.
-		assertEquals('z', keys.pressed(z, 'z', KeyEvent.VK_Z, KeyEvent.VK_Z, false, false));
-		assertEquals('z', keys.released(z, '\u001a', KeyEvent.VK_Z, KeyEvent.VK_Z, true, false));
+		assertEquals('z', keys.pressed('z', KeyEvent.VK_Z, KeyEvent.VK_Z, standard, false, false));
+		assertEquals('z', keys.released('\u001a', KeyEvent.VK_Z, KeyEvent.VK_Z, standard, true, false));
 		// E pressed alone, then AltGr, then E released: AWT types the euro sign, the release is still an e.
-		final int e = KeyEvent.VK_E + 400000000;
-		assertEquals('e', keys.pressed(e, 'e', KeyEvent.VK_E, KeyEvent.VK_E, false, false));
-		assertEquals('e', keys.released(e, '€', KeyEvent.VK_E, KeyEvent.VK_E, false, false));
+		assertEquals('e', keys.pressed('e', KeyEvent.VK_E, KeyEvent.VK_E, standard, false, false));
+		assertEquals('e', keys.released('€', KeyEvent.VK_E, KeyEvent.VK_E, standard, false, false));
 		// A release without its press (the window got the focus meanwhile): the character it types now.
-		assertEquals('w', keys.released(KeyEvent.VK_W, '\u0017', KeyEvent.VK_W, KeyEvent.VK_W, true, false));
+		assertEquals('w', keys.released('\u0017', KeyEvent.VK_W, KeyEvent.VK_W, standard, true, false));
+	}
+
+	@Test
+	void keysWithoutKeyCodeAreReleasedEachWithItsOwnCharacter() {
+		// AZERTY: é, è, ç, à, ù and ² have no key code (VK_UNDEFINED), each its own extended key code.
+		final TypedCharacters keys = new TypedCharacters();
+		final int standard = KeyEvent.KEY_LOCATION_STANDARD;
+		final int undefined = KeyEvent.VK_UNDEFINED;
+		// é pressed, è pressed, é released (with Control, AWT types nothing): é, not è, is released.
+		assertEquals('é', keys.pressed('é', undefined, unicode('é'), standard, false, false));
+		assertEquals('è', keys.pressed('è', undefined, unicode('è'), standard, false, false));
+		assertEquals('é', keys.released(KeyEvent.CHAR_UNDEFINED, undefined, unicode('é'), standard, true, false));
+		// Then è released with Shift (AWT types the 7 of the key): still è.
+		assertEquals('è', keys.released('7', undefined, unicode('è'), standard, false, true));
+	}
+
+	@Test
+	void eachKeyHasItsOwnNumber() {
+		final int standard = KeyEvent.KEY_LOCATION_STANDARD;
+		final int undefined = KeyEvent.VK_UNDEFINED;
+		final Set<Integer> numbers = new HashSet<>();
+		for (final char symbol : new char[] { 'é', 'è', 'ç', 'à', 'ù', '²' }) {
+			assertTrue(numbers.add(TypedCharacters.keyOf(undefined, unicode(symbol), standard)), "key " + symbol);
+		}
+		assertTrue(numbers.add(TypedCharacters.keyOf(KeyEvent.VK_Z, KeyEvent.VK_Z, standard)));
+		// Left and right Shift, the digit 1 of the top row and of the keypad.
+		assertTrue(numbers.add(TypedCharacters.keyOf(KeyEvent.VK_SHIFT, KeyEvent.VK_SHIFT, KeyEvent.KEY_LOCATION_LEFT)));
+		assertTrue(numbers.add(TypedCharacters.keyOf(KeyEvent.VK_SHIFT, KeyEvent.VK_SHIFT, KeyEvent.KEY_LOCATION_RIGHT)));
+		assertTrue(numbers.add(TypedCharacters.keyOf(KeyEvent.VK_1, KeyEvent.VK_1, standard)));
+		assertTrue(numbers.add(TypedCharacters.keyOf(KeyEvent.VK_1, KeyEvent.VK_1, KeyEvent.KEY_LOCATION_NUMPAD)));
+		// The same key at its press and at its release; a key event built by hand has no extended key code.
+		assertEquals(TypedCharacters.keyOf(undefined, unicode('é'), standard),
+				TypedCharacters.keyOf(undefined, unicode('é'), standard));
+		assertEquals(TypedCharacters.keyOf(KeyEvent.VK_Z, KeyEvent.VK_Z, standard),
+				TypedCharacters.keyOf(KeyEvent.VK_Z, undefined, standard));
 	}
 }

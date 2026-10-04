@@ -23,7 +23,8 @@ import java.util.Map;
  * <p>
  * A release names the character its press named: a letter pressed alone and
  * released once Control (or AltGr) is down is still released, and the
- * application does not keep it held for ever.
+ * application does not keep it held for ever. Each key of the keyboard has
+ * its own entry ({@link #keyOf}), the keys AWT has no key code for included.
  */
 public final class TypedCharacters {
 
@@ -31,27 +32,45 @@ public final class TypedCharacters {
 	private static final char UNDEFINED = KeyEvent.CHAR_UNDEFINED;
 	/** Added by AWT to the Unicode value of a symbol that has no key code of its own. */
 	private static final int UNICODE_KEY_CODE = 0x01000000;
+	/** Gap between the key numbers of two locations: above every key code and extended key code. */
+	private static final int LOCATION_STEP = 100_000_000;
 	private static final char FIRST_PRINTABLE = ' ';
 	private static final char DELETE = '\u007f';
 	private static final Map<Integer, Character> SYMBOLS = symbols();
 
-	/** The character each key held down typed when it was pressed, by key. */
+	/** The character each key held down typed when it was pressed, by key ({@link #keyOf}). */
 	private final Map<Integer, Character> typedAtPress = new HashMap<>();
+
+	/**
+	 * The number of a key of the keyboard: the same at its press and at its
+	 * release, another for each key. AWT gives no key code
+	 * ({@link KeyEvent#VK_UNDEFINED}) to a key whose symbol has none (é, è,
+	 * ç, à, ù and ² on an AZERTY keyboard), but each its own extended key
+	 * code; the location tells the left Shift from the right one.
+	 *
+	 * @param keyCode         its key code ({@link KeyEvent#getKeyCode()})
+	 * @param extendedKeyCode its extended key code ({@link KeyEvent#getExtendedKeyCode()}), 0 if unknown
+	 * @param location        its location ({@link KeyEvent#getKeyLocation()})
+	 */
+	public static int keyOf(final int keyCode, final int extendedKeyCode, final int location) {
+		final int code = extendedKeyCode != KeyEvent.VK_UNDEFINED ? extendedKeyCode : keyCode;
+		return location * LOCATION_STEP + code;
+	}
 
 	/**
 	 * The character of a key pressed.
 	 *
-	 * @param key             the key, the same number for its press and its release (code and location)
 	 * @param keyChar         the character AWT typed ({@link KeyEvent#getKeyChar()})
 	 * @param keyCode         its key code ({@link KeyEvent#getKeyCode()})
 	 * @param extendedKeyCode its extended key code ({@link KeyEvent#getExtendedKeyCode()})
+	 * @param location        its location ({@link KeyEvent#getKeyLocation()})
 	 * @param control         whether Control is held
 	 * @param shift           whether Shift is held
 	 */
-	public char pressed(final int key, final char keyChar, final int keyCode, final int extendedKeyCode,
+	public char pressed(final char keyChar, final int keyCode, final int extendedKeyCode, final int location,
 			final boolean control, final boolean shift) {
 		final char typed = typed(keyChar, keyCode, extendedKeyCode, control, shift);
-		this.typedAtPress.put(key, typed);
+		this.typedAtPress.put(keyOf(keyCode, extendedKeyCode, location), typed);
 		return typed;
 	}
 
@@ -61,9 +80,9 @@ public final class TypedCharacters {
 	 *
 	 * @see #pressed
 	 */
-	public char released(final int key, final char keyChar, final int keyCode, final int extendedKeyCode,
+	public char released(final char keyChar, final int keyCode, final int extendedKeyCode, final int location,
 			final boolean control, final boolean shift) {
-		final Character atPress = this.typedAtPress.remove(key);
+		final Character atPress = this.typedAtPress.remove(keyOf(keyCode, extendedKeyCode, location));
 		return atPress != null ? atPress : typed(keyChar, keyCode, extendedKeyCode, control, shift);
 	}
 
