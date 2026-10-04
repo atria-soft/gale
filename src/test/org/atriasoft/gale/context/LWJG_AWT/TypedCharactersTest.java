@@ -34,13 +34,26 @@ class TypedCharactersTest {
 	}
 
 	@Test
+	void aLetterHeldWithControlIsTheOneOfTheLayoutInUse() {
+		// X11, layouts "us,fr", fr in use: the key W of the first layout bears Z; its key code is VK_W, its
+		// extended key code VK_Z.
+		assertEquals('z', TypedCharacters.typed('\u001a', KeyEvent.VK_W, KeyEvent.VK_Z, CTRL));
+		// X11, layouts "fr,us", us in use: the key Z of the first layout bears W.
+		assertEquals('w', TypedCharacters.typed('\u0017', KeyEvent.VK_Z, KeyEvent.VK_W, CTRL));
+		// A key event built by hand has no extended key code: the key code.
+		assertEquals('z', TypedCharacters.typed('\u001a', KeyEvent.VK_Z, KeyEvent.VK_UNDEFINED, CTRL));
+	}
+
+	@Test
 	void controlLettersThatAreAlsoKeysOfTheirOwnStayLetters() {
 		// Ctrl+I types a Tab, Ctrl+M a Return, Ctrl+H a Backspace, Ctrl+[ an Escape.
 		assertEquals('i', TypedCharacters.typed('\t', KeyEvent.VK_I, KeyEvent.VK_I, CTRL));
 		assertEquals('m', TypedCharacters.typed('\r', KeyEvent.VK_M, KeyEvent.VK_M, CTRL));
 		assertEquals('h', TypedCharacters.typed('\b', KeyEvent.VK_H, KeyEvent.VK_H, CTRL));
 		assertEquals('[', TypedCharacters.typed('\u001b', KeyEvent.VK_OPEN_BRACKET, KeyEvent.VK_OPEN_BRACKET, CTRL));
+		// Windows types a NUL for Ctrl+2; X11 types the 2 itself.
 		assertEquals('2', TypedCharacters.typed('\0', KeyEvent.VK_2, KeyEvent.VK_2, CTRL));
+		assertEquals('2', TypedCharacters.typed('2', KeyEvent.VK_2, KeyEvent.VK_2, CTRL));
 	}
 
 	@Test
@@ -82,9 +95,12 @@ class TypedCharactersTest {
 
 	@Test
 	void aSymbolWithoutKeyCodeComesFromItsExtendedCode() {
-		// AZERTY: the key 2 of the top row bears é, which has no key code; with Control AWT may type nothing.
+		// AZERTY: the key 2 of the top row bears é, which has no key code. X11 types é with Control; a system
+		// that types nothing for it (CHAR_UNDEFINED) gets é from the extended key code.
+		assertEquals('é', TypedCharacters.typed('é', KeyEvent.VK_UNDEFINED, unicode('é'), CTRL));
 		assertEquals('é', TypedCharacters.typed(KeyEvent.CHAR_UNDEFINED, KeyEvent.VK_UNDEFINED,
 				unicode('é'), CTRL));
+		assertEquals('&', TypedCharacters.typed('&', KeyEvent.VK_AMPERSAND, KeyEvent.VK_AMPERSAND, CTRL));
 		assertEquals('&', TypedCharacters.typed('\0', KeyEvent.VK_AMPERSAND, KeyEvent.VK_AMPERSAND, CTRL));
 		// An arrow types no symbol: nothing to rebuild.
 		assertEquals(KeyEvent.CHAR_UNDEFINED, TypedCharacters.typed(KeyEvent.CHAR_UNDEFINED, KeyEvent.VK_LEFT,

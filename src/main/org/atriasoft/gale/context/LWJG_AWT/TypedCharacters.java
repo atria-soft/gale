@@ -14,12 +14,14 @@ import java.util.Map;
  * an application that bound {@code w} (a game moving forward while it
  * crouches on Ctrl) or {@code ctrl+c} (a copy shortcut) never saw its key.
  * Here a key held with Control, and neither Alt nor AltGr, types the
- * character of the key itself, rebuilt from its key code: AWT gives the code
- * of the symbol the key bears in the keyboard layout in use (on an AZERTY
- * keyboard the key left of E is {@code VK_Z}), never of its position on a US
- * keyboard; a symbol without a code of its own comes as its extended key code
- * (Unicode + 0x01000000). The keys that type a control character by
- * themselves (Return, Backspace, Escape...) keep it. With Alt or AltGr held,
+ * character it types without Control in the keyboard layout in use, rebuilt
+ * from its extended key code: the code of that symbol (on an AZERTY keyboard
+ * the key left of E is {@code VK_Z}), never of its position on a US keyboard,
+ * and for a symbol without a code of its own its Unicode value + 0x01000000.
+ * Its key code serves only when the extended one names no symbol: X11 takes
+ * it from the first layout, whichever is in use. The keys that type a
+ * control character by themselves (Return, Backspace, Escape...) keep it.
+ * With Alt or AltGr held,
  * the character is what AWT typed: AltGr types the third symbol of a key
  * ({@code @}, {@code €}...), and where AltGr comes with Control (Windows)
  * a key without third symbol types nothing, which must not become its
@@ -133,24 +135,33 @@ public final class TypedCharacters {
 	/**
 	 * The symbol a key bears in the layout in use, in lower case, from its key
 	 * codes; {@link KeyEvent#CHAR_UNDEFINED} for a key that types no symbol
-	 * (Return, Escape, an arrow...).
+	 * (Return, Escape, an arrow...). The extended key code first: X11 derives
+	 * it from the layout in use, its key code from the first layout (with the
+	 * layouts "us,fr" and fr in use, the key bearing Z has the key code
+	 * {@code VK_W}); Windows gives both the same code for a letter.
 	 */
 	static char symbolOf(final int keyCode, final int extendedKeyCode) {
-		if (keyCode >= KeyEvent.VK_A && keyCode <= KeyEvent.VK_Z) {
-			return (char) ('a' + keyCode - KeyEvent.VK_A);
+		final char symbol = symbolOfCode(extendedKeyCode);
+		return symbol != UNDEFINED ? symbol : symbolOfCode(keyCode);
+	}
+
+	/** The symbol of a key code or an extended key code, in lower case; {@link KeyEvent#CHAR_UNDEFINED} if none. */
+	private static char symbolOfCode(final int code) {
+		if (code >= KeyEvent.VK_A && code <= KeyEvent.VK_Z) {
+			return (char) ('a' + code - KeyEvent.VK_A);
 		}
-		if (keyCode >= KeyEvent.VK_0 && keyCode <= KeyEvent.VK_9) {
-			return (char) ('0' + keyCode - KeyEvent.VK_0);
+		if (code >= KeyEvent.VK_0 && code <= KeyEvent.VK_9) {
+			return (char) ('0' + code - KeyEvent.VK_0);
 		}
-		if (keyCode >= KeyEvent.VK_NUMPAD0 && keyCode <= KeyEvent.VK_NUMPAD9) {
-			return (char) ('0' + keyCode - KeyEvent.VK_NUMPAD0);
+		if (code >= KeyEvent.VK_NUMPAD0 && code <= KeyEvent.VK_NUMPAD9) {
+			return (char) ('0' + code - KeyEvent.VK_NUMPAD0);
 		}
-		final Character symbol = SYMBOLS.get(keyCode);
+		final Character symbol = SYMBOLS.get(code);
 		if (symbol != null) {
 			return symbol;
 		}
-		if (extendedKeyCode > UNICODE_KEY_CODE && extendedKeyCode - UNICODE_KEY_CODE < UNDEFINED) {
-			return Character.toLowerCase((char) (extendedKeyCode - UNICODE_KEY_CODE));
+		if (code > UNICODE_KEY_CODE && code - UNICODE_KEY_CODE < UNDEFINED) {
+			return Character.toLowerCase((char) (code - UNICODE_KEY_CODE));
 		}
 		return UNDEFINED;
 	}
