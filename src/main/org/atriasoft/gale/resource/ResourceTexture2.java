@@ -170,9 +170,16 @@ public class ResourceTexture2 extends Resource {
 		}
 	}
 
+	/**
+	 * Delete the texture of the graphic card; once released, the image is dropped
+	 * too (Java heap).
+	 */
 	@Override
-	public void cleanUp() {
+	public synchronized void cleanUp() {
 		removeContext();
+		if (isReleased()) {
+			this.data = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+		}
 	}
 
 	// Flush the data to send it at the openGl system

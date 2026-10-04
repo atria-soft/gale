@@ -3,6 +3,7 @@ package org.atriasoft.gale.resource;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -197,8 +198,15 @@ public class ResourceTextureCubeMap extends Resource {
 		this.texId = -1;
 	}
 
+	/**
+	 * Delete the texture of the graphic card; once released, the face images are
+	 * dropped too (Java heap).
+	 */
 	@Override
-	public void cleanUp() {
+	public synchronized void cleanUp() {
 		removeContext();
+		if (isReleased()) {
+			Arrays.fill(this.faceImages, null);
+		}
 	}
 }

@@ -162,6 +162,15 @@ class ResourceLifecycleTest {
 	}
 
 	@Test
+	void aReleasedTextureDropsItsImage() {
+		final ResourceTexture2 texture = ResourceTexture2.createNamed("image");
+		assertEquals(32, texture.get().getWidth());
+		texture.release();
+		this.manager.updateContext();
+		assertEquals(1, texture.get().getWidth());
+	}
+
+	@Test
 	void aCachedResourceOfAnotherTypeThrows() {
 		final CountingResource resource = new CountingResource("taken");
 		assertThrows(IllegalStateException.class, () -> ResourceTexture2.createNamed("taken"));
