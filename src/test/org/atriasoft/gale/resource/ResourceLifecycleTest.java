@@ -234,6 +234,19 @@ class ResourceLifecycleTest {
 	}
 
 	@Test
+	void aLostContextStillCleansUpTheReleasedResources() {
+		final Uri vertex = new Uri("DATA", "lost.vert");
+		final Uri fragment = new Uri("DATA", "lost.frag");
+		final ResourceProgram program = ResourceProgram.create(vertex, fragment);
+		final CountingResource living = new CountingResource("living");
+		program.release();
+		this.manager.contextHasBeenDestroyed();
+		// The shaders the program held are given back with it.
+		assertEquals(1, this.manager.getResourceCount());
+		assertEquals(0, living.cleanUps);
+	}
+
+	@Test
 	void releasingAColoredObjectGivesBackItsProgram() {
 		final ResourceColored3DObject object = ResourceColored3DObject.create();
 		// The object, its program and the two shaders of the program.

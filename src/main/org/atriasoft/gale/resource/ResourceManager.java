@@ -74,19 +74,31 @@ public class ResourceManager {
 	 */
 	public void contextHasBeenDestroyed() {
 		final List<Resource> living;
-		final List<Resource> destroyed;
 		synchronized (this.lock) {
 			living = new ArrayList<>(this.resourceList);
-			destroyed = new ArrayList<>(this.resourceListToDestroy);
-			this.resourceListToDestroy.clear();
-			// The OpenGL objects are gone with the context: nothing left to delete.
-			this.glTasks.clear();
 		}
 		for (final Resource it : living) {
 			it.removeContextToLate();
 		}
-		for (final Resource it : destroyed) {
-			it.removeContextToLate();
+		// The released resources forget their OpenGL ids, then their clean-up runs (it gives back the resources
+		// they hold: a program its shaders) until none is left.
+		while (true) {
+			final List<Resource> destroyed;
+			synchronized (this.lock) {
+				destroyed = new ArrayList<>(this.resourceListToDestroy);
+				this.resourceListToDestroy.clear();
+			}
+			if (destroyed.isEmpty()) {
+				break;
+			}
+			for (final Resource it : destroyed) {
+				it.removeContextToLate();
+				destroy(it);
+			}
+		}
+		synchronized (this.lock) {
+			// The OpenGL objects are gone with the context: nothing left to delete.
+			this.glTasks.clear();
 		}
 		// no context preent ...
 		this.contextHasBeenRemoved = true;
