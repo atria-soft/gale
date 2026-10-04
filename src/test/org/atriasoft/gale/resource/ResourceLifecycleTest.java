@@ -206,6 +206,25 @@ class ResourceLifecycleTest {
 	}
 
 	@Test
+	void aProgramThatFailsToBuildLeavesNothingInTheCache() {
+		final Uri vertex = new Uri("DATA", "test.vert");
+		final Uri fragment = new Uri("DATA", "taken.frag");
+		// The name of the fragment shader is taken by another type: its creation throws inside the program.
+		final CountingResource squatter = new CountingResource(fragment.getValue());
+		assertThrows(IllegalStateException.class, () -> ResourceProgram.create(vertex, fragment));
+		final String programName = vertex.getValue() + "<-->" + fragment.getValue();
+		assertNull(this.manager.localKeep(programName), "no half-built program in the cache");
+		// The clean-up of the abandoned program gives back the vertex shader it took.
+		this.manager.updateContext();
+		assertNull(this.manager.localKeep(vertex.getValue()));
+		assertEquals(1, this.manager.getResourceCount(), "only the squatter");
+		squatter.release();
+		final ResourceProgram program = ResourceProgram.create(vertex, fragment);
+		assertEquals(1, program.getCount());
+		assertSame(program, this.manager.localKeep(programName));
+	}
+
+	@Test
 	void releasingAColoredObjectGivesBackItsProgram() {
 		final ResourceColored3DObject object = ResourceColored3DObject.create();
 		// The object, its program and the two shaders of the program.

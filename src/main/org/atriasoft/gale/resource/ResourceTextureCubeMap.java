@@ -82,6 +82,15 @@ public class ResourceTextureCubeMap extends Resource {
 		this.faceUris[3] = bottom;
 		this.faceUris[4] = front;
 		this.faceUris[5] = back;
+		try {
+			load();
+		} catch (final RuntimeException | Error ex) {
+			abandonConstruction();
+			throw ex;
+		}
+	}
+
+	private void load() {
 		// Load images from disk immediately (they will be uploaded to GPU in updateContext)
 		for (int i = 0; i < 6; i++) {
 			try (final InputStream in = Uri.getStream(this.faceUris[i])) {

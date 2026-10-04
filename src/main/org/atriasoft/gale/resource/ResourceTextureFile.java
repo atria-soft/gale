@@ -85,6 +85,15 @@ public class ResourceTextureFile extends ResourceTexture2 {
 	protected ResourceTextureFile(final String genName, final Uri uri, final Vector2i size) {
 		super(genName);
 		LOGGER.debug("create a new resource::Image: genName={} uri={} size={}", genName, uri, size);
+		try {
+			load(uri, size);
+		} catch (final RuntimeException | Error ex) {
+			abandonConstruction();
+			throw ex;
+		}
+	}
+
+	private void load(final Uri uri, final Vector2i size) {
 		final BufferedImage tmp;
 		try (final InputStream in = Uri.getStream(uri)) {
 			if (uri.get().endsWith(".svg") && size.x() > 0 && size.y() > 0) {

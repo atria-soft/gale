@@ -40,6 +40,15 @@ public abstract class Resource {
 	}
 
 	/**
+	 * For a constructor that fails after the registration done here: the
+	 * half-built resource gives back its reference (count 1 to 0), so it leaves
+	 * the manager and its name the cache; the constructor then throws.
+	 */
+	protected final void abandonConstruction() {
+		release();
+	}
+
+	/**
 	 * Run an OpenGL work (deletion of OpenGL objects) on the OpenGL thread: at
 	 * once when the caller is on it, at the next update of the context otherwise.
 	 * @param task The OpenGL work.

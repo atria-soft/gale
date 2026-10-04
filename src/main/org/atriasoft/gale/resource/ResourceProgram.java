@@ -93,6 +93,16 @@ public class ResourceProgram extends Resource {
 		super(uriVertexShader.getValue() + "<-->" + uriFragmentShader.getValue());
 		this.resourceLevel = 1;
 		LOGGER.debug("OGL: load PROGRAM '{}' && '{}'", uriVertexShader, uriFragmentShader);
+		try {
+			load(uriVertexShader, uriFragmentShader);
+		} catch (final RuntimeException | Error ex) {
+			// cleanUp() gives back the shader already taken.
+			abandonConstruction();
+			throw ex;
+		}
+	}
+
+	private void load(final Uri uriVertexShader, final Uri uriFragmentShader) {
 		this.shaderVertex = ResourceShader.create(uriVertexShader);
 		if (this.shaderVertex == null) {
 			LOGGER.error("Error while getting a specific shader filename: {}", uriVertexShader);

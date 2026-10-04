@@ -49,7 +49,12 @@ public class ResourceShader extends Resource {
 			this.type = ShaderType.VERTEX;
 			return;
 		}
-		reload();
+		try {
+			reload();
+		} catch (final RuntimeException | Error ex) {
+			abandonConstruction();
+			throw ex;
+		}
 	}
 	
 	/**

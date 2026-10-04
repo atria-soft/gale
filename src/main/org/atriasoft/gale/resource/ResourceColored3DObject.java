@@ -32,14 +32,19 @@ public class ResourceColored3DObject extends Resource {
 	protected ResourceColored3DObject() {
 		// get the shader resource :
 		this.oGLPosition = 0;
-		this.program = ResourceProgram.create(new Uri("DATA", "simple3D.vert", "gale"),
-				new Uri("DATA", "simple3D.frag", "gale"));
-		if (this.program != null) {
-			this.oGLMatrixTransformation = this.program.getUniform("in_matrixTransformation");
-			this.oGLMatrixProjection = this.program.getUniform("in_matrixProjection");
-			this.oGLMatrixView = this.program.getUniform("in_matrixView");
-			this.oGLPosition = this.program.getAttribute("in_position");
-			this.oGLColor = this.program.getUniform("in_colors");
+		try {
+			this.program = ResourceProgram.create(new Uri("DATA", "simple3D.vert", "gale"),
+					new Uri("DATA", "simple3D.frag", "gale"));
+			if (this.program != null) {
+				this.oGLMatrixTransformation = this.program.getUniform("in_matrixTransformation");
+				this.oGLMatrixProjection = this.program.getUniform("in_matrixProjection");
+				this.oGLMatrixView = this.program.getUniform("in_matrixView");
+				this.oGLPosition = this.program.getAttribute("in_position");
+				this.oGLColor = this.program.getUniform("in_colors");
+			}
+		} catch (final RuntimeException | Error ex) {
+			abandonConstruction();
+			throw ex;
 		}
 	}
 
