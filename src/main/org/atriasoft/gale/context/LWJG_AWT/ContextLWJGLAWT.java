@@ -657,11 +657,12 @@ public class ContextLWJGLAWT extends GaleContext
 						runFrame();
 					} catch (final Throwable ex) {
 						// The loop must go on: it is the only one to empty the GUI queue, and it ends the application.
-						LOGGER.error("The GUI loop failed: the application ends", ex);
+						// Stop first: logging may fail too (out of memory) and must not skip the stop.
 						if (ContextLWJGLAWT.this.fatalError == null) {
 							ContextLWJGLAWT.this.fatalError = ex;
 						}
 						stop(-1);
+						LOGGER.error("The GUI loop failed: the application ends", ex);
 					}
 				}
 				// Schedule next frame
