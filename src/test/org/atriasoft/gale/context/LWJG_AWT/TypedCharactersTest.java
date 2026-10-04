@@ -98,25 +98,33 @@ class TypedCharactersTest {
 		// Z pressed alone, then Control (crouch), then Z released: AWT types Ctrl+Z, the release is still a z.
 		assertEquals('z', keys.pressed('z', KeyEvent.VK_Z, KeyEvent.VK_Z, standard, NONE));
 		assertEquals('z', keys.released('\u001a', KeyEvent.VK_Z, KeyEvent.VK_Z, standard, CTRL));
-		// E pressed alone, then AltGr, then E released: AWT types the euro sign, the release is still an e.
+		// X11, AZERTY: E pressed alone, then AltGr, then E released: AWT types the euro sign, gives the extended
+		// key code of the euro sign and no location; the release is still an e.
 		assertEquals('e', keys.pressed('e', KeyEvent.VK_E, KeyEvent.VK_E, standard, NONE));
-		assertEquals('e', keys.released('€', KeyEvent.VK_E, KeyEvent.VK_E, standard, NONE));
+		assertEquals('e', keys.released('€', KeyEvent.VK_E, KeyEvent.VK_EURO_SIGN, KeyEvent.KEY_LOCATION_UNKNOWN,
+				ALT_GRAPH));
+		// X11, AZERTY: AltGr+( types [, AltGr is released, then (: the release is still a [, nothing stays held.
+		assertEquals('[', keys.pressed('[', KeyEvent.VK_LEFT_PARENTHESIS, KeyEvent.VK_OPEN_BRACKET, standard,
+				ALT_GRAPH));
+		assertEquals('[', keys.released('(', KeyEvent.VK_LEFT_PARENTHESIS, KeyEvent.VK_LEFT_PARENTHESIS, standard,
+				NONE));
 		// A release without its press (the window got the focus meanwhile): the character it types now.
 		assertEquals('w', keys.released('\u0017', KeyEvent.VK_W, KeyEvent.VK_W, standard, CTRL));
 	}
 
 	@Test
 	void keysWithoutKeyCodeAreReleasedEachWithItsOwnCharacter() {
-		// AZERTY: é, è, ç, à, ù and ² have no key code (VK_UNDEFINED), each its own extended key code.
+		// X11, AZERTY: é, è, ç, à, ù and ² have no key code (VK_UNDEFINED) and no location, each its own extended
+		// key code.
 		final TypedCharacters keys = new TypedCharacters();
-		final int standard = KeyEvent.KEY_LOCATION_STANDARD;
+		final int unknown = KeyEvent.KEY_LOCATION_UNKNOWN;
 		final int undefined = KeyEvent.VK_UNDEFINED;
-		// é pressed, è pressed, é released (with Control, AWT types nothing): é, not è, is released.
-		assertEquals('é', keys.pressed('é', undefined, unicode('é'), standard, NONE));
-		assertEquals('è', keys.pressed('è', undefined, unicode('è'), standard, NONE));
-		assertEquals('é', keys.released(KeyEvent.CHAR_UNDEFINED, undefined, unicode('é'), standard, CTRL));
-		// Then è released with Shift (AWT types the 7 of the key): still è.
-		assertEquals('è', keys.released('7', undefined, unicode('è'), standard, SHIFT));
+		// é pressed, è pressed, é released with Control: é, not è, is released.
+		assertEquals('é', keys.pressed('é', undefined, unicode('é'), unknown, NONE));
+		assertEquals('è', keys.pressed('è', undefined, unicode('è'), unknown, NONE));
+		assertEquals('é', keys.released('é', undefined, unicode('é'), unknown, CTRL));
+		// Then è released with Shift (AWT types the 7 of the key, the extended key code stays the one of è): è.
+		assertEquals('è', keys.released('7', undefined, unicode('è'), unknown, SHIFT));
 	}
 
 	@Test
@@ -125,7 +133,8 @@ class TypedCharactersTest {
 		final int undefined = KeyEvent.VK_UNDEFINED;
 		final Set<Integer> numbers = new HashSet<>();
 		for (final char symbol : new char[] { 'é', 'è', 'ç', 'à', 'ù', '²' }) {
-			assertTrue(numbers.add(TypedCharacters.keyOf(undefined, unicode(symbol), standard)), "key " + symbol);
+			assertTrue(numbers.add(TypedCharacters.keyOf(undefined, unicode(symbol), KeyEvent.KEY_LOCATION_UNKNOWN)),
+					"key " + symbol);
 		}
 		assertTrue(numbers.add(TypedCharacters.keyOf(KeyEvent.VK_Z, KeyEvent.VK_Z, standard)));
 		// Left and right Shift, the digit 1 of the top row and of the keypad.
@@ -133,10 +142,22 @@ class TypedCharactersTest {
 		assertTrue(numbers.add(TypedCharacters.keyOf(KeyEvent.VK_SHIFT, KeyEvent.VK_SHIFT, KeyEvent.KEY_LOCATION_RIGHT)));
 		assertTrue(numbers.add(TypedCharacters.keyOf(KeyEvent.VK_1, KeyEvent.VK_1, standard)));
 		assertTrue(numbers.add(TypedCharacters.keyOf(KeyEvent.VK_1, KeyEvent.VK_1, KeyEvent.KEY_LOCATION_NUMPAD)));
-		// The same key at its press and at its release; a key event built by hand has no extended key code.
-		assertEquals(TypedCharacters.keyOf(undefined, unicode('é'), standard),
-				TypedCharacters.keyOf(undefined, unicode('é'), standard));
+		// A key event built by hand has no extended key code.
 		assertEquals(TypedCharacters.keyOf(KeyEvent.VK_Z, KeyEvent.VK_Z, standard),
 				TypedCharacters.keyOf(KeyEvent.VK_Z, undefined, standard));
+	}
+
+	@Test
+	void theNumberOfAKeyDoesNotFollowAltGrNorTheLayoutInUse() {
+		final int standard = KeyEvent.KEY_LOCATION_STANDARD;
+		// X11, AZERTY: E without and with AltGr (euro sign, no location).
+		assertEquals(TypedCharacters.keyOf(KeyEvent.VK_E, KeyEvent.VK_E, standard),
+				TypedCharacters.keyOf(KeyEvent.VK_E, KeyEvent.VK_EURO_SIGN, KeyEvent.KEY_LOCATION_UNKNOWN));
+		// X11, AZERTY: ( without and with AltGr ([).
+		assertEquals(TypedCharacters.keyOf(KeyEvent.VK_LEFT_PARENTHESIS, KeyEvent.VK_LEFT_PARENTHESIS, standard),
+				TypedCharacters.keyOf(KeyEvent.VK_LEFT_PARENTHESIS, KeyEvent.VK_OPEN_BRACKET, standard));
+		// X11, layouts "us,fr": the key W of the first layout bears Z in the second one, when it is in use.
+		assertEquals(TypedCharacters.keyOf(KeyEvent.VK_W, KeyEvent.VK_W, standard),
+				TypedCharacters.keyOf(KeyEvent.VK_W, KeyEvent.VK_Z, standard));
 	}
 }

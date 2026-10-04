@@ -49,18 +49,29 @@ public final class TypedCharacters {
 
 	/**
 	 * The number of a key of the keyboard: the same at its press and at its
-	 * release, another for each key. AWT gives no key code
-	 * ({@link KeyEvent#VK_UNDEFINED}) to a key whose symbol has none (é, è,
-	 * ç, à, ù and ² on an AZERTY keyboard), but each its own extended key
-	 * code; the location tells the left Shift from the right one.
+	 * release, another for each key.
+	 * <p>
+	 * It is its key code: X11 gives the code of the symbol the key bears in
+	 * the first keyboard layout, without any modifier, the same whatever
+	 * AltGr, Shift or the layout in use. Its extended key code and its
+	 * location follow the symbol typed: with AltGr, E comes as
+	 * {@link KeyEvent#VK_EURO_SIGN} at an unknown location, without it as
+	 * {@link KeyEvent#VK_E} at the standard one; an unknown location is thus
+	 * the standard one. AWT gives no key code ({@link KeyEvent#VK_UNDEFINED})
+	 * to a key whose symbol has none (é, è, ç, à, ù and ² on an AZERTY
+	 * keyboard): the number of such a key is its extended key code, its own
+	 * but the one of its AltGr symbol while AltGr is held (à, then @). AWT
+	 * tells no other number of the key: such a key pressed with AltGr and
+	 * released without it (or the reverse) is released under another number.
 	 *
 	 * @param keyCode         its key code ({@link KeyEvent#getKeyCode()})
 	 * @param extendedKeyCode its extended key code ({@link KeyEvent#getExtendedKeyCode()}), 0 if unknown
 	 * @param location        its location ({@link KeyEvent#getKeyLocation()})
 	 */
 	public static int keyOf(final int keyCode, final int extendedKeyCode, final int location) {
-		final int code = extendedKeyCode != KeyEvent.VK_UNDEFINED ? extendedKeyCode : keyCode;
-		return location * LOCATION_STEP + code;
+		final int code = keyCode != KeyEvent.VK_UNDEFINED ? keyCode : extendedKeyCode;
+		final int place = location == KeyEvent.KEY_LOCATION_UNKNOWN ? KeyEvent.KEY_LOCATION_STANDARD : location;
+		return place * LOCATION_STEP + code;
 	}
 
 	/**
