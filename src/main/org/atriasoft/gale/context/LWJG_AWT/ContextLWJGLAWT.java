@@ -116,6 +116,8 @@ public class ContextLWJGLAWT extends GaleContext
 	private final List<Integer> pressedKey = new ArrayList<>();
 	/** Time of the last release of each key, to tell the auto-repeat of a held key from a key pressed again. */
 	private final Map<Integer, Long> releasedAt = new HashMap<>();
+	/** The character of each key, the same from its press to its release (Control does not make it a control code). */
+	private final TypedCharacters typedCharacters = new TypedCharacters();
 	private Boolean isInitialized = false;
 	/** First error that ended the GUI loop, handed to the default uncaught exception handler at exit. */
 	private Throwable fatalError = null;
@@ -488,12 +490,13 @@ public class ContextLWJGLAWT extends GaleContext
 				break;
 			default:
 				find = false;
+				final char typed = typedCharacter(e, pressed);
 				if (thisIsAReapeateKey) {
 					operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER,
-							(!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, e.getKeyChar());
+							(!pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, typed);
 				}
 				operatingSystemsetKeyboard(this.guiKeyBoardMode, KeyKeyboard.CHARACTER,
-						(pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, e.getKeyChar());
+						(pressed ? KeyStatus.down : KeyStatus.up), thisIsAReapeateKey, typed);
 		}
 		if (find) {
 			if (thisIsAReapeateKey) {
@@ -503,6 +506,20 @@ public class ContextLWJGLAWT extends GaleContext
 			operatingSystemsetKeyboard(this.guiKeyBoardMode, keyInput, (pressed ? KeyStatus.down : KeyStatus.up),
 					thisIsAReapeateKey);
 		}
+	}
+
+	/**
+	 * The character of a character key ({@link TypedCharacters}): with Control the symbol of the key rather
+	 * than a control code, and at its release the one of its press.
+	 */
+	private char typedCharacter(final KeyEvent e, final boolean pressed) {
+		final int key = getUniqueIndex(e);
+		if (pressed) {
+			return this.typedCharacters.pressed(key, e.getKeyChar(), e.getKeyCode(), e.getExtendedKeyCode(),
+					e.isControlDown(), e.isShiftDown());
+		}
+		return this.typedCharacters.released(key, e.getKeyChar(), e.getKeyCode(), e.getExtendedKeyCode(),
+				e.isControlDown(), e.isShiftDown());
 	}
 
 	@Override
