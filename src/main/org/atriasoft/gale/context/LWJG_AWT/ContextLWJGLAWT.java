@@ -500,16 +500,16 @@ public class ContextLWJGLAWT extends GaleContext
 	}
 
 	/**
-	 * The character of a character key ({@link TypedCharacters}): with Control the symbol of the key rather
-	 * than a control code, and at its release the one of its press.
+	 * The character of a character key ({@link TypedCharacters}): with Control alone the symbol of the key
+	 * rather than a control code, and at its release the one of its press.
 	 */
 	private char typedCharacter(final KeyEvent e, final boolean pressed) {
 		if (pressed) {
 			return this.typedCharacters.pressed(e.getKeyChar(), e.getKeyCode(), e.getExtendedKeyCode(),
-					e.getKeyLocation(), e.isControlDown(), e.isShiftDown());
+					e.getKeyLocation(), e.getModifiersEx());
 		}
 		return this.typedCharacters.released(e.getKeyChar(), e.getKeyCode(), e.getExtendedKeyCode(),
-				e.getKeyLocation(), e.isControlDown(), e.isShiftDown());
+				e.getKeyLocation(), e.getModifiersEx());
 	}
 
 	@Override

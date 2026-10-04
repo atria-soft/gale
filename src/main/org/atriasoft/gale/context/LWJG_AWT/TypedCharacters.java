@@ -1,5 +1,6 @@
 package org.atriasoft.gale.context.LWJG_AWT;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,14 +13,17 @@ import java.util.Map;
  * {@code '\u0017'}, Ctrl+Z {@code '\u001a'}, Ctrl+I a Tab, Ctrl+M a Return):
  * an application that bound {@code w} (a game moving forward while it
  * crouches on Ctrl) or {@code ctrl+c} (a copy shortcut) never saw its key.
- * Here a key held with Control types the character of the key itself, rebuilt
- * from its key code: AWT gives the code of the symbol the key bears in the
- * keyboard layout in use (on an AZERTY keyboard the key left of E is
- * {@code VK_Z}), never of its position on a US keyboard; a symbol without a
- * code of its own comes as its extended key code (Unicode + 0x01000000). The
- * keys that type a control character by themselves (Return, Backspace,
- * Escape...) keep it; Shift, AltGr and Alt keep what AWT types (AltGr types
- * the third symbol of a key: {@code @}, {@code €}...).
+ * Here a key held with Control, and neither Alt nor AltGr, types the
+ * character of the key itself, rebuilt from its key code: AWT gives the code
+ * of the symbol the key bears in the keyboard layout in use (on an AZERTY
+ * keyboard the key left of E is {@code VK_Z}), never of its position on a US
+ * keyboard; a symbol without a code of its own comes as its extended key code
+ * (Unicode + 0x01000000). The keys that type a control character by
+ * themselves (Return, Backspace, Escape...) keep it. With Alt or AltGr held,
+ * the character is what AWT typed: AltGr types the third symbol of a key
+ * ({@code @}, {@code €}...), and where AltGr comes with Control (Windows)
+ * a key without third symbol types nothing, which must not become its
+ * letter; a real Control+Alt chord keeps its control character.
  * <p>
  * A release names the character its press named: a letter pressed alone and
  * released once Control (or AltGr) is down is still released, and the
@@ -34,6 +38,8 @@ public final class TypedCharacters {
 	private static final int UNICODE_KEY_CODE = 0x01000000;
 	/** Gap between the key numbers of two locations: above every key code and extended key code. */
 	private static final int LOCATION_STEP = 100_000_000;
+	/** Alt and AltGr: with either, the character is what AWT typed. */
+	private static final int ALT_OR_ALT_GRAPH = InputEvent.ALT_DOWN_MASK | InputEvent.ALT_GRAPH_DOWN_MASK;
 	private static final char FIRST_PRINTABLE = ' ';
 	private static final char DELETE = '\u007f';
 	private static final Map<Integer, Character> SYMBOLS = symbols();
@@ -64,12 +70,11 @@ public final class TypedCharacters {
 	 * @param keyCode         its key code ({@link KeyEvent#getKeyCode()})
 	 * @param extendedKeyCode its extended key code ({@link KeyEvent#getExtendedKeyCode()})
 	 * @param location        its location ({@link KeyEvent#getKeyLocation()})
-	 * @param control         whether Control is held
-	 * @param shift           whether Shift is held
+	 * @param modifiers       the keys held ({@link KeyEvent#getModifiersEx()})
 	 */
 	public char pressed(final char keyChar, final int keyCode, final int extendedKeyCode, final int location,
-			final boolean control, final boolean shift) {
-		final char typed = typed(keyChar, keyCode, extendedKeyCode, control, shift);
+			final int modifiers) {
+		final char typed = typed(keyChar, keyCode, extendedKeyCode, modifiers);
 		this.typedAtPress.put(keyOf(keyCode, extendedKeyCode, location), typed);
 		return typed;
 	}
@@ -81,32 +86,32 @@ public final class TypedCharacters {
 	 * @see #pressed
 	 */
 	public char released(final char keyChar, final int keyCode, final int extendedKeyCode, final int location,
-			final boolean control, final boolean shift) {
+			final int modifiers) {
 		final Character atPress = this.typedAtPress.remove(keyOf(keyCode, extendedKeyCode, location));
-		return atPress != null ? atPress : typed(keyChar, keyCode, extendedKeyCode, control, shift);
+		return atPress != null ? atPress : typed(keyChar, keyCode, extendedKeyCode, modifiers);
 	}
 
 	/**
 	 * The character a key types for the application (see the class comment):
-	 * what AWT typed, unless Control turned it into a control character, then
-	 * the symbol of the key, in upper case with Shift.
+	 * what AWT typed, unless Control, without Alt nor AltGr, turned it into a
+	 * control character, then the symbol of the key, in upper case with Shift.
 	 *
 	 * @param keyChar         the character AWT typed
 	 * @param keyCode         the key code of the key
 	 * @param extendedKeyCode the extended key code of the key
-	 * @param control         whether Control is held
-	 * @param shift           whether Shift is held
+	 * @param modifiers       the keys held ({@link KeyEvent#getModifiersEx()})
 	 */
-	public static char typed(final char keyChar, final int keyCode, final int extendedKeyCode,
-			final boolean control, final boolean shift) {
-		if (!control || !madeByControl(keyChar)) {
+	public static char typed(final char keyChar, final int keyCode, final int extendedKeyCode, final int modifiers) {
+		final boolean controlAlone = (modifiers & InputEvent.CTRL_DOWN_MASK) != 0
+				&& (modifiers & ALT_OR_ALT_GRAPH) == 0;
+		if (!controlAlone || !madeByControl(keyChar)) {
 			return keyChar;
 		}
 		final char symbol = symbolOf(keyCode, extendedKeyCode);
 		if (symbol == UNDEFINED) {
 			return keyChar;
 		}
-		return shift ? Character.toUpperCase(symbol) : symbol;
+		return (modifiers & InputEvent.SHIFT_DOWN_MASK) != 0 ? Character.toUpperCase(symbol) : symbol;
 	}
 
 	/** Whether Control may have made {@code keyChar}: a control character, or none. */
