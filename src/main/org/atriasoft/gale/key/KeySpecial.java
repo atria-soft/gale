@@ -17,7 +17,27 @@ public class KeySpecial {
 	 * Main ructor
 	 */
 	public KeySpecial() {
-		
+
+	}
+
+	/**
+	 * Copy of the keys held at a given time: an event keeps them as they were
+	 * when it happened, whatever the keys pressed or released before it is
+	 * handled.
+	 * @param other The keys held to copy.
+	 */
+	public KeySpecial(final KeySpecial other) {
+		this.valueCapLock = other.valueCapLock;
+		this.valueShiftLeft = other.valueShiftLeft;
+		this.valueShiftRight = other.valueShiftRight;
+		this.valueCtrlLeft = other.valueCtrlLeft;
+		this.valueCtrlRight = other.valueCtrlRight;
+		this.valueMetaLeft = other.valueMetaLeft;
+		this.valueMetaRight = other.valueMetaRight;
+		this.valueAltLeft = other.valueAltLeft;
+		this.valueAltRight = other.valueAltRight;
+		this.valueNumLock = other.valueNumLock;
+		this.valueInsert = other.valueInsert;
 	}
 	
 	/**

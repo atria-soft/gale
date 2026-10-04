@@ -616,12 +616,14 @@ public abstract class GaleContext {
 			final int pointerID,
 			final Vector2f pos) {
 		LOGGER.trace("Position motion: {}", pos);
+		// The keys held now: the backend keeps changing its own object, the event is handled later.
+		final KeySpecial held = new KeySpecial(special);
 		postActionAsync(context -> {
 			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
 				return;
 			}
-			appl.onPointer(special, type, pointerID, pos, status);
+			appl.onPointer(held, type, pointerID, pos, status);
 		});
 	}
 
@@ -655,12 +657,14 @@ public abstract class GaleContext {
 			final KeyKeyboard type,
 			final KeyStatus state,
 			final Character charValue) {
+		// The keys held now: the backend keeps changing its own object, the event is handled later.
+		final KeySpecial held = new KeySpecial(special);
 		postActionAsync(context -> {
 			final GaleApplication appl = context.getApplication();
 			if (appl == null) {
 				return;
 			}
-			appl.onKeyboard(special, type, charValue, state);
+			appl.onKeyboard(held, type, charValue, state);
 		});
 	}
 
