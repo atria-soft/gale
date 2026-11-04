@@ -1,0 +1,4 @@
+2026-11-05
+- CLAUDE.md reduced from 28 Ko to under 4 Ko (loaded every turn): the API reference moved verbatim to doc/
+  (ARCHITECTURE.md, API.md, RESOURCES.md, RUNTIME.md, EXAMPLES.md), read on demand.
+- CLAUDE.md keeps Quick Start, build, dependencies, pitfalls, and a "Where to find what" table.
