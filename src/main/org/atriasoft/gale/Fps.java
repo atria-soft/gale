@@ -71,7 +71,10 @@ public class Fps {
 				                         + this.maxIdle + " ");
 			}
 			if (this.displayFPS) {
-				System.out.println("FPS : " + this.nbDisplayTime + "/" + this.nbCallTime + "fps");
+				// Counted over the seconds since the first tic (about ten), told by the second.
+				final double seconds = Math.max(1e-3, (System.nanoTime() - this.startTime) * 1e-9);
+				System.out.println(String.format(java.util.Locale.ROOT, "FPS : %.1f drawn / %.1f loops per second",
+						this.nbDisplayTime / seconds, this.nbCallTime / seconds));
 			}
 			this.max = 0;
 			this.min = 99999999;
