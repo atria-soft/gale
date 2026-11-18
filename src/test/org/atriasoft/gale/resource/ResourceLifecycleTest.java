@@ -8,7 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.atriasoft.etk.Uri;
 import org.atriasoft.gale.context.GaleContext;
@@ -168,6 +172,70 @@ class ResourceLifecycleTest {
 		texture.release();
 		this.manager.updateContext();
 		assertEquals(1, texture.get().getWidth());
+	}
+
+	@Test
+	void aCachedCubeMapIsKeptOnEachHit() {
+		// Faces that do not exist: journaled, nothing decoded, the cache works all the same.
+		final Uri face = new Uri("DATA", "missing_face.png");
+		final ResourceTextureCubeMap first = ResourceTextureCubeMap.create(face, face, face, face, face, face);
+		final ResourceTextureCubeMap second = ResourceTextureCubeMap.create(face, face, face, face, face, face);
+		assertSame(first, second);
+		assertEquals(2, first.getCount());
+		assertEquals(1, this.manager.getResourceCount());
+		first.release();
+		assertFalse(first.isReleased(), "the other user still has it");
+		second.release();
+		assertTrue(first.isReleased());
+		assertEquals(0, this.manager.getResourceCount());
+		final ResourceTextureCubeMap again = ResourceTextureCubeMap.create(face, face, face, face, face, face);
+		assertNotSame(first, again);
+		assertEquals(1, again.getCount());
+	}
+
+	@Test
+	void concurrentKeepsReleasesAndCreationsLoseNoReference() throws InterruptedException {
+		final CountingResource shared = new CountingResource("concurrent");
+		final int threadCount = 8;
+		final int rounds = 2000;
+		final CountDownLatch start = new CountDownLatch(1);
+		final AtomicReference<Throwable> failure = new AtomicReference<>();
+		final List<Thread> threads = new ArrayList<>();
+		for (int iii = 0; iii < threadCount; iii++) {
+			final int index = iii;
+			final Thread thread = new Thread(() -> {
+				try {
+					start.await();
+					for (int jjj = 0; jjj < rounds; jjj++) {
+						shared.keep();
+						final CountingResource own = new CountingResource("own-" + index + "-" + jjj);
+						this.manager.update(own);
+						this.manager.update(shared);
+						assertSame(shared, this.manager.localKeep("concurrent"));
+						own.release();
+						shared.release();
+					}
+				} catch (final Throwable ex) {
+					failure.compareAndSet(null, ex);
+				}
+			});
+			threads.add(thread);
+			thread.start();
+		}
+		start.countDown();
+		for (final Thread thread : threads) {
+			thread.join();
+		}
+		assertNull(failure.get());
+		// Every keep was matched by a release: only the creation reference is left.
+		assertEquals(1, shared.getCount());
+		assertFalse(shared.isReleased());
+		assertEquals(1, this.manager.getResourceCount());
+		this.manager.updateContext();
+		assertEquals(0, shared.cleanUps);
+		shared.release();
+		this.manager.updateContext();
+		assertEquals(1, shared.cleanUps);
 	}
 
 	@Test
