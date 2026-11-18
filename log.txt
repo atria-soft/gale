@@ -2,3 +2,8 @@
 - CLAUDE.md reduced from 28 Ko to under 4 Ko (loaded every turn): the API reference moved verbatim to doc/
   (ARCHITECTURE.md, API.md, RESOURCES.md, RUNTIME.md, EXAMPLES.md), read on demand.
 - CLAUDE.md keeps Quick Start, build, dependencies, pitfalls, and a "Where to find what" table.
+
+2026-11-18
+- Roadmap engine debt (final lock, VAO registered once, VAO GL deletion, cube map cache keep) was already fixed
+  on 2026-10-03/04; added the missing tests (cube map cache hit, concurrent keep/release); last System.exit left
+  in gale outside ContextLWJGLAWT.shutdownAndExit (the single exit point of context.exit) was sample2 Log.critical.

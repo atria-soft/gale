@@ -6,9 +6,15 @@ public class Log {
 	public static void print(String data) {
 		System.out.println(data);
 	}
-	public static void critical(String data) {
+	/**
+	 * Journal a fatal error and throw it: the caller (or the context, for an error
+	 * in the GUI loop) ends the application, never this sample through System.exit.
+	 * @param data Message of the error.
+	 * @throws IllegalStateException always.
+	 */
+	public static void critical(final String data) {
 		System.out.println("[C] " + LIBNAME + " | " + data);
-		System.exit(-1);
+		throw new IllegalStateException(data);
 	}
 	public static void error(String data) {
 		System.out.println("[E] " + LIBNAME + " | " + data);
