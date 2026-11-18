@@ -1318,15 +1318,26 @@ public class OpenGL {
 	 */
 	public static int shaderLoad(final Uri file, final ShaderType type) {
 		LOGGER.debug("Load shader: '{}'", file);
-		final StringBuilder shaderSource = OpenGL.readLocalFile(file);
+		return OpenGL.shaderLoadSource(file.toString(), OpenGL.readLocalFile(file), type);
+	}
+
+	/**
+	 * Compile a shader given as text (no file). A shader that does not compile is journaled with its whole
+	 * compilation log and deleted.
+	 * @param name Name of the shader, for the journal.
+	 * @param source The GLSL source.
+	 * @param type Type of the shader.
+	 * @return the OpenGL id of the shader, or -1 if it does not compile.
+	 */
+	public static int shaderLoadSource(final String name, final CharSequence source, final ShaderType type) {
 		final int shaderID = OpenGL.shaderCreate(type);
 		if (shaderID < 0) {
 			return -1;
 		}
-		GL20.glShaderSource(shaderID, shaderSource);
+		GL20.glShaderSource(shaderID, source);
 		GL20.glCompileShader(shaderID);
 		if (GL20.glGetShaderi(shaderID, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
-			LOGGER.error("Cannot compile the shader '{}':\n{}", file, GL20.glGetShaderInfoLog(shaderID));
+			LOGGER.error("Cannot compile the shader '{}':\n{}", name, GL20.glGetShaderInfoLog(shaderID));
 			GL20.glDeleteShader(shaderID);
 			return -1;
 		}

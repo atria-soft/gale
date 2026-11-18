@@ -3,6 +3,7 @@ package org.atriasoft.gale.resource;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.atriasoft.etk.Color;
 import org.atriasoft.etk.Uri;
@@ -90,11 +91,34 @@ public class ResourceProgram extends Resource {
 	 * @param uriFragmentShader Uri of the file
 	 */
 	protected ResourceProgram(final Uri uriVertexShader, final Uri uriFragmentShader) {
-		super(uriVertexShader.getValue() + "<-->" + uriFragmentShader.getValue());
+		this(uriVertexShader.getValue() + "<-->" + uriFragmentShader.getValue(), uriVertexShader.toString(),
+				uriFragmentShader.toString(), () -> ResourceShader.create(uriVertexShader),
+				() -> ResourceShader.create(uriFragmentShader));
+	}
+
+	/**
+	 * Get or create a program whose shaders are given as text (see {@link ResourceShader#createFromSource}).
+	 * @param vertex the vertex shader
+	 * @param fragment the fragment shader
+	 * @return the program, kept for the caller
+	 */
+	public static ResourceProgram create(final ShaderText vertex, final ShaderText fragment) {
+		final String name = vertex.key() + "<-->" + fragment.key();
+		final ResourceProgram existing = keepExisting(name, ResourceProgram.class);
+		if (existing != null) {
+			return existing;
+		}
+		return new ResourceProgram(name, vertex.name(), fragment.name(), () -> ResourceShader.createFromSource(vertex),
+				() -> ResourceShader.createFromSource(fragment));
+	}
+
+	private ResourceProgram(final String name, final String vertexLabel, final String fragmentLabel,
+			final Supplier<ResourceShader> vertex, final Supplier<ResourceShader> fragment) {
+		super(name);
 		this.resourceLevel = 1;
-		LOGGER.debug("OGL: load PROGRAM '{}' && '{}'", uriVertexShader, uriFragmentShader);
+		LOGGER.debug("OGL: load PROGRAM '{}' && '{}'", vertexLabel, fragmentLabel);
 		try {
-			load(uriVertexShader, uriFragmentShader);
+			load(vertexLabel, fragmentLabel, vertex, fragment);
 		} catch (final RuntimeException | Error ex) {
 			// cleanUp() gives back the shader already taken.
 			abandonConstruction();
@@ -102,19 +126,20 @@ public class ResourceProgram extends Resource {
 		}
 	}
 
-	private void load(final Uri uriVertexShader, final Uri uriFragmentShader) {
-		this.shaderVertex = ResourceShader.create(uriVertexShader);
+	private void load(final String vertexLabel, final String fragmentLabel, final Supplier<ResourceShader> vertex,
+			final Supplier<ResourceShader> fragment) {
+		this.shaderVertex = vertex.get();
 		if (this.shaderVertex == null) {
-			LOGGER.error("Error while getting a specific shader filename: {}", uriVertexShader);
+			LOGGER.error("Error while getting a specific shader filename: {}", vertexLabel);
 			return;
 		}
-		LOGGER.debug("Add shader on program: '{}'", uriFragmentShader);
-		this.shaderFragment = ResourceShader.create(uriFragmentShader);
+		LOGGER.debug("Add shader on program: '{}'", fragmentLabel);
+		this.shaderFragment = fragment.get();
 		if (this.shaderFragment == null) {
-			LOGGER.error("Error while getting a specific shader filename: {}", uriFragmentShader);
+			LOGGER.error("Error while getting a specific shader filename: {}", fragmentLabel);
 			return;
 		}
-		LOGGER.debug("Add shader on program: {}frag", uriFragmentShader);
+		LOGGER.debug("Add shader on program: {}frag", fragmentLabel);
 		if (OpenGL.hasContext()) {
 			updateContext();
 		} else {

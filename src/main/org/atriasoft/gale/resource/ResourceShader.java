@@ -22,11 +22,45 @@ public class ResourceShader extends Resource {
 		return new ResourceShader(uriShader);
 	}
 	
+	/**
+	 * Get or create a shader built from a text (no file): the supplier of the {@link ShaderText} is called again
+	 * at each {@link #reload()}. Shaders with the same name and the same first text share one resource.
+	 * @param text the shader text
+	 * @return the shader, kept for the caller (release it when done)
+	 */
+	public static ResourceShader createFromSource(final ShaderText text) {
+		final ResourceShader existing = keepExisting(text.key(), ResourceShader.class);
+		if (existing != null) {
+			return existing;
+		}
+		return new ResourceShader(text);
+	}
+
 	private boolean exist = false; //!< The shader file existed and has been loaded
 	private int shader = -1; //!< opengl id of this element
 	private final ShaderType type; //!< Type of the current shader(vertex/fragment)
 	private final Uri uri;
-	
+	private final ShaderText text; //!< source given as text, null when the shader comes from a file
+
+	/**
+	 * Constructor of an opengl Shader built from a text.
+	 * @param text the source
+	 */
+	protected ResourceShader(final ShaderText text) {
+		super(text.key());
+		this.uri = null;
+		this.text = text;
+		this.type = text.type();
+		this.resourceLevel = 0;
+		LOGGER.debug("OGL: load SHADER from text '{}'", text.key());
+		try {
+			reload();
+		} catch (final RuntimeException | Error ex) {
+			abandonConstruction();
+			throw ex;
+		}
+	}
+
 	/**
 	 * Constructor of an opengl Shader
 	 * @param uri Standard file name format. see @ref etk::FSNode
@@ -34,6 +68,7 @@ public class ResourceShader extends Resource {
 	protected ResourceShader(final Uri uri) {
 		super(uri);
 		this.uri = uri;
+		this.text = null;
 		this.resourceLevel = 0;
 		LOGGER.debug("OGL: load SHADER '{}'", uri);
 		// load data from file "all the time ..."
@@ -133,7 +168,18 @@ public class ResourceShader extends Resource {
 			return true;
 		}
 		if (!this.exist) {
-			this.shader = OpenGL.shaderLoad(this.uri, this.type);
+			if (this.text != null) {
+				String source;
+				try {
+					source = this.text.currentText();
+				} catch (final RuntimeException ex) {
+					LOGGER.error("Cannot read the source of the shader '{}'", this.text.name(), ex);
+					return true;
+				}
+				this.shader = OpenGL.shaderLoadSource(this.text.name(), source, this.type);
+			} else {
+				this.shader = OpenGL.shaderLoad(this.uri, this.type);
+			}
 			// create the Shader
 			if (this.shader < 0) {
 				return true;

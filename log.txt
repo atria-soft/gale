@@ -7,3 +7,5 @@
 - Roadmap engine debt (final lock, VAO registered once, VAO GL deletion, cube map cache keep) was already fixed
   on 2026-10-03/04; added the missing tests (cube map cache hit, concurrent keep/release); last System.exit left
   in gale outside ContextLWJGLAWT.shutdownAndExit (the single exit point of context.exit) was sample2 Log.critical.
+
+2026-11-18 ShaderText + ResourceShader.createFromSource + ResourceProgram.create(ShaderText, ShaderText) + OpenGL.shaderLoadSource: shaders from text (additive), keyed by name+hash of the first text, supplier re-run at reload.
